@@ -6,6 +6,7 @@ import {LOCAL_ATLAS_JOURNEY_KEY_R745,createLocalAtlasCheckpointR745,verifyLocalA
 import {computeAtlasDetourR746,verifyAtlasDetourR746} from '../../src/atlasDetourR746.mjs';
 import {computeAtlasTradeoffR747,verifyAtlasTradeoffR747} from '../../src/atlasTradeoffR747.mjs';
 import {computeBlendedAtlasJourneyR748,verifyBlendedAtlasJourneyR748} from '../../src/blendedAtlasJourneyR748.mjs';
+import {computeSourceFrontierSweepR749,verifySourceFrontierSweepR749} from '../../src/sourceFrontierSweepR749.mjs';
 import {getMandala20736Field} from '../../src/mandala20736Runtime';
 import {computeRouteBasinsR732,inspectRouteBasinR732} from '../../src/routeBasinR732.mjs';
 import {renderRouteBasinRasterR733,addressAtRasterPointR733} from '../../src/routeBasinRasterR733.mjs';
@@ -39,6 +40,7 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
  const [detourAvoid,setDetourAvoid]=useState(''),[detourResult,setDetourResult]=useState<any>(null),[detourRecovery,setDetourRecovery]=useState('');
  const [tradeoffChannel,setTradeoffChannel]=useState('q'),[tradeoffResult,setTradeoffResult]=useState<any>(null),[tradeoffRecovery,setTradeoffRecovery]=useState('');
  const [blendAlpha,setBlendAlpha]=useState(0.5),[blendResult,setBlendResult]=useState<any>(null),[blendRecovery,setBlendRecovery]=useState('');
+ const [frontierResult,setFrontierResult]=useState<any>(null),[frontierRecovery,setFrontierRecovery]=useState('');
  const [routeRecoveryStatus,setRouteRecoveryStatus]=useState('');
  const [recoveryStatus,setRecoveryStatus]=useState('');
  const rasterCanvas=useRef<HTMLCanvasElement|null>(null);
@@ -89,7 +91,7 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
  },[field,address,journeyTarget,journeyChannel,journeyWaypoints,journeyBlocked]);
  useEffect(()=>{setDetourResult(null);setDetourRecovery('');setTradeoffResult(null);setTradeoffRecovery('')},[field,address,journeyTarget,journeyChannel,journeyWaypoints,journeyBlocked]);
  // Keep an already verified R748 witness navigable while its address selection moves.
- useEffect(()=>{setBlendResult(null);setBlendRecovery('')},[field,journeyTarget,journeyChannel,journeyWaypoints,journeyBlocked]);
+ useEffect(()=>{setBlendResult(null);setBlendRecovery('');setFrontierResult(null);setFrontierRecovery('')},[field,journeyTarget,journeyChannel,journeyWaypoints,journeyBlocked,tradeoffChannel]);
  const piWitness=useMemo(()=>Number.isSafeInteger(address)&&address>=0&&address<20736&&/^(0|[1-9]\d*)$/.test(piTarget)&&Number(piTarget)<20736?piAxisWitnessR742(address,Number(piTarget)):null,[address,piTarget]);
  const directedRoute=useMemo(()=>inverseIndex&&analysis&&continuity&&Number.isSafeInteger(address)&&address>=0&&address<20736&&/^(0|[1-9]\d*)$/.test(routeTarget)&&Number(routeTarget)<20736?findDirectedSourceRouteR741(inverseIndex,analysis,continuity,address,Number(routeTarget)):null,[inverseIndex,analysis,continuity,address,routeTarget]);
  const exportPhaseExchange=()=>{
@@ -494,6 +496,50 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
      </label>
      <p data-r748-recovery role='status'>{blendRecovery||'No blended route recovered.'}</p>
      <small>R748 weights two existing source-field edge metrics; it is a model-space scalarized optimum, not a complete Pareto frontier, physical path, donor-equivalent weighting or CanonState mutation.</small>
+    </section>
+    <section data-r749-frontier aria-label='Sampled supported source-metric tradeoff paths' style={{margin:'12px 0',maxWidth:'100%',minWidth:0}}>
+     <h4>R749 · Supported tradeoff candidate explorer</h4>
+     <p>Execute five separate constrained A* optimizations at 0%, 25%, 50%, 75% and 100% primary weight. Compare actual costs on both source channels, remove duplicate paths, and identify routes that are non-dominated among these samples. This is not an exhaustive Pareto frontier.</p>
+     <button type='button' data-r749-run disabled={!field||!journeyState.route||tradeoffChannel===journeyChannel} onClick={()=>{
+      try{
+       if(!field||!journeyState.route)throw Error('R749 source journey unavailable');
+       const comparison=computeAtlasTradeoffR747(field,journeyState.route,tradeoffChannel);
+       const result=computeSourceFrontierSweepR749(field,comparison);
+       setFrontierResult(result);setFrontierRecovery('COMPUTED · five fresh source-model optimizations');
+      }catch(err){setFrontierResult(null);setFrontierRecovery('REFUSED · '+(err instanceof Error?err.message:'sweep unavailable'))}
+     }}>Compute five supported tradeoff samples</button>
+     <p data-r749-summary role='status'>{frontierResult?'Five weights · '+frontierResult.uniqueRoutes+' unique routes · '+frontierResult.supportedCount+' non-dominated sampled routes':frontierRecovery||'Select distinct primary and secondary source channels and compute the candidate set.'}</p>
+     {frontierResult&&<>
+      <div style={{maxWidth:'100%',overflowX:'auto'}}><table data-r749-table style={{width:'100%',fontVariantNumeric:'tabular-nums',fontSize:12}}><thead><tr><th>Primary weight</th><th>Moves</th><th>Primary cost</th><th>Secondary cost</th></tr></thead><tbody>
+       {frontierResult.samples.map((sample:any,i:number)=><tr key={i}><td>{Math.round(sample.alpha*100)}%</td><td>{sample.steps}</td><td>{sample.primaryCost.toFixed(6)}</td><td>{sample.secondaryCost.toFixed(6)}</td></tr>)}
+      </tbody></table></div>
+      <p>Unique sampled paths (non-dominated among samples marked)</p>
+      {frontierResult.candidates.map((candidate:any)=><div key={candidate.index} data-r749-candidate={candidate.index} style={{margin:'8px 0',padding:6,border:'1px solid #627b87',borderRadius:6}}>
+       <p>{candidate.dominated?'Dominated in sample':'Non-dominated in sample'} · weights {candidate.weights.map((w:number)=>Math.round(w*100)+'%').join(', ')} · source costs {candidate.primaryCost.toFixed(6)} / {candidate.secondaryCost.toFixed(6)}</p>
+       <div data-r749-path style={{display:'flex',flexWrap:'wrap',gap:5,maxHeight:110,overflowY:'auto'}}>{candidate.addresses.map((step:number,i:number)=><button key={i} type='button' data-r749-step={i} onClick={()=>onAddress(step)}>{step}</button>)}</div>
+      </div>)}
+      <button type='button' data-r749-export onClick={()=>{
+       const blob=new Blob([JSON.stringify(frontierResult,null,2)],{type:'application/json'});
+       const url=URL.createObjectURL(blob),link=document.createElement('a');
+       link.href=url;link.download='omega-r749-supported-candidates.json';document.body.appendChild(link);link.click();link.remove();
+       setTimeout(()=>URL.revokeObjectURL(url),0);
+      }}>Export sampled tradeoff candidates JSON</button>
+     </>}
+     <label style={{display:'block',marginTop:8}}>Verify exported candidates against fresh source-field optimization
+      <input data-r749-import type='file' accept='.json,application/json' onChange={async e=>{
+       const file=e.currentTarget.files?.[0];e.currentTarget.value='';
+       if(!file||!field)return;
+       try{
+        if(file.size>4194304)throw Error('R749 sweep export size refused');
+        const recovered=verifySourceFrontierSweepR749(await file.text(),field);
+        if(!journeyState.route||JSON.stringify(recovered.tradeoff.primary)!==JSON.stringify(journeyState.route))throw Error('R749 current primary journey differs');
+        setTradeoffChannel(recovered.tradeoff.secondaryChannel);setFrontierResult(recovered);
+        setFrontierRecovery('VERIFIED · five optimizations recomputed from source');
+       }catch(err){setFrontierResult(null);setFrontierRecovery('REFUSED · '+(err instanceof Error?err.message:'sweep invalid'))}
+      }}/>
+     </label>
+     <p data-r749-recovery role='status'>{frontierRecovery||'No candidate set recovered.'}</p>
+     <small>R749 identifies only supported, non-dominated paths within five sampled scalarizations. It does not establish every Pareto route, historical donor parity, physical measurement or device execution.</small>
     </section>
     <label style={{display:'block',marginTop:8}}>Verify and recover a previously exported constrained journey
      <input data-r744-import type='file' accept='.json,application/json' onChange={async e=>{
