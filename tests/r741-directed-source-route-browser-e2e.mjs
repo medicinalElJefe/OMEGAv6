@@ -62,6 +62,13 @@ try{
    assert.equal(witness.addresses[0],source);
    assert.equal(witness.addresses.at(-1),next);
    assert.equal(witness.canonicalMutation,false);assert.equal(witness.physicalMeasurement,false);
+   const imported=explorer.locator('[data-r741-import]');
+   await imported.setInputFiles({name:'source-route.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(witness))});
+   assert.match(await explorer.locator('[data-r741-recovery]').innerText(),/VERIFIED · restored source/);
+   assert.equal(await explorer.locator('[data-r741-target]').inputValue(),String(next));
+   await imported.setInputFiles({name:'tampered-route.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({...witness,steps:steps+1}))});
+   assert.match(await explorer.locator('[data-r741-recovery]').innerText(),/REFUSED · R741 imported route differs/);
+   assert.equal(await explorer.locator('[data-r741-target]').inputValue(),String(next));
    if(await rows.count()>1){
     const second=rows.nth(1).locator('button[data-r740-select]');
     const other=Number((await second.innerText()).match(/Select (\d+)/)?.[1]);
@@ -74,7 +81,7 @@ try{
    assert.match((await explorer.locator('[data-r741-boundary]').innerText()).toLowerCase(),/not physical travel/);
    if(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)>8)throw Error(device+': horizontal overflow');
    if(errors.length)throw Error(device+': browser errors '+errors.slice(0,3).join(' | '));
-   console.log('R741 '+device+' directed successor, self-route, unreachable basin, JSON witness, invalid target and containment PASS');
+   console.log('R741 '+device+' directed successor, self-route, unreachable basin, JSON recovery/tamper refusal, invalid target and containment PASS');
   }finally{await context.close()}
  }
 }finally{await browser.close()}
