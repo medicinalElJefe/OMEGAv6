@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {computeRouteBasinsR732} from '../src/routeBasinR732.mjs';
 import {buildSourcePreimageIndexR739} from '../src/sourcePreimageR739.mjs';
 import {proveSourceContinuityR740,SOURCE_CONTINUITY_SCHEMA_R740} from '../src/sourceContinuityR740.mjs';
@@ -19,6 +20,12 @@ assert.throws(()=>proveSourceContinuityR740(corrupt,graph),/bijection refused|ed
 const wrong={...index,offsets:index.offsets.slice()};
 wrong.offsets[2]++;
 assert.throws(()=>proveSourceContinuityR740(wrong,graph),/continuity mismatch|edge bijection refused/);
+const alteredCycle={...graph,cycles:graph.cycles.map(c=>({...c,nodes:[...c.nodes]}))};
+alteredCycle.cycles[0].size++;
+assert.throws(()=>proveSourceContinuityR740(index,alteredCycle),/cycle and basin ledger mismatch/);
+const ui=readFileSync(new URL('../src7/workspaces/RouteBasinInstrumentR732.tsx',import.meta.url),'utf8');
+for(const token of ['proveSourceContinuityR740','data-r740-continuity','data-r740-summary','data-r740-branches','data-r740-selected','data-r740-table','data-r740-select','data-r740-export','data-r740-boundary'])
+ assert.ok(ui.includes(token),'missing R740 executable UI '+token);
 const n=20736,chain=new Uint32Array(n);
 for(let i=0;i<n-1;i++)chain[i]=i+1;
 chain[n-1]=n-1;
