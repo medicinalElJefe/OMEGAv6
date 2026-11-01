@@ -191,6 +191,9 @@ try{
    await blendImport.setInputFiles({name:'tampered.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({...blendWitness,blendedCost:blendWitness.blendedCost+1}))});
    await blended.locator('[data-r748-recovery]').filter({hasText:'REFUSED · R748 journey differs'}).waitFor({state:'visible',timeout:20000});
    await blended.locator('[data-r748-run]').click();
+   await blended.locator('[data-r748-step="1"]').click();
+   assert.equal(Number(await workspace.getAttribute('data-address')),blendWitness.addresses[1]);
+   assert.equal(await blended.locator('[data-r748-path] [data-r748-step]').count(),blendWitness.addresses.length);
    await blended.locator('[data-r748-step="0"]').click();
    assert.equal(Number(await workspace.getAttribute('data-address')),blendWitness.from);
    console.log('R748 '+device+' blended constrained source-metric A* optimum, cost bounds, export, recomputed recovery, tamper refusal and navigation PASS');
