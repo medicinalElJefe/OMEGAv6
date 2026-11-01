@@ -4,6 +4,7 @@ import './r289-full-archive-native-convergence-invariants.mjs';
 import './r289-recovered-menu-navigation-invariants.mjs';
 import './r290-singmaster-proof-atlas-invariants.mjs';
 import './r292-proof-carry-fabric-invariants.mjs';
+import './r751-singmaster-fixed-gap-reduction-invariants.mjs';
 import './dewey-temporal-rotation-v9-invariants.mjs';
 import './dewey-temporal-nd-v9-invariants.mjs';
 import './dewey-temporal-workbench-v9-invariants.mjs';
