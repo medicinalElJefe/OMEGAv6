@@ -6,6 +6,7 @@ import './r290-singmaster-proof-atlas-invariants.mjs';
 import './r292-proof-carry-fabric-invariants.mjs';
 import './r752-pell-thread-invariants.mjs';
 import './r752-pell-complete-classification-invariants.mjs';
+import './r752-pell-workbench-invariants.mjs';
 import './r751-singmaster-fixed-gap-reduction-invariants.mjs';
 import './dewey-temporal-rotation-v9-invariants.mjs';
 import './dewey-temporal-nd-v9-invariants.mjs';
