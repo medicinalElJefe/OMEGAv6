@@ -5,6 +5,7 @@ import {computeConstrainedAtlasJourneyR744,verifyConstrainedAtlasJourneyR744} fr
 import {LOCAL_ATLAS_JOURNEY_KEY_R745,createLocalAtlasCheckpointR745,verifyLocalAtlasCheckpointR745} from '../../src/localAtlasJourneyCheckpointR745.mjs';
 import {computeAtlasDetourR746,verifyAtlasDetourR746} from '../../src/atlasDetourR746.mjs';
 import {computeAtlasTradeoffR747,verifyAtlasTradeoffR747} from '../../src/atlasTradeoffR747.mjs';
+import {computeBlendedAtlasJourneyR748,verifyBlendedAtlasJourneyR748} from '../../src/blendedAtlasJourneyR748.mjs';
 import {getMandala20736Field} from '../../src/mandala20736Runtime';
 import {computeRouteBasinsR732,inspectRouteBasinR732} from '../../src/routeBasinR732.mjs';
 import {renderRouteBasinRasterR733,addressAtRasterPointR733} from '../../src/routeBasinRasterR733.mjs';
@@ -37,6 +38,7 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
  const [localJourneyStatus,setLocalJourneyStatus]=useState('No local journey checkpoint restored.');
  const [detourAvoid,setDetourAvoid]=useState(''),[detourResult,setDetourResult]=useState<any>(null),[detourRecovery,setDetourRecovery]=useState('');
  const [tradeoffChannel,setTradeoffChannel]=useState('q'),[tradeoffResult,setTradeoffResult]=useState<any>(null),[tradeoffRecovery,setTradeoffRecovery]=useState('');
+ const [blendAlpha,setBlendAlpha]=useState(0.5),[blendResult,setBlendResult]=useState<any>(null),[blendRecovery,setBlendRecovery]=useState('');
  const [routeRecoveryStatus,setRouteRecoveryStatus]=useState('');
  const [recoveryStatus,setRecoveryStatus]=useState('');
  const rasterCanvas=useRef<HTMLCanvasElement|null>(null);
@@ -85,7 +87,7 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
    return {route,error:''};
   }catch(e){return {route:null,error:e instanceof Error?e.message:'R744 journey refused'}}
  },[field,address,journeyTarget,journeyChannel,journeyWaypoints,journeyBlocked]);
- useEffect(()=>{setDetourResult(null);setDetourRecovery('');setTradeoffResult(null);setTradeoffRecovery('')},[field,address,journeyTarget,journeyChannel,journeyWaypoints,journeyBlocked]);
+ useEffect(()=>{setDetourResult(null);setDetourRecovery('');setTradeoffResult(null);setTradeoffRecovery('');setBlendResult(null);setBlendRecovery('')},[field,address,journeyTarget,journeyChannel,journeyWaypoints,journeyBlocked]);
  const piWitness=useMemo(()=>Number.isSafeInteger(address)&&address>=0&&address<20736&&/^(0|[1-9]\d*)$/.test(piTarget)&&Number(piTarget)<20736?piAxisWitnessR742(address,Number(piTarget)):null,[address,piTarget]);
  const directedRoute=useMemo(()=>inverseIndex&&analysis&&continuity&&Number.isSafeInteger(address)&&address>=0&&address<20736&&/^(0|[1-9]\d*)$/.test(routeTarget)&&Number(routeTarget)<20736?findDirectedSourceRouteR741(inverseIndex,analysis,continuity,address,Number(routeTarget)):null,[inverseIndex,analysis,continuity,address,routeTarget]);
  const exportPhaseExchange=()=>{
@@ -450,6 +452,46 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
      </label>
      <p data-r747-recovery role='status'>{tradeoffRecovery||'No two-channel comparison recovered.'}</p>
      <small>R747 compares two independent optima over identical model constraints. Cross-channel cost and regret are derived from the existing 20,736-address source field, not observed motion, original donor weights, physical dimensions or CanonState authority.</small>
+    </section>
+
+    <section data-r748-blend aria-label='Two-channel blended source-metric Atlas journey' style={{margin:'12px 0',maxWidth:'100%',minWidth:0}}>
+     <h4>R748 · Constrained blended-source optimal journey</h4>
+     <p>Compute a new A* optimum minimizing the selected convex combination of the two source channels, with the same ordered waypoints and excluded addresses. The result can differ from both independently optimized routes.</p>
+     <label>Primary source weight <input data-r748-alpha type='range' min={0} max={1} step={0.05} value={blendAlpha} onChange={e=>{setBlendAlpha(Number(e.target.value));setBlendResult(null);setBlendRecovery('')}}/> {Math.round(blendAlpha*100)}% primary / {Math.round((1-blendAlpha)*100)}% secondary</label>
+     <button type='button' data-r748-run disabled={!field||!journeyState.route||tradeoffChannel===journeyChannel} onClick={()=>{
+      try{
+       if(!field||!journeyState.route)throw Error('R748 source journey unavailable');
+       const comparison=computeAtlasTradeoffR747(field,journeyState.route,tradeoffChannel);
+       const result=computeBlendedAtlasJourneyR748(field,comparison,blendAlpha);
+       setBlendResult(result);setBlendRecovery('COMPUTED · new source-weighted A* optimum');
+      }catch(err){setBlendResult(null);setBlendRecovery('REFUSED · '+(err instanceof Error?err.message:'blend unavailable'))}
+     }}>Compute blended optimum</button>
+     <p data-r748-summary role='status'>{blendResult?'WEIGHT '+Math.round(blendResult.alpha*100)+'% · '+blendResult.steps+' moves · blended cost '+blendResult.blendedCost.toFixed(6)+' · improvement over best endpoint '+blendResult.improvement.toFixed(6)+' · '+blendResult.expanded+' examined addresses':blendRecovery||'Choose two distinct source channels and compute a blended optimal journey.'}</p>
+     {blendResult&&<>
+      <p>Actual source costs · {blendResult.tradeoff.primaryChannel}: {blendResult.primaryCost.toFixed(6)} · {blendResult.tradeoff.secondaryChannel}: {blendResult.secondaryCost.toFixed(6)}</p>
+      <div data-r748-path style={{display:'flex',flexWrap:'wrap',gap:5,maxHeight:140,overflowY:'auto'}}>{blendResult.addresses.map((step:number,i:number)=><button key={i} type='button' data-r748-step={i} onClick={()=>onAddress(step)}>{step}</button>)}</div>
+      <button type='button' data-r748-export onClick={()=>{
+       const blob=new Blob([JSON.stringify(blendResult,null,2)],{type:'application/json'});
+       const url=URL.createObjectURL(blob),link=document.createElement('a');
+       link.href=url;link.download='omega-r748-blended-atlas.json';document.body.appendChild(link);link.click();link.remove();
+       setTimeout(()=>URL.revokeObjectURL(url),0);
+      }}>Export blended journey JSON</button>
+     </>}
+     <label style={{display:'block',marginTop:8}}>Verify blended journey against current source and constraints
+      <input data-r748-import type='file' accept='.json,application/json' onChange={async e=>{
+       const file=e.currentTarget.files?.[0];e.currentTarget.value='';
+       if(!file||!field)return;
+       try{
+        if(file.size>4194304)throw Error('R748 export size refused');
+        const recovered=verifyBlendedAtlasJourneyR748(await file.text(),field);
+        if(!journeyState.route||JSON.stringify(recovered.tradeoff.primary)!==JSON.stringify(journeyState.route))throw Error('R748 current journey differs');
+        setTradeoffChannel(recovered.tradeoff.secondaryChannel);setBlendAlpha(recovered.alpha);setBlendResult(recovered);
+        setBlendRecovery('VERIFIED · blended optimum freshly recomputed from source');
+       }catch(err){setBlendResult(null);setBlendRecovery('REFUSED · '+(err instanceof Error?err.message:'blend invalid'))}
+      }}/>
+     </label>
+     <p data-r748-recovery role='status'>{blendRecovery||'No blended route recovered.'}</p>
+     <small>R748 weights two existing source-field edge metrics; it is a model-space scalarized optimum, not a complete Pareto frontier, physical path, donor-equivalent weighting or CanonState mutation.</small>
     </section>
     <label style={{display:'block',marginTop:8}}>Verify and recover a previously exported constrained journey
      <input data-r744-import type='file' accept='.json,application/json' onChange={async e=>{
