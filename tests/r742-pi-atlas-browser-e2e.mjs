@@ -139,6 +139,32 @@ try{
    await detour.locator('[data-r746-avoid]').fill(String(journeyWitness.waypoints[0]));
    await detour.locator('[data-r746-run]').click();
    await detour.locator('[data-r746-recovery]').filter({hasText:'REFUSED · R746 endpoint or ordered stop'}).waitFor({state:'visible',timeout:20000});
+   // R747: optimize the same constrained source journey under two independent channels.
+   const tradeoff=journey.locator('[data-r747-tradeoff]');
+   await tradeoff.locator('[data-r747-channel]').selectOption('q');
+   await tradeoff.locator('[data-r747-run]').click();
+   await tradeoff.locator('[data-r747-summary]').filter({hasText:'PRIMARY C / SECONDARY q'}).waitFor({state:'visible',timeout:20000});
+   const tradeoffDownloadPromise=page.waitForEvent('download',{timeout:20000});
+   await tradeoff.locator('[data-r747-export]').click();
+   const tradeoffDownload=await tradeoffDownloadPromise;
+   assert.equal(tradeoffDownload.suggestedFilename(),'omega-r747-source-tradeoff.json');
+   const tradeoffWitness=JSON.parse(await readFile(await tradeoffDownload.path(),'utf8'));
+   assert.deepEqual(tradeoffWitness.primary,detourBaseline);
+   assert.equal(tradeoffWitness.secondary.channel,'q');
+   assert.deepEqual(tradeoffWitness.secondary.waypoints,detourBaseline.waypoints);
+   assert.deepEqual(tradeoffWitness.secondary.blocked,detourBaseline.blocked);
+   assert.ok(tradeoffWitness.regrets.secondaryOnPrimary>=0);
+   assert.ok(tradeoffWitness.regrets.primaryOnSecondary>=0);
+   assert.equal(await tradeoff.locator('[data-r747-table] tbody tr').count(),2);
+   const tradeoffImport=tradeoff.locator('[data-r747-import]');
+   await tradeoffImport.setInputFiles({name:'tradeoff.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(tradeoffWitness))});
+   await tradeoff.locator('[data-r747-recovery]').filter({hasText:'VERIFIED · both optimized paths freshly recomputed'}).waitFor({state:'visible',timeout:20000});
+   await tradeoffImport.setInputFiles({name:'tampered.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({...tradeoffWitness,regrets:{...tradeoffWitness.regrets,secondaryOnPrimary:999}}))});
+   await tradeoff.locator('[data-r747-recovery]').filter({hasText:'REFUSED · R747 tradeoff differs'}).waitFor({state:'visible',timeout:20000});
+   await tradeoff.locator('[data-r747-run]').click();
+   await tradeoff.locator('[data-r747-secondary-step="0"]').click();
+   assert.equal(Number(await workspace.getAttribute('data-address')),detourBaseline.from);
+   console.log('R747 '+device+' two-channel source-metric optima, cost table, export, recomputed recovery, tamper refusal and navigation PASS');
    await journey.locator('[data-r744-target]').fill(String(journeyWitness.to));
    await page.waitForFunction(target=>{
     const steps=document.querySelectorAll('[data-r744-journey] [data-r744-path] [data-r744-step]');
