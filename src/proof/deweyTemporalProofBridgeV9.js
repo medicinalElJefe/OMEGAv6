@@ -1,6 +1,7 @@
 import {compileProofCarryR292} from './proofCarryRuntimeR292.js';
 import {compileProofEvolutionR293} from './proofEvolutionRuntimeR293.js';
 import {V9_MODELS,compositionDefect,rotatedReturnDefect,equivarianceCertificate,filterFiniteCandidates} from './deweyTemporalRotationV9.js';
+import {ND_EXAMPLES,exactCommutatorND,observationRankND} from './deweyTemporalNDV9.js';
 
 export const DEWEY_V9_PROOF_DOMAIN='DYNAMICAL_SYSTEMS/DISCRETE_ROTATION/CONTINUITY';
 export const DEWEY_V9_PROOF_CLAIM='UNIVERSAL_TIME_ROTATION_CONTINUITY';
@@ -16,6 +17,7 @@ export function compileTemporalProofCarryV9(){
   {id:'ANISOTROPIC-COUNTEREXAMPLE',pass:compositionDefect(V9_MODELS.anisotropic,[1,2],1,1).squaredDefect==='5'},
   {id:'RELATIVE-NOT-ORDINARY-RETURN',pass:rotatedReturnDefect(V9_MODELS.relative,[1,2],1,1).squaredDefect==='0'&&rotatedReturnDefect(V9_MODELS.relative,[1,2],1,0).squaredDefect==='10'},
   {id:'OBSERVATION-REFINEMENT',pass:first.remainingCount===5&&both.remainingCount===1&&repeat.remainingCount===5&&norm.remainingCount===8},
+  {id:'ND-RANK-OBSERVABILITY',pass:exactCommutatorND(ND_EXAMPLES.commuting3,ND_EXAMPLES.r3).universalCommutation&&observationRankND(ND_EXAMPLES.commuting3,ND_EXAMPLES.r3,[{projection:[[1,0,0]],timeSteps:0,rotationSteps:0},{projection:[[1,0,0]],timeSteps:0,rotationSteps:1}]).rank===2},
  ];
  return compileProofCarryR292({
   domainId:DEWEY_V9_PROOF_DOMAIN,claimId:DEWEY_V9_PROOF_CLAIM,
@@ -24,6 +26,7 @@ export function compileTemporalProofCarryV9(){
   gates:[
    {id:'V9-C4-ALGEBRA',status:'PASS',detail:'Exact matrix identities for six declared 2D integer-linear maps'},
    {id:'V9-OBSERVABILITY',status:'PASS',detail:'Finite 25-state set intersection, redundancy and alias examples'},
+   {id:'V9-ND-RANK',status:'PASS',detail:'Exact 3D/4D integer-linear observability rank and unobservability counterexamples'},
    {id:'V9-GENERAL-NONLINEAR',status:'OPEN',detail:'Nonlinear, arbitrary dimensional, and continuous-time generalization absent'},
    {id:'V9-EMPIRICAL-PHYSICS',status:'OPEN',detail:'No empirical claim about all physical dimensions or mechanisms is certified'},
    {id:'G09-G10-G13',status:'OPEN',detail:'Singmaster uniform fourfold exclusion remains unproved and independent'},
