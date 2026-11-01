@@ -18,6 +18,12 @@ for(const [a,b] of [[0,20735],[12000,17000],[0,0],[20735,0]]){
  assert.deepEqual(verifyPiAxisWitnessR742(JSON.stringify(w)),w);
  assert.throws(()=>verifyPiAxisWitnessR742(JSON.stringify({...w,steps:999})),/differs/);
 }
+const donor=JSON.parse(readFileSync(new URL('./fixtures/r742-donor-sampled-geometry.json',import.meta.url),'utf8'));
+assert.equal(donor.schema,'omega.r742.donor-sampled-geometry.v1');
+for(const sample of donor.samples){
+ const position=piAtlasPositionR742(sample.index,sample.metrics);
+ for(let axis=0;axis<3;axis++)assert.ok(Math.abs(position[axis]-sample.position[axis])<2e-6,'R742 donor sampled geometry parity '+sample.index+' axis '+axis);
+}
 assert.equal(piAxisNeighborsR742(0)[0],1728);
 assert.equal(piAxisNeighborsR742(0)[1],19008);
 assert.equal(piAtlasPositionR742(0).length,3);
