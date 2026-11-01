@@ -410,7 +410,7 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
     <section data-r747-tradeoff aria-label='Two-channel source-metric Atlas tradeoff' style={{margin:'12px 0',maxWidth:'100%',minWidth:0}}>
      <h4>R747 · Two-channel source-metric route comparison</h4>
      <p>Optimize the same constrained journey independently for two source channels, then evaluate both paths under both cost functions. Nonnegative cross-channel regret exposes actual model tradeoffs; this is not a physical or empirical Pareto frontier.</p>
-     <label>Second source channel <select data-r747-channel value={tradeoffChannel} onChange={e=>{setTradeoffChannel(e.target.value);setTradeoffResult(null);setTradeoffRecovery('')}}>
+     <label>Second source channel <select data-r747-channel value={tradeoffChannel} onChange={e=>{setTradeoffChannel(e.target.value);setTradeoffResult(null);setTradeoffRecovery('');setBlendResult(null);setBlendRecovery('')}}>
       {METRIC_ATLAS_CHANNELS_R743.map(channel=><option key={channel} value={channel}>{ATLAS_FIELD_CHANNELS_R734[channel]}</option>)}
      </select></label>
      <button type='button' data-r747-run disabled={!journeyState.route||!field} onClick={()=>{
@@ -445,7 +445,7 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
         if(file.size>2097152)throw Error('R747 tradeoff size refused');
         const recovered=verifyAtlasTradeoffR747(await file.text(),field);
         if(!journeyState.route||JSON.stringify(recovered.primary)!==JSON.stringify(journeyState.route))throw Error('R747 current primary journey differs');
-        setTradeoffChannel(recovered.secondaryChannel);setTradeoffResult(recovered);
+        setTradeoffChannel(recovered.secondaryChannel);setTradeoffResult(recovered);setBlendResult(null);setBlendRecovery('');
         setTradeoffRecovery('VERIFIED · both optimized paths freshly recomputed from source');
        }catch(err){setTradeoffResult(null);setTradeoffRecovery('REFUSED · '+(err instanceof Error?err.message:'tradeoff invalid'))}
       }}/>
