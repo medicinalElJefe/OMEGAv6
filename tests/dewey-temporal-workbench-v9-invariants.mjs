@@ -26,4 +26,6 @@ const ui=readFileSync(new URL('../src/DeweyTemporalWorkbenchV9.tsx',import.meta.
 const host=readFileSync(new URL('../src/OmegaResearchAdvancementR316.tsx',import.meta.url),'utf8');
 for(const marker of ['data-dewey-v9-workbench','data-v9-model','data-v9-composition','data-v9-return','data-v9-equivariance','data-v9-export','data-v9-import','data-v9-verify','data-v9-recovery'])assert.ok(ui.includes(marker),'missing executable V9 UI marker '+marker);
 assert.ok(host.includes('<DeweyTemporalWorkbenchV9/>'),'existing research workspace must expose executable V9 tool');
+const omega7=readFileSync(new URL('../src7/workspaces/ScienceWorkspaceR441.tsx',import.meta.url),'utf8');
+assert.ok(omega7.includes("route==='Relativity'?<><RelativityLab")&&omega7.includes('<DeweyTemporalWorkbenchV9/>'),'OMEGA7 Relativity route must render executable V9 workbench');
 console.log('V9 exact research workbench six-model execution, deterministic export recovery, tamper refusal, bounded inputs and OMEGA UI binding PASS');
