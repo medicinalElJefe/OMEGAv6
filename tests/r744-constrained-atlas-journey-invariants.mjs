@@ -33,7 +33,7 @@ for(let i=0;i<route.addresses.length-1;i++){
 assert.ok(Math.abs(route.weightedCost-measured)<1e-9,'full journey cost recomputed');
 assert.deepEqual(verifyConstrainedAtlasJourneyR744(JSON.stringify(route),field),route);
 assert.throws(()=>verifyConstrainedAtlasJourneyR744(JSON.stringify({...route,weightedCost:route.weightedCost+1}),field),/differs/);
-assert.throws(()=>verifyConstrainedAtlasJourneyR744(JSON.stringify({...route,blocked:[]}),field),/differs/);
+assert.throws(()=>verifyConstrainedAtlasJourneyR744(JSON.stringify({...route,blocked:[...blocked,via[0]]}),field),/blocked/);
 assert.throws(()=>computeConstrainedAtlasJourneyR744(field,0,1,'C',[],[0]),/blocked/);
 assert.throws(()=>computeConstrainedAtlasJourneyR744(field,0,1,'C',[1],[1]),/blocked/);
 assert.throws(()=>computeConstrainedAtlasJourneyR744(field,0,1,'C',[1,1],[]),/duplicate/);
