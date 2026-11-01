@@ -4,6 +4,7 @@ import {METRIC_ATLAS_CHANNELS_R743,computeMetricAtlasRouteR743,verifyMetricAtlas
 import {computeConstrainedAtlasJourneyR744,verifyConstrainedAtlasJourneyR744} from '../../src/constrainedAtlasJourneyR744.mjs';
 import {LOCAL_ATLAS_JOURNEY_KEY_R745,createLocalAtlasCheckpointR745,verifyLocalAtlasCheckpointR745} from '../../src/localAtlasJourneyCheckpointR745.mjs';
 import {computeAtlasDetourR746,verifyAtlasDetourR746} from '../../src/atlasDetourR746.mjs';
+import {computeAtlasTradeoffR747,verifyAtlasTradeoffR747} from '../../src/atlasTradeoffR747.mjs';
 import {getMandala20736Field} from '../../src/mandala20736Runtime';
 import {computeRouteBasinsR732,inspectRouteBasinR732} from '../../src/routeBasinR732.mjs';
 import {renderRouteBasinRasterR733,addressAtRasterPointR733} from '../../src/routeBasinRasterR733.mjs';
@@ -35,6 +36,7 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
  const [journeyWaypoints,setJourneyWaypoints]=useState(''),[journeyBlocked,setJourneyBlocked]=useState(''),[journeyRecovery,setJourneyRecovery]=useState('');
  const [localJourneyStatus,setLocalJourneyStatus]=useState('No local journey checkpoint restored.');
  const [detourAvoid,setDetourAvoid]=useState(''),[detourResult,setDetourResult]=useState<any>(null),[detourRecovery,setDetourRecovery]=useState('');
+ const [tradeoffChannel,setTradeoffChannel]=useState('q'),[tradeoffResult,setTradeoffResult]=useState<any>(null),[tradeoffRecovery,setTradeoffRecovery]=useState('');
  const [routeRecoveryStatus,setRouteRecoveryStatus]=useState('');
  const [recoveryStatus,setRecoveryStatus]=useState('');
  const rasterCanvas=useRef<HTMLCanvasElement|null>(null);
@@ -83,7 +85,7 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
    return {route,error:''};
   }catch(e){return {route:null,error:e instanceof Error?e.message:'R744 journey refused'}}
  },[field,address,journeyTarget,journeyChannel,journeyWaypoints,journeyBlocked]);
- useEffect(()=>{setDetourResult(null);setDetourRecovery('')},[field,address,journeyTarget,journeyChannel,journeyWaypoints,journeyBlocked]);
+ useEffect(()=>{setDetourResult(null);setDetourRecovery('');setTradeoffResult(null);setTradeoffRecovery('')},[field,address,journeyTarget,journeyChannel,journeyWaypoints,journeyBlocked]);
  const piWitness=useMemo(()=>Number.isSafeInteger(address)&&address>=0&&address<20736&&/^(0|[1-9]\d*)$/.test(piTarget)&&Number(piTarget)<20736?piAxisWitnessR742(address,Number(piTarget)):null,[address,piTarget]);
  const directedRoute=useMemo(()=>inverseIndex&&analysis&&continuity&&Number.isSafeInteger(address)&&address>=0&&address<20736&&/^(0|[1-9]\d*)$/.test(routeTarget)&&Number(routeTarget)<20736?findDirectedSourceRouteR741(inverseIndex,analysis,continuity,address,Number(routeTarget)):null,[inverseIndex,analysis,continuity,address,routeTarget]);
  const exportPhaseExchange=()=>{
@@ -403,6 +405,52 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
      <small>R746 counterfactual costs and routes are computed in source-model address space. They are not physical obstacle observations, empirical forecasts, donor parity or CanonState mutation.</small>
     </section>
 
+    <section data-r747-tradeoff aria-label='Two-channel source-metric Atlas tradeoff' style={{margin:'12px 0',maxWidth:'100%',minWidth:0}}>
+     <h4>R747 · Two-channel source-metric route comparison</h4>
+     <p>Optimize the same constrained journey independently for two source channels, then evaluate both paths under both cost functions. Nonnegative cross-channel regret exposes actual model tradeoffs; this is not a physical or empirical Pareto frontier.</p>
+     <label>Second source channel <select data-r747-channel value={tradeoffChannel} onChange={e=>{setTradeoffChannel(e.target.value);setTradeoffResult(null);setTradeoffRecovery('')}}>
+      {METRIC_ATLAS_CHANNELS_R743.map(channel=><option key={channel} value={channel}>{ATLAS_FIELD_CHANNELS_R734[channel]}</option>)}
+     </select></label>
+     <button type='button' data-r747-run disabled={!journeyState.route||!field} onClick={()=>{
+      try{
+       if(!field||!journeyState.route)throw Error('R747 source journey unavailable');
+       const result=computeAtlasTradeoffR747(field,journeyState.route,tradeoffChannel);
+       setTradeoffResult(result);setTradeoffRecovery('COMPUTED · both paths optimized against current source');
+      }catch(err){setTradeoffResult(null);setTradeoffRecovery('REFUSED · '+(err instanceof Error?err.message:'tradeoff unavailable'))}
+     }}>Compare independently optimal journeys</button>
+     <p data-r747-summary role='status'>{tradeoffResult?'PRIMARY '+tradeoffResult.primaryChannel+' / SECONDARY '+tradeoffResult.secondaryChannel+' · '+(tradeoffResult.pathChanged?'different routes':'same route')+' · '+tradeoffResult.sharedAddressCount+' shared addresses · regrets '+tradeoffResult.regrets.secondaryOnPrimary.toFixed(6)+' / '+tradeoffResult.regrets.primaryOnSecondary.toFixed(6):tradeoffRecovery||'Select a different second channel and compare the current constrained journey.'}</p>
+     {tradeoffResult&&<>
+      <div style={{maxWidth:'100%',overflowX:'auto'}}><table data-r747-table style={{width:'100%',fontVariantNumeric:'tabular-nums',fontSize:12}}><thead><tr><th>Optimal for</th><th>Steps</th><th>Cost on primary</th><th>Cost on secondary</th></tr></thead><tbody>
+       <tr><td>{tradeoffResult.primaryChannel}</td><td>{tradeoffResult.primary.steps}</td><td>{tradeoffResult.costs.primaryOnPrimary.toFixed(6)}</td><td>{tradeoffResult.costs.primaryOnSecondary.toFixed(6)}</td></tr>
+       <tr><td>{tradeoffResult.secondaryChannel}</td><td>{tradeoffResult.secondary.steps}</td><td>{tradeoffResult.costs.secondaryOnPrimary.toFixed(6)}</td><td>{tradeoffResult.costs.secondaryOnSecondary.toFixed(6)}</td></tr>
+      </tbody></table></div>
+      <p>Primary-optimal addresses</p>
+      <div data-r747-primary-path style={{display:'flex',flexWrap:'wrap',gap:5,maxHeight:120,overflowY:'auto'}}>{tradeoffResult.primary.addresses.map((step:number,i:number)=><button key={i} type='button' data-r747-primary-step={i} onClick={()=>onAddress(step)}>{step}</button>)}</div>
+      <p>Secondary-optimal addresses</p>
+      <div data-r747-secondary-path style={{display:'flex',flexWrap:'wrap',gap:5,maxHeight:120,overflowY:'auto'}}>{tradeoffResult.secondary.addresses.map((step:number,i:number)=><button key={i} type='button' data-r747-secondary-step={i} onClick={()=>onAddress(step)}>{step}</button>)}</div>
+      <button type='button' data-r747-export onClick={()=>{
+       const blob=new Blob([JSON.stringify(tradeoffResult,null,2)],{type:'application/json'});
+       const url=URL.createObjectURL(blob),link=document.createElement('a');
+       link.href=url;link.download='omega-r747-source-tradeoff.json';document.body.appendChild(link);link.click();link.remove();
+       setTimeout(()=>URL.revokeObjectURL(url),0);
+      }}>Export two-channel comparison JSON</button>
+     </>}
+     <label style={{display:'block',marginTop:8}}>Verify exported comparison against both current source channels
+      <input data-r747-import type='file' accept='.json,application/json' onChange={async e=>{
+       const file=e.currentTarget.files?.[0];e.currentTarget.value='';
+       if(!file||!field)return;
+       try{
+        if(file.size>2097152)throw Error('R747 tradeoff size refused');
+        const recovered=verifyAtlasTradeoffR747(await file.text(),field);
+        if(!journeyState.route||JSON.stringify(recovered.primary)!==JSON.stringify(journeyState.route))throw Error('R747 current primary journey differs');
+        setTradeoffChannel(recovered.secondaryChannel);setTradeoffResult(recovered);
+        setTradeoffRecovery('VERIFIED · both optimized paths freshly recomputed from source');
+       }catch(err){setTradeoffResult(null);setTradeoffRecovery('REFUSED · '+(err instanceof Error?err.message:'tradeoff invalid'))}
+      }}/>
+     </label>
+     <p data-r747-recovery role='status'>{tradeoffRecovery||'No two-channel comparison recovered.'}</p>
+     <small>R747 compares two independent optima over identical model constraints. Cross-channel cost and regret are derived from the existing 20,736-address source field, not observed motion, original donor weights, physical dimensions or CanonState authority.</small>
+    </section>
     <label style={{display:'block',marginTop:8}}>Verify and recover a previously exported constrained journey
      <input data-r744-import type='file' accept='.json,application/json' onChange={async e=>{
       const file=e.currentTarget.files?.[0];e.currentTarget.value='';
