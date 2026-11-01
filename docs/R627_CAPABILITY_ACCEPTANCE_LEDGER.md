@@ -1,5 +1,12 @@
 # OMEGA capability acceptance ledger — observed checkpoint 2026-10-27
 
+## R744 production acceptance and R745 same-browser checkpoint candidate — 2026-11-01 UTC
+
+- **R744 source-model constrained journeys accepted in production, not donor parity:** [PR #1207](https://github.com/medicinalElJefe/OMEGAv6/pull/1207) merged at `672a683d7e692541e2dcaadf59b686ccf22f5242`. [Cloud Bridge #41293294513](https://github.com/medicinalElJefe/OMEGAv6/actions/runs/41293294513) completed verify, deploy-main, exact-SHA live R744 desktop/mobile journey/recovery/tamper/browser behavior, post-deploy authority closure and governed continuation. Live Worker version `388e4c4d-08e3-4b80-9fb7-7f92406218e1`; previous R743 version `cc964a00-6b0b-4c5f-955e-c376c80c403f`. [R223 #41294874703](https://github.com/medicinalElJefe/OMEGAv6/actions/runs/41294874703) closed the exact-SHA authority chain. Previous-baseline rollback eligibility was reported; no rollback was performed.
+- **R745 candidate only:** An explicit same-browser checkpoint for R744 journeys, with actual localStorage save, fresh source-field fingerprint and R744 route recomputation before restore, tamper refusal, reload recovery and clearing. Local storage is browser-origin scoped, not authenticated, not durable cross-device memory, not historical donor recovery and not CanonState authority. Source invariants and desktop/mobile reload browser tests are required before promotion.
+- **Unresolved:** historical donor source bytes and weighted route parity, native Windows host/GPU/installer acceptance (live census zero public devices), authenticated cross-device persistence, remaining corpus families and full application parity. No R2, paid services or original-backup mutations.
+
+
 This ledger follows the R474 year-corpus capability graph: **identity → lineage → function → strongest implementation → evidence → truth class → dependencies → executor → UI → gap → supersession**. It distinguishes source, tests, merged code, exact deployed behavior, native proof and historical parity. The previous R626/R627 *candidate* entries are superseded by the verified production evidence below.
 
 

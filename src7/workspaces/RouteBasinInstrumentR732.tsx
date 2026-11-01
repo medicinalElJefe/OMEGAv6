@@ -2,6 +2,7 @@ import {useEffect,useMemo,useRef,useState} from 'react';
 import {decodePiAddressR742,piAxisNeighborsR742,piAxisWitnessR742,verifyPiAxisWitnessR742} from '../../src/piAtlasTraversalR742.mjs';
 import {METRIC_ATLAS_CHANNELS_R743,computeMetricAtlasRouteR743,verifyMetricAtlasRouteR743} from '../../src/sourceMetricAtlasRouteR743.mjs';
 import {computeConstrainedAtlasJourneyR744,verifyConstrainedAtlasJourneyR744} from '../../src/constrainedAtlasJourneyR744.mjs';
+import {LOCAL_ATLAS_JOURNEY_KEY_R745,createLocalAtlasCheckpointR745,verifyLocalAtlasCheckpointR745} from '../../src/localAtlasJourneyCheckpointR745.mjs';
 import {getMandala20736Field} from '../../src/mandala20736Runtime';
 import {computeRouteBasinsR732,inspectRouteBasinR732} from '../../src/routeBasinR732.mjs';
 import {renderRouteBasinRasterR733,addressAtRasterPointR733} from '../../src/routeBasinRasterR733.mjs';
@@ -31,6 +32,7 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
  const [metricTarget,setMetricTarget]=useState('0'),[metricChannel,setMetricChannel]=useState('C'),[metricRecovery,setMetricRecovery]=useState('');
  const [journeyTarget,setJourneyTarget]=useState('0'),[journeyChannel,setJourneyChannel]=useState('C');
  const [journeyWaypoints,setJourneyWaypoints]=useState(''),[journeyBlocked,setJourneyBlocked]=useState(''),[journeyRecovery,setJourneyRecovery]=useState('');
+ const [localJourneyStatus,setLocalJourneyStatus]=useState('No local journey checkpoint restored.');
  const [routeRecoveryStatus,setRouteRecoveryStatus]=useState('');
  const [recoveryStatus,setRecoveryStatus]=useState('');
  const rasterCanvas=useRef<HTMLCanvasElement|null>(null);
@@ -327,6 +329,34 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
       setTimeout(()=>URL.revokeObjectURL(url),0);
      }}>Export exact journey JSON</button>
     </>}
+    <div data-r745-local-journey style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:8}}>
+     <button type='button' data-r745-save disabled={!journeyState.route} onClick={()=>{
+      try{
+       if(!field||!journeyState.route)throw Error('R745 source journey unavailable');
+       const checkpoint=createLocalAtlasCheckpointR745(journeyState.route,field);
+       window.localStorage.setItem(LOCAL_ATLAS_JOURNEY_KEY_R745,JSON.stringify(checkpoint));
+       setLocalJourneyStatus('SAVED · '+checkpoint.journey.legs.length+' source-verified legs · same browser only');
+      }catch(err){setLocalJourneyStatus('REFUSED · '+(err instanceof Error?err.message:'local storage unavailable'))}
+     }}>Save verified journey in this browser</button>
+     <button type='button' data-r745-restore onClick={()=>{
+      try{
+       if(!field)throw Error('R745 source field unavailable');
+       const raw=window.localStorage.getItem(LOCAL_ATLAS_JOURNEY_KEY_R745);
+       if(raw===null)throw Error('R745 no saved journey in this browser');
+       const recovered=verifyLocalAtlasCheckpointR745(raw,field);
+       setJourneyTarget(String(recovered.to));setJourneyChannel(recovered.channel);
+       setJourneyWaypoints(recovered.waypoints.join(','));setJourneyBlocked(recovered.blocked.join(','));
+       onAddress(recovered.from);
+       setLocalJourneyStatus('VERIFIED · '+recovered.legs.length+' freshly recomputed legs · restored from this browser');
+      }catch(err){setLocalJourneyStatus('REFUSED · '+(err instanceof Error?err.message:'local checkpoint invalid'))}
+     }}>Verify and restore saved journey</button>
+     <button type='button' data-r745-clear onClick={()=>{
+      try{window.localStorage.removeItem(LOCAL_ATLAS_JOURNEY_KEY_R745);setLocalJourneyStatus('CLEARED · local checkpoint removed')}
+      catch(err){setLocalJourneyStatus('REFUSED · '+(err instanceof Error?err.message:'local storage unavailable'))}
+     }}>Clear local checkpoint</button>
+    </div>
+    <p data-r745-status role='status'>{localJourneyStatus}</p>
+    <small>R745 stores one explicit checkpoint only in this browser. Restore recomputes and verifies against the current source field; it never silently restores, synchronizes to another device, modifies CanonState or proves durable cloud memory.</small>
     <label style={{display:'block',marginTop:8}}>Verify and recover a previously exported constrained journey
      <input data-r744-import type='file' accept='.json,application/json' onChange={async e=>{
       const file=e.currentTarget.files?.[0];e.currentTarget.value='';
