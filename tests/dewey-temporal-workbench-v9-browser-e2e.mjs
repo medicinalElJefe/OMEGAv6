@@ -47,6 +47,7 @@ try{
    assert.equal(download.suggestedFilename(),'omega-dewey-v9-temporal-witness.json');
    const witness=JSON.parse(await readFile(await download.path(),'utf8'));
    assert.deepEqual(verifyTemporalWorkbenchV9(JSON.stringify(witness)),witness);
+   await instrument.locator('details summary').click();
    await instrument.locator('[data-v9-verify]').click();
    assert.match(await instrument.locator('[data-v9-recovery]').innerText(),/PASS: exact witness recomputed/);
    await instrument.locator('[data-v9-import]').fill(JSON.stringify({...witness,physicalMeasurement:true}));
