@@ -3,7 +3,7 @@
  * For k>=2, d>=1, compare C(m+d,k)=C(m,l), k<l<=m/2.
  * The function firstDominanceM proves the remaining row search is finite:
  * at every m>=T, C(m,k+1)>C(m+d,k), making every higher l impossible.
- * Exact BigInt arithmetic; no external proof admission or production mutation.
+ * Exact BigInt arithmetic including unbounded row indices for complete coefficient fibers; no external proof admission or production mutation.
  */
 export const SINGMASTER_FIXED_GAP_BOUNDARY_R751='Exact fixed-parameter arithmetic only. Offline V12 atlas certificates require independent replay. Sharp Singmaster G09/G10/G13 remain OPEN.';
 const int=(x,name,min=0)=>{
@@ -11,10 +11,12 @@ const int=(x,name,min=0)=>{
  return x;
 };
 export function chooseExactR751(n,k){
- int(n,'n');int(k,'k');
- if(k>n)throw new RangeError('k cannot exceed n');
- let p=1n,kk=Math.min(k,n-k);
- for(let j=1;j<=kk;j++)p=p*BigInt(n-kk+j)/BigInt(j);
+ int(k,'k');
+ const N=typeof n==='bigint'?n:BigInt(int(n,'n'));
+ if(N<0n||BigInt(k)>N)throw new RangeError('k cannot exceed nonnegative n');
+ let p=1n,K=BigInt(k);
+ if(N-K<K)K=N-K;
+ for(let j=1n;j<=K;j++)p=p*(N-K+j)/j;
  return p;
 }
 export function firstDominanceMR751(k,d){
@@ -51,10 +53,10 @@ export function completeFixedValueFiberR751(value){
  const reps=[];
  for(let k=2;k<10000;k++){
   if(chooseExactR751(2*k,k)>a)break;
-  let lo=2*k,hi=4*k;
-  while(chooseExactR751(hi,k)<a){hi*=2;if(hi>10000)throw new RangeError('implementation row limit; no claim inferred');}
-  while(lo<hi){const mid=Math.floor((lo+hi)/2);if(chooseExactR751(mid,k)<a)lo=mid+1;else hi=mid;}
-  if(chooseExactR751(lo,k)===a)reps.push({n:lo,k});
+  let lo=BigInt(2*k),hi=BigInt(4*k);
+  while(chooseExactR751(hi,k)<a)hi*=2n;
+  while(lo<hi){const mid=(lo+hi)/2n;if(chooseExactR751(mid,k)<a)lo=mid+1n;else hi=mid;}
+  if(chooseExactR751(lo,k)===a)reps.push({n:lo<=BigInt(Number.MAX_SAFE_INTEGER)?Number(lo):lo.toString(),k});
  }
  return {value:a.toString(),representations:reps,M:reps.length,scope:'COMPLETE_FIXED_VALUE_WITHIN_SAFE_EXECUTION_BOUND'};
 }
