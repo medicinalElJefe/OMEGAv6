@@ -19,3 +19,28 @@ An exact, previously known infinite family of adjacent-row binomial collisions i
 Known family: David Singmaster, *Repeated Binomial Coefficients and Fibonacci Numbers*, Fibonacci Quarterly 13 (1975), 295–298. https://www.fq.math.ca/Scanned/13-4/singmaster.pdf
 
 Execution: node tests/r752-pell-thread-invariants.mjs. All other existing R290-R751 authority and CI boundaries are preserved. Production evidence requires the canonical eight-workflow exact-head and live-SHA gates.
+
+## V15: complete classification, not merely one generated sequence
+
+For every nontrivial left-half coefficient equality with *both* row and column differences exactly one,
+
+    C(n,k)=C(n-1,k+1), k>=2, n-1>=2(k+1),
+
+there exists a unique t>=1 with m=2t+2 such that
+
+    n=F_m F_(m+1), k=F_m F_(m-1)-1,
+    n-k-1=F_m².
+
+This is an **if and only if** classification. Its proof is a globally valid integer-affine descent under the exact inverse P^-1(n,k)=(-n+3k+2,-3n+8k+5). For k>=5 on Q(n,k)=0 the resulting (N,K) satisfies K>=0, N>=2(K+1), K<k. The three inequalities are certified by discriminant identities:
+
+    (7k+4)²-9D(k)=4(k-5)(k+1)>=0;
+    25D(k)-(11k+10)²=4k(k-5)>=0;
+    9D(k)-(5k+4)²=20k²+32k+20>0,
+
+where D(k)=5k²+8k+4. k=1..4 have nonsquare discriminants, and k=5 gives the base (15,5) descending to (2,0). Strictly decreasing k proves no other orbit exists. Cassini's identity at even m proves the Fibonacci formulas satisfy Q=0. Hence ALL admissible adjacent-row-and-column equalities belong to the known Pell/Fibonacci family.
+
+Exact instance: t=5, m=12, F_12=144, (n,k)=(33552,12815), and n-k-1=144²=20736=12⁴. This is a number-theory equality with the OMEGA 20,736-address count, not evidence of shared physical dimensions or equivalent mathematical domain semantics.
+
+Files: src/proof/singmasterPellClassificationR752.js, tests/r752-pell-complete-classification-invariants.mjs. The stand-alone V15 research package includes an independently recomputed 20,376-cell crosswalk and a k<=200,000 discriminant scan. Its CSV bytes are not source-ingested by this PR.
+
+**Truth gate:** this classification covers first column step one and first row step one ONLY. Pairs of row gap 1 and larger column step remain independent. Global fourfold exclusion count gained is **zero**; all 3,249 unresolved V13/V14 chart regions and global G09/G10/G13 remain OPEN. It is not a newly claimed theorem of historical priority, and no CanonState, production, or self-scheduling authority is conferred.
