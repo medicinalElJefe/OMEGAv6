@@ -25,7 +25,8 @@ Noninvertible maps cannot be made invertible by a saved event history: a history
 
 ## Existing OMEGA integration boundary
 
-- New engine: src/proof/deweyTemporalRotationV9.js, BigInt exact operators; no host actions, routes, or state mutation.
+- New engine: src/proof/deweyTemporalRotationV9.js, BigInt exact operators; no host actions or state mutation.
+- Executable model instrument: src/DeweyTemporalWorkbenchV9.tsx and src/proof/deweyTemporalWorkbenchRuntimeV9.js, exposed through the existing research workspace and OMEGA7 Science → Relativity full instrument. Six selectable models, bounded state/time/rotation inputs, exact defects, model-level equivariance, JSON export and recomputed tamper-refusing import. UI source integration does not establish deployed browser acceptance.
 - Proof carry bridge: src/proof/deweyTemporalProofBridgeV9.js, compiles existing R292 certificate-completeness packets and R293 unresolved research cells.
 - Regression: node tests/dewey-temporal-rotation-v9-invariants.mjs.
 - No new parallel truth, CI, promotion, deployment, or CanonState authority. R294/R295 remain unchanged and retain their existing evidence and source-admission obligations.
@@ -42,7 +43,7 @@ The local package additionally contains a 78-event SHA-256 predecessor-linked te
 
 - Singmaster G09/G10/G13 remain OPEN.
 - No global nonlinear/higher-dimensional/continuous-time classification established.
-- No physical universal law, empirical inference, source recovery, OMEGA7 route acceptance, or production deployment established.
+- No physical universal law, empirical inference, external V8 source recovery, OMEGA7 live browser acceptance, or R750 production deployment established. Exact-head CI and production gates must pass after the UI changes.
 - Exact mathematical model checks are not generalized beyond their hypotheses.
 
 Acceptance boundary: research-only source and tests. Full-product production claims require canonical workflows, exact-head tests, live SHA proof, historical parity evidence, and existing governed admission.
