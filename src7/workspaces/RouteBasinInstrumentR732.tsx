@@ -65,7 +65,7 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
  };
  const exportContinuity=()=>{
   if(!continuity)return;
-  const blob=new Blob([JSON.stringify(continuity,null,2)+'\\n'],{type:'application/json'});
+  const blob=new Blob([JSON.stringify(continuity,null,2)+'\n'],{type:'application/json'});
   const url=URL.createObjectURL(blob),link=document.createElement('a');
   link.href=url;link.download='omega-r740-source-continuity.json';
   document.body.appendChild(link);link.click();link.remove();
