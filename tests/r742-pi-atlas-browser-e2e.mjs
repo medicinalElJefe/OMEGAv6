@@ -167,7 +167,7 @@ try{
    console.log('R747 '+device+' two-channel source-metric optima, cost table, export, recomputed recovery, tamper refusal and navigation PASS');
    // R748: optimize a new convex source-cost objective over the same constraints.
    const blended=journey.locator('[data-r748-blend]');
-   await blended.locator('[data-r748-alpha]').fill('0.5');
+   assert.equal(await blended.locator('[data-r748-alpha]').inputValue(),'0.5');
    await blended.locator('[data-r748-run]').click();
    await blended.locator('[data-r748-summary]').filter({hasText:'blended cost'}).waitFor({state:'visible',timeout:20000});
    const blendDownloadPromise=page.waitForEvent('download',{timeout:20000});
