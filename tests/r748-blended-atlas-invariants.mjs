@@ -31,6 +31,23 @@ for(const alpha of [0,0.1,0.25,0.5,0.75,0.9,1]){
  assert.deepEqual(verifyBlendedAtlasJourneyR748(JSON.stringify(value),field),value);
  assert.throws(()=>verifyBlendedAtlasJourneyR748(JSON.stringify({...value,improvement:999}),field),/differs/);
 }
+// Independent relaxation oracle: prove the blended optimum, not just a plausible route.
+const oracle=new Float64Array(COUNT).fill(Infinity);oracle[0]=0;
+for(let pass=0;pass<30;pass++){
+ let changed=false;
+ for(let address=0;address<COUNT;address++){
+  if(!Number.isFinite(oracle[address]))continue;
+  for(const next of piAxisNeighborsR742(address)){
+   const p=1+Math.abs(field.C[address]-field.C[next]);
+   const q=1+Math.abs(field.q[address]-field.q[next]);
+   const candidate=oracle[address]+0.5*p+0.5*q;
+   if(candidate<oracle[next]){oracle[next]=candidate;changed=true}
+  }
+ }
+ if(!changed)break;
+}
+const middle=computeBlendedAtlasJourneyR748(field,tradeoff,0.5);
+assert.ok(Math.abs(middle.blendedCost-oracle[2])<1e-8,'R748 A* equals independent source-cost relaxation');
 const constrained=computeConstrainedAtlasJourneyR744(field,0,2,'C',[1728],[12]);
 const constrainedTradeoff=computeAtlasTradeoffR747(field,constrained,'q');
 const via=computeBlendedAtlasJourneyR748(field,constrainedTradeoff,0.5);
