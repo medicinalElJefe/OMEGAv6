@@ -87,7 +87,9 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
    return {route,error:''};
   }catch(e){return {route:null,error:e instanceof Error?e.message:'R744 journey refused'}}
  },[field,address,journeyTarget,journeyChannel,journeyWaypoints,journeyBlocked]);
- useEffect(()=>{setDetourResult(null);setDetourRecovery('');setTradeoffResult(null);setTradeoffRecovery('');setBlendResult(null);setBlendRecovery('')},[field,address,journeyTarget,journeyChannel,journeyWaypoints,journeyBlocked]);
+ useEffect(()=>{setDetourResult(null);setDetourRecovery('');setTradeoffResult(null);setTradeoffRecovery('')},[field,address,journeyTarget,journeyChannel,journeyWaypoints,journeyBlocked]);
+ // Keep an already verified R748 witness navigable while its address selection moves.
+ useEffect(()=>{setBlendResult(null);setBlendRecovery('')},[field,journeyTarget,journeyChannel,journeyWaypoints,journeyBlocked]);
  const piWitness=useMemo(()=>Number.isSafeInteger(address)&&address>=0&&address<20736&&/^(0|[1-9]\d*)$/.test(piTarget)&&Number(piTarget)<20736?piAxisWitnessR742(address,Number(piTarget)):null,[address,piTarget]);
  const directedRoute=useMemo(()=>inverseIndex&&analysis&&continuity&&Number.isSafeInteger(address)&&address>=0&&address<20736&&/^(0|[1-9]\d*)$/.test(routeTarget)&&Number(routeTarget)<20736?findDirectedSourceRouteR741(inverseIndex,analysis,continuity,address,Number(routeTarget)):null,[inverseIndex,analysis,continuity,address,routeTarget]);
  const exportPhaseExchange=()=>{
