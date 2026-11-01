@@ -34,6 +34,23 @@ for(const [from,to] of [[0,0],[0,1728],[0,20735],[12000,17000],[20735,0],[42,140
   assert.equal(route.donorWeighted,false);assert.equal(route.physicalMeasurement,false);
  }
 }
+// Independent repeated-relaxation oracle: A* must minimize actual source-edge cost,
+// not merely return a plausible or axis-shortest route.
+const oracleStart=12000,oracleTarget=17000,oracleDistances=new Float64Array(COUNT).fill(Infinity);
+oracleDistances[oracleStart]=0;
+for(let pass=0;pass<30;pass++){
+ let changed=false;
+ for(let address=0;address<COUNT;address++){
+  if(!Number.isFinite(oracleDistances[address]))continue;
+  for(const next of piAxisNeighborsR742(address)){
+   const cost=oracleDistances[address]+1+Math.abs(field.C[address]-field.C[next]);
+   if(cost<oracleDistances[next]){oracleDistances[next]=cost;changed=true}
+  }
+ }
+ if(!changed)break;
+}
+const optimal=computeMetricAtlasRouteR743(field,oracleStart,oracleTarget,'C');
+assert.ok(Math.abs(optimal.weightedCost-oracleDistances[oracleTarget])<1e-9,'A* matches independent exhaustive relaxation');
 const flat=computeMetricAtlasRouteR743(field,0,20735,'Phi');
 assert.equal(flat.steps,4);assert.equal(flat.weightedCost,4);
 assert.throws(()=>computeMetricAtlasRouteR743(field,0,20736),/outside/);
