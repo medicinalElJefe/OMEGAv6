@@ -8,7 +8,7 @@ for(const model of V9_SCENARIO_NAMES){
  assert.deepEqual(verifyTemporalWorkbenchV9(JSON.stringify(packet)),packet);
  assert.equal(packet.productionAuthority,false);
  assert.equal(packet.physicalMeasurement,false);
- assert.throws(()=>verifyTemporalWorkbenchV9(JSON.stringify({...packet,composition:{...packet.composition,squaredDefect:'0'}})),/differs/);
+ assert.throws(()=>verifyTemporalWorkbenchV9(JSON.stringify({...packet,composition:{...packet.composition,squaredDefect:(BigInt(packet.composition.squaredDefect)+1n).toString()}})),/differs/);
  assert.throws(()=>verifyTemporalWorkbenchV9(JSON.stringify({...packet,source:'EMPIRICAL'})),/differs/);
 }
 const relative=computeTemporalWorkbenchV9('relative','1','2','1','1');
