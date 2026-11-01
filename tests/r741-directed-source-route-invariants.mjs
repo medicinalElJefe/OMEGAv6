@@ -3,7 +3,7 @@ import {readFileSync} from 'node:fs';
 import {computeRouteBasinsR732} from '../src/routeBasinR732.mjs';
 import {buildSourcePreimageIndexR739} from '../src/sourcePreimageR739.mjs';
 import {proveSourceContinuityR740} from '../src/sourceContinuityR740.mjs';
-import {findDirectedSourceRouteR741,SOURCE_DIRECTED_ROUTE_SCHEMA_R741} from '../src/sourceDirectedRouteR741.mjs';
+import {findDirectedSourceRouteR741,verifyDirectedSourceRouteRecoveryR741,SOURCE_DIRECTED_ROUTE_SCHEMA_R741} from '../src/sourceDirectedRouteR741.mjs';
 function fixture(route){
  const graph=computeRouteBasinsR732(route),index=buildSourcePreimageIndexR739(route,graph);
  return {graph,index,proof:proveSourceContinuityR740(index,graph)};
@@ -44,7 +44,15 @@ assert.throws(()=>findDirectedSourceRouteR741(index,graph,{...proof,forwardInver
 const brokenEntry={...graph,entry:graph.entry.slice()};
 brokenEntry.entry[0]=-1;
 assert.throws(()=>findDirectedSourceRouteR741(index,brokenEntry,proof,0,1),/entry witness refused/);
+const recovered=verifyDirectedSourceRouteRecoveryR741(JSON.stringify(direct),index,graph,proof);
+assert.equal(recovered.verified,true);assert.equal(recovered.from,0);assert.equal(recovered.to,2);
+assert.equal(recovered.rawSourceIdentityVerified,false);
+const tampered={...direct,steps:3};
+assert.throws(()=>verifyDirectedSourceRouteRecoveryR741(JSON.stringify(tampered),index,graph,proof),/differs/);
+assert.throws(()=>verifyDirectedSourceRouteRecoveryR741(JSON.stringify({...direct,extra:true}),index,graph,proof),/differs/);
+assert.throws(()=>verifyDirectedSourceRouteRecoveryR741('{',index,graph,proof),/invalid source route JSON/);
+assert.throws(()=>verifyDirectedSourceRouteRecoveryR741('x'.repeat(262145),index,graph,proof),/size refused/);
 const ui=readFileSync(new URL('../src7/workspaces/RouteBasinInstrumentR732.tsx',import.meta.url),'utf8');
-for(const token of ['findDirectedSourceRouteR741','data-r741-route','data-r741-target','data-r741-summary','data-r741-path','data-r741-export','data-r741-boundary'])
+for(const token of ['findDirectedSourceRouteR741','data-r741-route','data-r741-target','data-r741-summary','data-r741-path','data-r741-export','data-r741-import','data-r741-recovery','data-r741-boundary'])
  assert.ok(ui.includes(token),'R741 UI binding missing '+token);
 console.log('R741 exact directed reachability, branch refusal, cycle wrap, 20,736-address witness and UI bindings PASS');
