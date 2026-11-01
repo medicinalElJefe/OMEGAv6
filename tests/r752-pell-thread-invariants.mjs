@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {R752_TRUTH,pellCurveR752,pellForwardR752,pellInverseR752,pellNormR752,certifyPellMapR752,pellThreadR752} from '../src/proof/singmasterPellThreadR752.js';
+import {compilePellProofContextR752} from '../src/proof/singmasterPellProofBridgeR752.js';
 const pass=certifyPellMapR752();
 assert.equal(pass.isGlobalIdentity,true);
 assert.deepEqual(pass.anchorResiduals,['0','0','0','0','0','0']);
@@ -19,4 +20,15 @@ for(let n=-20;n<=20;n++)for(let k=-20;k<=20;k++){
 }
 assert.equal(R752_TRUTH.sharpSingmaster,'OPEN');
 assert.equal(packet.autopingActivated,false);assert.equal(packet.canonicalMutation,false);
+const context=compilePellProofContextR752();
+assert.equal(context.carry.claimStatus,'OPEN');
+assert.equal(context.carry.promotionEligible,false);
+assert.equal(context.evolution.promotionEligible,false);
+assert(context.evolution.unresolvedCount>=2);
+assert(context.carry.unresolvedScars.some(x=>x.id==='R752-ADDITIONAL-REPS'));
+assert(context.carry.unresolvedScars.some(x=>x.id==='G09-G10-G13'));
+assert(context.evolution.cells.every(x=>x.canonicalMutation===false&&x.evidenceCreated===false));
+assert.equal(context.sourceAdmission,false);
+assert.equal(context.autopingActivated,false);
+
 console.log('R752 Pell-family exact degree-2 identity, inverse, 128 threads, negative controls and OPEN gates PASS');
