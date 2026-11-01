@@ -7,6 +7,7 @@ import './r292-proof-carry-fabric-invariants.mjs';
 import './dewey-temporal-rotation-v9-invariants.mjs';
 import './dewey-temporal-nd-v9-invariants.mjs';
 import './dewey-temporal-workbench-v9-invariants.mjs';
+import './r751-singmaster-fixed-gap-reduction-invariants.mjs';
 import './r301-html-svg-capability-recovery-invariants.mjs';
 import fs from 'node:fs';
 import {deriveSpecialistPrefetchPolicyR110,selectWorkingSetPanelsR110,WORKING_SET_POLICY_TRUTH_R110} from '../src/specialistWorkingSetPolicyR110.js';
