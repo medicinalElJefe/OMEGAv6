@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {chromium} from 'playwright';
-const base=(process.env.OMEGA_E2E_URL||process.env.OMEGA_PUBLIC_URL||'http://127.0.0.1:4173').replace(/\\/$/,'');
+const base=(process.env.OMEGA_E2E_URL||process.env.OMEGA_PUBLIC_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 const expected=String(process.env.OMEGA_EXPECTED_SHA||'').trim();
 if(expected){
  if(!/^[0-9a-f]{40}$/i.test(expected))throw Error('R740 exact production SHA required');
@@ -46,7 +46,7 @@ try{
    const edges=Number(await first.locator('td').nth(2).innerText());
    assert.ok(nodes>0&&nodes===edges,device+': basin conservation failed');
    const select=first.locator('button[data-r740-select]');
-   const address=Number((await select.innerText()).match(/Select (\\d+)/)?.[1]);
+   const address=Number((await select.innerText()).match(/Select (\d+)/)?.[1]);
    assert.ok(Number.isSafeInteger(address),device+': basin address unavailable');
    await select.click();
    await page.locator('.o7-science-workspace[data-route="Atlas"][data-address="'+address+'"]').waitFor({state:'visible',timeout:10000});
