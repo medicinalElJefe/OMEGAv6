@@ -3,6 +3,7 @@ import {decodePiAddressR742,piAxisNeighborsR742,piAxisWitnessR742,verifyPiAxisWi
 import {METRIC_ATLAS_CHANNELS_R743,computeMetricAtlasRouteR743,verifyMetricAtlasRouteR743} from '../../src/sourceMetricAtlasRouteR743.mjs';
 import {computeConstrainedAtlasJourneyR744,verifyConstrainedAtlasJourneyR744} from '../../src/constrainedAtlasJourneyR744.mjs';
 import {LOCAL_ATLAS_JOURNEY_KEY_R745,createLocalAtlasCheckpointR745,verifyLocalAtlasCheckpointR745} from '../../src/localAtlasJourneyCheckpointR745.mjs';
+import {computeAtlasDetourR746,verifyAtlasDetourR746} from '../../src/atlasDetourR746.mjs';
 import {getMandala20736Field} from '../../src/mandala20736Runtime';
 import {computeRouteBasinsR732,inspectRouteBasinR732} from '../../src/routeBasinR732.mjs';
 import {renderRouteBasinRasterR733,addressAtRasterPointR733} from '../../src/routeBasinRasterR733.mjs';
@@ -33,6 +34,7 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
  const [journeyTarget,setJourneyTarget]=useState('0'),[journeyChannel,setJourneyChannel]=useState('C');
  const [journeyWaypoints,setJourneyWaypoints]=useState(''),[journeyBlocked,setJourneyBlocked]=useState(''),[journeyRecovery,setJourneyRecovery]=useState('');
  const [localJourneyStatus,setLocalJourneyStatus]=useState('No local journey checkpoint restored.');
+ const [detourAvoid,setDetourAvoid]=useState(''),[detourResult,setDetourResult]=useState<any>(null),[detourRecovery,setDetourRecovery]=useState('');
  const [routeRecoveryStatus,setRouteRecoveryStatus]=useState('');
  const [recoveryStatus,setRecoveryStatus]=useState('');
  const rasterCanvas=useRef<HTMLCanvasElement|null>(null);
@@ -81,6 +83,7 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
    return {route,error:''};
   }catch(e){return {route:null,error:e instanceof Error?e.message:'R744 journey refused'}}
  },[field,address,journeyTarget,journeyChannel,journeyWaypoints,journeyBlocked]);
+ useEffect(()=>{setDetourResult(null);setDetourRecovery('')},[field,address,journeyTarget,journeyChannel,journeyWaypoints,journeyBlocked]);
  const piWitness=useMemo(()=>Number.isSafeInteger(address)&&address>=0&&address<20736&&/^(0|[1-9]\d*)$/.test(piTarget)&&Number(piTarget)<20736?piAxisWitnessR742(address,Number(piTarget)):null,[address,piTarget]);
  const directedRoute=useMemo(()=>inverseIndex&&analysis&&continuity&&Number.isSafeInteger(address)&&address>=0&&address<20736&&/^(0|[1-9]\d*)$/.test(routeTarget)&&Number(routeTarget)<20736?findDirectedSourceRouteR741(inverseIndex,analysis,continuity,address,Number(routeTarget)):null,[inverseIndex,analysis,continuity,address,routeTarget]);
  const exportPhaseExchange=()=>{
@@ -357,6 +360,49 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
     </div>
     <p data-r745-status role='status'>{localJourneyStatus}</p>
     <small>R745 stores one explicit checkpoint only in this browser. Restore recomputes and verifies against the current source field; it never silently restores, synchronizes to another device, modifies CanonState or proves durable cloud memory.</small>
+    <section data-r746-detour aria-label='Atlas counterfactual detour' style={{margin:'12px 0',maxWidth:'100%',minWidth:0}}>
+     <h4>R746 · Source-metric detour and route sensitivity</h4>
+     <p>Exclude one non-stop address from the current route. Recompute an optimal alternative, compare cost and steps, and inspect or export the result. This is a model constraint, not an observed physical blockage.</p>
+     <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+      <label>Route address to exclude <input data-r746-avoid type='number' min={0} max={20735} step={1} value={detourAvoid} onChange={e=>{setDetourAvoid(e.target.value);setDetourResult(null);setDetourRecovery('')}} style={{maxWidth:125}}/></label>
+      <button type='button' data-r746-run disabled={!journeyState.route||!field} onClick={()=>{
+       try{
+        if(!field||!journeyState.route)throw Error('R746 source journey unavailable');
+        if(!/^(0|[1-9]\d*)$/.test(detourAvoid))throw Error('R746 enter a valid model address');
+        const result=computeAtlasDetourR746(field,journeyState.route,Number(detourAvoid));
+        setDetourResult(result);setDetourRecovery('COMPUTED · source-bound alternative');
+       }catch(err){setDetourResult(null);setDetourRecovery('REFUSED · '+(err instanceof Error?err.message:'detour unavailable'))}
+      }}>Compute alternative route</button>
+     </div>
+     <p data-r746-summary role='status'>{detourResult?'EXCLUDED '+detourResult.avoid+' · '+detourResult.detour.steps+' alternate steps · cost change '+detourResult.costDelta.toFixed(6)+' · '+detourResult.sharedAddressCount+' shared addresses':detourRecovery||'Select a non-stop address on the current route.'}</p>
+     {detourResult&&<>
+      <div data-r746-path style={{display:'flex',flexWrap:'wrap',gap:5,maxHeight:160,overflowY:'auto',margin:'8px 0'}}>
+       {detourResult.detour.addresses.map((step:number,i:number)=><button key={i} type='button' data-r746-step={i} onClick={()=>onAddress(step)} title={'Inspect alternate model address '+step}>{step}</button>)}
+      </div>
+      <button type='button' data-r746-export onClick={()=>{
+       const blob=new Blob([JSON.stringify(detourResult,null,2)],{type:'application/json'});
+       const url=URL.createObjectURL(blob),link=document.createElement('a');
+       link.href=url;link.download='omega-r746-source-detour.json';document.body.appendChild(link);link.click();link.remove();
+       setTimeout(()=>URL.revokeObjectURL(url),0);
+      }}>Export verified detour JSON</button>
+     </>}
+     <label style={{display:'block',marginTop:8}}>Recover a detour against the current source and journey
+      <input data-r746-import type='file' accept='.json,application/json' onChange={async e=>{
+       const file=e.currentTarget.files?.[0];e.currentTarget.value='';
+       if(!file||!field)return;
+       try{
+        if(file.size>2097152)throw Error('R746 detour size refused');
+        const recovered=verifyAtlasDetourR746(await file.text(),field);
+        if(!journeyState.route||JSON.stringify(recovered.baseline)!==JSON.stringify(journeyState.route))throw Error('R746 current journey differs');
+        setDetourAvoid(String(recovered.avoid));setDetourResult(recovered);
+        setDetourRecovery('VERIFIED · recomputed source-bound alternative');
+       }catch(err){setDetourResult(null);setDetourRecovery('REFUSED · '+(err instanceof Error?err.message:'detour invalid'))}
+      }}/>
+     </label>
+     <p data-r746-recovery role='status'>{detourRecovery||'No exported detour recovered.'}</p>
+     <small>R746 counterfactual costs and routes are computed in source-model address space. They are not physical obstacle observations, empirical forecasts, donor parity or CanonState mutation.</small>
+    </section>
+
     <label style={{display:'block',marginTop:8}}>Verify and recover a previously exported constrained journey
      <input data-r744-import type='file' accept='.json,application/json' onChange={async e=>{
       const file=e.currentTarget.files?.[0];e.currentTarget.value='';

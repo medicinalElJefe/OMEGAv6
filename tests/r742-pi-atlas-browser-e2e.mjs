@@ -103,6 +103,48 @@ try{
    await journey.locator('[data-r744-recovery]').filter({hasText:'VERIFIED · 2 recomputed constrained legs'}).waitFor({state:'visible',timeout:20000});
    await journeyImport.setInputFiles({name:'tampered.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({...journeyWitness,weightedCost:journeyWitness.weightedCost+1}))});
    await journey.locator('[data-r744-recovery]').filter({hasText:'REFUSED · R744 journey differs'}).waitFor({state:'visible',timeout:20000});
+      // R746: exclude an actual non-stop path cell, recompute and verify the counterfactual.
+   // Use a longer route so a non-stop interior address exists even if the path
+   // returns through the origin after the first waypoint.
+   let detourTarget=journeySource;
+   for(let i=0;i<4;i++)detourTarget=piAxisNeighborsR742(detourTarget)[2];
+   await journey.locator('[data-r744-target]').fill(String(detourTarget));
+   await page.waitForFunction(target=>{
+    const steps=document.querySelectorAll('[data-r744-journey] [data-r744-path] [data-r744-step]');
+    return steps.length>0&&steps[steps.length-1].textContent?.trim()===String(target);
+   },detourTarget,{timeout:20000});
+   const detourBaselineDownloadPromise=page.waitForEvent('download',{timeout:20000});
+   await journey.locator('[data-r744-export]').click();
+   const detourBaselineDownload=await detourBaselineDownloadPromise;
+   const detourBaseline=JSON.parse(await readFile(await detourBaselineDownload.path(),'utf8'));
+   const detour=journey.locator('[data-r746-detour]');
+   const avoid=detourBaseline.addresses.find(a=>a!==detourBaseline.from&&a!==detourBaseline.to&&!detourBaseline.waypoints.includes(a));
+   assert.ok(Number.isInteger(avoid),device+': route has no eligible detour cell');
+   await detour.locator('[data-r746-avoid]').fill(String(avoid));
+   await detour.locator('[data-r746-run]').click();
+   await detour.locator('[data-r746-summary]').filter({hasText:'EXCLUDED '+avoid}).waitFor({state:'visible',timeout:20000});
+   const detourDownloadPromise=page.waitForEvent('download',{timeout:20000});
+   await detour.locator('[data-r746-export]').click();
+   const detourDownload=await detourDownloadPromise;
+   assert.equal(detourDownload.suggestedFilename(),'omega-r746-source-detour.json');
+   const detourWitness=JSON.parse(await readFile(await detourDownload.path(),'utf8'));
+   assert.deepEqual(detourWitness.baseline,detourBaseline);
+   assert.ok(!detourWitness.detour.addresses.includes(avoid));
+   assert.ok(detourWitness.costDelta>=-1e-8);
+   const detourImport=detour.locator('[data-r746-import]');
+   await detourImport.setInputFiles({name:'detour.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(detourWitness))});
+   await detour.locator('[data-r746-recovery]').filter({hasText:'VERIFIED · recomputed source-bound alternative'}).waitFor({state:'visible',timeout:20000});
+   await detourImport.setInputFiles({name:'tampered.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({...detourWitness,costDelta:detourWitness.costDelta+1}))});
+   await detour.locator('[data-r746-recovery]').filter({hasText:'REFUSED · R746 detour differs'}).waitFor({state:'visible',timeout:20000});
+   await detour.locator('[data-r746-avoid]').fill(String(journeyWitness.waypoints[0]));
+   await detour.locator('[data-r746-run]').click();
+   await detour.locator('[data-r746-recovery]').filter({hasText:'REFUSED · R746 endpoint or ordered stop'}).waitFor({state:'visible',timeout:20000});
+   await journey.locator('[data-r744-target]').fill(String(journeyWitness.to));
+   await page.waitForFunction(target=>{
+    const steps=document.querySelectorAll('[data-r744-journey] [data-r744-path] [data-r744-step]');
+    return steps.length>0&&steps[steps.length-1].textContent?.trim()===String(target);
+   },journeyWitness.to,{timeout:20000});
+   console.log('R746 '+device+' source-metric counterfactual detour, export, recomputed recovery, tamper refusal and waypoint refusal PASS');
    // R745: same-browser checkpoint is explicitly saved, then refused on tampering.
    await journey.locator('[data-r745-save]').click();
    await journey.locator('[data-r745-status]').filter({hasText:'SAVED · 2 source-verified legs'}).waitFor({state:'visible',timeout:20000});
