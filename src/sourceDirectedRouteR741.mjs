@@ -58,3 +58,24 @@ export function findDirectedSourceRouteR741(index,graph,conservation,from,to,lim
   reason,sourceBound:true,canonicalMutation:false,physicalMeasurement:false,
   boundary:'Directed reachability in the declared finite source-model graph only; not physical travel, historical donor parity or CanonState admission.'};
 }
+
+export const SOURCE_DIRECTED_RECOVERY_SCHEMA_R741='OMEGA_SOURCE_DIRECTED_RECOVERY_R741_V1';
+export function verifyDirectedSourceRouteRecoveryR741(text,index,graph,conservation){
+ if(typeof text!=='string'||text.length===0||text.length>262144)
+  throw Error('R741 source route export size refused');
+ let imported;
+ try{imported=JSON.parse(text)}catch{throw Error('R741 invalid source route JSON refused')}
+ if(!imported||typeof imported!=='object'||Array.isArray(imported)||
+    imported.schema!==SOURCE_DIRECTED_ROUTE_SCHEMA_R741)
+  throw Error('R741 unknown source route schema refused');
+ const {from,to}=imported;
+ if(!Number.isSafeInteger(from)||!Number.isSafeInteger(to))
+  throw Error('R741 invalid source route address refused');
+ const expected=findDirectedSourceRouteR741(index,graph,conservation,from,to);
+ if(JSON.stringify(imported)!==JSON.stringify(expected))
+  throw Error('R741 imported route differs from current computed source');
+ return {schema:SOURCE_DIRECTED_RECOVERY_SCHEMA_R741,verified:true,from,to,
+  reachable:expected.reachable,steps:expected.steps,sourceBound:true,
+  rawSourceIdentityVerified:false,canonicalMutation:false,physicalMeasurement:false,
+  boundary:'Recovered route matches fresh finite source-model execution; original source-byte identity, historical donor parity and physical travel remain unproved.'};
+}
