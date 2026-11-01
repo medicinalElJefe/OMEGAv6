@@ -5,6 +5,7 @@ import './r289-recovered-menu-navigation-invariants.mjs';
 import './r290-singmaster-proof-atlas-invariants.mjs';
 import './r292-proof-carry-fabric-invariants.mjs';
 import './r752-pell-thread-invariants.mjs';
+import './r752-pell-complete-classification-invariants.mjs';
 import './r751-singmaster-fixed-gap-reduction-invariants.mjs';
 import './r301-html-svg-capability-recovery-invariants.mjs';
 import fs from 'node:fs';
