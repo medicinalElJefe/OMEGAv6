@@ -1,5 +1,6 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {decodePiAddressR742,piAxisNeighborsR742,piAxisWitnessR742,verifyPiAxisWitnessR742} from '../../src/piAtlasTraversalR742.mjs';
+import {METRIC_ATLAS_CHANNELS_R743,computeMetricAtlasRouteR743,verifyMetricAtlasRouteR743} from '../../src/sourceMetricAtlasRouteR743.mjs';
 import {getMandala20736Field} from '../../src/mandala20736Runtime';
 import {computeRouteBasinsR732,inspectRouteBasinR732} from '../../src/routeBasinR732.mjs';
 import {renderRouteBasinRasterR733,addressAtRasterPointR733} from '../../src/routeBasinRasterR733.mjs';
@@ -26,6 +27,7 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
  const [jump,setJump]=useState('0');
  const [routeTarget,setRouteTarget]=useState('0');
  const [piTarget,setPiTarget]=useState('0'),[piRecovery,setPiRecovery]=useState('');
+ const [metricTarget,setMetricTarget]=useState('0'),[metricChannel,setMetricChannel]=useState('C'),[metricRecovery,setMetricRecovery]=useState('');
  const [routeRecoveryStatus,setRouteRecoveryStatus]=useState('');
  const [recoveryStatus,setRecoveryStatus]=useState('');
  const rasterCanvas=useRef<HTMLCanvasElement|null>(null);
@@ -60,6 +62,7 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
  const inverseIndex=useMemo(()=>field&&analysis?buildSourcePreimageIndexR739(field.routeNext,analysis):null,[field,analysis]);
  const continuity=useMemo(()=>inverseIndex&&analysis?proveSourceContinuityR740(inverseIndex,analysis):null,[inverseIndex,analysis]);
  const inverse=useMemo(()=>inverseIndex&&analysis&&Number.isSafeInteger(address)&&address>=0&&address<20736?inspectSourcePreimagesR739(inverseIndex,analysis,address,inverseDepth,inverseNodes):null,[inverseIndex,analysis,address,inverseDepth,inverseNodes]);
+ const metricWitness=useMemo(()=>field&&Number.isSafeInteger(address)&&address>=0&&address<20736&&/^(0|[1-9]\\d*)$/.test(metricTarget)&&Number(metricTarget)<20736?computeMetricAtlasRouteR743(field,address,Number(metricTarget),metricChannel):null,[field,address,metricTarget,metricChannel]);
  const piWitness=useMemo(()=>Number.isSafeInteger(address)&&address>=0&&address<20736&&/^(0|[1-9]\d*)$/.test(piTarget)&&Number(piTarget)<20736?piAxisWitnessR742(address,Number(piTarget)):null,[address,piTarget]);
  const directedRoute=useMemo(()=>inverseIndex&&analysis&&continuity&&Number.isSafeInteger(address)&&address>=0&&address<20736&&/^(0|[1-9]\d*)$/.test(routeTarget)&&Number(routeTarget)<20736?findDirectedSourceRouteR741(inverseIndex,analysis,continuity,address,Number(routeTarget)):null,[inverseIndex,analysis,continuity,address,routeTarget]);
  const exportPhaseExchange=()=>{
@@ -284,6 +287,41 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
     </label>
     <p data-r742-recovery role='status'>{piRecovery||'No imported witness verified. Local file only.'}</p>
     <small>Model-address topology and donor-derived geometry only. No donor metric buffers, weighted A* equivalence, empirical dimensionality or original-source identity claimed.</small>
+   </section>
+   <section data-r743-metric-atlas aria-label='Source-metric weighted Atlas traversal' style={{margin:'16px 0',maxWidth:'100%',minWidth:0}}>
+    <h3>R743 · Source-metric Atlas route optimizer</h3>
+    <p>Compute an actual least-cost path over the eight reversible R742 axis neighbors. Each edge costs one step plus the absolute difference in a selected, already-computed source metric. A* uses the admissible wrapped axis distance; it does not invent historical donor weights.</p>
+    <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+     <label>Destination address <input data-r743-target type='number' min={0} max={20735} step={1} value={metricTarget} onChange={e=>setMetricTarget(e.target.value)}/></label>
+     <label>Source metric <select data-r743-channel value={metricChannel} onChange={e=>setMetricChannel(e.target.value)}>{METRIC_ATLAS_CHANNELS_R743.map(channel=><option key={channel} value={channel}>{ATLAS_FIELD_CHANNELS_R734[channel]}</option>)}</select></label>
+    </div>
+    <p data-r743-summary role='status'>{metricWitness?metricWitness.steps+' verified axis moves · optimized cost '+metricWitness.weightedCost.toFixed(6)+' · minimum axis distance '+metricWitness.axisLowerBound+' · '+metricWitness.expanded+' examined addresses':'Enter a valid address from 0 to 20735.'}</p>
+    {metricWitness&&<>
+     <div data-r743-path style={{display:'flex',flexWrap:'wrap',gap:5,margin:'8px 0'}}>
+      {metricWitness.addresses.map((step,i)=><button key={i} type='button' data-r743-step={i} onClick={()=>onAddress(step)} title={'Select exact route address '+step}>{step}</button>)}
+     </div>
+     <button type='button' data-r743-export onClick={()=>{
+      const blob=new Blob([JSON.stringify(metricWitness,null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(blob),link=document.createElement('a');
+      link.href=url;link.download='omega-r743-source-metric-route.json';document.body.appendChild(link);link.click();link.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),0);
+     }}>Export optimized route JSON</button>
+    </>}
+    <label style={{display:'block',marginTop:8}}>Recover and verify a source-metric route
+     <input data-r743-import type='file' accept='.json,application/json' onChange={async e=>{
+      const file=e.currentTarget.files?.[0];e.currentTarget.value='';
+      if(!file)return;
+      try{
+       if(file.size>262144)throw Error('R743 route size refused');
+       if(!field)throw Error('R743 source field unavailable');
+       const recovered=verifyMetricAtlasRouteR743(await file.text(),field);
+       setMetricTarget(String(recovered.to));setMetricChannel(recovered.channel);onAddress(recovered.from);
+       setMetricRecovery('VERIFIED · '+recovered.steps+' source-metric axis moves');
+      }catch(err){setMetricRecovery('REFUSED · '+(err instanceof Error?err.message:'invalid route'))}
+     }}/>
+    </label>
+    <p data-r743-recovery role='status'>{metricRecovery||'No imported route verified. Local file only.'}</p>
+    <small data-r743-boundary>Actual computed corpus metric buffers and model-address edges, not empirical motion, physical dimensions, original donor A* parity or canonical state mutation. Route export is verified against fresh source computation.</small>
    </section>
    <h3>Largest source-route basins</h3>
    <ol data-r732-ranked>{analysis.ranked.slice(0,8).map((cycle:any)=><li key={cycle.id} style={{padding:'4px 0'}}>
