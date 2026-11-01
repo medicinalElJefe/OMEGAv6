@@ -8,6 +8,7 @@ import './r752-pell-thread-invariants.mjs';
 import './r752-pell-complete-classification-invariants.mjs';
 import './r753-pell-arithmetic-skin-invariants.mjs';
 import './r754-exact-column-crossing-invariants.mjs';
+import './r755-pell-workbench-invariants.mjs';
 import './r751-singmaster-fixed-gap-reduction-invariants.mjs';
 import './dewey-temporal-rotation-v9-invariants.mjs';
 import './dewey-temporal-nd-v9-invariants.mjs';
