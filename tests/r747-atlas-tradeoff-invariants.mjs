@@ -1,0 +1,38 @@
+import assert from 'node:assert/strict';
+import {computeConstrainedAtlasJourneyR744} from '../src/constrainedAtlasJourneyR744.mjs';
+import {computeAtlasTradeoffR747,verifyAtlasTradeoffR747} from '../src/atlasTradeoffR747.mjs';
+const COUNT=20736,field={count:COUNT,C:new Float32Array(COUNT),q:new Float32Array(COUNT)};
+field.C[1]=100; // The C-optimal path avoids cell 1; the q-optimal path uses it.
+const primary=computeConstrainedAtlasJourneyR744(field,0,2,'C',[],[]);
+const result=computeAtlasTradeoffR747(field,primary,'q');
+assert.equal(result.primary.channel,'C');
+assert.equal(result.secondary.channel,'q');
+assert.equal(result.primary.from,0);assert.equal(result.secondary.to,2);
+assert.deepEqual(result.primary.waypoints,result.secondary.waypoints);
+assert.deepEqual(result.primary.blocked,result.secondary.blocked);
+assert.ok(result.pathChanged,'different source channels must produce genuinely different optimal paths in this fixture');
+assert.ok(!result.primary.addresses.includes(1),'C-optimal route must avoid the C spike');
+assert.ok(result.secondary.addresses.includes(1),'q-optimal route must take the shorter flat path');
+assert.ok(result.regrets.secondaryOnPrimary>0);
+assert.ok(result.regrets.primaryOnSecondary>0);
+assert.equal(result.costs.primaryOnPrimary,result.primary.weightedCost);
+assert.equal(result.costs.secondaryOnSecondary,result.secondary.weightedCost);
+assert.deepEqual(verifyAtlasTradeoffR747(JSON.stringify(result),field),result);
+assert.throws(()=>computeAtlasTradeoffR747(field,primary,'C'),/distinct/);
+assert.throws(()=>computeAtlasTradeoffR747(field,primary,'invalid'),/distinct/);
+assert.throws(()=>verifyAtlasTradeoffR747(JSON.stringify({...result,regrets:{...result.regrets,secondaryOnPrimary:0}}),field),/differs/);
+assert.throws(()=>verifyAtlasTradeoffR747(JSON.stringify({...result,secondary:{...result.secondary,steps:999}}),field),/differs/);
+assert.throws(()=>verifyAtlasTradeoffR747('{broken',field),/invalid JSON/);
+assert.throws(()=>verifyAtlasTradeoffR747('x'.repeat(2097153),field),/size refused/);
+const changed={...field,C:new Float32Array(field.C)};changed.C[1]=0;
+assert.throws(()=>verifyAtlasTradeoffR747(JSON.stringify(result),changed),/differs|R744 journey differs/);
+const constrained=computeConstrainedAtlasJourneyR744(field,0,2,'C',[1728],[12]);
+const constrainedResult=computeAtlasTradeoffR747(field,constrained,'q');
+assert.deepEqual(constrainedResult.secondary.waypoints,[1728]);
+assert.deepEqual(constrainedResult.secondary.blocked,[12]);
+assert.ok(constrainedResult.regrets.secondaryOnPrimary>=0&&constrainedResult.regrets.primaryOnSecondary>=0);
+assert.deepEqual(verifyAtlasTradeoffR747(JSON.stringify(constrainedResult),field),constrainedResult);
+const ui=(await import('node:fs')).readFileSync(new URL('../src7/workspaces/RouteBasinInstrumentR732.tsx',import.meta.url),'utf8');
+for(const marker of ['data-r747-channel','data-r747-run','data-r747-summary','data-r747-table','data-r747-primary-path','data-r747-secondary-path','data-r747-export','data-r747-import','data-r747-recovery'])
+ assert.ok(ui.includes(marker),'R747 UI missing '+marker);
+console.log('R747 two independently optimized source channels, cross-evaluated costs, actual tradeoff, constrained recovery, tamper refusal and UI bindings PASS');
