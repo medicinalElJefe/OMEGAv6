@@ -4,6 +4,7 @@ import './r289-full-archive-native-convergence-invariants.mjs';
 import './r289-recovered-menu-navigation-invariants.mjs';
 import './r290-singmaster-proof-atlas-invariants.mjs';
 import './r292-proof-carry-fabric-invariants.mjs';
+import './r751-singmaster-fixed-gap-reduction-invariants.mjs';
 import './r301-html-svg-capability-recovery-invariants.mjs';
 import fs from 'node:fs';
 import {deriveSpecialistPrefetchPolicyR110,selectWorkingSetPanelsR110,WORKING_SET_POLICY_TRUTH_R110} from '../src/specialistWorkingSetPolicyR110.js';
