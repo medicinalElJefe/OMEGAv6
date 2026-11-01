@@ -1,6 +1,7 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {decodePiAddressR742,piAxisNeighborsR742,piAxisWitnessR742,verifyPiAxisWitnessR742} from '../../src/piAtlasTraversalR742.mjs';
 import {METRIC_ATLAS_CHANNELS_R743,computeMetricAtlasRouteR743,verifyMetricAtlasRouteR743} from '../../src/sourceMetricAtlasRouteR743.mjs';
+import {computeConstrainedAtlasJourneyR744,verifyConstrainedAtlasJourneyR744} from '../../src/constrainedAtlasJourneyR744.mjs';
 import {getMandala20736Field} from '../../src/mandala20736Runtime';
 import {computeRouteBasinsR732,inspectRouteBasinR732} from '../../src/routeBasinR732.mjs';
 import {renderRouteBasinRasterR733,addressAtRasterPointR733} from '../../src/routeBasinRasterR733.mjs';
@@ -28,6 +29,8 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
  const [routeTarget,setRouteTarget]=useState('0');
  const [piTarget,setPiTarget]=useState('0'),[piRecovery,setPiRecovery]=useState('');
  const [metricTarget,setMetricTarget]=useState('0'),[metricChannel,setMetricChannel]=useState('C'),[metricRecovery,setMetricRecovery]=useState('');
+ const [journeyTarget,setJourneyTarget]=useState('0'),[journeyChannel,setJourneyChannel]=useState('C');
+ const [journeyWaypoints,setJourneyWaypoints]=useState(''),[journeyBlocked,setJourneyBlocked]=useState(''),[journeyRecovery,setJourneyRecovery]=useState('');
  const [routeRecoveryStatus,setRouteRecoveryStatus]=useState('');
  const [recoveryStatus,setRecoveryStatus]=useState('');
  const rasterCanvas=useRef<HTMLCanvasElement|null>(null);
@@ -63,6 +66,19 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
  const continuity=useMemo(()=>inverseIndex&&analysis?proveSourceContinuityR740(inverseIndex,analysis):null,[inverseIndex,analysis]);
  const inverse=useMemo(()=>inverseIndex&&analysis&&Number.isSafeInteger(address)&&address>=0&&address<20736?inspectSourcePreimagesR739(inverseIndex,analysis,address,inverseDepth,inverseNodes):null,[inverseIndex,analysis,address,inverseDepth,inverseNodes]);
  const metricWitness=useMemo(()=>field&&Number.isSafeInteger(address)&&address>=0&&address<20736&&/^(0|[1-9]\d*)$/.test(metricTarget)&&Number(metricTarget)<20736?computeMetricAtlasRouteR743(field,address,Number(metricTarget),metricChannel):null,[field,address,metricTarget,metricChannel]);
+ const journeyState=useMemo(()=>{
+  if(!field)return {route:null,error:''};
+  const parse=(value:string,label:string)=>value.trim()?value.split(',').map(part=>{
+   const token=part.trim();
+   if(!/^(0|[1-9]\d*)$/.test(token)||Number(token)>=20736)throw Error('R744 '+label+' must contain addresses 0–20735 separated by commas');
+   return Number(token);
+  }):[];
+  try{
+   if(!/^(0|[1-9]\d*)$/.test(journeyTarget)||Number(journeyTarget)>=20736)throw Error('R744 destination must be 0–20735');
+   const route=computeConstrainedAtlasJourneyR744(field,address,Number(journeyTarget),journeyChannel,parse(journeyWaypoints,'waypoints'),parse(journeyBlocked,'blocked cells'));
+   return {route,error:''};
+  }catch(e){return {route:null,error:e instanceof Error?e.message:'R744 journey refused'}}
+ },[field,address,journeyTarget,journeyChannel,journeyWaypoints,journeyBlocked]);
  const piWitness=useMemo(()=>Number.isSafeInteger(address)&&address>=0&&address<20736&&/^(0|[1-9]\d*)$/.test(piTarget)&&Number(piTarget)<20736?piAxisWitnessR742(address,Number(piTarget)):null,[address,piTarget]);
  const directedRoute=useMemo(()=>inverseIndex&&analysis&&continuity&&Number.isSafeInteger(address)&&address>=0&&address<20736&&/^(0|[1-9]\d*)$/.test(routeTarget)&&Number(routeTarget)<20736?findDirectedSourceRouteR741(inverseIndex,analysis,continuity,address,Number(routeTarget)):null,[inverseIndex,analysis,continuity,address,routeTarget]);
  const exportPhaseExchange=()=>{
@@ -287,6 +303,46 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
     </label>
     <p data-r742-recovery role='status'>{piRecovery||'No imported witness verified. Local file only.'}</p>
     <small>Model-address topology and donor-derived geometry only. No donor metric buffers, weighted A* equivalence, empirical dimensionality or original-source identity claimed.</small>
+   </section>
+   <section data-r744-journey aria-label='Constrained source-metric Atlas journey' style={{margin:'16px 0',maxWidth:'100%',minWidth:0}}>
+    <h3>R744 · Constrained multi-stop Atlas journey</h3>
+    <p>Execute a least-cost route across the existing 20,736 model addresses, visiting intermediate addresses in order while excluding explicitly blocked model cells. Each leg uses real R743 source-metric costs and a bounded admissible A* search. Blocks are your planning constraints, not observed obstacles.</p>
+    <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+     <label>Destination <input data-r744-target type='number' min={0} max={20735} step={1} value={journeyTarget} onChange={e=>setJourneyTarget(e.target.value)} style={{maxWidth:120}}/></label>
+     <label>Source metric <select data-r744-channel value={journeyChannel} onChange={e=>setJourneyChannel(e.target.value)}>{METRIC_ATLAS_CHANNELS_R743.map(channel=><option key={channel} value={channel}>{ATLAS_FIELD_CHANNELS_R734[channel]}</option>)}</select></label>
+    </div>
+    <div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:8}}>
+     <label>Intermediate addresses (up to 4, comma separated) <input data-r744-waypoints type='text' value={journeyWaypoints} onChange={e=>setJourneyWaypoints(e.target.value)} placeholder='1728, 3456'/></label>
+     <label>Excluded addresses (up to 64, comma separated) <input data-r744-blocked type='text' value={journeyBlocked} onChange={e=>setJourneyBlocked(e.target.value)} placeholder='1, 12'/></label>
+    </div>
+    <p data-r744-summary role='status'>{journeyState.route?journeyState.route.legs.length+' optimized legs · '+journeyState.route.steps+' steps · weighted cost '+journeyState.route.weightedCost.toFixed(6)+' · '+journeyState.route.blocked.length+' excluded addresses · '+journeyState.route.expanded+' expanded states':'REFUSED · '+(journeyState.error||'Source field unavailable')}</p>
+    {journeyState.route&&<>
+     <div data-r744-path style={{display:'flex',flexWrap:'wrap',gap:5,margin:'8px 0',maxHeight:180,overflowY:'auto'}}>
+      {journeyState.route.addresses.map((step,i)=><button key={i} type='button' data-r744-step={i} onClick={()=>onAddress(step)} title={'Navigate to model address '+step}>{step}</button>)}
+     </div>
+     <button type='button' data-r744-export onClick={()=>{
+      const blob=new Blob([JSON.stringify(journeyState.route,null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(blob),link=document.createElement('a');
+      link.href=url;link.download='omega-r744-constrained-journey.json';document.body.appendChild(link);link.click();link.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),0);
+     }}>Export exact journey JSON</button>
+    </>}
+    <label style={{display:'block',marginTop:8}}>Verify and recover a previously exported constrained journey
+     <input data-r744-import type='file' accept='.json,application/json' onChange={async e=>{
+      const file=e.currentTarget.files?.[0];e.currentTarget.value='';
+      if(!file||!field)return;
+      try{
+       if(file.size>1048576)throw Error('R744 journey size refused');
+       const recovered=verifyConstrainedAtlasJourneyR744(await file.text(),field);
+       setJourneyTarget(String(recovered.to));setJourneyChannel(recovered.channel);
+       setJourneyWaypoints(recovered.waypoints.join(','));setJourneyBlocked(recovered.blocked.join(','));
+       onAddress(recovered.from);
+       setJourneyRecovery('VERIFIED · '+recovered.legs.length+' recomputed constrained legs · '+recovered.steps+' steps');
+      }catch(err){setJourneyRecovery('REFUSED · '+(err instanceof Error?err.message:'invalid journey'))}
+     }}/>
+    </label>
+    <p data-r744-recovery role='status'>{journeyRecovery||'No journey recovered. Local file only.'}</p>
+    <small>Planning occurs only in model-address space. No physical routing, original donor parity, external map obstruction, empirical dimension or CanonState mutation.</small>
    </section>
    <section data-r743-metric-atlas aria-label='Source-metric weighted Atlas traversal' style={{margin:'16px 0',maxWidth:'100%',minWidth:0}}>
     <h3>R743 · Source-metric Atlas route optimizer</h3>
