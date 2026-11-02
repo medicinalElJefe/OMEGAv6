@@ -345,6 +345,32 @@ try{
    await recall.locator('[data-r723-replay]').click();
    if(!(await recall.locator('[data-r723-status]').innerText()).includes('Verified local source address'))
     throw Error(device+': R723 verified address replay did not execute');
+
+   // R771: source-bound intelligence, comparison and trajectory are usable from native Memory.
+   const nativeAnalysis=memoryHost.locator('[data-r771-memory-analysis]');
+   await nativeAnalysis.waitFor({state:'visible',timeout:10000});
+   if(await nativeAnalysis.getAttribute('data-r771-active')!=='EVIDENCE')
+    throw Error(device+': R771 grounded memory executor is not the default');
+   const nativeGrounded=nativeAnalysis.locator('[data-r724-intelligence]');
+   await nativeGrounded.locator('[data-r724-question]').fill('What did I record about independently recoverable?');
+   await nativeGrounded.locator('[data-r724-run]').click();
+   await nativeGrounded.locator('[data-r724-source]').first().waitFor({state:'visible',timeout:10000});
+   if(!(await nativeGrounded.locator('[data-r724-result]').innerText()).includes('R722 independently recoverable packet observation'))
+    throw Error(device+': R771 native Memory did not execute source-grounded retrieval');
+   await nativeGrounded.locator('[data-r724-replay]').first().click();
+   if(!(await nativeGrounded.locator('[data-r724-status]').innerText()).includes('Verified local address'))
+    throw Error(device+': R771 native grounded replay did not select the shared Atlas address');
+   await nativeAnalysis.locator('[data-r771-select="CONTINUITY"]').click();
+   await nativeAnalysis.locator('[data-r725-continuity]').waitFor({state:'visible',timeout:10000});
+   await nativeAnalysis.locator('[data-r771-select="TRAJECTORY"]').click();
+   await nativeAnalysis.locator('[data-r726-trajectory]').waitFor({state:'visible',timeout:10000});
+   await nativeAnalysis.locator('[data-r771-select="EVIDENCE"]').click();
+   const nativeGroundedAgain=nativeAnalysis.locator('[data-r724-intelligence]');
+   await nativeGroundedAgain.locator('[data-r724-question]').fill('independently recoverable');
+   await nativeGroundedAgain.locator('[data-r724-run]').click();
+   await nativeGroundedAgain.locator('[data-r724-source]').first().waitFor({state:'visible',timeout:10000});
+   console.log('R771 native Memory analysis '+device+' PASS: grounded source execution, shared replay, continuity/trajectory instruments');
+
    // Existing R28 replay must refuse a locally altered row, not only imports.
    await page.evaluate(()=>{
     const key='omega.v6.memory.r28',rows=JSON.parse(localStorage.getItem(key)||'[]');
