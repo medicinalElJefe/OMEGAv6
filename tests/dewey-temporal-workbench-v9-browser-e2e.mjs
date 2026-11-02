@@ -217,6 +217,16 @@ try{
    await navigator.locator('[data-r763-search]').click();
    assert.equal((await navigator.locator('[data-r763-status]').innerText()).trim(),'NO_MATCH_IN_EXHAUSTED_DECLARED_GRAPH');
    await navigator.locator('[data-r763-trend]').selectOption('ANY');
+   await navigator.locator('[data-r763-min-score]').fill('0.50');
+   await navigator.locator('[data-r763-scope]').selectOption('ALL_NODES');
+   await navigator.locator('[data-r763-search]').click();
+   assert.equal((await navigator.locator('[data-r763-status]').innerText()).trim(),'START_OUTSIDE_DECLARED_PATH_CONSTRAINTS');
+   assert.match(await navigator.locator('[data-r763-scope-result]').innerText(),/every traversed state/);
+   await navigator.locator('[data-r763-scope]').selectOption('TARGET_ONLY');
+   await navigator.locator('[data-r763-min-score]').fill('');
+   await navigator.locator('[data-r763-search]').click();
+   assert.equal((await navigator.locator('[data-r763-status]').innerText()).trim(),'FOUND_IN_DECLARED_SYMBOLIC_GRAPH');
+   assert.match(await navigator.locator('[data-r763-scope-result]').innerText(),/destination only/);
    await navigator.locator('[data-r763-start]').fill('248833');
    await navigator.locator('[data-r763-search]').click();
    assert.match(await navigator.locator('[data-r763-error]').innerText(),/must be integer/);
