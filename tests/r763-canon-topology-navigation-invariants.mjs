@@ -36,6 +36,22 @@ const restricted=planCanonPathR763({start:1,targetDecision:'STAY',minScore:'0.50
  maxBurden:'1',maxContradiction:'1',maxHops:8,maxVisited:15000});
 assert.equal(restricted.status,'FOUND_IN_DECLARED_SYMBOLIC_GRAPH');
 assert(Number(restricted.path.at(-1).score)>=0.5);
+assert.equal(restricted.pathConstraintScope,'TARGET_ONLY');
+// The same target-only certificate does NOT authorize traversal through inadmissible intermediates.
+const allNodeHold=planCanonPathR763({start:1,targetDecision:'STAY',minScore:'0.50',
+ maxBurden:'1',maxContradiction:'1',maxHops:8,maxVisited:15000,pathConstraintScope:'ALL_NODES'});
+assert.equal(allNodeHold.status,'START_OUTSIDE_DECLARED_PATH_CONSTRAINTS');
+assert.equal(allNodeHold.visited,0);assert.equal(allNodeHold.pathConstraintScope,'ALL_NODES');
+const admissibleStart=planCanonPathR763({start:1,targetDecision:'ESCALATE',targetMode:mode,
+ maxHops:0,maxVisited:1,pathConstraintScope:'ALL_NODES',minScore:'0'});
+assert.equal(admissibleStart.status,'FOUND_IN_DECLARED_SYMBOLIC_GRAPH');
+assert.equal(admissibleStart.distance,0);assert.equal(admissibleStart.pathConstraintScope,'ALL_NODES');
+assert.throws(()=>planCanonPathR763({start:1,pathConstraintScope:'IGNORE_EVIDENCE'}),/constraint scope/);
+const allNodeWitness=computeCanonPathWitnessR763({start:1,targetDecision:'STAY',minScore:'0.50',
+ pathConstraintScope:'ALL_NODES'});
+assert.deepEqual(verifyCanonPathWitnessR763(JSON.stringify(allNodeWitness)),allNodeWitness);
+assert.throws(()=>verifyCanonPathWitnessR763(JSON.stringify({...allNodeWitness,
+ query:{...allNodeWitness.query,pathConstraintScope:'TARGET_ONLY'}})),/differs/);
 const query={start:1,targetDecision:'STAY',maxHops:8,maxVisited:15000};
 const witness=computeCanonPathWitnessR763(query);
 assert.deepEqual(verifyCanonPathWitnessR763(JSON.stringify(witness)),witness);
@@ -51,5 +67,7 @@ assert(science.includes('CanonTopologyWorkbenchR763'));
 assert(science.includes('<CanonTopologyWorkbenchR763'));
 const ui=fs.readFileSync('src/CanonTopologyWorkbenchR763.tsx','utf8');
 assert(ui.includes('data-r763-search')&&ui.includes('data-r763-export')&&ui.includes('data-r763-verify'));
+assert(ui.includes('data-r763-scope')&&ui.includes('data-r763-scope-result'));
+assert(ui.includes('Source and every traversed state'));
 assert(ui.includes('NOT a physical action')||ui.includes('not physical actions'));
 console.log('R763 exact five-axis inverse graph: shortest symbolic path, mode188/phase/RSC filters, reversible scar, bounded refusal and source-gated UI PASS');
