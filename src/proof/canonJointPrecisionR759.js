@@ -12,7 +12,7 @@ export const R759_TRUTH=Object.freeze({
 });
 const pattern=/^(?:0|[1-9][0-9]*)(?:\.[0-9]{1,4})?$/;
 function score4(v){
- if(typeof v!=='string'||!pattern.test(v))throw new TypeError('score must be nonnegative decimal text, max four fractional digits');
+ if(typeof v!=='string'||v.length>32||!pattern.test(v))throw new TypeError('score must be nonnegative decimal text, max four fractional digits');
  const [i,j='']=v.split('.'),s=BigInt(i)*10000n+BigInt(j.padEnd(4,'0')||'0');
  if(s<=0n)throw new RangeError('positive score required');return s;
 }
@@ -41,4 +41,22 @@ export function jointCanonPrecisionR759(metrics,storedScore){
   assumption:'NEAREST_4DP_SAME_LATENT_SCORE_COMPONENTS_AND_STORED_SCORE',
   originalDecisionOverwritten:false,canonicalMutation:false,liveActionAdmissible:false,
   sharpSingmaster:'OPEN'};
+}
+/** Portable, deterministic R759 conditional witness. Never an action receipt. */
+export function computeJointCanonWitnessR759(metrics,storedScore){
+ const inputs={metrics:{c:metrics.c,phi:metrics.phi,q:metrics.q,lambda:metrics.lambda},storedScore};
+ return {schema:'OMEGA_R759_JOINT_CONDITIONAL_WITNESS_V1',inputs,
+  result:jointCanonPrecisionR759(inputs.metrics,inputs.storedScore)};
+}
+export function verifyJointCanonWitnessR759(raw){
+ if(typeof raw!=='string'||raw.length>12000)throw new TypeError('bounded JSON witness text required');
+ let submitted;
+ try{submitted=JSON.parse(raw);}catch{throw new TypeError('invalid JSON witness');}
+ if(!submitted||submitted.schema!=='OMEGA_R759_JOINT_CONDITIONAL_WITNESS_V1'||
+    !submitted.inputs||!submitted.inputs.metrics||!submitted.result)
+  throw new TypeError('R759 witness schema required');
+ const computed=computeJointCanonWitnessR759(submitted.inputs.metrics,submitted.inputs.storedScore);
+ if(JSON.stringify(submitted)!==JSON.stringify(computed))
+  throw new Error('R759 witness differs from independent exact recomputation');
+ return computed;
 }
