@@ -12,7 +12,7 @@ const presets:{[key:string]:string[]}={
 const opt=(s:string)=>s.trim()?s.trim():null;
 
 /** Executable V27 symbolic path lab; never assumes real-world admissibility of an ordinal step. */
-export default function CanonTopologyWorkbenchR763(){
+export default function CanonTopologyWorkbenchR763({onAddress}:{onAddress?:(address:number)=>void}={}){
  const[start,setStart]=useState('1'),[goal,setGoal]=useState<Goal>('STAY');
  const[axisPreset,setAxisPreset]=useState('ALL'),[mode,setMode]=useState('');
  const[scoreTrend,setScoreTrend]=useState('ANY');
@@ -144,8 +144,9 @@ export default function CanonTopologyWorkbenchR763(){
      <title>{f.key+' · '+f.decision+' · modeled score '+f.score}</title>
     </circle>)}
    </svg>
-   <p data-r764-frame>Frame <b>{frame+1}</b> / {replay.frames.length} · <b>{replay.frames[frame].key}</b> · Mode {replay.frames[frame].mode188} · phase {replay.frames[frame].phaseGroup} / 6 · {replay.frames[frame].decision}</p>
+   <p data-r764-frame>Frame <b>{frame+1}</b> / {replay.frames.length} · <b>{replay.frames[frame].key}</b> · Mode {replay.frames[frame].mode188} · phase {replay.frames[frame].phaseGroup} / 6 · {replay.frames[frame].decision} · Atlas 20,736 address <b data-r764-atlas-address>{replay.frames[frame].atlasAddress20736}</b> (outer domain {replay.frames[frame].outerDomain})</p>
    <p data-r764-carry>Exact cumulative score change: {replay.frames[frame].cumulativeExactDelta.numerator}/{replay.frames[frame].cumulativeExactDelta.denominator}; boundary scars: {replay.frames[frame].cumulativeBoundaryScars}. Total: {replay.totalExactScoreDelta.numerator}/{replay.totalExactScoreDelta.denominator}; reverse score return: {replay.inverseScoreReturnExact?'exact':'refused'}.</p>
+   <button type="button" data-r764-project-atlas disabled={!onAddress} onClick={()=>onAddress?.(replay.frames[frame].atlasAddress20736)}>Select this 20,736-address Atlas location (local view only)</button>
    <div className="r316-controls">
     <button type="button" data-r764-first disabled={frame===0} onClick={()=>setFrame(0)}>First</button>
     <button type="button" data-r764-prev disabled={frame===0} onClick={()=>setFrame(x=>Math.max(0,x-1))}>Previous</button>
