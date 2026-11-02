@@ -21,13 +21,16 @@ The two independent offline verifiers (one exact scaled-integer rational crossin
 **IMPORTANT:** This is a stronger hypothetical measurement model than V23. An unchanged four-digit score does not establish that it was derived from the SAME latent unrounded inputs. Therefore a numerically stable class is NOT a source-authorized live decision, and none of the original 92+76 records are rewritten. The original Decision column is a comparison/negative control, not an independent measurement that can be used to force a desired result.
 
 ## Executable code and tests
-- src/proof/canonJointPrecisionR759.js: arbitrary precision BigInt rational intersection; explicit score-input validation and incompatibility refusal.
-- tests/r759-canon-joint-precision-invariants.mjs: representative newly resolved vs held cases, known source boundary cases, incompatible source-score refusal, and negative controls.
-- src/TypedProvenanceWorkbenchR757.tsx: separate labeled hypothetical stored S field, conditional joint result and explicit no-authority scope alongside existing R757 and R758 comparisons.
-- tests/dewey-temporal-workbench-v9-browser-e2e.mjs: desktop/mobile joint interval, improvement and contradiction refusal.
+- src/proof/canonJointPrecisionR759.js: arbitrary precision BigInt rational intersection; bounded score-input validation, incompatibility refusal, portable conditional witness export and independent exact recomputation with tamper refusal.
+- tests/r759-canon-joint-precision-invariants.mjs: representative newly resolved vs held cases, known source boundary cases, incompatible source-score refusal, exact witness recovery, tampered gate/input/authority refusal and oversized-input negative controls.
+- src/TypedProvenanceWorkbenchR757.tsx: separate labeled hypothetical stored S field, conditional joint result, JSON export and independent recomputed recovery/refusal, with explicit no-authority scope alongside existing R757 and R758 comparisons.
+- tests/dewey-temporal-workbench-v9-browser-e2e.mjs: desktop/mobile joint interval, improvement, contradiction refusal, downloaded witness recovery and tamper rejection.
 - tests/r110-runtime-aware-working-set-invariants.mjs: new test import preserving all earlier research regressions and source proof gates.
 
 ## Scope and release
 The complete V24 offline source CSVs, original-source replay scripts and prior V1–V23 archive are external downloadable evidence. The original 29MB private XLSX is NOT imported to GitHub. No PSC Gate/UnifiedGate conflation, Mode 188 gate mutation, R295 automatic proof admission, live AutoPing, physical equivalent ontology or global Singmaster G09/G10/G13 proof follows.
 
 This candidate is STACKED on R758 #1223, which itself is based on merged R757 mainline. Merge R758 only after all eight exact-head CI families pass, then reconstruct/rebase R759 onto the new mainline and require all eight exact-head workflows for that changed head. DO NOT infer production deployment from source tests. Any source-generator correction needs original generator code or unrounded score data.
+
+## Additional implementation guard (this candidate)
+The conditional instrument now refuses oversized metric/score strings before BigInt parsing, limiting accidental or hostile resource amplification. Its JSON witness is recomputed from its own bounded inputs on recovery; any changed gate, source-authority field or input without corresponding exact recomputation is refused. This is portable user-side recovery, **not** authenticated cross-device memory or a source-authorized decision. The changes are candidate-only until fresh exact-head CI and live release gates pass.
