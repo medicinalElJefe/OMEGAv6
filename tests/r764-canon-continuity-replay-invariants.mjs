@@ -23,6 +23,10 @@ for(const pt of replay.plot)assert(Number.isFinite(pt.x)&&Number.isFinite(pt.y))
 for(let i=1;i<replay.frames.length;i++){
  assert.equal(replay.frames[i].step,i);
  assert.equal(replay.frames[i].coordinates.length,5);
+ const [d,st,rel,m,p]=replay.frames[i].coordinates;
+ assert.equal(replay.frames[i].outerDomain,d);
+ assert.equal(replay.frames[i].atlasAddress20736,(((st-1)*12+(rel-1))*12+(m-1))*12+(p-1));
+ assert(replay.frames[i].atlasAddress20736>=0&&replay.frames[i].atlasAddress20736<20736);
  assert(replay.frames[i].cumulativeBoundaryScars>=replay.frames[i-1].cumulativeBoundaryScars);
 }
 const saved=createCanonReplayCheckpointR764(witness,1);
@@ -42,7 +46,9 @@ assert.equal(R764_LOCAL_KEY,'omega.r764.canonTrajectoryCheckpoint');
 const ui=fs.readFileSync('src/CanonTopologyWorkbenchR763.tsx','utf8');
 for(const token of ['data-r764-replay','data-r764-plot','data-r764-frame','data-r764-carry',
  'data-r764-first','data-r764-prev','data-r764-next','data-r764-last',
- 'data-r764-save','data-r764-load','data-r764-clear','data-r764-status'])
+ 'data-r764-save','data-r764-load','data-r764-clear','data-r764-status','data-r764-project-atlas','data-r764-atlas-address'])
  assert(ui.includes(token),'R764 UI missing '+token);
 assert(ui.includes('verifyCanonReplayCheckpointR764'));
+const science=fs.readFileSync('src7/workspaces/ScienceWorkspaceR441.tsx','utf8');
+assert.equal(science.split('<CanonTopologyWorkbenchR763 onAddress={commit}/>').length-1,2);
 console.log('R764 exact symbolic continuity, reversible score carry, boundary scars, local checkpoint replay and tamper refusal PASS');
