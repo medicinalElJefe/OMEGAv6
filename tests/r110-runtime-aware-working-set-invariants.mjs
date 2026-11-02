@@ -9,6 +9,8 @@ import './r752-pell-complete-classification-invariants.mjs';
 import './r753-pell-arithmetic-skin-invariants.mjs';
 import './r754-exact-column-crossing-invariants.mjs';
 import './r755-v19-complete-fixed-fiber-invariants.mjs';
+import './r756-central-bit-cutoff-invariants.mjs';
+import './r757-canon-typed-provenance-invariants.mjs';
 import './r755-pell-workbench-invariants.mjs';
 import './r751-singmaster-fixed-gap-reduction-invariants.mjs';
 import './dewey-temporal-rotation-v9-invariants.mjs';
