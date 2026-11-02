@@ -1,5 +1,12 @@
 # OMEGA capability acceptance ledger — observed checkpoint 2026-10-27
 
+## R766 Science-to-Traversal executable handoff — draft candidate (2026-11-02 UTC)
+
+- R765 [PR #1230](https://github.com/medicinalElJefe/OMEGAv6/pull/1230) merged after eight exact-head workflow families passed at main SHA `9d55c9ed7f5b31bcd8c406a7c7a826081f79b4f4`. Main [Cloud Bridge #41393469027](https://github.com/medicinalElJefe/OMEGAv6/actions/runs/41393469027) must complete independent Worker identity, desktop/mobile live behavior and rollback closure; a successful merge is not production acceptance.
+- R766 [PR #1231](https://github.com/medicinalElJefe/OMEGAv6/pull/1231) adds a real cross-workspace executor: existing OMEGA7 Matter/Immersive/Extreme/Traversal viewports accept a source-recomputed R763/R764 Science checkpoint and project each chosen verified frame to its exact 20,736-address Atlas location. The selected frame is carried back into the saved Science checkpoint. Source changes, invalid checkpoint evidence and out-of-range frame requests fail closed before viewport mutation.
+- Desktop/mobile browser acceptance was extended to navigate from Science to Traversal, load a saved path, project two frames, verify changed shared address and checkpoint, and refuse altered evidence without moving the viewport. **HOLD:** candidate CI, governed merge, exact R766 Worker/SHA deployment and production browser acceptance remain unverified until completed.
+- This improves renderer/traversal integration but does not prove historical renderer pixel parity, native device action, external donor provenance, authenticated cross-device memory, physical dynamics or CanonState admission. R650's twelve broad families are not globally closed. No R2, paid services or original backup deletion.
+
 ## R765 portable directed-inverse audit — implementation candidate (2026-11-02 UTC)
 
 - R764 [PR #1229](https://github.com/medicinalElJefe/OMEGAv6/pull/1229) merged as `5ecb4520089b1488e1815a1ee7a46e0edf19735c`. Main [Cloud Bridge #41386342359](https://github.com/medicinalElJefe/OMEGAv6/actions/runs/41386342359) entered deployment; exact Worker identity, complete live desktop/mobile behavior, sequential closure and rollback eligibility must be verified separately before R764 is accepted.
