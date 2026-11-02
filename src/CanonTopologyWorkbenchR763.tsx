@@ -1,6 +1,8 @@
 import {useMemo,useState} from 'react';
 import {R763_AXES,inspectCanonLocalR763,computeCanonPathWitnessR763,
  verifyCanonPathWitnessR763} from './proof/canonNavigationR763.js';
+import {R764_LOCAL_KEY,deriveCanonTrajectoryR764,createCanonReplayCheckpointR764,
+ verifyCanonReplayCheckpointR764} from './proof/canonTrajectoryR764.js';
 
 type Goal='STAY'|'TURN'|'ESCALATE';
 const exactInt=(s:string,name:string)=>{if(!/^(0|[1-9][0-9]*)$/.test(s))throw new RangeError(name+' requires exact nonnegative integer text');const v=Number(s);if(!Number.isSafeInteger(v))throw new RangeError(name+' is out of bounds');return v;};
@@ -20,6 +22,11 @@ export default function CanonTopologyWorkbenchR763(){
  [budget,setBudget]=useState('12000');
  const[witness,setWitness]=useState<any>(null),[error,setError]=useState('');
  const[importText,setImportText]=useState(''),[recovery,setRecovery]=useState('');
+ const[frame,setFrame]=useState(0),[checkpointStatus,setCheckpointStatus]=useState('');
+ const replay=useMemo(()=>{
+  if(witness?.result?.status!=='FOUND_IN_DECLARED_SYMBOLIC_GRAPH')return null;
+  try{return deriveCanonTrajectoryR764(witness);}catch{return null;}
+ },[witness]);
  const local=useMemo(()=>{try{return {result:inspectCanonLocalR763(exactInt(start,'Canon state')),error:''};}
   catch(e){return {result:null,error:e instanceof Error?e.message:String(e)};}},[start]);
  const run=()=>{
@@ -30,7 +37,7 @@ export default function CanonTopologyWorkbenchR763(){
     maxBurden:opt(maxBurden),maxContradiction:opt(maxQ),
     maxHops:exactInt(maxHops,'maximum hops'),maxVisited:exactInt(budget,'node budget')};
    const out=computeCanonPathWitnessR763(query);
-   setWitness(out);setError('');setRecovery('');
+   setWitness(out);setFrame(0);setError('');setRecovery('');setCheckpointStatus('');
   }catch(e){setWitness(null);setError(e instanceof Error?e.message:String(e));}
  };
  const exportWitness=()=>{
@@ -44,6 +51,32 @@ export default function CanonTopologyWorkbenchR763(){
  const verify=()=>{
   try{verifyCanonPathWitnessR763(importText);setRecovery('PASS: R763 exact path and constraints recomputed; no physical authority.');}
   catch(e){setRecovery('REFUSED: '+(e instanceof Error?e.message:String(e)));}
+ };
+ const saveCheckpoint=()=>{
+  try{if(!witness)throw new Error('calculate a path before saving');
+   const checkpoint=createCanonReplayCheckpointR764(witness,frame);
+   localStorage.setItem(R764_LOCAL_KEY,JSON.stringify(checkpoint));
+   setCheckpointStatus('SAVED: exact modeled path and replay frame in this browser only.');
+  }catch(e){setCheckpointStatus('REFUSED: '+(e instanceof Error?e.message:String(e)));}
+ };
+ const loadCheckpoint=()=>{
+  try{const raw=localStorage.getItem(R764_LOCAL_KEY);
+   if(!raw)throw new Error('no browser-local checkpoint exists');
+   const checkpoint=verifyCanonReplayCheckpointR764(raw),q=checkpoint.witness.query;
+   const preset=Object.entries(presets).find(([,axes])=>JSON.stringify(axes)===JSON.stringify(q.allowedAxes));
+   if(!preset)throw new Error('checkpoint axes are not represented by this instrument');
+   setStart(String(q.start));setGoal(q.targetDecision);setAxisPreset(preset[0]);
+   setMode(q.targetMode===null?'':String(q.targetMode));setScoreTrend(q.scoreTrend);
+   setPathConstraintScope(q.pathConstraintScope);setMinScore(q.minScore??'');
+   setMaxBurden(q.maxBurden??'');setMaxQ(q.maxContradiction??'');
+   setMaxHops(String(q.maxHops));setBudget(String(q.maxVisited));
+   setWitness(checkpoint.witness);setFrame(checkpoint.frame);setError('');
+   setCheckpointStatus('RESTORED: saved path independently recomputed; no cross-device or physical authority.');
+  }catch(e){setCheckpointStatus('REFUSED: '+(e instanceof Error?e.message:String(e)));}
+ };
+ const clearCheckpoint=()=>{
+  try{localStorage.removeItem(R764_LOCAL_KEY);setCheckpointStatus('CLEARED: browser-local checkpoint removed.');}
+  catch(e){setCheckpointStatus('REFUSED: '+(e instanceof Error?e.message:String(e)));}
  };
  const p=witness?.result;
  return <section className="r316-research" data-r763-canon-navigator="executable" aria-label="R763 generative Canon topology explorer">
@@ -100,12 +133,40 @@ export default function CanonTopologyWorkbenchR763(){
    <p>Inverse/outverse here means that the ordinal edges are reversible in the abstract graph. Scar denotes recorded modeled boundary crossings along this path, not an observed physical history.</p>
    <button type="button" data-r763-export onClick={exportWitness}>Export exact path certificate (JSON)</button>
   </article>}
+  {replay&&<article className="r316-card" data-r764-replay="executable">
+   <h3>R764 · Woven continuity replay and exact score transport</h3>
+   <p>Step through the computed path, retaining Mode 188, six-phase orientation, exact cumulative score change and decision-boundary scars. This is a symbolic model projection, not physical motion.</p>
+   <svg data-r764-plot role="img" aria-label="Modeled exact Canon coherence across successive path frames" viewBox="0 0 700 200" width="100%" height="190">
+    <polyline points={replay.plot.map(pt=>pt.x+','+pt.y).join(' ')} fill="none" stroke="#39b9ac" strokeWidth="3"/>
+    {replay.frames.map((f,i)=><circle key={f.index} cx={replay.plot[i].x} cy={replay.plot[i].y}
+     r={i===frame?8:4} fill={i===frame?'#f3c96a':f.decision==='STAY'?'#3dbba7':f.decision==='TURN'?'#76a9df':'#d58d67'}
+     stroke={i===frame?'#ffffff':'none'} strokeWidth="2">
+     <title>{f.key+' · '+f.decision+' · modeled score '+f.score}</title>
+    </circle>)}
+   </svg>
+   <p data-r764-frame>Frame <b>{frame+1}</b> / {replay.frames.length} · <b>{replay.frames[frame].key}</b> · Mode {replay.frames[frame].mode188} · phase {replay.frames[frame].phaseGroup} / 6 · {replay.frames[frame].decision}</p>
+   <p data-r764-carry>Exact cumulative score change: {replay.frames[frame].cumulativeExactDelta.numerator}/{replay.frames[frame].cumulativeExactDelta.denominator}; boundary scars: {replay.frames[frame].cumulativeBoundaryScars}. Total: {replay.totalExactScoreDelta.numerator}/{replay.totalExactScoreDelta.denominator}; reverse score return: {replay.inverseScoreReturnExact?'exact':'refused'}.</p>
+   <div className="r316-controls">
+    <button type="button" data-r764-first disabled={frame===0} onClick={()=>setFrame(0)}>First</button>
+    <button type="button" data-r764-prev disabled={frame===0} onClick={()=>setFrame(x=>Math.max(0,x-1))}>Previous</button>
+    <button type="button" data-r764-next disabled={frame===replay.frames.length-1} onClick={()=>setFrame(x=>Math.min(replay.frames.length-1,x+1))}>Next</button>
+    <button type="button" data-r764-last disabled={frame===replay.frames.length-1} onClick={()=>setFrame(replay.frames.length-1)}>Last</button>
+   </div>
+  </article>}
+  <article className="r316-card" data-r764-checkpoint>
+   <h3>Browser-local trajectory checkpoint</h3>
+   <p>Save, reload and independently recompute the selected path and frame. The checkpoint never leaves this browser and is not an authenticated or cross-device memory record.</p>
+   <button type="button" data-r764-save disabled={!replay} onClick={saveCheckpoint}>Save modeled path and frame</button>
+   <button type="button" data-r764-load onClick={loadCheckpoint}>Reload and verify checkpoint</button>
+   <button type="button" data-r764-clear onClick={clearCheckpoint}>Clear checkpoint</button>
+   <p role="status" data-r764-status>{checkpointStatus}</p>
+  </article>
   <details data-r763-recovery>
    <summary>Independently recompute an exported path certificate</summary>
    <textarea data-r763-import rows={5} aria-label="R763 path witness JSON" value={importText} onChange={e=>setImportText(e.target.value)}/>
    <button type="button" data-r763-verify onClick={verify}>Recompute and verify</button>
    <p role="status" data-r763-recovery-status>{recovery}</p>
   </details>
-  <p className="r316-boundary">Mode 188, six-phase geometry, relational q/Λ, exact motion-axis changes and symbolic inverse paths are executable. RSC/Woven persistence, external observer calibration, physical five-dimensional meaning, autonomous Auto-Ping and real-world action authority are NOT established by this graph.</p>
+  <p className="r316-boundary">Mode 188, six-phase geometry, relational q/Λ, exact motion-axis changes, symbolic inverse paths and browser-local exact continuity replay are executable. RSC/Woven persistence, external observer calibration, physical five-dimensional meaning, autonomous Auto-Ping and real-world action authority are NOT established by this graph.</p>
  </section>;
 }
