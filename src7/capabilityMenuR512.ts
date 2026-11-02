@@ -12,7 +12,7 @@ export const R512_DOMAIN_MENU:readonly {
 }[]=[
  {id:'HOME',label:'Home',shortLabel:'Home',purpose:'Start, search, resume and see the current OMEGA field.',primaryRoutes:['Command Center','Workspace','System Atlas']},
  {id:'WORK',label:'Work',shortLabel:'Work',purpose:'Projects, memory, workspace and ongoing work.',primaryRoutes:['Projects','Workspace','Memory']},
- {id:'EXPLORE',label:'Explore & Analyze',shortLabel:'Explore',purpose:'Earth, matter, traversal, atlas, forecast and analysis.',primaryRoutes:['Earth Now','Matter Traversal','Atlas','Forecast','Relativity']},
+ {id:'EXPLORE',label:'Explore & Analyze',shortLabel:'Explore',purpose:'Earth, matter, traversal, atlas, forecast and analysis.',primaryRoutes:['Earth Now','Matter Traversal','Atlas','Forecast','Relativity','Traversal']},
  {id:'CREATE',label:'Create & Visualize',shortLabel:'Create',purpose:'Visual instruments, rendering, assets and creative output.',primaryRoutes:['Visual Instrument','Create','Render Queue','Assets']},
  {id:'DEVELOP',label:'Build & Automate',shortLabel:'Build',purpose:'Software, AI, connected compute, repair and development.',primaryRoutes:['Development','Build Out','Kernel Intelligence','Hybrid Link','SAI Lab']},
  {id:'SYSTEM',label:'System & Proof',shortLabel:'System',purpose:'Evidence, governance, validation, archives, settings and diagnostics.',primaryRoutes:['Evidence & Proof','System Atlas','Validation','Governance','Settings']}

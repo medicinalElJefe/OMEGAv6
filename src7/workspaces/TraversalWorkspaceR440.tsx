@@ -1,6 +1,7 @@
 import {useEffect,useMemo,useState} from 'react';
 import {MatterTraversalR36,TraversalR36} from '../../src/OmegaR36LivingSurfaces';
 import ExtremeTraversalUnionR60 from '../../src/ExtremeTraversalUnionR60';
+import VerifiedTrajectoryTraversalR766 from './VerifiedTrajectoryTraversalR766';
 import {corpusState,decodeAddress,initCorpusPack} from '../../src/corpusRuntime';
 
 export type Omega7TraversalRoute='Matter Traversal'|'Immersive Traversal'|'Extreme Traversal'|'Traversal';
@@ -27,6 +28,7 @@ export default function TraversalWorkspaceR440({route,onNavigate}:Props){
    <div><span>Explore · Motion & Traversal</span><h1>{route}</h1><p>One canonical address, one admitted route law, and one proof lineage. Depth and representation may change; state authority does not.</p></div>
    <aside><b>State {record.stateId.toLocaleString()}</b><small>D{coords.d} · P{coords.p} · R{coords.r} · L{coords.l} · {record.metrics.decision}</small></aside>
   </header>
+  <VerifiedTrajectoryTraversalR766 onAddress={commit}/>
   <div className='o7-native-surface'>
    {route==='Matter Traversal'?<MatterTraversalR36 address={address} onAddress={commit} state={state} onNavigate={onNavigate}/>:
     route==='Extreme Traversal'?<ExtremeTraversalUnionR60 record={record} address={address} state={state} onAddress={commit} onNavigate={onNavigate}/>:
