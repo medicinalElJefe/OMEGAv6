@@ -114,6 +114,23 @@ try{
    assert.equal((await typed.locator('[data-r758-precision-gate]').innerText()).trim(),'ESCALATE');
    assert.match(await typed.locator('[data-r758-precision-scope]').innerText(),/not original-precision or live action evidence/);
    console.log('R758 '+label+' conditional exact interval, precision HOLD and strict no-authority UI PASS');
+   await typed.locator('[data-r757-c]').fill('0.2654');
+   await typed.locator('[data-r757-phi]').fill('0.5444');
+   await typed.locator('[data-r757-q]').fill('0.1765');
+   await typed.locator('[data-r757-lambda]').fill('0.1667');
+   await typed.locator('[data-r759-stored-s]').fill('0.4199');
+   assert.equal((await typed.locator('[data-r758-precision-gate]').innerText()).trim(),'PRECISION_HOLD');
+   assert.equal((await typed.locator('[data-r759-joint-gate]').innerText()).trim(),'TURN');
+   await typed.locator('[data-r759-stored-s]').fill('0.4200');
+   assert.equal((await typed.locator('[data-r759-joint-gate]').innerText()).trim(),'PRECISION_HOLD');
+   await typed.locator('[data-r757-c]').fill('1');
+   await typed.locator('[data-r757-phi]').fill('1');
+   await typed.locator('[data-r757-q]').fill('0.1');
+   await typed.locator('[data-r757-lambda]').fill('0.1');
+   await typed.locator('[data-r759-stored-s]').fill('0.0100');
+   assert.match(await typed.locator('[data-r759-joint-scope]').innerText(),/Incompatible supplied score/);
+   console.log('R759 '+label+' joint-score convergence, stable conditional category and inconsistent evidence refusal PASS');
+
    console.log('R757 '+label+' executable typed provenance, atlas navigation, exact JSON recovery and tamper refusal PASS');
 
    assert.equal(errors.length,0,label+': browser errors '+errors.join(' | '));
