@@ -227,7 +227,7 @@ try{
    assert.equal((await comparison.locator('[data-r774-left-count]').innerText()).trim(),'20736');
    assert.equal((await comparison.locator('[data-r774-right-count]').innerText()).trim(),'20736');
    assert.ok(await comparison.locator('[data-r774-group-row]').count()>0);
-   assert.match(await comparison.locator('[data-r774-mean-delta]').innerText(),/^[+-]?[0-9]+\\.[0-9]{4}$/);
+   assert.match(await comparison.locator('[data-r774-mean-delta]').innerText(),/^[+-]?[0-9]+\.[0-9]{4}$/);
    await comparison.locator('[data-r774-open-left]').first().click();
    assert.ok(Number(await navigator.locator('[data-r763-start]').inputValue())>=1);
    await comparison.locator('[data-r774-save]').click();
