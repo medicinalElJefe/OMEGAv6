@@ -213,6 +213,10 @@ try{
    await navigator.locator('[data-r763-search]').click();
    assert.equal((await navigator.locator('[data-r763-status]').innerText()).trim(),'RESOURCE_HOLD_NO_INFERENCE');
    await navigator.locator('[data-r763-budget]').selectOption('12000');
+   await navigator.locator('[data-r763-trend]').selectOption('NONDECREASING');
+   await navigator.locator('[data-r763-search]').click();
+   assert.equal((await navigator.locator('[data-r763-status]').innerText()).trim(),'NO_MATCH_IN_EXHAUSTED_DECLARED_GRAPH');
+   await navigator.locator('[data-r763-trend]').selectOption('ANY');
    await navigator.locator('[data-r763-start]').fill('248833');
    await navigator.locator('[data-r763-search]').click();
    assert.match(await navigator.locator('[data-r763-error]').innerText(),/must be integer/);
