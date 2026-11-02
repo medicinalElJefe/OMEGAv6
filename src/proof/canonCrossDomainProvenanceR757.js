@@ -54,8 +54,8 @@ export function boundedResearchLinkR757({slot0,v8Id,pscPingId,chartId,chartStatu
  if(typeof chartId!=='string'||!/^C20376-[0-9]{5}$/.test(chartId))throw new Error('unverified chart identifier format');
  if(!['OPEN_GLOBAL_FOURFOLD','PROVED_EMPTY_OF_FOURFOLD'].includes(chartStatus))throw new Error('unknown chart proof status');
  return {slot:slot0,exactNumericAlignment:true,coarsenedChartId:chartId,
-  claimedProofStatus:chartStatus,proofStatusAdmissible:sourceDigestVerified===true,
-  sourceAuthority:sourceDigestVerified===true?'REFER_TO_SOURCE_CERTIFICATE':'HOLD_NO_INFERENCE',
+  claimedProofStatus:chartStatus,proofStatusAdmissible:false,externalDigestClaimedByCaller:sourceDigestVerified===true,
+  sourceAuthority:'HOLD_R295_ADMISSION_EVEN_IF_HASH_MATCHES',
   pscSemanticIdentity:false,canon5PhysicalIdentity:false,autoPingExecution:false,
   globalSharpSingmaster:'OPEN',canonicalMutation:false};
 }
