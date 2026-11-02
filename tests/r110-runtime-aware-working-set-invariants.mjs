@@ -15,6 +15,8 @@ import './r758-canon-precision-interval-invariants.mjs';
 import './r759-canon-joint-precision-invariants.mjs';
 import './r760-dewey-observer-transport-invariants.mjs';
 import './r761-full-canon-index-reconstruction-invariants.mjs';
+import './r763-canon-topology-navigation-invariants.mjs';
+import './r763-full-canon-topology-census-invariants.mjs';
 import './r755-pell-workbench-invariants.mjs';
 import './r751-singmaster-fixed-gap-reduction-invariants.mjs';
 import './dewey-temporal-rotation-v9-invariants.mjs';
