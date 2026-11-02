@@ -81,6 +81,8 @@ jobs:
         run: node tests/r773-canon-source-query-invariants.mjs
       - name: R774 exact source-slice comparison and tamper refusal
         run: node tests/r774-canon-slice-comparison-invariants.mjs
+      - name: R775 aligned original Canon decision transitions and exact metric deltas
+        run: node tests/r775-canon-paired-transition-invariants.mjs
       - name: R771 native Memory source-executor integration and source integrity
         run: |
           node tests/r771-native-memory-analysis-invariants.mjs
