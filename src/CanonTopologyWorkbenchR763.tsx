@@ -14,6 +14,7 @@ export default function CanonTopologyWorkbenchR763(){
  const[start,setStart]=useState('1'),[goal,setGoal]=useState<Goal>('STAY');
  const[axisPreset,setAxisPreset]=useState('ALL'),[mode,setMode]=useState('');
  const[scoreTrend,setScoreTrend]=useState('ANY');
+ const[pathConstraintScope,setPathConstraintScope]=useState('TARGET_ONLY');
  const[minScore,setMinScore]=useState(''),[maxBurden,setMaxBurden]=useState(''),
  [maxQ,setMaxQ]=useState(''),[maxHops,setMaxHops]=useState('8'),
  [budget,setBudget]=useState('12000');
@@ -25,7 +26,7 @@ export default function CanonTopologyWorkbenchR763(){
   try{
    const query={start:exactInt(start,'Canon state'),targetDecision:goal,
     targetMode:mode.trim()?exactInt(mode,'Mode 188'):null,
-    allowedAxes:presets[axisPreset],scoreTrend,minScore:opt(minScore),
+    allowedAxes:presets[axisPreset],scoreTrend,pathConstraintScope,minScore:opt(minScore),
     maxBurden:opt(maxBurden),maxContradiction:opt(maxQ),
     maxHops:exactInt(maxHops,'maximum hops'),maxVisited:exactInt(budget,'node budget')};
    const out=computeCanonPathWitnessR763(query);
@@ -63,6 +64,9 @@ export default function CanonTopologyWorkbenchR763(){
     <label>Motion score rule <select data-r763-trend value={scoreTrend} onChange={e=>setScoreTrend(e.target.value)}>
       <option value="ANY">Any exact score trajectory</option>
       <option value="NONDECREASING">Never decrease modeled coherence</option></select></label>
+    <label>Score / burden / contradiction gate scope <select data-r763-scope value={pathConstraintScope} onChange={e=>setPathConstraintScope(e.target.value)}>
+      <option value="TARGET_ONLY">Destination only (legacy search semantics)</option>
+      <option value="ALL_NODES">Source and every traversed state (continuity admissibility)</option></select></label>
     <label>Exact Mode 188 (optional) <input data-r763-mode inputMode="numeric" placeholder="Any" value={mode} onChange={e=>setMode(e.target.value)}/></label>
     <label>Minimum exact coherence (optional) <input data-r763-min-score inputMode="decimal" placeholder="Any" value={minScore} onChange={e=>setMinScore(e.target.value)}/></label>
     <label>Maximum burden Λ (optional) <input data-r763-max-burden inputMode="decimal" placeholder="Any" value={maxBurden} onChange={e=>setMaxBurden(e.target.value)}/></label>
@@ -87,6 +91,7 @@ export default function CanonTopologyWorkbenchR763(){
   {p&&<article className="r316-card" data-r763-result>
    <h3>Computed shortest-path result</h3>
    <p>Status: <b data-r763-status>{p.status}</b></p>
+   <p data-r763-scope-result>Score / burden / contradiction gate: <b>{p.pathConstraintScope==='ALL_NODES'?'every traversed state':'destination only'}</b>; Mode 188 and decision are destination targets.</p>
    <p>Nodes examined: {p.visited}; {p.status==='FOUND_IN_DECLARED_SYMBOLIC_GRAPH'?<>symbolic hops: <b data-r763-distance>{p.distance}</b>, target: <b data-r763-destination>{p.destination}</b>, boundary-scar crossings: <b data-r763-scars>{p.scarCrossings}</b></>:<>the bounded search does not authorize claims beyond its declared scope</>}</p>
    {p.status==='FOUND_IN_DECLARED_SYMBOLIC_GRAPH'&&<ol data-r763-trace>
      {p.path.map((node:any,i:number)=><li key={node.index}>{node.key} · {node.decision} · Mode {node.mode188} · Phase {node.phaseGroup} · score {node.score}
