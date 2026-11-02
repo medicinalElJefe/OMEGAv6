@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {observerRelativeCanonR760,R760_BOUNDARY} from '../src/proof/deweyObserverTransportR760.js';
 const metrics={c:'0.4100',phi:'0.6889',q:'0.5882',lambda:'0.0833'};
 function test(input,expected){
- const out=observerRelativeCanonR760({...metrics,storedScore:'0.4200',...input,sourceAttested:true});
+ const out=observerRelativeCanonR760({metrics,storedScore:'0.4200',...input,sourceAttested:true});
  assert.equal(out.conditionalGate,expected);
  assert.equal(out.externalObservationVerified,false);
  assert.equal(out.transportBoundExternallyVerified,false);
