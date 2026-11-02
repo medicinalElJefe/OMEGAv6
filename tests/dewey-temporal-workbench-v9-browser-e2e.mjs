@@ -275,6 +275,22 @@ try{
    await restoredNavigator.locator('[data-r764-clear]').click();
    assert.match(await restoredNavigator.locator('[data-r764-status]').innerText(),/CLEARED:/);
    assert.equal(await page.evaluate(()=>localStorage.getItem('omega.r764.canonTrajectoryCheckpoint')),null);
+   await restoredNavigator.locator('[data-r763-start]').fill('1');
+   await restoredNavigator.locator('[data-r763-goal]').selectOption('ESCALATE');
+   await restoredNavigator.locator('[data-r763-mode]').fill('51');
+   await restoredNavigator.locator('[data-r763-axes]').selectOption('MOTION');
+   await restoredNavigator.locator('[data-r763-trend]').selectOption('NONDECREASING');
+   await restoredNavigator.locator('[data-r763-search]').click();
+   assert.equal((await restoredNavigator.locator('[data-r763-status]').innerText()).trim(),'FOUND_IN_DECLARED_SYMBOLIC_GRAPH');
+   const directional=restoredNavigator.locator('[data-r765-inverse="executable"]');
+   await directional.waitFor({state:'visible',timeout:30000});
+   assert.match(await directional.locator('[data-r765-directed-status]').innerText(),/CONSTRAINT-REFUSED/);
+   assert.match(await directional.locator('[data-r765-reasons]').innerText(),/REVERSE_NONDECREASING_COHERENCE_VIOLATION/);
+   assert.match(await directional.locator('[data-r765-flux]').innerText(),/Motion/);
+   await restoredNavigator.locator('[data-r763-trend]').selectOption('ANY');
+   await restoredNavigator.locator('[data-r763-search]').click();
+   assert.match(await directional.locator('[data-r765-directed-status]').innerText(),/ADMISSIBLE SYMBOLIC REVERSE/);
+   console.log('R765 '+label+' exact inverse/outverse directional refusal, per-axis flux and recovered admissibility PASS');
    console.log('R764 '+label+' exact continuity SVG, frame stepping, reload persistence, recomputed recovery, tamper refusal and clear PASS');
 
    console.log('R763 '+label+' generated Canon path, shortest exact search, portable JSON tamper refusal and resource HOLD PASS');
