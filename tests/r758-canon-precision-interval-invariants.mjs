@@ -11,6 +11,7 @@ for(const sample of [
 assert.equal(conditionalCanonGateR758({c:'0.1000',phi:'0.1000',q:'0.1000',lambda:'0.1000'}).conditionalGate,'ESCALATE');
 assert.equal(conditionalCanonGateR758({c:'1',phi:'1',q:'0.1',lambda:'0.1'}).conditionalGate,'STAY');
 for(const v of ['0.00000','-0.1','NaN','1e-2',.4,''])assert.throws(()=>conditionalCanonGateR758({c:v,phi:'0.2',q:'0.2',lambda:'0.2'}));
+assert.throws(()=>conditionalCanonGateR758({c:'9'.repeat(1000),phi:'0.2',q:'0.2',lambda:'0.2'}));
 assert.equal(R758_TRUTH.originalGeneratorVerified,false);
 assert.equal(R758_TRUTH.liveDecisionAuthority,false);
 console.log('R758 conditional exact integer Canon interval, precision HOLD and negative controls PASS');
