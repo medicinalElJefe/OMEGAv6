@@ -97,7 +97,7 @@ export default function TypedProvenanceWorkbenchR757({address,onAddress}:Props){
     </>:<p role="alert" data-r757-error>{result.error}</p>}
    </article>
   </div>
-  <details><summary>Recover and independently verify a witness</summary>
+  <details data-r757-recovery-panel><summary>Recover and independently verify a witness</summary>
    <textarea rows={5} data-r757-import aria-label="R757 typed witness JSON" value={importText} onChange={e=>setImportText(e.target.value)}/>
    <button type="button" data-r757-verify onClick={verify}>Recompute and verify</button>
    <p role="status" data-r757-recovery>{recovery}</p>
