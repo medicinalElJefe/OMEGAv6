@@ -290,6 +290,17 @@ try{
    await restoredNavigator.locator('[data-r763-trend]').selectOption('ANY');
    await restoredNavigator.locator('[data-r763-search]').click();
    assert.match(await directional.locator('[data-r765-directed-status]').innerText(),/ADMISSIBLE SYMBOLIC REVERSE/);
+   await directional.locator('[data-r765-export]').click();
+   await directional.locator('[data-r765-recovery] summary').click();
+   const inverseInput=directional.locator('[data-r765-import]');
+   const exportedInverse=JSON.parse(await inverseInput.inputValue());
+   assert.equal(exportedInverse.schema,'OMEGA_R765_PORTABLE_INVERSE_BUNDLE_V1');
+   await directional.locator('[data-r765-verify]').click();
+   assert.match(await directional.locator('[data-r765-recovery-status]').innerText(),/PASS:/);
+   exportedInverse.audit.reverseUnderSameEnvelope=!exportedInverse.audit.reverseUnderSameEnvelope;
+   await inverseInput.fill(JSON.stringify(exportedInverse));
+   await directional.locator('[data-r765-verify]').click();
+   assert.match(await directional.locator('[data-r765-recovery-status]').innerText(),/REFUSED:/);
    console.log('R765 '+label+' exact inverse/outverse directional refusal, per-axis flux and recovered admissibility PASS');
    console.log('R764 '+label+' exact continuity SVG, frame stepping, reload persistence, recomputed recovery, tamper refusal and clear PASS');
 
