@@ -52,14 +52,15 @@ function exactBurdenAndQ(axes,mode){
  return {qN:BigInt(1+((mode-1)%12)+Math.abs(D-R)+Math.abs(S-M)),qD:34n,
  lambdaN:BigInt(1+((4+d+s+r+m+p+d*s)%12)),lambdaD:12n};
 }
-function eligible(node,opts){
- if(node.decision!==opts.targetDecision)return false;
- if(opts.targetMode!==null&&node.mode188!==opts.targetMode)return false;
+function withinStateLimits(node,opts){
  const N=BigInt(node.scoreNumerator),D=BigInt(node.scoreDenominator);
  if(opts.minScore){const [n,d]=opts.minScore;if(cmp(N,D,n,d)<0)return false;}
  if(opts.maxBurden){const {lambdaN,lambdaD}=exactBurdenAndQ(node.axes,node.mode188);const [n,d]=opts.maxBurden;if(cmp(lambdaN,lambdaD,n,d)>0)return false;}
  if(opts.maxContradiction){const {qN,qD}=exactBurdenAndQ(node.axes,node.mode188);const [n,d]=opts.maxContradiction;if(cmp(qN,qD,n,d)>0)return false;}
  return true;
+}
+function eligible(node,opts){
+ return node.decision===opts.targetDecision&&(opts.targetMode===null||node.mode188===opts.targetMode)&&withinStateLimits(node,opts);
 }
 const step=(from,to)=>{
  const x=canonNodeR763(from),y=canonNodeR763(to);
@@ -75,17 +76,22 @@ const step=(from,to)=>{
 };
 export function planCanonPathR763({start,targetDecision='STAY',targetMode=null,
  allowedAxes=R763_AXES,minScore=null,maxBurden=null,maxContradiction=null,
- maxHops=8,maxVisited=12000,scoreTrend='ANY'}={}){
+ maxHops=8,maxVisited=12000,scoreTrend='ANY',pathConstraintScope='TARGET_ONLY'}={}){
  integer(start,1,248832,'start');
  if(!['STAY','TURN','ESCALATE'].includes(targetDecision))throw new RangeError('targetDecision invalid');
  if(targetMode!==null)integer(targetMode,1,188,'targetMode');
  if(!['ANY','NONDECREASING'].includes(scoreTrend))throw new RangeError('unsupported exact score-trend constraint');
+ if(!['TARGET_ONLY','ALL_NODES'].includes(pathConstraintScope))throw new RangeError('unsupported path constraint scope');
  integer(maxHops,0,20,'maxHops');integer(maxVisited,1,100000,'maxVisited');
  canonNeighborEdgesR763(start,allowedAxes);
  const o={targetDecision,targetMode,
   minScore:minScore===null?null:rat(minScore,'minScore'),
   maxBurden:maxBurden===null?null:rat(maxBurden,'maxBurden'),
   maxContradiction:maxContradiction===null?null:rat(maxContradiction,'maxContradiction')};
+ if(pathConstraintScope==='ALL_NODES'&&!withinStateLimits(canonNodeR763(start),o))
+  return {schema:'OMEGA_R763_EXACT_SYMBOLIC_PATH_V1',status:'START_OUTSIDE_DECLARED_PATH_CONSTRAINTS',start,targetDecision,
+   requestedMode:targetMode,visited:0,queued:0,maxVisited,maxHops,pathConstraintScope,path:[],steps:[],
+   calibratedRealWorldTransitions:false,externalSourceAuthority:false,canonicalMutation:false};
  const previous=new Int32Array(248833);previous[start]=start;
  const distance=new Uint8Array(248833);
  const queue=[start];let q=0,visited=0,depthLimited=false;
@@ -97,21 +103,28 @@ export function planCanonPathR763({start,targetDecision='STAY',targetMode=null,
    const ids=[i];while(ids[ids.length-1]!==start){ids.push(previous[ids[ids.length-1]]);if(ids.length>21)throw new Error('predecessor cycle');}
    ids.reverse();let scars=0;const edges=ids.slice(1).map((id,j)=>{const e=step(ids[j],id);if(e.boundaryScar)scars++;return e;});
    return {schema:'OMEGA_R763_EXACT_SYMBOLIC_PATH_V1',status:'FOUND_IN_DECLARED_SYMBOLIC_GRAPH',start,destination:i,
-    targetDecision,requestedMode:targetMode,distance:ids.length-1,visited,
+    targetDecision,requestedMode:targetMode,pathConstraintScope,distance:ids.length-1,visited,
     path:ids.map(idx=>canonNodeR763(idx)),steps:edges,scarCrossings:scars,
     mode188Trace:ids.map(idx=>canonNodeR763(idx).mode188),
     inversePathIsSymbolicallyReversible:edges.every(e=>e.reversibleOrdinalEdge),
     searchCompleteForShortestPath:true,calibratedRealWorldTransitions:false,
     externalSourceAuthority:false,canonicalMutation:false};
   }
-  if(distance[i]===maxHops){if(canonNeighborEdgesR763(i,allowedAxes).some(e=>previous[e.to]===0))depthLimited=true;continue;}
-  for(const e of canonNeighborEdgesR763(i,allowedAxes))if(previous[e.to]===0){
-   if(scoreTrend==='NONDECREASING'){const next=canonNodeR763(e.to);if(cmp(BigInt(next.scoreNumerator),BigInt(next.scoreDenominator),BigInt(row.scoreNumerator),BigInt(row.scoreDenominator))<0)continue;}
+  const canTraverse=(e)=>{
+   if(previous[e.to]!==0)return false;
+   if(pathConstraintScope==='TARGET_ONLY'&&scoreTrend==='ANY')return true;
+   const next=canonNodeR763(e.to);
+   if(pathConstraintScope==='ALL_NODES'&&!withinStateLimits(next,o))return false;
+   if(scoreTrend==='NONDECREASING'&&cmp(BigInt(next.scoreNumerator),BigInt(next.scoreDenominator),BigInt(row.scoreNumerator),BigInt(row.scoreDenominator))<0)return false;
+   return true;
+  };
+  if(distance[i]===maxHops){if(canonNeighborEdgesR763(i,allowedAxes).some(canTraverse))depthLimited=true;continue;}
+  for(const e of canonNeighborEdgesR763(i,allowedAxes))if(canTraverse(e)){
    previous[e.to]=i;distance[e.to]=distance[i]+1;queue.push(e.to);}
  }
  return {schema:'OMEGA_R763_EXACT_SYMBOLIC_PATH_V1',
   status:q<queue.length?'RESOURCE_HOLD_NO_INFERENCE':depthLimited?'DEPTH_HOLD_NO_INFERENCE':'NO_MATCH_IN_EXHAUSTED_DECLARED_GRAPH',
-  start,targetDecision,requestedMode:targetMode,visited,queued:queue.length,maxVisited,maxHops,
+  start,targetDecision,requestedMode:targetMode,pathConstraintScope,visited,queued:queue.length,maxVisited,maxHops,
   path:[],steps:[],calibratedRealWorldTransitions:false,externalSourceAuthority:false,canonicalMutation:false};
 }
 export function inspectCanonLocalR763(index){
@@ -126,11 +139,12 @@ export function inspectCanonLocalR763(index){
 /** Portable certificate independently recomputes the full bounded BFS. */
 export function computeCanonPathWitnessR763(query){
  if(!query||typeof query!=='object'||Array.isArray(query))throw new TypeError('path query object required');
- const keys=['start','targetDecision','targetMode','allowedAxes','minScore','maxBurden','maxContradiction','maxHops','maxVisited','scoreTrend'];
+ const keys=['start','targetDecision','targetMode','allowedAxes','minScore','maxBurden','maxContradiction','maxHops','maxVisited','scoreTrend','pathConstraintScope'];
  if(Object.keys(query).some(k=>!keys.includes(k)))throw new Error('unknown search capability key');
  const spec={start:query.start,targetDecision:query.targetDecision??'STAY',targetMode:query.targetMode??null,
   allowedAxes:query.allowedAxes??R763_AXES,minScore:query.minScore??null,maxBurden:query.maxBurden??null,
-  maxContradiction:query.maxContradiction??null,maxHops:query.maxHops??8,maxVisited:query.maxVisited??12000,scoreTrend:query.scoreTrend??'ANY'};
+  maxContradiction:query.maxContradiction??null,maxHops:query.maxHops??8,maxVisited:query.maxVisited??12000,
+  scoreTrend:query.scoreTrend??'ANY',pathConstraintScope:query.pathConstraintScope??'TARGET_ONLY'};
  return {schema:'OMEGA_R763_PORTABLE_PATH_WITNESS_V1',query:spec,result:planCanonPathR763(spec),scope:R763_SCOPE};
 }
 export function verifyCanonPathWitnessR763(raw){
