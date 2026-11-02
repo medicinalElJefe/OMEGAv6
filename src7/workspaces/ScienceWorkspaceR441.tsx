@@ -3,6 +3,7 @@ import RelativityLab from '../../src/RelativityLab';
 import DeweyTemporalWorkbenchV9 from '../../src/DeweyTemporalWorkbenchV9';
 import PellResearchWorkbenchR755 from '../../src/PellResearchWorkbenchR755';
 import TypedProvenanceWorkbenchR757 from '../../src/TypedProvenanceWorkbenchR757';
+import CanonTopologyWorkbenchR763 from '../../src/CanonTopologyWorkbenchR763';
 import AppliedRealityLab from '../../src/AppliedRealityLab';
 import AtlasViewport from '../../src/AtlasViewport';
 import RouteBasinInstrumentR732 from './RouteBasinInstrumentR732';
@@ -70,9 +71,9 @@ export default function ScienceWorkspaceR441({route,onNavigate,depth}:Props){
   </section>}
 
   {instrumentOpen&&<div className='o7-native-surface'>
-   {route==='Relativity'?<><RelativityLab record={record} state={state} onNavigate={onNavigate}/><DeweyTemporalWorkbenchV9/><PellResearchWorkbenchR755/><TypedProvenanceWorkbenchR757 address={address} onAddress={commit}/></>:
+   {route==='Relativity'?<><RelativityLab record={record} state={state} onNavigate={onNavigate}/><DeweyTemporalWorkbenchV9/><PellResearchWorkbenchR755/><TypedProvenanceWorkbenchR757 address={address} onAddress={commit}/><CanonTopologyWorkbenchR763/></>:
     route==='Reality Lab'?<AppliedRealityLab canonicalAddress={address} onCommitAddress={commit}/>:
-    route==='Atlas'?<><FullSphereInstrumentR525 address={address} onAddress={commit}/><RouteBasinInstrumentR732 address={address} onAddress={commit}/><SourceExecutionWorkspaceR531 address={address} onAddress={commit}/><MotionSourceInstrumentR537/><AtlasViewport state={state} onSelect={c=>commit(fromCoords(c))}/></>:
+    route==='Atlas'?<><FullSphereInstrumentR525 address={address} onAddress={commit}/><RouteBasinInstrumentR732 address={address} onAddress={commit}/><CanonTopologyWorkbenchR763/><SourceExecutionWorkspaceR531 address={address} onAddress={commit}/><MotionSourceInstrumentR537/><AtlasViewport state={state} onSelect={c=>commit(fromCoords(c))}/></>:
     route==='Atlas Calculator'?<AtlasCalculatorPanel record={record} onCommit={commit}/>:
     route==='Scale Compiler'?<RecursiveScalePanel address={address} onAddress={commit}/>:
     <OmegaInfinityPanel record={record}/>}
