@@ -30,6 +30,9 @@ function deltaMean(right,left){
 function normalizedSlice(value){
  if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).some(k=>!['coordinates','decision'].includes(k)))
   throw new TypeError('slice accepts only five coordinates and decision');
+ if(!Array.isArray(value.coordinates)||value.coordinates.length!==5||
+  value.coordinates.some(v=>v!==null&&(!Number.isSafeInteger(v)||v<1||v>12)))
+  throw new RangeError('five exact ordinal coordinates required; invalid values are not wildcards');
  const q=parseCanonSourceQueryR773(JSON.stringify({...value,offset:0,limit:12}));
  return {coordinates:q.coordinates,decision:q.decision};
 }
