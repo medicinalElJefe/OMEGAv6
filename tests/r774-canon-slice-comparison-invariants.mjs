@@ -51,7 +51,7 @@ assert.equal(byState.left.examined,1728);assert.equal(byState.right.examined,172
 assert.equal(byState.groups.length,1);
 assert.equal(byState.groups[0].leftCount,1728);
 for(const metric of R774_METRICS){
- const x=compareCanonSlicesR774({...query,metric,left:slice(1,1,1,1,1),right:slice(2,1,1,1,1)});
+ const x=compareCanonSlicesR774({...query,metric,left:{coordinates:[1,1,1,1,1],decision:'ANY'},right:{coordinates:[2,1,1,1,1],decision:'ANY'}});
  assert.equal(x.left.summary.mean,reconstructCanonFullRowR772(1)[metric]);
 }
 const empty=compareCanonSlicesR774({...query,left:{coordinates:[1,1,1,1,1],decision:'STAY'},
