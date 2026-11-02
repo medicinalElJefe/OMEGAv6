@@ -4,6 +4,7 @@ import {chromium} from 'playwright';
 import {verifyTemporalWorkbenchV9} from '../src/proof/deweyTemporalWorkbenchRuntimeV9.js';
 import {verifyPellWorkbenchR755} from '../src/proof/singmasterResearchWorkbenchR755.js';
 import {verifyTypedProvenanceWitnessR757} from '../src/proof/canonCrossDomainProvenanceR757.js';
+import {verifyJointCanonWitnessR759} from '../src/proof/canonJointPrecisionR759.js';
 const base=(process.env.OMEGA_E2E_URL||process.env.OMEGA_PUBLIC_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 const expected=String(process.env.OMEGA_EXPECTED_SHA||'').trim();
 if(expected){
@@ -121,6 +122,18 @@ try{
    await typed.locator('[data-r759-stored-s]').fill('0.4199');
    assert.equal((await typed.locator('[data-r758-precision-gate]').innerText()).trim(),'PRECISION_HOLD');
    assert.equal((await typed.locator('[data-r759-joint-gate]').innerText()).trim(),'TURN');
+   const jointDownloadPromise=page.waitForEvent('download',{timeout:30000});
+   await typed.locator('[data-r759-export]').click();
+   const jointDownload=await jointDownloadPromise;
+   assert.equal(jointDownload.suggestedFilename(),'omega-r759-conditional-joint-precision.json');
+   const jointWitness=JSON.parse(await readFile(await jointDownload.path(),'utf8'));
+   assert.deepEqual(verifyJointCanonWitnessR759(JSON.stringify(jointWitness)),jointWitness);
+   await typed.locator('[data-r759-recovery-panel] summary').click();
+   await typed.locator('[data-r759-verify]').click();
+   assert.match(await typed.locator('[data-r759-recovery]').innerText(),/PASS: exact joint witness recomputed/);
+   await typed.locator('[data-r759-import]').fill(JSON.stringify({...jointWitness,result:{...jointWitness.result,jointGate:'STAY'}}));
+   await typed.locator('[data-r759-verify]').click();
+   assert.match(await typed.locator('[data-r759-recovery]').innerText(),/REFUSED:/);
    await typed.locator('[data-r759-stored-s]').fill('0.4200');
    assert.equal((await typed.locator('[data-r759-joint-gate]').innerText()).trim(),'PRECISION_HOLD');
    await typed.locator('[data-r757-c]').fill('1');
