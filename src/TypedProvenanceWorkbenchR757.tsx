@@ -1,5 +1,6 @@
 import {useEffect,useMemo,useState} from 'react';
 import {computeTypedProvenanceWitnessR757,verifyTypedProvenanceWitnessR757} from './proof/canonCrossDomainProvenanceR757.js';
+import {conditionalCanonGateR758} from './proof/canonPrecisionIntervalR758.js';
 
 type Props={address:number;onAddress:(address:number)=>void};
 const parseIndex=(value:string,max:number,name:string)=>{
@@ -28,6 +29,10 @@ export default function TypedProvenanceWorkbenchR757({address,onAddress}:Props){
   }),error:''};}
   catch(e){return {packet:null,error:e instanceof Error?e.message:String(e)};}
  },[slot,domain,c,phi,q,lambda]);
+ const precision=useMemo(()=>{
+  try{return {certificate:conditionalCanonGateR758({c,phi,q,lambda}),error:''};}
+  catch(e){return {certificate:null,error:e instanceof Error?e.message:String(e)};}
+ },[c,phi,q,lambda]);
  const exportWitness=()=>{
   if(!result.packet)return;
   const raw=JSON.stringify(result.packet,null,2);
@@ -62,6 +67,8 @@ export default function TypedProvenanceWorkbenchR757({address,onAddress}:Props){
      <p>Mode 188 computed index: <strong data-r757-mode>{result.packet.coordinates.mode188}</strong></p>
      <p>Hypothetical decision: <strong data-r757-decision>{result.packet.modeledDecision.decision}</strong></p>
      <p>Score: {result.packet.modeledDecision.score.toPrecision(9)}</p>
+      <p>Four-decimal source assumption: <strong data-r758-precision-gate>{precision.certificate?.conditionalGate||'PRECISION_INPUT_REQUIRED'}</strong></p>
+      <p data-r758-precision-scope>{precision.certificate?'Conditional arithmetic only; not original-precision or live action evidence.':precision.error}</p>
      <p>Semantic identity: <strong>NOT PROVED</strong> · External source validation: <strong>NOT PROVIDED</strong></p>
      <button type="button" data-r757-export onClick={exportWitness}>Export computed witness JSON</button>
     </>:<p role="alert" data-r757-error>{result.error}</p>}
