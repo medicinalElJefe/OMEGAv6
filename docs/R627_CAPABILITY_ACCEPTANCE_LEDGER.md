@@ -1,5 +1,13 @@
 # OMEGA capability acceptance ledger — observed checkpoint 2026-10-27
 
+## R765 portable directed-inverse audit — implementation candidate (2026-11-02 UTC)
+
+- R764 [PR #1229](https://github.com/medicinalElJefe/OMEGAv6/pull/1229) merged as `5ecb4520089b1488e1815a1ee7a46e0edf19735c`. Main [Cloud Bridge #41386342359](https://github.com/medicinalElJefe/OMEGAv6/actions/runs/41386342359) entered deployment; exact Worker identity, complete live desktop/mobile behavior, sequential closure and rollback eligibility must be verified separately before R764 is accepted.
+- R765 [PR #1230](https://github.com/medicinalElJefe/OMEGAv6/pull/1230) extends the current R764 main with a source-recomputed exact per-axis inverse/outverse audit. It distinguishes undirected ordinal-edge reversibility from same-path reverse admissibility under score trend and exact q/Λ/coherence gates, without asserting physical inverse dynamics.
+- The R765 implementation now also exports a **portable path-plus-inverse JSON bundle**, independently recomputes both source path and inverse audit after import, and rejects altered path or audit fields. The actual OMEGA7 Science workbench exposes export/recovery controls; Node tests and desktop/mobile browser tests exercise valid recovery and altered-evidence refusal. This is an executable browser-visible capability, not documentation-only evidence.
+- **HOLD:** New exact-head R765 eight-family CI, governed merge, exact Worker/SHA production live desktop/mobile parity and rollback closure are not yet accepted. Do not infer cross-device memory, historical donor byte parity, real-world reverse causality or native device authority.
+- R650's twelve historical families remain conservatively unproved as complete: original donor bytes/fingerprints and executor parity, renderer visual fidelity, sensor live sources, intelligence and memory, applications, native Windows/GPU/installer and authenticated host action all need independent acceptance. No R2 upload, paid services or original backup deletion.
+
 ## R764 exact continuity replay and browser-local recovery — candidate (2026-11-02 UTC)
 
 - R762 [PR #1227](https://github.com/medicinalElJefe/OMEGAv6/pull/1227) merged as `e46ffa3978be0b233e5169ebf1e3352bb1486ea9`; [Cloud Bridge #41381131807](https://github.com/medicinalElJefe/OMEGAv6/actions/runs/41381131807) completed verify, deployment and post-deploy authority closure. Worker `fa0bf414-3819-4762-918f-3185f050cbb2` was promoted to 100% and the previous Worker `9b6ba524-db13-480f-ab94-ab75698af3b0` remained recorded as rollback-eligible. Live Hybrid authority still reported zero authenticated public devices, DEVICE_PROOF_REQUIRED.

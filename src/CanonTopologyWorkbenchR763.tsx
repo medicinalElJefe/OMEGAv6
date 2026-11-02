@@ -3,6 +3,8 @@ import {R763_AXES,inspectCanonLocalR763,computeCanonPathWitnessR763,
  verifyCanonPathWitnessR763} from './proof/canonNavigationR763.js';
 import {R764_LOCAL_KEY,deriveCanonTrajectoryR764,createCanonReplayCheckpointR764,
  verifyCanonReplayCheckpointR764} from './proof/canonTrajectoryR764.js';
+import {auditCanonInverseR765,createCanonInverseBundleR765,
+ verifyCanonInverseBundleR765} from './proof/canonInverseAuditR765.js';
 
 type Goal='STAY'|'TURN'|'ESCALATE';
 const exactInt=(s:string,name:string)=>{if(!/^(0|[1-9][0-9]*)$/.test(s))throw new RangeError(name+' requires exact nonnegative integer text');const v=Number(s);if(!Number.isSafeInteger(v))throw new RangeError(name+' is out of bounds');return v;};
@@ -23,9 +25,14 @@ export default function CanonTopologyWorkbenchR763({onAddress}:{onAddress?:(addr
  const[witness,setWitness]=useState<any>(null),[error,setError]=useState('');
  const[importText,setImportText]=useState(''),[recovery,setRecovery]=useState('');
  const[frame,setFrame]=useState(0),[checkpointStatus,setCheckpointStatus]=useState('');
+ const[inverseImport,setInverseImport]=useState(''),[inverseRecovery,setInverseRecovery]=useState('');
  const replay=useMemo(()=>{
   if(witness?.result?.status!=='FOUND_IN_DECLARED_SYMBOLIC_GRAPH')return null;
   try{return deriveCanonTrajectoryR764(witness);}catch{return null;}
+ },[witness]);
+ const inverse=useMemo(()=>{
+  if(witness?.result?.status!=='FOUND_IN_DECLARED_SYMBOLIC_GRAPH')return null;
+  try{return auditCanonInverseR765(witness);}catch{return null;}
  },[witness]);
  const local=useMemo(()=>{try{return {result:inspectCanonLocalR763(exactInt(start,'Canon state')),error:''};}
   catch(e){return {result:null,error:e instanceof Error?e.message:String(e)};}},[start]);
@@ -51,6 +58,21 @@ export default function CanonTopologyWorkbenchR763({onAddress}:{onAddress?:(addr
  const verify=()=>{
   try{verifyCanonPathWitnessR763(importText);setRecovery('PASS: R763 exact path and constraints recomputed; no physical authority.');}
   catch(e){setRecovery('REFUSED: '+(e instanceof Error?e.message:String(e)));}
+ };
+ const exportInverse=()=>{
+  try{
+   if(!witness||!inverse)throw new Error('compute a completed path first');
+   const raw=JSON.stringify(createCanonInverseBundleR765(witness),null,2);
+   setInverseImport(raw);setInverseRecovery('EXPORTED: portable inverse witness; verify independently.');
+   const url=URL.createObjectURL(new Blob([raw+'\n'],{type:'application/json'}));
+   const a=document.createElement('a');a.href=url;a.download='omega-r765-inverse-audit.json';a.click();
+   setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }catch(e){setInverseRecovery('REFUSED: '+(e instanceof Error?e.message:String(e)));}
+ };
+ const verifyInverse=()=>{
+  try{verifyCanonInverseBundleR765(inverseImport);
+   setInverseRecovery('PASS: path and inverse audit independently recomputed; symbolic model only.');
+  }catch(e){setInverseRecovery('REFUSED: '+(e instanceof Error?e.message:String(e)));}
  };
  const saveCheckpoint=()=>{
   try{if(!witness)throw new Error('calculate a path before saving');
@@ -153,6 +175,24 @@ export default function CanonTopologyWorkbenchR763({onAddress}:{onAddress?:(addr
     <button type="button" data-r764-next disabled={frame===replay.frames.length-1} onClick={()=>setFrame(x=>Math.min(replay.frames.length-1,x+1))}>Next</button>
     <button type="button" data-r764-last disabled={frame===replay.frames.length-1} onClick={()=>setFrame(replay.frames.length-1)}>Last</button>
    </div>
+  </article>}
+  {inverse&&<article className="r316-card" data-r765-inverse="executable">
+   <h3>R765 · Directed inverse/outverse and exact axis continuity</h3>
+   <p>Every forward ordinal edge admits a geometric reverse, but reverse travel under the SAME score, burden, contradiction and monotone-coherence rules may be refused. This checks the existing witnessed path, not an arbitrary new shortest return route.</p>
+   <p data-r765-directed-status>Geometric edge reversal: <b>{inverse.structurallyReversible?'YES':'REFUSED'}</b>. Return from {inverse.destinationIndex} to {inverse.sourceIndex} under the same constraint envelope: <b>{inverse.reverseUnderSameEnvelope?'ADMISSIBLE SYMBOLIC REVERSE':'CONSTRAINT-REFUSED'}</b>.</p>
+   <p data-r765-reasons>{inverse.reverseRefusalReasons.length?'Reason(s): '+inverse.reverseRefusalReasons.join(' · '):'All declared reverse path constraints are satisfied.'}</p>
+   <p>Phase transitions: {inverse.phaseTransitions}; Mode 188 changes: {inverse.modeTransitions}; decision-boundary crossings: {inverse.boundaryScars}. Signed axis transport and its inverse sum exactly to zero.</p>
+   <div data-r765-flux><b>Exact score flux by symbolic axis</b>
+    <ul>{R763_AXES.map(axis=><li key={axis}>{axis}: {inverse.signedOrdinalAxisMoves[axis]>0?'+':''}{inverse.signedOrdinalAxisMoves[axis]} ordinal steps · forward {inverse.exactScoreFluxByAxis[axis].numerator}/{inverse.exactScoreFluxByAxis[axis].denominator} · inverse {inverse.exactReverseFluxByAxis[axis].numerator}/{inverse.exactReverseFluxByAxis[axis].denominator}</li>)}</ul>
+   </div>
+   <p>Physical reversibility, original source authentication and native device action are NOT established; the source/target Canon state labels remain distinguishable from Atlas views.</p>
+   <button type="button" data-r765-export onClick={exportInverse}>Export independently verifiable inverse audit (JSON)</button>
+   <details data-r765-recovery>
+    <summary>Recover and independently verify a portable inverse audit</summary>
+    <textarea data-r765-import rows={5} aria-label="R765 portable inverse audit JSON" value={inverseImport} onChange={e=>setInverseImport(e.target.value)}/>
+    <button type="button" data-r765-verify onClick={verifyInverse}>Recompute inverse audit</button>
+    <p role="status" data-r765-recovery-status>{inverseRecovery}</p>
+   </details>
   </article>}
   <article className="r316-card" data-r764-checkpoint>
    <h3>Browser-local trajectory checkpoint</h3>
