@@ -7,6 +7,7 @@
 export const R761_TRUTH=Object.freeze({
  scope:'COMPLETE_NUMERIC_SOURCE_REPLAY_OF_248832_STORED_CANON_ROWS',
  sourceWorkbookSha256:'e1ccb57cdfbc78955dd6e86be110cdb91cb15a0cc78a869b74dca7e4ffa55af3',
+ originalWorkbookBytesInRepository:false,
  normalizedNumericDigestSha256:'c5560df0a6967013a46d6eb5c286298b01961329427469568407cc8a6c65eb35',
  sourceRowsMatched:248832,
  scoreAndDecisionMismatches:0,
@@ -46,4 +47,22 @@ export function reconstructCanonIndexR761(D,S,R,M,P){
   scoreNumerator:String(scoreN),scoreDenominator:String(scoreD),
   evidence:'DETERMINISTIC_RECONSTRUCTION_OF_STORED_CANON',historicalGeneratorAuthenticated:false,
   liveDecisionAuthority:false,canonicalMutation:false,physicalDimensionalityProved:false};
+}
+/** Portable deterministic witness, not historical source authentication. */
+export function computeCanonIndexWitnessR761(axes){
+ if(!axes||typeof axes!=='object'||Array.isArray(axes)||Object.keys(axes).sort().join(',')!=='D,M,P,R,S')
+  throw new TypeError('exact five Canon axes required');
+ const {D,S,R,M,P}=axes;
+ return {schema:'OMEGA_R761_INDEX_RECONSTRUCTION_V1',
+  axes:{D,S,R,M,P},result:reconstructCanonIndexR761(D,S,R,M,P),
+  authority:'DETERMINISTIC_MODEL_REPLAY_ONLY'};
+}
+export function verifyCanonIndexWitnessR761(raw){
+ if(typeof raw!=='string'||raw.length>32768)throw new TypeError('bounded JSON witness required');
+ const parsed=JSON.parse(raw);
+ if(!parsed||typeof parsed!=='object')throw new TypeError('invalid witness object');
+ const expected=computeCanonIndexWitnessR761(parsed.axes);
+ if(JSON.stringify(parsed)!==JSON.stringify(expected))
+  throw new Error('R761 witness differs from exact recomputation');
+ return expected;
 }

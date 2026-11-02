@@ -1,5 +1,11 @@
 # OMEGA capability acceptance ledger — observed checkpoint 2026-10-27
 
+## R760/R761 consolidated executable candidate — not accepted (2026-11-02 UTC)
+
+- Existing PR #1225 is the sole consolidation candidate for R759 joint-score precision, R760 bounded observer transport, and R761 exact index-only Canon5 reconstruction. Its interactive OMEGA7 Science → Relativity workbench now selects all five Canon axes, executes a deterministic exact-rational model, shows the reconstructed score/decision, and exports/recomputes tamper-refusing JSON witnesses. Canon reconstruction is modeled fixed-source replay, not recovery of the original historical generator or a physical five-dimensional claim.
+- R761 Node invariants reconstruct 248,832 modeled records and compare their normalized digest with the independently reported source-corpus digest; browser acceptance covers desktop/mobile selection, export/recovery, tamper refusal, and boundary text. The original private XLSX is not in this repository; digest equality alone cannot independently authenticate its provenance.
+- The R758 decimal parser now rejects oversized strings before BigInt conversion. No new canonical decision authority, R295 ingestion, paid storage, R2 migration, device authentication or backup mutation is granted. All eight exact-head CI families, governed merge, exact Worker/SHA production behavior and rollback evidence are still required for this candidate. Historical donor parity and full product restoration remain incomplete.
+
 ## R755 executable research workbench — candidate, not accepted (2026-11-01)
 
 - [Draft PR #1219](https://github.com/medicinalElJefe/OMEGAv6/pull/1219) consolidates R752–R754 exact arithmetic and now adds a **usable OMEGA7 Science → Relativity research instrument** at `src/PellResearchWorkbenchR755.tsx`, backed by `src/proof/singmasterResearchWorkbenchR755.js`. Operators select Pell index, higher column, candidate row and a prime base; actual BigInt computations return a known adjacent-pair witness, Fibonacci square, forced divisor, exact row-crossing interval and selected-prime necessary sieve. The UI exports JSON and rejects tampered imports by fresh recomputation.

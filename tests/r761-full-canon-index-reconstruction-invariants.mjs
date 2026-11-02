@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
-import {reconstructCanonIndexR761,R761_TRUTH} from '../src/proof/canonIndexReconstructionR761.js';
+import {reconstructCanonIndexR761,computeCanonIndexWitnessR761,verifyCanonIndexWitnessR761,R761_TRUTH} from '../src/proof/canonIndexReconstructionR761.js';
 
 const first=reconstructCanonIndexR761(1,1,1,1,1);
 assert.deepEqual([first.index,first.key,first.mode188,first.C,first.q,first.lambda,first.Phi,first.score,first.decision],
@@ -30,5 +30,12 @@ assert.throws(()=>reconstructCanonIndexR761(0,1,1,1,1));
 assert.throws(()=>reconstructCanonIndexR761(1,13,1,1,1));
 assert.throws(()=>reconstructCanonIndexR761(1.5,1,1,1,1));
 assert.throws(()=>reconstructCanonIndexR761('1',1,1,1,1));
+const witness=computeCanonIndexWitnessR761({D:12,S:12,R:12,M:12,P:12});
+assert.deepEqual(verifyCanonIndexWitnessR761(JSON.stringify(witness)),witness);
+assert.throws(()=>verifyCanonIndexWitnessR761(JSON.stringify({...witness,result:{...witness.result,decision:'TURN'}})),/differs/);
+assert.throws(()=>verifyCanonIndexWitnessR761(JSON.stringify({...witness,productionAuthority:true})),/differs/);
+assert.throws(()=>verifyCanonIndexWitnessR761(JSON.stringify({...witness,axes:{...witness.axes,D:0}})));
+assert.throws(()=>verifyCanonIndexWitnessR761('x'.repeat(32769)),/bounded/);
+assert.throws(()=>computeCanonIndexWitnessR761({D:1,S:1,R:1,M:1,P:1,physicalAuthority:true}));
 console.log('R761 FULL 248832 CANON INDEX-ONLY RECONSTRUCTION SHA256 PASS '+digest+
  ' · 92 formerly HOLD labels reproduced · historical generator authority NOT ASSERTED');
