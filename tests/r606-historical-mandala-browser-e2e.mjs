@@ -1,7 +1,6 @@
 import {chromium} from 'playwright';
 import {computeCanonPathWitnessR763} from '../src/proof/canonNavigationR763.js';
 import {createCanonReplayCheckpointR764,deriveCanonTrajectoryR764} from '../src/proof/canonTrajectoryR764.js';
-import {replayWorkbookFrameR604} from '../src7/workspaces/timeMandalaFormulaReplayR604.ts';
 const base=(process.env.OMEGA_E2E_URL||process.env.OMEGA_PUBLIC_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 // R663: PR acceptance must never silently fall back to the already deployed
 // OMEGA_PUBLIC_URL when a candidate preview URL was omitted by CI.
@@ -71,8 +70,9 @@ try{
   await page.waitForFunction(address=>Number(document.querySelector('[data-omega7-native="forecast.visual"]')?.getAttribute('data-address'))===address,selectedFrame.atlasAddress20736,{timeout:10000});
   if(JSON.parse(await page.evaluate(()=>localStorage.getItem('omega.r764.canonTrajectoryCheckpoint'))).frame!==2)throw Error(label+': R767 Science checkpoint was not updated');
   await assertFrame(0);
-  const r767Expected=replayWorkbookFrameR604(selectedFrame.atlasAddress20736,0);
-  if(!(await bridge.locator('[data-r767-frame="2"]').innerText()).includes('star '+r767Expected.activeStar))throw Error(label+': R767 original workbook projection mismatch');
+  const a=selectedFrame.atlasAddress20736;
+  const expectedStar=((Math.floor(a/1728)+Math.floor(a/144)%12+Math.floor(a/12)%12+a%12)%7)+1;
+  if(!(await bridge.locator('[data-r767-frame="2"]').innerText()).includes('star '+expectedStar))throw Error(label+': R767 original workbook projection mismatch');
   await page.evaluate(()=>{
    const key='omega.r764.canonTrajectoryCheckpoint';
    const stored=JSON.parse(localStorage.getItem(key));stored.summary.frameCount=999;
