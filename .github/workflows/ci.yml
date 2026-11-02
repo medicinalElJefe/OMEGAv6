@@ -77,6 +77,8 @@ jobs:
         run: node tests/r707-woven-topology-invariants.mjs
       - name: R770 source-derived woven field lens invariants
         run: node tests/r770-source-lens-invariants.mjs
+      - name: R773 bounded original Canon source query and portable verification
+        run: node tests/r773-canon-source-query-invariants.mjs
       - name: R771 native Memory source-executor integration and source integrity
         run: |
           node tests/r771-native-memory-analysis-invariants.mjs
