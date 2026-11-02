@@ -32,7 +32,7 @@ const witness=computeTypedProvenanceWitnessR757({slot0:20735,domain1:12,metrics:
 assert.equal(witness.coordinates.v8Id,'D11-P11-R11-L11');
 assert.equal(witness.coordinates.pscPingId,'PSC-20736');
 assert.equal(witness.coordinates.canon5Key,'D12-S12-R12-M12-P12');
-assert.equal(witness.modeledDecision.decision,'TURN');
+assert.equal(witness.modeledDecision.decision,'ESCALATE');
 assert.equal(witness.inputs.metricAuthority,'USER_SUPPLIED_HYPOTHETICAL');
 assert.equal(witness.evidence.semanticIdentityProved,false);
 assert.deepEqual(verifyTypedProvenanceWitnessR757(JSON.stringify(witness)),witness);
