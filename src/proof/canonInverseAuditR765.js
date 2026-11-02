@@ -100,3 +100,23 @@ export function verifyCanonInverseAuditR765(witness,raw){
   throw new Error('R765 inverse audit differs from source-recomputed exact conservation');
  return expected;
 }
+
+/** Portable source-recomputed inverse certificate, including the path witness it depends on.
+ * This can be verified in a fresh browser session without the original UI state.
+ */
+export function createCanonInverseBundleR765(witness){
+ const verified=verifyCanonPathWitnessR763(JSON.stringify(witness));
+ return {schema:'OMEGA_R765_PORTABLE_INVERSE_BUNDLE_V1',witness:verified,
+  audit:auditCanonInverseR765(verified),authority:'RECOMPUTED_SYMBOLIC_MODEL_ONLY'};
+}
+export function verifyCanonInverseBundleR765(raw){
+ if(typeof raw!=='string'||raw.length>240000)throw new TypeError('bounded R765 inverse bundle JSON required');
+ const received=JSON.parse(raw);
+ if(!received||typeof received!=='object'||Array.isArray(received)||
+  received.schema!=='OMEGA_R765_PORTABLE_INVERSE_BUNDLE_V1')
+  throw new TypeError('R765 inverse bundle schema required');
+ const expected=createCanonInverseBundleR765(received.witness);
+ if(JSON.stringify(received)!==JSON.stringify(expected))
+  throw new Error('R765 inverse bundle differs from independent exact recomputation');
+ return expected;
+}
