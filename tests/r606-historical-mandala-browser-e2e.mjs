@@ -1,4 +1,6 @@
 import {chromium} from 'playwright';
+import {computeCanonPathWitnessR763} from '../src/proof/canonNavigationR763.js';
+import {createCanonReplayCheckpointR764,deriveCanonTrajectoryR764} from '../src/proof/canonTrajectoryR764.js';
 const base=(process.env.OMEGA_E2E_URL||process.env.OMEGA_PUBLIC_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 // R663: PR acceptance must never silently fall back to the already deployed
 // OMEGA_PUBLIC_URL when a candidate preview URL was omitted by CI.
@@ -17,6 +19,9 @@ if(expectedSha){
   throw Error('R608 production receipt does not attest exact promoted SHA');
  console.log('R608 deployed SHA attested: '+expectedSha);
 }
+const r767Witness=computeCanonPathWitnessR763({start:1,targetDecision:'STAY',maxHops:8,maxVisited:12000});
+if(r767Witness.result.status!=='FOUND_IN_DECLARED_SYMBOLIC_GRAPH')throw Error('R767 fixture path unavailable');
+const r767Trajectory=deriveCanonTrajectoryR764(r767Witness);
 const browser=await chromium.launch({headless:true});
 try{
  for(const [label,viewport] of [['desktop',{width:1440,height:900}],['mobile',{width:390,height:844}]]){
@@ -53,6 +58,33 @@ try{
   };
   await instrument.getByRole('button',{name:'Reset clock to sector 1'}).click();
   await assertFrame(0);
+  // R767: real Science path drives historical Time Mandala formula replay and shared viewport.
+  const r767Checkpoint=createCanonReplayCheckpointR764(r767Witness,1);
+  await page.evaluate(cp=>localStorage.setItem('omega.r764.canonTrajectoryCheckpoint',JSON.stringify(cp)),r767Checkpoint);
+  const bridge=instrument.locator('[data-r767-canon-mandala="executable"]');
+  await bridge.locator('[data-r767-load]').click();
+  await bridge.locator('[data-r767-session]').waitFor({state:'visible',timeout:20000});
+  if(!(await bridge.locator('[data-r767-sector]').innerText()).includes('7 independently recomputed path frames'))throw Error(label+': R767 path not computed');
+  const selectedFrame=r767Trajectory.frames[2];
+  await bridge.locator('[data-r767-frame="2"]').click();
+  await page.waitForFunction(address=>Number(document.querySelector('[data-omega7-native="forecast.visual"]')?.getAttribute('data-address'))===address,selectedFrame.atlasAddress20736,{timeout:10000});
+  if(JSON.parse(await page.evaluate(()=>localStorage.getItem('omega.r764.canonTrajectoryCheckpoint'))).frame!==2)throw Error(label+': R767 Science checkpoint was not updated');
+  await assertFrame(0);
+  const a=selectedFrame.atlasAddress20736;
+  const expectedStar=((Math.floor(a/1728)+Math.floor(a/144)%12+Math.floor(a/12)%12+a%12)%7)+1;
+  if(!(await bridge.locator('[data-r767-frame="2"]').innerText()).includes('star '+expectedStar))throw Error(label+': R767 original workbook projection mismatch');
+  await page.evaluate(()=>{
+   const key='omega.r764.canonTrajectoryCheckpoint';
+   const stored=JSON.parse(localStorage.getItem(key));stored.summary.frameCount=999;
+   localStorage.setItem(key,JSON.stringify(stored));
+  });
+  await bridge.locator('[data-r767-next]').click();
+  if(!(await bridge.locator('[data-r767-error]').innerText()).includes('REFUSED:'))throw Error(label+': R767 altered checkpoint was accepted');
+  if(Number(await workspace.getAttribute('data-address'))!==selectedFrame.atlasAddress20736)throw Error(label+': R767 tamper changed viewport');
+  await page.evaluate(cp=>localStorage.setItem('omega.r764.canonTrajectoryCheckpoint',JSON.stringify(cp)),r767Checkpoint);
+  await bridge.locator('[data-r767-load]').click();
+  await bridge.locator('[data-r767-session]').waitFor({state:'visible',timeout:10000});
+  console.log('R767 '+label+' source-recomputed path × historical workbook execution, real Atlas handoff and tamper refusal PASS');
   // R663: exercise real browser-side historical evidence comparison, discrepancy and refusal.
   const recon=instrument.locator('[data-r663-reconciliation="true"]');
   // The reconciliation tool is below the historical frame inside a scrollable
@@ -114,6 +146,12 @@ try{
   const slider=instrument.getByRole('slider',{name:'Historical clock seconds'});
   await slider.focus();await slider.press('End');
   await assertFrame(86399);
+  if(!(await bridge.locator('[data-r767-sector]').innerText()).includes('Workbook sector 7/7'))throw Error(label+': R767 clock did not recompute');
+  const clockFrame=r767Trajectory.frames[1];
+  const clockAddress=clockFrame.atlasAddress20736;
+  const clockBase=((Math.floor(clockAddress/1728)+Math.floor(clockAddress/144)%12+Math.floor(clockAddress/12)%12+clockAddress%12)%7)+1;
+  const clockStar=((clockBase+7-2)%7)+1;
+  if(!(await bridge.locator('[data-r767-frame="1"]').innerText()).includes('star '+clockStar))throw Error(label+': R767 clock changed without correct workbook formula replay');
   await page.waitForFunction(()=>document.querySelector('[data-r605-sector]')?.textContent?.includes('Sector 7/7'),null,{timeout:10000});
   // R610: sample the interior of every sector, not only first and last.
   // Native range setter + input event exercises React's real controlled onChange.

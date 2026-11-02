@@ -1,4 +1,5 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
+import VerifiedCanonMandalaR767 from './VerifiedCanonMandalaR767';
 import {replayWorkbookFrameR604,workbookClockR604} from './timeMandalaFormulaReplayR604';
 import {historicalNamedStateR603,HISTORICAL_SEVEN_STAR_OPERATORS,SEVEN_STAR_HISTORICAL_SOURCES} from './sevenStarHistoricalAuthorityR602';
 import {reconcileHistoricalBatchR663} from './historicalSourceReconciliationR663';
@@ -60,6 +61,7 @@ export default function HistoricalTimeMandalaR605({address,onAddress}:Props){
   <p>Base star {frame.baseStar} → active star {frame.activeStar} ({frame.activeColor}) · {frame.operator} · {frame.matterAnalogy}</p>
   <p>θ center {frame.thetaCenter.toFixed(6)} rad · local blend {frame.localBlendWeight.toFixed(6)} · Mode 188 gate <b>{frame.mode188Gate}</b> · dispatch {frame.deweyDispatch}</p>
   <p>Truth: {frame.truthRank} · canonical address remains controlled by the parent workspace.</p>
+  <VerifiedCanonMandalaR767 seconds={seconds} onAddress={onAddress}/>
   <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
    <button onClick={()=>onAddress((address+20735)%20736)}>Previous address</button>
    <button onClick={()=>onAddress((address+1)%20736)}>Next address</button>
