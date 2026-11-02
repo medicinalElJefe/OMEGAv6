@@ -45,6 +45,15 @@ assert.ok(svg.includes('data-address="0"'));assert.ok(svg.includes('viewBox="0 0
 assert.equal(serializeSourceTessellationSvgR769(tile),svg);
 assert.equal((serializeSourceTessellationSvgR769(tile,{showEdges:false}).match(/<line /g)||[]).length,0);
 assert.throws(()=>serializeSourceTessellationSvgR769({...tile,cells:[]}),/required/);
+const forgedPoints={...tile,cells:tile.cells.map((c,i)=>i===0?
+ {...c,triangles:[{...c.triangles[0],points:'0,0 1,0 1,1" onload="alert(1)'},c.triangles[1]]}:c)};
+assert.throws(()=>serializeSourceTessellationSvgR769(forgedPoints),/geometry refused/,'SVG attribute injection must fail closed');
+const forgedFill={...tile,cells:tile.cells.map((c,i)=>i===0?
+ {...c,triangles:[{...c.triangles[0],fill:'red" onload="alert(1)'},c.triangles[1]]}:c)};
+assert.throws(()=>serializeSourceTessellationSvgR769(forgedFill),/geometry refused/,'untrusted SVG color must fail closed');
+assert.throws(()=>serializeSourceTessellationSvgR769({...tile,edges:[{...tile.edges[0],x1:Infinity}]}),/geometry refused/);
+assert.throws(()=>serializeSourceTessellationSvgR769({...tile,originCol:1}),/geometry refused/);
+assert.throws(()=>serializeSourceTessellationSvgR769({...tile,selectedAddress:20735}),/geometry refused/);
 const ui=readFileSync(new URL('../src7/workspaces/SourceTessellationR769.tsx',import.meta.url),'utf8');
 const host=readFileSync(new URL('../src7/workspaces/RouteBasinInstrumentR732.tsx',import.meta.url),'utf8');
 for(const marker of ['data-r769-svg','data-r769-cell','data-r769-zoom','data-r769-export','data-r769-selected','data-r769-boundary'])assert.ok(ui.includes(marker),'missing real UI '+marker);
