@@ -7,6 +7,7 @@ import {verifyTypedProvenanceWitnessR757} from '../src/proof/canonCrossDomainPro
 import {verifyJointCanonWitnessR759} from '../src/proof/canonJointPrecisionR759.js';
 import {verifyCanonIndexWitnessR761} from '../src/proof/canonIndexReconstructionR761.js';
 import {verifyCanonPathWitnessR763} from '../src/proof/canonNavigationR763.js';
+import {deriveCanonTrajectoryR764} from '../src/proof/canonTrajectoryR764.js';
 const base=(process.env.OMEGA_E2E_URL||process.env.OMEGA_PUBLIC_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 const expected=String(process.env.OMEGA_EXPECTED_SHA||'').trim();
 if(expected){
@@ -213,6 +214,11 @@ try{
    assert.equal(navigatorDownload.suggestedFilename(),'omega-r763-exact-canon-path.json');
    const pathWitness=JSON.parse(await readFile(await navigatorDownload.path(),'utf8'));
    assert.deepEqual(verifyCanonPathWitnessR763(JSON.stringify(pathWitness)),pathWitness);
+   const projectedAtlas=deriveCanonTrajectoryR764(pathWitness).frames[1].atlasAddress20736;
+   await navigator.locator('[data-r764-project-atlas]').click();
+   assert.equal(Number(await page.evaluate(()=>localStorage.getItem('omega.v6.address'))),projectedAtlas);
+   assert.equal(Number((await navigator.locator('[data-r764-atlas-address]').innerText()).trim()),projectedAtlas);
+
    await navigator.locator('[data-r763-recovery] summary').click();
    await navigator.locator('[data-r763-verify]').click();
    assert.match(await navigator.locator('[data-r763-recovery-status]').innerText(),/PASS: R763 exact path/);
