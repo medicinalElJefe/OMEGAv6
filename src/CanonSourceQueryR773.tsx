@@ -1,4 +1,5 @@
 import {useMemo,useState} from 'react';
+import {CanonSliceComparisonR774} from './CanonSliceComparisonR774';
 import {R763_AXES,R763_STRIDES} from './proof/canonNavigationR763.js';
 import {reconstructCanonFullRowR772} from './proof/canonFullSourceR772.js';
 import {R773_QUERY_LOCAL_KEY,queryCanonSourceR773,verifyCanonSourceQueryR773,parseCanonSourceQueryR773} from './proof/canonSourceQueryR773.js';
@@ -92,5 +93,6 @@ export function CanonSourceQueryR773({onSelect}:{onSelect:(index:number)=>void})
    <button type="button" data-r773-verify onClick={verify}>Independently recompute and verify</button>
    <p role="status" data-r773-verification>{verification}</p>
   </details>
+  <CanonSliceComparisonR774 onSelect={onSelect}/>
  </article>;
 }

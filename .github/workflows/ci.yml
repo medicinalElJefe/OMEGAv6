@@ -79,6 +79,8 @@ jobs:
         run: node tests/r770-source-lens-invariants.mjs
       - name: R773 bounded original Canon source query and portable verification
         run: node tests/r773-canon-source-query-invariants.mjs
+      - name: R774 exact source-slice comparison and tamper refusal
+        run: node tests/r774-canon-slice-comparison-invariants.mjs
       - name: R771 native Memory source-executor integration and source integrity
         run: |
           node tests/r771-native-memory-analysis-invariants.mjs
