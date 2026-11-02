@@ -1,6 +1,7 @@
 import {useEffect,useMemo,useState} from 'react';
 import {computeTypedProvenanceWitnessR757,verifyTypedProvenanceWitnessR757} from './proof/canonCrossDomainProvenanceR757.js';
 import {conditionalCanonGateR758} from './proof/canonPrecisionIntervalR758.js';
+import {jointCanonPrecisionR759} from './proof/canonJointPrecisionR759.js';
 
 type Props={address:number;onAddress:(address:number)=>void};
 const parseIndex=(value:string,max:number,name:string)=>{
@@ -19,6 +20,7 @@ const parseMetric=(value:string,name:string)=>{
 export default function TypedProvenanceWorkbenchR757({address,onAddress}:Props){
  const[slot,setSlot]=useState(String(address)),[domain,setDomain]=useState('1');
  const[c,setC]=useState('0.1'),[phi,setPhi]=useState('0.42'),[q,setQ]=useState('0.1'),[lambda,setLambda]=useState('0.1');
+ const[storedS,setStoredS]=useState('0.2090');
  const[importText,setImportText]=useState(''),[recovery,setRecovery]=useState('');
  useEffect(()=>setSlot(String(address)),[address]);
  const result=useMemo(()=>{
@@ -33,6 +35,10 @@ export default function TypedProvenanceWorkbenchR757({address,onAddress}:Props){
   try{return {certificate:conditionalCanonGateR758({c,phi,q,lambda}),error:''};}
   catch(e){return {certificate:null,error:e instanceof Error?e.message:String(e)};}
  },[c,phi,q,lambda]);
+ const combined=useMemo(()=>{
+  try{return {certificate:jointCanonPrecisionR759({c,phi,q,lambda},storedS),error:''};}
+  catch(e){return {certificate:null,error:e instanceof Error?e.message:String(e)};}
+ },[c,phi,q,lambda,storedS]);
  const exportWitness=()=>{
   if(!result.packet)return;
   const raw=JSON.stringify(result.packet,null,2);
@@ -58,6 +64,7 @@ export default function TypedProvenanceWorkbenchR757({address,onAddress}:Props){
     <label>Phi <input data-r757-phi inputMode="decimal" value={phi} onChange={e=>setPhi(e.target.value)}/></label>
     <label>q <input data-r757-q inputMode="decimal" value={q} onChange={e=>setQ(e.target.value)}/></label>
     <label>Lambda <input data-r757-lambda inputMode="decimal" value={lambda} onChange={e=>setLambda(e.target.value)}/></label>
+     <label>Hypothetical stored S (four decimals) <input data-r759-stored-s inputMode="decimal" value={storedS} onChange={e=>setStoredS(e.target.value)}/></label>
     <button type="button" disabled={!result.packet||result.packet.inputs.slot0===address} onClick={()=>{if(result.packet)onAddress(result.packet.inputs.slot0)}} data-r757-commit>Navigate selected atlas address</button>
    </article>
    <article className="r316-card"><h3>Executed typed comparison</h3>
@@ -69,6 +76,8 @@ export default function TypedProvenanceWorkbenchR757({address,onAddress}:Props){
      <p>Score: {result.packet.modeledDecision.score.toPrecision(9)}</p>
       <p>Four-decimal source assumption: <strong data-r758-precision-gate>{precision.certificate?.conditionalGate||'PRECISION_INPUT_REQUIRED'}</strong></p>
       <p data-r758-precision-scope>{precision.certificate?'Conditional arithmetic only; not original-precision or live action evidence.':precision.error}</p>
+      <p>Combined input-and-score evidence: <strong data-r759-joint-gate>{combined.certificate?.jointGate||'PRECISION_INPUT_REQUIRED'}</strong></p>
+      <p data-r759-joint-scope>{combined.certificate?(combined.certificate.status==='INCOMPATIBLE_CONDITIONAL_OBSERVATIONS_HOLD'?'Incompatible supplied score; no inference.':'Stronger conditional same-source rounding assumption; never live action.') : combined.error}</p>
      <p>Semantic identity: <strong>NOT PROVED</strong> · External source validation: <strong>NOT PROVIDED</strong></p>
      <button type="button" data-r757-export onClick={exportWitness}>Export computed witness JSON</button>
     </>:<p role="alert" data-r757-error>{result.error}</p>}
