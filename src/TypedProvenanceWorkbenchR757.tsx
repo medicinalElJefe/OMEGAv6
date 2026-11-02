@@ -37,7 +37,7 @@ export default function TypedProvenanceWorkbenchR757({address,onAddress}:Props){
   setTimeout(()=>URL.revokeObjectURL(url),1000);
  };
  const verify=()=>{
-  try{verifyTypedProvenanceWitnessR757(importText);setRecovery('PASS: exact typed witness independently recomputed.');}
+  try{verifyTypedProvenanceWitnessR757(importText);setRecovery('PASS: typed witness deterministically recomputed.');}
   catch(e){setRecovery('REFUSED: '+(e instanceof Error?e.message:'Invalid witness'));}
  };
  return <section className="r316-research" data-r757-typed-workbench="executable" aria-label="R757 typed coordinate provenance explorer">

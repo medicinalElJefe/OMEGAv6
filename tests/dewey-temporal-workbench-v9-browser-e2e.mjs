@@ -93,7 +93,7 @@ try{
    assert.deepEqual(verifyTypedProvenanceWitnessR757(JSON.stringify(typedWitness)),typedWitness);
    await typed.locator('details summary').click();
    await typed.locator('[data-r757-verify]').click();
-   assert.match(await typed.locator('[data-r757-recovery]').innerText(),/PASS: exact typed witness/);
+   assert.match(await typed.locator('[data-r757-recovery]').innerText(),/PASS: typed witness deterministically/);
    await typed.locator('[data-r757-import]').fill(JSON.stringify({...typedWitness,evidence:{...typedWitness.evidence,productionAuthority:true}}));
    await typed.locator('[data-r757-verify]').click();
    assert.match(await typed.locator('[data-r757-recovery]').innerText(),/REFUSED:/);
@@ -101,7 +101,7 @@ try{
    assert.match(await typed.locator('[data-r757-error]').innerText(),/Atlas address/);
    await typed.locator('[data-r757-slot]').fill('0');
    await typed.locator('[data-r757-commit]').click();
-   assert.equal(await science.getAttribute('data-address'),'0');
+   await page.waitForFunction(()=>document.querySelector('.o7-science-workspace[data-route="Relativity"]')?.getAttribute('data-address')==='0',{timeout:10000});
    console.log('R757 '+label+' executable typed provenance, atlas navigation, exact JSON recovery and tamper refusal PASS');
 
    assert.equal(errors.length,0,label+': browser errors '+errors.join(' | '));
