@@ -13,6 +13,7 @@ const opt=(s:string)=>s.trim()?s.trim():null;
 export default function CanonTopologyWorkbenchR763(){
  const[start,setStart]=useState('1'),[goal,setGoal]=useState<Goal>('STAY');
  const[axisPreset,setAxisPreset]=useState('ALL'),[mode,setMode]=useState('');
+ const[scoreTrend,setScoreTrend]=useState('ANY');
  const[minScore,setMinScore]=useState(''),[maxBurden,setMaxBurden]=useState(''),
  [maxQ,setMaxQ]=useState(''),[maxHops,setMaxHops]=useState('8'),
  [budget,setBudget]=useState('12000');
@@ -24,7 +25,7 @@ export default function CanonTopologyWorkbenchR763(){
   try{
    const query={start:exactInt(start,'Canon state'),targetDecision:goal,
     targetMode:mode.trim()?exactInt(mode,'Mode 188'):null,
-    allowedAxes:presets[axisPreset],minScore:opt(minScore),
+    allowedAxes:presets[axisPreset],scoreTrend,minScore:opt(minScore),
     maxBurden:opt(maxBurden),maxContradiction:opt(maxQ),
     maxHops:exactInt(maxHops,'maximum hops'),maxVisited:exactInt(budget,'node budget')};
    const out=computeCanonPathWitnessR763(query);
@@ -59,6 +60,9 @@ export default function CanonTopologyWorkbenchR763(){
      <option value="OBSERVER">Motion + Perspective</option>
      <option value="RELATIONAL">Relation + Motion + Perspective</option>
      <option value="RECONSTRUCTION">State + Relation + Motion</option></select></label>
+    <label>Motion score rule <select data-r763-trend value={scoreTrend} onChange={e=>setScoreTrend(e.target.value)}>
+      <option value="ANY">Any exact score trajectory</option>
+      <option value="NONDECREASING">Never decrease modeled coherence</option></select></label>
     <label>Exact Mode 188 (optional) <input data-r763-mode inputMode="numeric" placeholder="Any" value={mode} onChange={e=>setMode(e.target.value)}/></label>
     <label>Minimum exact coherence (optional) <input data-r763-min-score inputMode="decimal" placeholder="Any" value={minScore} onChange={e=>setMinScore(e.target.value)}/></label>
     <label>Maximum burden Λ (optional) <input data-r763-max-burden inputMode="decimal" placeholder="Any" value={maxBurden} onChange={e=>setMaxBurden(e.target.value)}/></label>
