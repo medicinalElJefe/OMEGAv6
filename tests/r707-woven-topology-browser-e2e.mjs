@@ -709,6 +709,23 @@ try{
    if(!(await tess.locator('[data-r769-boundary]').innerText()).includes('not physical geometry'))
     throw Error(device+': R769 source-only truth boundary missing');
    console.log('R769 '+device+' PASS: source-bound triangles, exact address navigation, zoom, successor visibility and portable SVG bytes');
+   // R770: live two-source normalization, actual mesh mutation and browser-local view recovery.
+   const singleFill=await tess.locator('polygon').first().getAttribute('fill');
+   await tess.locator('[data-r770-mode]').selectOption('woven');
+   await tess.locator('[data-r770-first]').selectOption('C');
+   await tess.locator('[data-r770-second]').selectOption('q');
+   await tess.locator('[data-r770-weight]').focus();
+   await tess.locator('[data-r770-weight]').press('End');
+   await tess.locator('[data-r770-summary]').filter({hasText:'100% Contradiction q'}).waitFor({state:'visible',timeout:10000});
+   const wovenFill=await tess.locator('polygon').first().getAttribute('fill');
+   if(!wovenFill||wovenFill===singleFill)throw Error(device+': R770 woven lens did not change actual triangle colors');
+   const savedLens=await page.evaluate(()=>localStorage.getItem('omega.r770.source-lens.v1'));
+   if(!savedLens||!savedLens.includes('"mode":"woven"')||!savedLens.includes('"weightPercent":100'))
+    throw Error(device+': R770 browser-local lens view not persisted');
+   if(!(await tess.locator('[data-r770-boundary]').innerText()).includes('not an observed field'))
+    throw Error(device+': R770 empirical boundary missing');
+   console.log('R770 '+device+' PASS: source-computed two-channel mesh, real color change, 100% endpoint, browser-local preference carry');
+
 
 
 
