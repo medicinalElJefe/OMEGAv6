@@ -19,6 +19,7 @@ import './r763-canon-topology-navigation-invariants.mjs';
 import './r763-full-canon-topology-census-invariants.mjs';
 import './r764-canon-continuity-replay-invariants.mjs';
 import './r765-directed-inverse-canon-invariants.mjs';
+import './r772-full-canon-source-invariants.mjs';
 import './r755-pell-workbench-invariants.mjs';
 import './r751-singmaster-fixed-gap-reduction-invariants.mjs';
 import './dewey-temporal-rotation-v9-invariants.mjs';
