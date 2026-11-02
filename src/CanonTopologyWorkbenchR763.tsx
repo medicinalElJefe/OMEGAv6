@@ -6,6 +6,7 @@ import {R764_LOCAL_KEY,deriveCanonTrajectoryR764,createCanonReplayCheckpointR764
 import {auditCanonInverseR765,createCanonInverseBundleR765,
  verifyCanonInverseBundleR765} from './proof/canonInverseAuditR765.js';
 import {reconstructCanonFullRowR772,R772_FULL_SOURCE_HEADERS,R772_ORIGINAL_SOURCE_PROOF} from './proof/canonFullSourceR772.js';
+import {CanonSourceQueryR773} from './CanonSourceQueryR773';
 
 type Goal='STAY'|'TURN'|'ESCALATE';
 const exactInt=(s:string,name:string)=>{if(!/^(0|[1-9][0-9]*)$/.test(s))throw new RangeError(name+' requires exact nonnegative integer text');const v=Number(s);if(!Number.isSafeInteger(v))throw new RangeError(name+' is out of bounds');return v;};
@@ -156,6 +157,7 @@ export default function CanonTopologyWorkbenchR763({onAddress}:{onAddress?:(addr
     <table><tbody>{R772_FULL_SOURCE_HEADERS.map(k=><tr key={k}><th scope="row">{k}</th><td>{String(originalRow[k])}</td></tr>)}</tbody></table>
    </details>
   </article>}
+  <CanonSourceQueryR773 onSelect={index=>{setStart(String(index));setWitness(null);setError("");}}/>
   {p&&<article className="r316-card" data-r763-result>
    <h3>Computed shortest-path result</h3>
    <p>Status: <b data-r763-status>{p.status}</b></p>
