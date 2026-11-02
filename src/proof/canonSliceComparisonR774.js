@@ -77,7 +77,7 @@ export function compareCanonSlicesR774(input){
  const groups=[...new Set([...l.keys(),...r.keys()])].sort((a,b)=>a.localeCompare(b))
   .map(label=>({label,leftCount:l.get(label)?.count??0,rightCount:r.get(label)?.count??0,
    leftMean:l.get(label)?.mean??null,rightMean:r.get(label)?.mean??null,
-   meanDelta:deltaMean(r.get(label)??{count:0},l.get(label)??{count:0}),
+   meanDelta:deltaMean(r.has(label)?{count:r.get(label).count,sum:r.get(label).sumScaled4}:{count:0},l.has(label)?{count:l.get(label).count,sum:l.get(label).sumScaled4}:{count:0}),
    leftAddress:l.get(label)?.firstAddress??null,rightAddress:r.get(label)?.firstAddress??null}));
  return {schema:R774_SCHEMA,query,left,right,
   matchDelta:right.matched-left.matched,meanDelta:deltaMean(
