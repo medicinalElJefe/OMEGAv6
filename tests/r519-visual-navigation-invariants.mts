@@ -19,6 +19,10 @@ for(const domain of OMEGA7_DOMAINS){
  assert.ok(rows.every(x=>domain==='HOME'||x.domain===domain),'cross-domain card leakage: '+domain);
  assert.ok(presentation.includes(domain+':{eyebrow:'),'domain presentation missing: '+domain);
 }
+const exploreFeatured=quickActionsR512('EXPLORE');
+assert.ok(exploreFeatured.some(x=>x.legacyRoute==='Relativity'),'Science origin must remain directly reachable');
+assert.ok(exploreFeatured.some(x=>x.legacyRoute==='Traversal'),'R766 verified trajectory destination must be directly reachable from Explore');
+assert.ok(exploreFeatured.length<=6,'featured route capacity must not expand silently');
 for(const word of ["R519VisualNavigation domain={state.domain} onNavigate={open}","R519VisualNavigation domain='HOME' onNavigate={open}","data-navigation-revision='R512'","data-design-revision='R519'","R512_DOMAIN_MENU.map","OmegaHomeR71","data-r510-visual-restoration","o7-recovered[data-r486-visible-convergence"]){
  if(word==="o7-recovered[data-r486-visible-convergence")continue;
  assert.ok(root.includes(word),'existing HOME/historical authority or new visual navigation missing: '+word);
