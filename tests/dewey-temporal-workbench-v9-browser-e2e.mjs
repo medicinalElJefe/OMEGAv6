@@ -7,6 +7,7 @@ import {verifyTypedProvenanceWitnessR757} from '../src/proof/canonCrossDomainPro
 import {verifyJointCanonWitnessR759} from '../src/proof/canonJointPrecisionR759.js';
 import {verifyCanonIndexWitnessR761} from '../src/proof/canonIndexReconstructionR761.js';
 import {verifyCanonPathWitnessR763} from '../src/proof/canonNavigationR763.js';
+import {deriveCanonTrajectoryR764} from '../src/proof/canonTrajectoryR764.js';
 const base=(process.env.OMEGA_E2E_URL||process.env.OMEGA_PUBLIC_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 const expected=String(process.env.OMEGA_EXPECTED_SHA||'').trim();
 if(expected){
@@ -197,12 +198,27 @@ try{
    assert.equal((await navigator.locator('[data-r763-status]').innerText()).trim(),'FOUND_IN_DECLARED_SYMBOLIC_GRAPH');
    assert.equal((await navigator.locator('[data-r763-distance]').innerText()).trim(),'6');
    assert.equal((await navigator.locator('[data-r763-destination]').innerText()).trim(),'24339');
+   const continuity=navigator.locator('[data-r764-replay="executable"]');
+   await continuity.waitFor({state:'visible',timeout:30000});
+   assert.match(await continuity.locator('[data-r764-frame]').innerText(),/Frame 1 \/ 7/);
+   assert.equal(await continuity.locator('[data-r764-plot]').count(),1);
+   await continuity.locator('[data-r764-next]').click();
+   assert.match(await continuity.locator('[data-r764-frame]').innerText(),/Frame 2 \/ 7/);
+   await navigator.locator('[data-r764-save]').click();
+   assert.match(await navigator.locator('[data-r764-status]').innerText(),/SAVED:/);
+   assert.ok(await page.evaluate(()=>Boolean(localStorage.getItem('omega.r764.canonTrajectoryCheckpoint'))));
+
    const navigatorDownloadPromise=page.waitForEvent('download',{timeout:30000});
    await navigator.locator('[data-r763-export]').click();
    const navigatorDownload=await navigatorDownloadPromise;
    assert.equal(navigatorDownload.suggestedFilename(),'omega-r763-exact-canon-path.json');
    const pathWitness=JSON.parse(await readFile(await navigatorDownload.path(),'utf8'));
    assert.deepEqual(verifyCanonPathWitnessR763(JSON.stringify(pathWitness)),pathWitness);
+   const projectedAtlas=deriveCanonTrajectoryR764(pathWitness).frames[1].atlasAddress20736;
+   await navigator.locator('[data-r764-project-atlas]').click();
+   assert.equal(Number(await page.evaluate(()=>localStorage.getItem('omega.v6.address'))),projectedAtlas);
+   assert.equal(Number((await navigator.locator('[data-r764-atlas-address]').innerText()).trim()),projectedAtlas);
+
    await navigator.locator('[data-r763-recovery] summary').click();
    await navigator.locator('[data-r763-verify]').click();
    assert.match(await navigator.locator('[data-r763-recovery-status]').innerText(),/PASS: R763 exact path/);
@@ -230,6 +246,37 @@ try{
    await navigator.locator('[data-r763-start]').fill('248833');
    await navigator.locator('[data-r763-search]').click();
    assert.match(await navigator.locator('[data-r763-error]').innerText(),/must be integer/);
+   await page.reload({waitUntil:'domcontentloaded',timeout:45000});
+   await page.locator('.o7-app[data-omega7="true"]').waitFor({state:'visible',timeout:30000});
+   const restoredScience=page.locator('.o7-science-workspace[data-route="Relativity"]');
+   if(!(await restoredScience.count())){
+    await page.locator('.o7-nav-r519').getByRole('button',{name:'Explore'}).click();
+    const restoredPortal=page.locator('.o7-r519-portal[data-r519-visual-navigation="EXPLORE"]');
+    await restoredPortal.waitFor({state:'visible',timeout:20000});
+    await restoredPortal.locator('button[data-r519-node="Relativity"]').click();
+    await restoredPortal.locator('button[data-r519-launch="Relativity"]').click();
+   }
+   await restoredScience.waitFor({state:'visible',timeout:30000});
+   const restoredOpen=restoredScience.locator('.o7-open-instrument');
+   if(await restoredOpen.count())await restoredOpen.click();
+   const restoredNavigator=restoredScience.locator('[data-r763-canon-navigator="executable"]');
+   await restoredNavigator.locator('[data-r764-load]').click();
+   assert.match(await restoredNavigator.locator('[data-r764-status]').innerText(),/RESTORED:/);
+   assert.match(await restoredNavigator.locator('[data-r764-frame]').innerText(),/Frame 2 \/ 7/);
+   assert.equal((await restoredNavigator.locator('[data-r763-destination]').innerText()).trim(),'24339');
+   await page.evaluate(()=>{
+    const key='omega.r764.canonTrajectoryCheckpoint';
+    const saved=JSON.parse(localStorage.getItem(key));
+    saved.summary.scarCrossings=999;
+    localStorage.setItem(key,JSON.stringify(saved));
+   });
+   await restoredNavigator.locator('[data-r764-load]').click();
+   assert.match(await restoredNavigator.locator('[data-r764-status]').innerText(),/REFUSED:/);
+   await restoredNavigator.locator('[data-r764-clear]').click();
+   assert.match(await restoredNavigator.locator('[data-r764-status]').innerText(),/CLEARED:/);
+   assert.equal(await page.evaluate(()=>localStorage.getItem('omega.r764.canonTrajectoryCheckpoint')),null);
+   console.log('R764 '+label+' exact continuity SVG, frame stepping, reload persistence, recomputed recovery, tamper refusal and clear PASS');
+
    console.log('R763 '+label+' generated Canon path, shortest exact search, portable JSON tamper refusal and resource HOLD PASS');
 
 
