@@ -146,6 +146,12 @@ try{
   const slider=instrument.getByRole('slider',{name:'Historical clock seconds'});
   await slider.focus();await slider.press('End');
   await assertFrame(86399);
+  if(!(await bridge.locator('[data-r767-sector]').innerText()).includes('Workbook sector 7/7'))throw Error(label+': R767 clock did not recompute');
+  const clockFrame=r767Trajectory.frames[1];
+  const clockAddress=clockFrame.atlasAddress20736;
+  const clockBase=((Math.floor(clockAddress/1728)+Math.floor(clockAddress/144)%12+Math.floor(clockAddress/12)%12+clockAddress%12)%7)+1;
+  const clockStar=((clockBase+7-2)%7)+1;
+  if(!(await bridge.locator('[data-r767-frame="1"]').innerText()).includes('star '+clockStar))throw Error(label+': R767 clock changed without correct workbook formula replay');
   await page.waitForFunction(()=>document.querySelector('[data-r605-sector]')?.textContent?.includes('Sector 7/7'),null,{timeout:10000});
   // R610: sample the interior of every sector, not only first and last.
   // Native range setter + input event exercises React's real controlled onChange.
