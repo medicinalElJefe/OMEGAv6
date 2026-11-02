@@ -52,7 +52,7 @@ export default function TypedProvenanceWorkbenchR757({address,onAddress}:Props){
   if(!combined.certificate)return;
   const raw=JSON.stringify(computeJointCanonWitnessR759({c,phi,q,lambda},storedS),null,2);
   setJointImport(raw);setJointRecovery('Exported conditional witness; recompute to verify.');
-  const url=URL.createObjectURL(new Blob([raw+'\\n'],{type:'application/json'}));
+  const url=URL.createObjectURL(new Blob([raw+'\n'],{type:'application/json'}));
   const a=document.createElement('a');a.href=url;a.download='omega-r759-conditional-joint-precision.json';a.click();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
  };
