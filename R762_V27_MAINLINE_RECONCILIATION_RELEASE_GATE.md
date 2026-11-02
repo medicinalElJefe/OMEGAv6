@@ -1,0 +1,9 @@
+# R762 / V27 current-main exact reconstruction acceptance
+
+R760 #1225 passed all eight exact-head workflow families and was merged at SHA 4f865ffdea9c72d4ec5554e65e6c3b18b709d6f0. The older R761 candidate #1226 was created before this merge and also modified the R110 test import file. This R762 branch is based directly on the new merged mainline, retains every R752–R760 invariant import, and adds the R761 complete-source generator, its 248,832-address full digest regression, and the full mathematical research note without overwriting R760 functionality.
+
+Original corrected source XLSX SHA256: e1ccb57cdfbc78955dd6e86be110cdb91cb15a0cc78a869b74dca7e4ffa55af3. Source-normalized and independently re-generated 248,832-row field digest SHA256: c5560df0a6967013a46d6eb5c286298b01961329427469568407cc8a6c65eb35. Exactly 248,832 source score and stored decision matches, zero mismatches, including the 92 V24 precision-HOLD cases. Gate census: STAY 73,214 / TURN 111,786 / ESCALATE 63,832.
+
+External V27 complete package: DEWEY_OMEGA_V27_FULL_CANON_INDEX_RECONSTRUCTION.zip SHA256 173de429e17c86552278725cd8c0ca2ae26e66347c3a508897698f0ceb5b3d4c. Clean extraction and original-workbook replay passed. It preserves V1–V26 byte-for-byte.
+
+TRUTH: This is a successful compact, exact computational reconstruction of the STORED source data, not a unique recovered original generator, a physical 5D claim, R295 proof admission, a license for autonomous decisions, or proof of unrestricted sharp Singmaster. The original XLSX is neither changed nor source-ingested in public GitHub. Requires all eight exact-head workflow families, conflict-free reviewed merge, and separately authenticated postmerge live production verification.
