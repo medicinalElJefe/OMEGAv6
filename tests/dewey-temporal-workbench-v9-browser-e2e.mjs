@@ -6,6 +6,7 @@ import {verifyPellWorkbenchR755} from '../src/proof/singmasterResearchWorkbenchR
 import {verifyTypedProvenanceWitnessR757} from '../src/proof/canonCrossDomainProvenanceR757.js';
 import {verifyJointCanonWitnessR759} from '../src/proof/canonJointPrecisionR759.js';
 import {verifyCanonIndexWitnessR761} from '../src/proof/canonIndexReconstructionR761.js';
+import {verifyCanonPathWitnessR763} from '../src/proof/canonNavigationR763.js';
 const base=(process.env.OMEGA_E2E_URL||process.env.OMEGA_PUBLIC_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 const expected=String(process.env.OMEGA_EXPECTED_SHA||'').trim();
 if(expected){
@@ -186,6 +187,37 @@ try{
    assert.equal((await typed.locator('[data-r761-decision]').innerText()).trim(),'ESCALATE');
    assert.match(await typed.locator('[data-r761-boundary]').innerText(),/original source generator is not authenticated/);
    console.log('R761 '+label+' 248832 Canon index reconstruction, exact source-model replay, export, recovery and tamper refusal PASS');
+
+   const navigator=science.locator('[data-r763-canon-navigator="executable"]');
+   await navigator.waitFor({state:'visible',timeout:30000});
+   await navigator.locator('[data-r763-start]').fill('1');
+   assert.equal((await navigator.locator('[data-r763-local-decision]').innerText()).trim(),'ESCALATE');
+   await navigator.locator('[data-r763-goal]').selectOption('STAY');
+   await navigator.locator('[data-r763-search]').click();
+   assert.equal((await navigator.locator('[data-r763-status]').innerText()).trim(),'FOUND_IN_DECLARED_SYMBOLIC_GRAPH');
+   assert.equal((await navigator.locator('[data-r763-distance]').innerText()).trim(),'6');
+   assert.equal((await navigator.locator('[data-r763-destination]').innerText()).trim(),'24339');
+   const navigatorDownloadPromise=page.waitForEvent('download',{timeout:30000});
+   await navigator.locator('[data-r763-export]').click();
+   const navigatorDownload=await navigatorDownloadPromise;
+   assert.equal(navigatorDownload.suggestedFilename(),'omega-r763-exact-canon-path.json');
+   const pathWitness=JSON.parse(await readFile(await navigatorDownload.path(),'utf8'));
+   assert.deepEqual(verifyCanonPathWitnessR763(JSON.stringify(pathWitness)),pathWitness);
+   await navigator.locator('[data-r763-recovery] summary').click();
+   await navigator.locator('[data-r763-verify]').click();
+   assert.match(await navigator.locator('[data-r763-recovery-status]').innerText(),/PASS: R763 exact path/);
+   await navigator.locator('[data-r763-import]').fill(JSON.stringify({...pathWitness,result:{...pathWitness.result,distance:0}}));
+   await navigator.locator('[data-r763-verify]').click();
+   assert.match(await navigator.locator('[data-r763-recovery-status]').innerText(),/REFUSED:/);
+   await navigator.locator('[data-r763-budget]').selectOption('1');
+   await navigator.locator('[data-r763-search]').click();
+   assert.equal((await navigator.locator('[data-r763-status]').innerText()).trim(),'RESOURCE_HOLD_NO_INFERENCE');
+   await navigator.locator('[data-r763-budget]').selectOption('12000');
+   await navigator.locator('[data-r763-start]').fill('248833');
+   await navigator.locator('[data-r763-search]').click();
+   assert.match(await navigator.locator('[data-r763-error]').innerText(),/must be integer/);
+   console.log('R763 '+label+' generated Canon path, shortest exact search, portable JSON tamper refusal and resource HOLD PASS');
+
 
    console.log('R757 '+label+' executable typed provenance, atlas navigation, exact JSON recovery and tamper refusal PASS');
 
