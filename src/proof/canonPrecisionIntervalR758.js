@@ -5,7 +5,7 @@
 export const R758_TRUTH=Object.freeze({precisionAssumption:'CONDITIONAL_NEAREST_FOUR_DECIMAL_ROUNDING',originalGeneratorVerified:false,liveDecisionAuthority:false,globalPhysicalClaim:false,globalSharpSingmaster:'OPEN',canonicalMutation:false,releaseGate:'SOURCE_PRECISION_ATTESTATION_REQUIRED'});
 const INT=/^(?:0|[1-9][0-9]*)(?:\.[0-9]{1,4})?$/;
 function parse4(v,name){
- if(typeof v!=='string'||!INT.test(v))throw new TypeError(name+' must be a nonnegative decimal string with <=4 fractional digits');
+ if(typeof v!=='string'||v.length>32||!INT.test(v))throw new TypeError(name+' must be a nonnegative decimal string with <=4 fractional digits');
  const [a,b='']=v.split('.');const x=BigInt(a)*10000n+BigInt(b.padEnd(4,'0')||'0');
  if(x<=0n)throw new RangeError(name+' must be strictly positive');
  return x;
