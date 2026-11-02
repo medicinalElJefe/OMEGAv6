@@ -1,6 +1,8 @@
 import {useEffect,useMemo,useState} from 'react';
 import {computeTypedProvenanceWitnessR757,verifyTypedProvenanceWitnessR757} from './proof/canonCrossDomainProvenanceR757.js';
 import {conditionalCanonGateR758} from './proof/canonPrecisionIntervalR758.js';
+import {jointCanonPrecisionR759,computeJointCanonWitnessR759,verifyJointCanonWitnessR759} from './proof/canonJointPrecisionR759.js';
+import {observerRelativeCanonR760} from './proof/deweyObserverTransportR760.js';
 
 type Props={address:number;onAddress:(address:number)=>void};
 const parseIndex=(value:string,max:number,name:string)=>{
@@ -19,7 +21,10 @@ const parseMetric=(value:string,name:string)=>{
 export default function TypedProvenanceWorkbenchR757({address,onAddress}:Props){
  const[slot,setSlot]=useState(String(address)),[domain,setDomain]=useState('1');
  const[c,setC]=useState('0.1'),[phi,setPhi]=useState('0.42'),[q,setQ]=useState('0.1'),[lambda,setLambda]=useState('0.1');
+ const[storedS,setStoredS]=useState('0.2090');
+ const[referenceLo,setReferenceLo]=useState('0.2090'),[referenceHi,setReferenceHi]=useState('0.2091'),[transportError,setTransportError]=useState('0.00001');
  const[importText,setImportText]=useState(''),[recovery,setRecovery]=useState('');
+ const[jointImport,setJointImport]=useState(''),[jointRecovery,setJointRecovery]=useState('');
  useEffect(()=>setSlot(String(address)),[address]);
  const result=useMemo(()=>{
   try{return {packet:computeTypedProvenanceWitnessR757({
@@ -33,6 +38,15 @@ export default function TypedProvenanceWorkbenchR757({address,onAddress}:Props){
   try{return {certificate:conditionalCanonGateR758({c,phi,q,lambda}),error:''};}
   catch(e){return {certificate:null,error:e instanceof Error?e.message:String(e)};}
  },[c,phi,q,lambda]);
+ const combined=useMemo(()=>{
+  try{return {certificate:jointCanonPrecisionR759({c,phi,q,lambda},storedS),error:''};}
+  catch(e){return {certificate:null,error:e instanceof Error?e.message:String(e)};}
+ },[c,phi,q,lambda,storedS]);
+ const observer=useMemo(()=>{
+  try{return {certificate:observerRelativeCanonR760({metrics:{c,phi,q,lambda},storedScore:storedS,
+   referenceLower:referenceLo,referenceUpper:referenceHi,error:transportError}),error:''};}
+  catch(e){return {certificate:null,error:e instanceof Error?e.message:String(e)};}
+ },[c,phi,q,lambda,storedS,referenceLo,referenceHi,transportError]);
  const exportWitness=()=>{
   if(!result.packet)return;
   const raw=JSON.stringify(result.packet,null,2);
@@ -40,6 +54,18 @@ export default function TypedProvenanceWorkbenchR757({address,onAddress}:Props){
   const url=URL.createObjectURL(new Blob([raw+'\n'],{type:'application/json'}));
   const a=document.createElement('a');a.href=url;a.download='omega-r757-typed-provenance.json';a.click();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
+ };
+ const exportJoint=()=>{
+  if(!combined.certificate)return;
+  const raw=JSON.stringify(computeJointCanonWitnessR759({c,phi,q,lambda},storedS),null,2);
+  setJointImport(raw);setJointRecovery('Exported conditional witness; recompute to verify.');
+  const url=URL.createObjectURL(new Blob([raw+'\n'],{type:'application/json'}));
+  const a=document.createElement('a');a.href=url;a.download='omega-r759-conditional-joint-precision.json';a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+ };
+ const verifyJoint=()=>{
+  try{verifyJointCanonWitnessR759(jointImport);setJointRecovery('PASS: exact joint witness recomputed; no live authority.');}
+  catch(e){setJointRecovery('REFUSED: '+(e instanceof Error?e.message:'Invalid joint witness'));}
  };
  const verify=()=>{
   try{verifyTypedProvenanceWitnessR757(importText);setRecovery('PASS: typed witness deterministically recomputed.');}
@@ -58,6 +84,7 @@ export default function TypedProvenanceWorkbenchR757({address,onAddress}:Props){
     <label>Phi <input data-r757-phi inputMode="decimal" value={phi} onChange={e=>setPhi(e.target.value)}/></label>
     <label>q <input data-r757-q inputMode="decimal" value={q} onChange={e=>setQ(e.target.value)}/></label>
     <label>Lambda <input data-r757-lambda inputMode="decimal" value={lambda} onChange={e=>setLambda(e.target.value)}/></label>
+     <label>Hypothetical stored S (four decimals) <input data-r759-stored-s inputMode="decimal" value={storedS} onChange={e=>setStoredS(e.target.value)}/></label>
     <button type="button" disabled={!result.packet||result.packet.inputs.slot0===address} onClick={()=>{if(result.packet)onAddress(result.packet.inputs.slot0)}} data-r757-commit>Navigate selected atlas address</button>
    </article>
    <article className="r316-card"><h3>Executed typed comparison</h3>
@@ -69,15 +96,32 @@ export default function TypedProvenanceWorkbenchR757({address,onAddress}:Props){
      <p>Score: {result.packet.modeledDecision.score.toPrecision(9)}</p>
       <p>Four-decimal source assumption: <strong data-r758-precision-gate>{precision.certificate?.conditionalGate||'PRECISION_INPUT_REQUIRED'}</strong></p>
       <p data-r758-precision-scope>{precision.certificate?'Conditional arithmetic only; not original-precision or live action evidence.':precision.error}</p>
+      <p>Combined input-and-score evidence: <strong data-r759-joint-gate>{combined.certificate?.jointGate||'PRECISION_INPUT_REQUIRED'}</strong></p>
+      <p data-r759-joint-scope>{combined.certificate?(combined.certificate.status==='INCOMPATIBLE_CONDITIONAL_OBSERVATIONS_HOLD'?'Incompatible supplied score; no inference.':'Stronger conditional same-source rounding assumption; never live action.') : combined.error}</p>
+     <button type="button" data-r759-export disabled={!combined.certificate} onClick={exportJoint}>Export conditional joint witness JSON</button>
      <p>Semantic identity: <strong>NOT PROVED</strong> · External source validation: <strong>NOT PROVIDED</strong></p>
      <button type="button" data-r757-export onClick={exportWitness}>Export computed witness JSON</button>
     </>:<p role="alert" data-r757-error>{result.error}</p>}
    </article>
   </div>
-  <details><summary>Recover and independently verify a witness</summary>
+  <details data-r760-observer-panel>
+   <summary>V26 hypothetical observer-relative transport — research, not measured motion</summary>
+   <label>Reference score lower <input data-r760-reference-low inputMode="decimal" value={referenceLo} onChange={e=>setReferenceLo(e.target.value)}/></label>
+   <label>Reference score upper <input data-r760-reference-high inputMode="decimal" value={referenceHi} onChange={e=>setReferenceHi(e.target.value)}/></label>
+   <label>Assumed absolute transport error <input data-r760-error inputMode="decimal" value={transportError} onChange={e=>setTransportError(e.target.value)}/></label>
+   <p>Conditional transport gate: <strong data-r760-gate>{observer.certificate?.conditionalGate||'INVALID_INTERVAL'}</strong></p>
+   <p data-r760-status>{observer.certificate?.status||observer.error}</p>
+   <p>These reference measurements and their error bounds have NOT been authenticated. An apparent decision never authorizes a live Canon action.</p>
+  </details>
+  <details data-r757-recovery-panel><summary>Recover and independently verify a witness</summary>
    <textarea rows={5} data-r757-import aria-label="R757 typed witness JSON" value={importText} onChange={e=>setImportText(e.target.value)}/>
    <button type="button" data-r757-verify onClick={verify}>Recompute and verify</button>
    <p role="status" data-r757-recovery>{recovery}</p>
+  </details>
+  <details data-r759-recovery-panel><summary>Recover and recompute R759 conditional joint evidence</summary>
+   <textarea rows={5} data-r759-import aria-label="R759 conditional joint witness JSON" value={jointImport} onChange={e=>setJointImport(e.target.value)}/>
+   <button type="button" data-r759-verify onClick={verifyJoint}>Recompute joint witness</button>
+   <p role="status" data-r759-recovery>{jointRecovery}</p>
   </details>
   <p className="r316-boundary">Only finite ordinal/key calculations and hypothetical Mode 188 decision arithmetic execute here. This does not validate external PSC/Canon source rows, global theorems, physical dimensions, autonomous Ping, production authority or device action.</p>
  </section>;
