@@ -7,6 +7,7 @@
 export const R761_TRUTH=Object.freeze({
  scope:'COMPLETE_NUMERIC_SOURCE_REPLAY_OF_248832_STORED_CANON_ROWS',
  sourceWorkbookSha256:'e1ccb57cdfbc78955dd6e86be110cdb91cb15a0cc78a869b74dca7e4ffa55af3',
+ originalWorkbookBytesInRepository:false,
  normalizedNumericDigestSha256:'c5560df0a6967013a46d6eb5c286298b01961329427469568407cc8a6c65eb35',
  sourceRowsMatched:248832,
  scoreAndDecisionMismatches:0,
