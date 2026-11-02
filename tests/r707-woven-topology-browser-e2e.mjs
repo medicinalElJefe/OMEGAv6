@@ -682,6 +682,35 @@ try{
     throw Error(device+': R734 empirical truth boundary missing');
    console.log('R734 source metric field '+device+' PASS: all source pixels, signed successor gradient, channel switching and exact address selection');
 
+   // R769: exercise the actual source-colored triangles, address mutation, zoom and SVG bytes.
+   const tess=basin.locator('[data-r769-tessellation="source-field"]');
+   await tess.locator('[data-r769-svg]').waitFor({state:'visible',timeout:15000});
+   if(await tess.locator('[data-r769-cell]').count()!==144||await tess.locator('polygon').count()!==288)
+    throw Error(device+': R769 did not render 144 source addresses as 288 triangles');
+   if(!(await tess.locator('[data-r769-summary]').innerText()).includes('144 addresses'))
+    throw Error(device+': R769 source tile coverage missing');
+   await tess.locator('[data-r769-cell="1"]').click();
+   await tess.locator('[data-r769-selected]').filter({hasText:'Selected address 1'}).waitFor({state:'visible',timeout:10000});
+   await tess.locator('[data-r769-down]').click();
+   await tess.locator('[data-r769-selected]').filter({hasText:'Selected address 145'}).waitFor({state:'visible',timeout:10000});
+   await tess.locator('[data-r769-zoom]').selectOption('6');
+   if(await tess.locator('[data-r769-cell]').count()!==36||await tess.locator('polygon').count()!==72)
+    throw Error(device+': R769 multiscale zoom did not recompute 36 source cells');
+   await tess.locator('[data-r769-edges]').uncheck();
+   if(await tess.locator('[data-r769-source-edges]').count()!==0)
+    throw Error(device+': R769 successor-line toggle failed');
+   const [tessDownload]=await Promise.all([page.waitForEvent('download',{timeout:15000}),tess.locator('[data-r769-export]').click()]);
+   if(!tessDownload.suggestedFilename().endsWith('.svg'))throw Error(device+': R769 portable SVG filename missing');
+   const svgStream=await tessDownload.createReadStream();let exportedSvg='';
+   for await(const chunk of svgStream)exportedSvg+=chunk.toString();
+   if((exportedSvg.match(/<polygon /g)||[]).length!==72||(exportedSvg.match(/<line /g)||[]).length!==0||
+      !exportedSvg.includes('viewBox="0 0 6 6"'))
+    throw Error(device+': R769 exported SVG does not reproduce selected computed zoom');
+   if(!(await tess.locator('[data-r769-boundary]').innerText()).includes('not physical geometry'))
+    throw Error(device+': R769 source-only truth boundary missing');
+   console.log('R769 '+device+' PASS: source-bound triangles, exact address navigation, zoom, successor visibility and portable SVG bytes');
+
+
 
    if(errors.length)throw Error(device+': page errors '+errors.join(' | '));
    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
