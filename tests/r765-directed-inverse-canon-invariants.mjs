@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {computeCanonPathWitnessR763} from '../src/proof/canonNavigationR763.js';
-import {auditCanonInverseR765,verifyCanonInverseAuditR765} from '../src/proof/canonInverseAuditR765.js';
+import {auditCanonInverseR765,verifyCanonInverseAuditR765,
+ createCanonInverseBundleR765,verifyCanonInverseBundleR765} from '../src/proof/canonInverseAuditR765.js';
 
 const forward=computeCanonPathWitnessR763({start:1,targetDecision:'ESCALATE',targetMode:51,
  allowedAxes:['Motion'],maxHops:1,maxVisited:20});
@@ -21,6 +22,17 @@ assert.equal(any.deviceActionAuthority,false);
 assert.deepEqual(verifyCanonInverseAuditR765(forward,JSON.stringify(any)),any);
 assert.throws(()=>verifyCanonInverseAuditR765(forward,JSON.stringify({...any,
  reverseUnderSameEnvelope:false})),/differs/);
+
+const portable=createCanonInverseBundleR765(forward);
+assert.equal(portable.audit.reverseUnderSameEnvelope,true);
+assert.equal(portable.authority,'RECOMPUTED_SYMBOLIC_MODEL_ONLY');
+assert.deepEqual(verifyCanonInverseBundleR765(JSON.stringify(portable)),portable);
+assert.throws(()=>verifyCanonInverseBundleR765(JSON.stringify({...portable,
+ audit:{...portable.audit,reverseUnderSameEnvelope:false}})),/differs/);
+assert.throws(()=>verifyCanonInverseBundleR765(JSON.stringify({...portable,
+ witness:{...portable.witness,query:{...portable.witness.query,start:2}}})),/differs/);
+assert.throws(()=>verifyCanonInverseBundleR765('x'.repeat(240001)),/bounded/);
+assert.throws(()=>verifyCanonInverseBundleR765('{}'),/schema/);
 
 const monotone=computeCanonPathWitnessR763({start:1,targetDecision:'ESCALATE',targetMode:51,
  allowedAxes:['Motion'],scoreTrend:'NONDECREASING',maxHops:1,maxVisited:20});
@@ -62,7 +74,7 @@ assert.throws(()=>auditCanonInverseR765(computeCanonPathWitnessR763({
  start:1,targetDecision:'STAY',maxHops:0,maxVisited:1})),/only completed/);
 assert.throws(()=>verifyCanonInverseAuditR765(forward,'x'.repeat(65537)),/bounded/);
 const ui=fs.readFileSync('src/CanonTopologyWorkbenchR763.tsx','utf8');
-for(const token of ['data-r765-inverse','data-r765-directed-status','data-r765-flux','data-r765-reasons'])
+for(const token of ['data-r765-inverse','data-r765-directed-status','data-r765-flux','data-r765-reasons','data-r765-export','data-r765-import','data-r765-verify','data-r765-recovery-status'])
  assert(ui.includes(token),'R765 UI missing '+token);
 assert(ui.includes('auditCanonInverseR765'));
 console.log('R765 directed inverse/outverse audit: exact per-axis flux, reverse monotone veto, source-gated score/q/Lambda refusal, zero-hop identity, tamper controls PASS');
