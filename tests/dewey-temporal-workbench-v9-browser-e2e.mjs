@@ -92,7 +92,7 @@ try{
    assert.equal(typedDownload.suggestedFilename(),'omega-r757-typed-provenance.json');
    const typedWitness=JSON.parse(await readFile(await typedDownload.path(),'utf8'));
    assert.deepEqual(verifyTypedProvenanceWitnessR757(JSON.stringify(typedWitness)),typedWitness);
-   await typed.locator('details summary').click();
+   await typed.locator('[data-r757-recovery-panel] summary').click();
    await typed.locator('[data-r757-verify]').click();
    assert.match(await typed.locator('[data-r757-recovery]').innerText(),/PASS: typed witness deterministically/);
    await typed.locator('[data-r757-import]').fill(JSON.stringify({...typedWitness,evidence:{...typedWitness.evidence,productionAuthority:true}}));
