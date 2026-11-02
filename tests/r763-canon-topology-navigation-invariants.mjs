@@ -46,6 +46,13 @@ const admissibleStart=planCanonPathR763({start:1,targetDecision:'ESCALATE',targe
  maxHops:0,maxVisited:1,pathConstraintScope:'ALL_NODES',minScore:'0'});
 assert.equal(admissibleStart.status,'FOUND_IN_DECLARED_SYMBOLIC_GRAPH');
 assert.equal(admissibleStart.distance,0);assert.equal(admissibleStart.pathConstraintScope,'ALL_NODES');
+// Exact q filter removes the sole legal Perspective neighbor; a zero-hop budget is
+// exhaustive in the filtered graph, not a fictitious depth hold.
+const fenced=planCanonPathR763({start:1,targetDecision:'STAY',
+ allowedAxes:['Perspective'],pathConstraintScope:'ALL_NODES',
+ maxContradiction:'0.12',maxHops:0,maxVisited:20});
+assert.equal(fenced.status,'NO_MATCH_IN_EXHAUSTED_DECLARED_GRAPH');
+assert.equal(fenced.visited,1);
 assert.throws(()=>planCanonPathR763({start:1,pathConstraintScope:'IGNORE_EVIDENCE'}),/constraint scope/);
 const allNodeWitness=computeCanonPathWitnessR763({start:1,targetDecision:'STAY',minScore:'0.50',
  pathConstraintScope:'ALL_NODES'});
