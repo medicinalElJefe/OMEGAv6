@@ -197,6 +197,16 @@ try{
    assert.equal((await navigator.locator('[data-r763-status]').innerText()).trim(),'FOUND_IN_DECLARED_SYMBOLIC_GRAPH');
    assert.equal((await navigator.locator('[data-r763-distance]').innerText()).trim(),'6');
    assert.equal((await navigator.locator('[data-r763-destination]').innerText()).trim(),'24339');
+   const continuity=navigator.locator('[data-r764-replay="executable"]');
+   await continuity.waitFor({state:'visible',timeout:30000});
+   assert.match(await continuity.locator('[data-r764-frame]').innerText(),/Frame 1 \/ 7/);
+   assert.equal(await continuity.locator('[data-r764-plot]').count(),1);
+   await continuity.locator('[data-r764-next]').click();
+   assert.match(await continuity.locator('[data-r764-frame]').innerText(),/Frame 2 \/ 7/);
+   await navigator.locator('[data-r764-save]').click();
+   assert.match(await navigator.locator('[data-r764-status]').innerText(),/SAVED:/);
+   assert.ok(await page.evaluate(()=>Boolean(localStorage.getItem('omega.r764.canonTrajectoryCheckpoint'))));
+
    const navigatorDownloadPromise=page.waitForEvent('download',{timeout:30000});
    await navigator.locator('[data-r763-export]').click();
    const navigatorDownload=await navigatorDownloadPromise;
@@ -230,6 +240,37 @@ try{
    await navigator.locator('[data-r763-start]').fill('248833');
    await navigator.locator('[data-r763-search]').click();
    assert.match(await navigator.locator('[data-r763-error]').innerText(),/must be integer/);
+   await page.reload({waitUntil:'domcontentloaded',timeout:45000});
+   await page.locator('.o7-app[data-omega7="true"]').waitFor({state:'visible',timeout:30000});
+   const restoredScience=page.locator('.o7-science-workspace[data-route="Relativity"]');
+   if(!(await restoredScience.count())){
+    await page.locator('.o7-nav-r519').getByRole('button',{name:'Explore'}).click();
+    const restoredPortal=page.locator('.o7-r519-portal[data-r519-visual-navigation="EXPLORE"]');
+    await restoredPortal.waitFor({state:'visible',timeout:20000});
+    await restoredPortal.locator('button[data-r519-node="Relativity"]').click();
+    await restoredPortal.locator('button[data-r519-launch="Relativity"]').click();
+   }
+   await restoredScience.waitFor({state:'visible',timeout:30000});
+   const restoredOpen=restoredScience.locator('.o7-open-instrument');
+   if(await restoredOpen.count())await restoredOpen.click();
+   const restoredNavigator=restoredScience.locator('[data-r763-canon-navigator="executable"]');
+   await restoredNavigator.locator('[data-r764-load]').click();
+   assert.match(await restoredNavigator.locator('[data-r764-status]').innerText(),/RESTORED:/);
+   assert.match(await restoredNavigator.locator('[data-r764-frame]').innerText(),/Frame 2 \/ 7/);
+   assert.equal((await restoredNavigator.locator('[data-r763-destination]').innerText()).trim(),'24339');
+   await page.evaluate(()=>{
+    const key='omega.r764.canonTrajectoryCheckpoint';
+    const saved=JSON.parse(localStorage.getItem(key));
+    saved.summary.scarCrossings=999;
+    localStorage.setItem(key,JSON.stringify(saved));
+   });
+   await restoredNavigator.locator('[data-r764-load]').click();
+   assert.match(await restoredNavigator.locator('[data-r764-status]').innerText(),/REFUSED:/);
+   await restoredNavigator.locator('[data-r764-clear]').click();
+   assert.match(await restoredNavigator.locator('[data-r764-status]').innerText(),/CLEARED:/);
+   assert.equal(await page.evaluate(()=>localStorage.getItem('omega.r764.canonTrajectoryCheckpoint')),null);
+   console.log('R764 '+label+' exact continuity SVG, frame stepping, reload persistence, recomputed recovery, tamper refusal and clear PASS');
+
    console.log('R763 '+label+' generated Canon path, shortest exact search, portable JSON tamper refusal and resource HOLD PASS');
 
 
