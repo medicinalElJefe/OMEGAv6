@@ -77,6 +77,12 @@ jobs:
         run: node tests/r707-woven-topology-invariants.mjs
       - name: R770 source-derived woven field lens invariants
         run: node tests/r770-source-lens-invariants.mjs
+      - name: R771 native Memory source-executor integration and source integrity
+        run: |
+          node tests/r771-native-memory-analysis-invariants.mjs
+          node tests/r724-grounded-intelligence-invariants.mjs
+          node tests/r725-verified-memory-continuity-invariants.mjs
+          node tests/r726-verified-memory-trajectory-invariants.mjs
       - name: R616 original private workbook proof command fail-closed tests
         run: node tests/r616-local-original-workbook-import.mjs
       - name: R613 real historical workbook fingerprint and coordinate manifest
