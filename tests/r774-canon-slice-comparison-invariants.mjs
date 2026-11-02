@@ -72,6 +72,14 @@ assert.throws(()=>compareCanonSlicesR774({...query,metric:'FAKE'}),/unsupported/
 assert.throws(()=>compareCanonSlicesR774({...query,groupBy:'__proto__'}),/unsupported/);
 assert.throws(()=>compareCanonSlicesR774({...query,left:slice(null)}),/fix at least one/);
 assert.throws(()=>compareCanonSlicesR774({...query,right:slice(13)}),/integer/);
+assert.throws(()=>compareCanonSlicesR774({...query,right:{coordinates:[2,NaN,null,null,null],decision:'ANY'}}),/exact ordinal/);
+assert.throws(()=>compareCanonSlicesR774({...query,right:{coordinates:[2,undefined,null,null,null],decision:'ANY'}}),/exact ordinal/);
+const manualRows=Array.from({length:1728},(_,i)=>reconstructCanonFullRowR772(i+1));
+const manualSum=manualRows.reduce((sum,row)=>sum+Number(row.S_Coherence.replace('.','')),0);
+assert.equal(byState.left.summary.sumScaled4,manualSum);
+assert.equal(byState.left.summary.min,manualRows.map(row=>row.S_Coherence).sort()[0]);
+assert.equal(byState.left.summary.max,manualRows.map(row=>row.S_Coherence).sort().at(-1));
+
 assert.throws(()=>compareCanonSlicesR774({...query,canonicalMutation:true}),/unknown comparison/);
 assert.throws(()=>compareCanonSlicesR774({...query,left:{...slice(1),limit:248832}}),/slice accepts/);
 assert.throws(()=>parseCanonComparisonR774(' '.repeat(4097)),/bounded/);
