@@ -59,7 +59,26 @@ export function serializeSourceTessellationSvgR769(tile,{showEdges=true}={}){
     !validAddress(tile.selectedAddress)||tile.cells?.length!==tile.tileSize**2||
     !Array.isArray(tile.edges)||typeof showEdges!=='boolean')
   throw TypeError('R769 valid computed tile required');
- const s=tile.tileSize,polygons=tile.cells.map(c=>c.triangles.map(t=>
+ const s=tile.tileSize;
+ // Refuse malformed externally supplied tile objects before embedding attributes in a portable SVG.
+ // This is SVG structural safety, not proof that a tile came from the historical donor.
+ const safePoints=/^\d+,\d+ \d+,\d+ \d+,\d+$/;
+ const safeFill=/^#[0-9a-f]{6}$/i;
+ const validCell=(c,i)=>c&&c.address===(tile.originRow+Math.floor(i/s))*SIDE+tile.originCol+(i%s)&&
+  c.x===i%s&&c.y===Math.floor(i/s)&&Array.isArray(c.triangles)&&c.triangles.length===2&&
+  c.triangles.every(t=>t&&typeof t.points==='string'&&safePoints.test(t.points)&&
+   typeof t.fill==='string'&&safeFill.test(t.fill));
+ const validEdge=e=>e&&validAddress(e.from)&&validAddress(e.to)&&e.from!==e.to&&
+  [e.x1,e.y1,e.x2,e.y2].every(v=>Number.isFinite(v)&&v>=0&&v<=s);
+ if(!Number.isSafeInteger(tile.originRow)||!Number.isSafeInteger(tile.originCol)||
+    tile.originRow<0||tile.originCol<0||tile.originRow+s>SIDE||tile.originCol+s>SIDE||
+    tile.originRow%s!==0||tile.originCol%s!==0||
+    Math.floor(tile.selectedAddress/SIDE)<tile.originRow||
+    Math.floor(tile.selectedAddress/SIDE)>=tile.originRow+s||
+    tile.selectedAddress%SIDE<tile.originCol||tile.selectedAddress%SIDE>=tile.originCol+s||
+    !tile.cells.every(validCell)||!tile.edges.every(validEdge))
+  throw TypeError('R769 invalid source tile geometry refused');
+ const polygons=tile.cells.map(c=>c.triangles.map(t=>
   '<polygon points="'+t.points+'" fill="'+t.fill+'" data-address="'+c.address+'"/>').join('')).join('');
  const edges=showEdges?tile.edges.map(e=>
   '<line x1="'+e.x1+'" y1="'+e.y1+'" x2="'+e.x2+'" y2="'+e.y2+'" stroke="#fff" stroke-opacity=".38" stroke-width=".045" data-from="'+e.from+'" data-to="'+e.to+'"/>').join(''):'';
