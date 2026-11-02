@@ -254,7 +254,7 @@ try{
    await paired.locator('[data-r775-run]').click();
    assert.equal((await paired.locator('[data-r775-pairs]').innerText()).trim(),'20736');
    assert.equal(await paired.locator('[data-r775-transition-row]').count(),9);
-   assert.match(await paired.locator('[data-r775-mean-delta]').innerText(),/^-?[0-9]+\\.[0-9]{4}$/);
+   assert.match(await paired.locator('[data-r775-mean-delta]').innerText(),/^-?[0-9]+\.[0-9]{4}$/);
    await paired.locator('[data-r775-open-left]').first().click();
    assert.ok(Number(await navigator.locator('[data-r763-start]').inputValue())>=1);
    await paired.locator('[data-r775-save]').click();
