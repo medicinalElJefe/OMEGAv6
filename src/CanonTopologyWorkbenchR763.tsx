@@ -5,6 +5,7 @@ import {R764_LOCAL_KEY,deriveCanonTrajectoryR764,createCanonReplayCheckpointR764
  verifyCanonReplayCheckpointR764} from './proof/canonTrajectoryR764.js';
 import {auditCanonInverseR765,createCanonInverseBundleR765,
  verifyCanonInverseBundleR765} from './proof/canonInverseAuditR765.js';
+import {reconstructCanonFullRowR772,R772_FULL_SOURCE_HEADERS,R772_ORIGINAL_SOURCE_PROOF} from './proof/canonFullSourceR772.js';
 
 type Goal='STAY'|'TURN'|'ESCALATE';
 const exactInt=(s:string,name:string)=>{if(!/^(0|[1-9][0-9]*)$/.test(s))throw new RangeError(name+' requires exact nonnegative integer text');const v=Number(s);if(!Number.isSafeInteger(v))throw new RangeError(name+' is out of bounds');return v;};
@@ -34,6 +35,7 @@ export default function CanonTopologyWorkbenchR763({onAddress}:{onAddress?:(addr
   if(witness?.result?.status!=='FOUND_IN_DECLARED_SYMBOLIC_GRAPH')return null;
   try{return auditCanonInverseR765(witness);}catch{return null;}
  },[witness]);
+ const originalRow=useMemo(()=>{try{return reconstructCanonFullRowR772(exactInt(start,'Canon state'));}catch{return null;}},[start]);
  const local=useMemo(()=>{try{return {result:inspectCanonLocalR763(exactInt(start,'Canon state')),error:''};}
   catch(e){return {result:null,error:e instanceof Error?e.message:String(e)};}},[start]);
  const run=()=>{
@@ -143,6 +145,17 @@ export default function CanonTopologyWorkbenchR763({onAddress}:{onAddress?:(addr
     </>:<p role="alert">{local.error}</p>}
    </article>
   </div>
+  {originalRow&&<article className="r316-card" data-r772-source-semantics="source-matched">
+   <h3>R772 · Original Full Overall Canon · complete 24-column state</h3>
+   <p>Recover the source workbook's actual domain, state, relation, motion, perspective, principle, skins, mirror and water geometry at this Canon address. Every original stored row was independently checked; this is not measured physical motion or a new CanonState authority.</p>
+   <p><b>{originalRow.Domain} · {originalRow.State} · {originalRow.Relation} · {originalRow.Motion} · {originalRow.Perspective}</b></p>
+   <p data-r772-mirror>{originalRow.Mirror_Statement}</p>
+   <p data-r772-water>Water geometry: {originalRow.Water_Geometry_Teal}; Deep Mother: {originalRow.Deep_Mother_Field}; High Father: {originalRow.High_Father_Field}</p>
+   <p data-r772-original-fingerprint>Original SHA-256 {R772_ORIGINAL_SOURCE_PROOF.workbookSha256}; 248,832 source rows, 24 original fields, independently replayed. Original source bytes are not publicly bundled.</p>
+   <details><summary>Inspect every source-matched field for this address</summary>
+    <table><tbody>{R772_FULL_SOURCE_HEADERS.map(k=><tr key={k}><th scope="row">{k}</th><td>{String(originalRow[k])}</td></tr>)}</tbody></table>
+   </details>
+  </article>}
   {p&&<article className="r316-card" data-r763-result>
    <h3>Computed shortest-path result</h3>
    <p>Status: <b data-r763-status>{p.status}</b></p>
