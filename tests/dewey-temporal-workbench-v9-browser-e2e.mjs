@@ -193,6 +193,16 @@ try{
    await navigator.waitFor({state:'visible',timeout:30000});
    await navigator.locator('[data-r763-start]').fill('1');
    assert.equal((await navigator.locator('[data-r763-local-decision]').innerText()).trim(),'ESCALATE');
+   const original=navigator.locator('[data-r772-source-semantics="source-matched"]');
+   await original.waitFor({state:'visible',timeout:30000});
+   assert.match(await original.locator('[data-r772-mirror]').innerText(),/Origin as atom \/ bond \/ rest \/ seen/);
+   assert.match(await original.locator('[data-r772-water]').innerText(),/Contain origin through droplet memory/);
+   assert.match(await original.locator('[data-r772-original-fingerprint]').innerText(),/e1ccb57cdfbc78955dd6e86be110cdb91cb15a0cc78a869b74dca7e4ffa55af3/);
+   await original.locator('details summary').click();
+   assert.equal(await original.locator('tbody tr').count(),24);
+   await navigator.locator('[data-r763-start]').fill('248832');
+   assert.match(await original.locator('[data-r772-mirror]').innerText(),/Fracture as innovation \/ weave \/ ascend \/ unresolved/);
+   await navigator.locator('[data-r763-start]').fill('1');
    await navigator.locator('[data-r763-goal]').selectOption('STAY');
    await navigator.locator('[data-r763-search]').click();
    assert.equal((await navigator.locator('[data-r763-status]').innerText()).trim(),'FOUND_IN_DECLARED_SYMBOLIC_GRAPH');
