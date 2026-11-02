@@ -11,6 +11,7 @@ import {getMandala20736Field} from '../../src/mandala20736Runtime';
 import {computeRouteBasinsR732,inspectRouteBasinR732} from '../../src/routeBasinR732.mjs';
 import {renderRouteBasinRasterR733,addressAtRasterPointR733} from '../../src/routeBasinRasterR733.mjs';
 import {renderAtlasFieldRasterR734,ATLAS_FIELD_CHANNELS_R734} from '../../src/atlasFieldRasterR734.mjs';
+import SourceTessellationR769 from './SourceTessellationR769';
 import {computeSourceRouteProfileR735} from '../../src/sourceRouteProfileR735.mjs';
 import {computeSourcePhasePortraitR736} from '../../src/sourcePhasePortraitR736.mjs';
 import {computeSourcePhaseExchangeR737,serializeSourcePhaseExchangeR737} from '../../src/sourcePhaseExchangeR737.mjs';
@@ -171,6 +172,7 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
     }} style={{display:'block',width:'min(100%,432px)',height:'auto',aspectRatio:'1 / 1',imageRendering:'pixelated',cursor:'crosshair',margin:'10px 0',border:'1px solid #6d8795'}}/>
     <p data-r734-selected>Address {address}: {fieldRaster.label} = {fieldRaster.values[address]?.toFixed(6)??'unavailable'}</p>
     <small data-r734-boundary>Colors normalize within the computed source channel; signed channels center on zero. These values are deterministic model projections, not measured physical fields, historical donor parity, empirical forecasts or CanonState changes.</small>
+    {field&&<SourceTessellationR769 field={field} raster={fieldRaster} address={address} onAddress={onAddress}/>}
    </div>}
    {routeProfile&&<div data-r735-route-profile>
     <h3>R735 · Computed successor metric traversal</h3>
