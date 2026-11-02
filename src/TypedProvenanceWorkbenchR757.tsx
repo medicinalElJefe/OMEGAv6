@@ -2,6 +2,7 @@ import {useEffect,useMemo,useState} from 'react';
 import {computeTypedProvenanceWitnessR757,verifyTypedProvenanceWitnessR757} from './proof/canonCrossDomainProvenanceR757.js';
 import {conditionalCanonGateR758} from './proof/canonPrecisionIntervalR758.js';
 import {jointCanonPrecisionR759,computeJointCanonWitnessR759,verifyJointCanonWitnessR759} from './proof/canonJointPrecisionR759.js';
+import {observerRelativeCanonR760} from './proof/deweyObserverTransportR760.js';
 
 type Props={address:number;onAddress:(address:number)=>void};
 const parseIndex=(value:string,max:number,name:string)=>{
@@ -21,6 +22,7 @@ export default function TypedProvenanceWorkbenchR757({address,onAddress}:Props){
  const[slot,setSlot]=useState(String(address)),[domain,setDomain]=useState('1');
  const[c,setC]=useState('0.1'),[phi,setPhi]=useState('0.42'),[q,setQ]=useState('0.1'),[lambda,setLambda]=useState('0.1');
  const[storedS,setStoredS]=useState('0.2090');
+ const[referenceLo,setReferenceLo]=useState('0.2090'),[referenceHi,setReferenceHi]=useState('0.2091'),[transportError,setTransportError]=useState('0.00001');
  const[importText,setImportText]=useState(''),[recovery,setRecovery]=useState('');
  const[jointImport,setJointImport]=useState(''),[jointRecovery,setJointRecovery]=useState('');
  useEffect(()=>setSlot(String(address)),[address]);
@@ -40,6 +42,11 @@ export default function TypedProvenanceWorkbenchR757({address,onAddress}:Props){
   try{return {certificate:jointCanonPrecisionR759({c,phi,q,lambda},storedS),error:''};}
   catch(e){return {certificate:null,error:e instanceof Error?e.message:String(e)};}
  },[c,phi,q,lambda,storedS]);
+ const observer=useMemo(()=>{
+  try{return {certificate:observerRelativeCanonR760({metrics:{c,phi,q,lambda},storedScore:storedS,
+   referenceLower:referenceLo,referenceUpper:referenceHi,error:transportError}),error:''};}
+  catch(e){return {certificate:null,error:e instanceof Error?e.message:String(e)};}
+ },[c,phi,q,lambda,storedS,referenceLo,referenceHi,transportError]);
  const exportWitness=()=>{
   if(!result.packet)return;
   const raw=JSON.stringify(result.packet,null,2);
@@ -97,6 +104,15 @@ export default function TypedProvenanceWorkbenchR757({address,onAddress}:Props){
     </>:<p role="alert" data-r757-error>{result.error}</p>}
    </article>
   </div>
+  <details data-r760-observer-panel>
+   <summary>V26 hypothetical observer-relative transport — research, not measured motion</summary>
+   <label>Reference score lower <input data-r760-reference-low inputMode="decimal" value={referenceLo} onChange={e=>setReferenceLo(e.target.value)}/></label>
+   <label>Reference score upper <input data-r760-reference-high inputMode="decimal" value={referenceHi} onChange={e=>setReferenceHi(e.target.value)}/></label>
+   <label>Assumed absolute transport error <input data-r760-error inputMode="decimal" value={transportError} onChange={e=>setTransportError(e.target.value)}/></label>
+   <p>Conditional transport gate: <strong data-r760-gate>{observer.certificate?.conditionalGate||'INVALID_INTERVAL'}</strong></p>
+   <p data-r760-status>{observer.certificate?.status||observer.error}</p>
+   <p>These reference measurements and their error bounds have NOT been authenticated. An apparent decision never authorizes a live Canon action.</p>
+  </details>
   <details data-r757-recovery-panel><summary>Recover and independently verify a witness</summary>
    <textarea rows={5} data-r757-import aria-label="R757 typed witness JSON" value={importText} onChange={e=>setImportText(e.target.value)}/>
    <button type="button" data-r757-verify onClick={verify}>Recompute and verify</button>
