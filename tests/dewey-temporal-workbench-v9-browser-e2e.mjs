@@ -7,7 +7,7 @@ import {verifyTypedProvenanceWitnessR757} from '../src/proof/canonCrossDomainPro
 import {verifyJointCanonWitnessR759} from '../src/proof/canonJointPrecisionR759.js';
 import {verifyCanonIndexWitnessR761} from '../src/proof/canonIndexReconstructionR761.js';
 import {verifyCanonPathWitnessR763} from '../src/proof/canonNavigationR763.js';
-import {deriveCanonTrajectoryR764} from '../src/proof/canonTrajectoryR764.js';
+import {deriveCanonTrajectoryR764,createCanonReplayCheckpointR764} from '../src/proof/canonTrajectoryR764.js';
 const base=(process.env.OMEGA_E2E_URL||process.env.OMEGA_PUBLIC_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 const expected=String(process.env.OMEGA_EXPECTED_SHA||'').trim();
 if(expected){
@@ -301,6 +301,38 @@ try{
    await inverseInput.fill(JSON.stringify(exportedInverse));
    await directional.locator('[data-r765-verify]').click();
    assert.match(await directional.locator('[data-r765-recovery-status]').innerText(),/REFUSED:/);
+   const handoff=createCanonReplayCheckpointR764(pathWitness,1);
+   await page.evaluate(value=>localStorage.setItem('omega.r764.canonTrajectoryCheckpoint',JSON.stringify(value)),handoff);
+   await page.locator('.o7-nav-r519').getByRole('button',{name:'Explore'}).click();
+   const traversalPortal=page.locator('.o7-r519-portal[data-r519-visual-navigation="EXPLORE"]');
+   await traversalPortal.waitFor({state:'visible',timeout:20000});
+   await traversalPortal.locator('button[data-r519-node="Traversal"]').click();
+   await traversalPortal.locator('button[data-r519-launch="Traversal"]').click();
+   const traversal=page.locator('.o7-traversal-workspace[data-route="Traversal"]');
+   await traversal.waitFor({state:'visible',timeout:30000});
+   const handoffUI=traversal.locator('[data-r766-traversal="executable"]');
+   await handoffUI.locator('[data-r766-load]').click();
+   assert.match(await handoffUI.locator('[data-r766-frame]').innerText(),/Frame 2 \/ 7/);
+   assert.equal(await handoffUI.locator('[data-r766-plot]').count(),1);
+   const frame2=deriveCanonTrajectoryR764(pathWitness).frames[1].atlasAddress20736;
+   const frame3=deriveCanonTrajectoryR764(pathWitness).frames[2].atlasAddress20736;
+   await handoffUI.locator('[data-r766-project]').click();
+   assert.equal(Number(await page.evaluate(()=>localStorage.getItem('omega.v6.address'))),frame2);
+   await handoffUI.locator('[data-r766-next]').click();
+   assert.match(await handoffUI.locator('[data-r766-frame]').innerText(),/Frame 3 \/ 7/);
+   assert.equal(Number(await page.evaluate(()=>localStorage.getItem('omega.v6.address'))),frame3);
+   assert.equal(JSON.parse(await page.evaluate(()=>localStorage.getItem('omega.r764.canonTrajectoryCheckpoint'))).frame,2);
+   await page.evaluate(()=>{
+    const key='omega.r764.canonTrajectoryCheckpoint';
+    const stored=JSON.parse(localStorage.getItem(key));
+    stored.summary.frameCount=999;
+    localStorage.setItem(key,JSON.stringify(stored));
+   });
+   await handoffUI.locator('[data-r766-prev]').click();
+   assert.match(await handoffUI.locator('[data-r766-error]').innerText(),/REFUSED:/);
+   assert.equal(Number(await page.evaluate(()=>localStorage.getItem('omega.v6.address'))),frame3);
+   assert.equal(await handoffUI.locator('[data-r766-session]').count(),0);
+   console.log('R766 '+label+' verified cross-workspace path traversal, address execution, checkpoint carry and tamper refusal PASS');
    console.log('R765 '+label+' exact inverse/outverse directional refusal, per-axis flux and recovered admissibility PASS');
    console.log('R764 '+label+' exact continuity SVG, frame stepping, reload persistence, recomputed recovery, tamper refusal and clear PASS');
 
