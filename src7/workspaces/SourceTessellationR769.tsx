@@ -1,22 +1,43 @@
-import {useMemo,useState} from 'react';
+import {useEffect,useMemo,useState} from 'react';
+import {ATLAS_FIELD_CHANNELS_R734} from '../../src/atlasFieldRasterR734.mjs';
+import {computeSourceFieldLensR770,DEFAULT_SOURCE_LENS_R770,SOURCE_LENS_STORAGE_KEY_R770,serializeSourceLensSettingsR770,parseSourceLensSettingsR770} from '../../src/sourceFieldLensR770.mjs';
 import {buildSourceTessellationR769,navigateSourceTessellationR769,serializeSourceTessellationSvgR769,SOURCE_TESSELLATION_SIZES_R769} from '../../src/sourceTessellationR769.mjs';
 import type {Mandala20736Field} from '../../src/mandala20736Runtime';
 type Props={field:Mandala20736Field;raster:any;address:number;onAddress:(address:number)=>void};
+type LensSettings={mode:'single'|'woven';first:string;second:string;weightPercent:number};
 /** Executable source-field tessellation, not an authenticated historical renderer. */
 export default function SourceTessellationR769({field,raster,address,onAddress}:Props){
  const [tileSize,setTileSize]=useState(12),[showEdges,setShowEdges]=useState(true);
- const tile=useMemo(()=>buildSourceTessellationR769(field,raster,address,tileSize),[field,raster,address,tileSize]);
+ const [lens,setLens]=useState<LensSettings>(()=>{
+  try{return typeof window==='undefined'?{...DEFAULT_SOURCE_LENS_R770}:parseSourceLensSettingsR770(window.localStorage.getItem(SOURCE_LENS_STORAGE_KEY_R770)||'');}
+  catch{return {...DEFAULT_SOURCE_LENS_R770};}
+ });
+ useEffect(()=>{try{window.localStorage.setItem(SOURCE_LENS_STORAGE_KEY_R770,serializeSourceLensSettingsR770(lens));}catch{/* private browsing or quota: source recomputation remains usable */}},[lens]);
+ const displayRaster=useMemo(()=>lens.mode==='woven'?
+  computeSourceFieldLensR770(field,lens.first,lens.second,lens.weightPercent):raster,
+  [field,raster,lens]);
+ const tile=useMemo(()=>buildSourceTessellationR769(field,displayRaster,address,tileSize),[field,displayRaster,address,tileSize]);
  const selected=tile.cells.find((c:any)=>c.address===address);
  const move=(dy:number,dx:number)=>onAddress(navigateSourceTessellationR769(address,dy,dx));
  const download=()=>{
   const svg=serializeSourceTessellationSvgR769(tile,{showEdges});
   const url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));
-  const a=document.createElement('a');a.href=url;a.download='omega-r769-source-'+raster.channel+'-'+address+'.svg';
+  const a=document.createElement('a');a.href=url;a.download='omega-r769-source-'+displayRaster.channel+'-'+address+'.svg';
   document.body.appendChild(a);a.click();a.remove();window.setTimeout(()=>URL.revokeObjectURL(url),1000);
  };
  return <section data-r769-tessellation='source-field' aria-label='Source field multiscale tessellation' style={{margin:'12px 0',padding:10,border:'1px solid #617987',borderRadius:8,maxWidth:580}}>
   <h4>R769 · Source-field multiscale tessellation</h4>
   <p>Zoom into the computed 144 × 144 address field. Each address becomes two source-colored triangles; their contrast follows the actual metric difference to its declared successor. Optional lines connect only successors inside the visible tile.</p>
+  <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
+   <label>Field lens <select data-r770-mode value={lens.mode} onChange={e=>setLens({...lens,mode:e.target.value as LensSettings['mode']})}><option value='single'>Single source channel</option><option value='woven'>Woven two-channel source lens</option></select></label>
+  </div>
+  {lens.mode==='woven'&&<div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center',margin:'8px 0'}}>
+   <label>First source <select data-r770-first value={lens.first} onChange={e=>setLens({...lens,first:e.target.value})}>{Object.entries(ATLAS_FIELD_CHANNELS_R734).map(([key,label])=><option key={key} value={key}>{label}</option>)}</select></label>
+   <label>Second source <select data-r770-second value={lens.second} onChange={e=>setLens({...lens,second:e.target.value})}>{Object.entries(ATLAS_FIELD_CHANNELS_R734).map(([key,label])=><option key={key} value={key}>{label}</option>)}</select></label>
+   <label>Second-source weight <input data-r770-weight type='range' min='0' max='100' step='5' value={lens.weightPercent} onChange={e=>setLens({...lens,weightPercent:Number(e.target.value)})}/>{lens.weightPercent}%</label>
+  </div>}
+  <p data-r770-summary role='status'>{lens.mode==='woven'?('Computed lens: '+(100-lens.weightPercent)+'% '+ATLAS_FIELD_CHANNELS_R734[lens.first]+' + '+lens.weightPercent+'% '+ATLAS_FIELD_CHANNELS_R734[lens.second]+' · '+displayRaster.values.length.toLocaleString()+' source addresses'):'Single source-channel projection (R769)'}</p>
+  <small data-r770-boundary>Woven lens normalizes each existing source channel independently and blends by the selected weights. Saved settings restore only this browser view; source metrics are recomputed. This is model-space color geometry, not an observed field, empirical forecast, donor renderer, or physical dimensions.</small>
   <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
    <label>Tile width <select data-r769-zoom value={tileSize} onChange={e=>setTileSize(Number(e.target.value))}>
     {SOURCE_TESSELLATION_SIZES_R769.map(n=><option key={n} value={n}>{n} × {n} addresses</option>)}

@@ -1,5 +1,12 @@
 # OMEGA capability acceptance ledger — observed checkpoint 2026-10-27
 
+## R769 exact-production closure and R770 source-field woven lens — 2026-11-02 UTC
+
+- **R769 exact-production accepted for bounded source-field tessellation:** [PR #1234](https://github.com/medicinalElJefe/OMEGAv6/pull/1234) merged as `6889f47784aa1167349fef27b9f2dd423103f48f` after eight exact-head workflow families. [Cloud Bridge #41445076934](https://github.com/medicinalElJefe/OMEGAv6/actions/runs/41445076934) completed verify, deploy-main, exact-SHA desktop/mobile R769 source-mesh interaction and SVG export, post-deploy R223 closure and governed continuation. Worker `c770fbb6-ce6f-4a80-9e71-aee6e3778493` promoted to 100% traffic from `fe8bd9ae-492c-4e4a-9f42-f5974c4f60f9`, which was rollback-eligible; no actual rollback. R223 closure [#41448334866](https://github.com/medicinalElJefe/OMEGAv6/actions/runs/41448334866) passed.
+- **R770 draft implementation, NOT merged or production-proven:** Existing R769 source renderer now supports an interactive two-channel source lens with independent full-field normalization, integer convex weighting, live triangle recoloring, safe SVG export and browser-local settings recovery. Recomputes all 20,736 source addresses without modifying source or CanonState. Node invariants and desktop/mobile R707 browser tests required on the exact final head; no acceptance until all eight workflow families, governed merge, exact production and rollback checks pass.
+- R650's twelve historical families remain incomplete. This lens does **not** establish donor-byte renderer fidelity, physical motion, empirical forecasting, cross-device memory or native GPU/Hybrid host execution. No R2 migration, paid services or backup deletion.
+
+
 ## R768 exact production closure and R769 executable source tessellation — 2026-11-02 UTC
 
 - **R768 production accepted only for bounded symbolic sector sweep:** [PR #1233](https://github.com/medicinalElJefe/OMEGAv6/pull/1233) merged as `39c99421bbc2c76cf91adadb77092bfcdeb74945`. [Cloud Bridge #41421455366](https://github.com/medicinalElJefe/OMEGAv6/actions/runs/41421455366) completed verify, deploy-main, live desktop/mobile proof, post-deploy authority closure and governed continuation. Exact Worker version `fe8bd9ae-492c-4e4a-9f42-f5974c4f60f9` promoted; previous Worker `0453e23a-27d4-4870-be92-91ce7f745ffa` rollback-eligible, rollback not executed. R223 exact-SHA closure run `41424892914` passed. Live Hybrid device proof remains outstanding.
