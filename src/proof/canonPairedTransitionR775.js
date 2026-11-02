@@ -25,6 +25,7 @@ export function normalizeCanonPairedTransitionR775(value){
  if(!value||typeof value!=='object'||Array.isArray(value)||
   Object.keys(value).some(k=>!['leftDomain','rightDomain','state','metric'].includes(k)))
   throw new TypeError('unknown paired-transition field');
+ if(Object.hasOwn(value,'state')&&value.state===undefined)throw new RangeError('state must be null or an ordinal 1..12');
  const {leftDomain,rightDomain,state=null,metric='S_Coherence'}=value;
  for(const v of [leftDomain,rightDomain])if(!Number.isSafeInteger(v)||v<1||v>12)
   throw new RangeError('domain must be an ordinal 1..12');
