@@ -71,7 +71,7 @@ for(const key of ['meanDelta','sourceWorkbookSha256','groups','left','right']){
 assert.throws(()=>compareCanonSlicesR774({...query,metric:'FAKE'}),/unsupported/);
 assert.throws(()=>compareCanonSlicesR774({...query,groupBy:'__proto__'}),/unsupported/);
 assert.throws(()=>compareCanonSlicesR774({...query,left:slice(null)}),/fix at least one/);
-assert.throws(()=>compareCanonSlicesR774({...query,right:slice(13)}),/integer/);
+assert.throws(()=>compareCanonSlicesR774({...query,right:slice(13)}),/exact ordinal/);
 assert.throws(()=>compareCanonSlicesR774({...query,right:{coordinates:[2,NaN,null,null,null],decision:'ANY'}}),/exact ordinal/);
 assert.throws(()=>compareCanonSlicesR774({...query,right:{coordinates:[2,undefined,null,null,null],decision:'ANY'}}),/exact ordinal/);
 const manualRows=Array.from({length:1728},(_,i)=>reconstructCanonFullRowR772(i+1));
