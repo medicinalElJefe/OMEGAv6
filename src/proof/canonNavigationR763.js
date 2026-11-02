@@ -75,10 +75,11 @@ const step=(from,to)=>{
 };
 export function planCanonPathR763({start,targetDecision='STAY',targetMode=null,
  allowedAxes=R763_AXES,minScore=null,maxBurden=null,maxContradiction=null,
- maxHops=8,maxVisited=12000}={}){
+ maxHops=8,maxVisited=12000,scoreTrend='ANY'}={}){
  integer(start,1,248832,'start');
  if(!['STAY','TURN','ESCALATE'].includes(targetDecision))throw new RangeError('targetDecision invalid');
  if(targetMode!==null)integer(targetMode,1,188,'targetMode');
+ if(!['ANY','NONDECREASING'].includes(scoreTrend))throw new RangeError('unsupported exact score-trend constraint');
  integer(maxHops,0,20,'maxHops');integer(maxVisited,1,100000,'maxVisited');
  canonNeighborEdgesR763(start,allowedAxes);
  const o={targetDecision,targetMode,
@@ -104,7 +105,9 @@ export function planCanonPathR763({start,targetDecision='STAY',targetMode=null,
     externalSourceAuthority:false,canonicalMutation:false};
   }
   if(distance[i]===maxHops){if(canonNeighborEdgesR763(i,allowedAxes).some(e=>previous[e.to]===0))depthLimited=true;continue;}
-  for(const e of canonNeighborEdgesR763(i,allowedAxes))if(previous[e.to]===0){previous[e.to]=i;distance[e.to]=distance[i]+1;queue.push(e.to);}
+  for(const e of canonNeighborEdgesR763(i,allowedAxes))if(previous[e.to]===0){
+   if(scoreTrend==='NONDECREASING'){const next=canonNodeR763(e.to);if(cmp(BigInt(next.scoreNumerator),BigInt(next.scoreDenominator),BigInt(row.scoreNumerator),BigInt(row.scoreDenominator))<0)continue;}
+   previous[e.to]=i;distance[e.to]=distance[i]+1;queue.push(e.to);}
  }
  return {schema:'OMEGA_R763_EXACT_SYMBOLIC_PATH_V1',
   status:q<queue.length?'RESOURCE_HOLD_NO_INFERENCE':depthLimited?'DEPTH_HOLD_NO_INFERENCE':'NO_MATCH_IN_EXHAUSTED_DECLARED_GRAPH',
@@ -123,11 +126,11 @@ export function inspectCanonLocalR763(index){
 /** Portable certificate independently recomputes the full bounded BFS. */
 export function computeCanonPathWitnessR763(query){
  if(!query||typeof query!=='object'||Array.isArray(query))throw new TypeError('path query object required');
- const keys=['start','targetDecision','targetMode','allowedAxes','minScore','maxBurden','maxContradiction','maxHops','maxVisited'];
+ const keys=['start','targetDecision','targetMode','allowedAxes','minScore','maxBurden','maxContradiction','maxHops','maxVisited','scoreTrend'];
  if(Object.keys(query).some(k=>!keys.includes(k)))throw new Error('unknown search capability key');
  const spec={start:query.start,targetDecision:query.targetDecision??'STAY',targetMode:query.targetMode??null,
   allowedAxes:query.allowedAxes??R763_AXES,minScore:query.minScore??null,maxBurden:query.maxBurden??null,
-  maxContradiction:query.maxContradiction??null,maxHops:query.maxHops??8,maxVisited:query.maxVisited??12000};
+  maxContradiction:query.maxContradiction??null,maxHops:query.maxHops??8,maxVisited:query.maxVisited??12000,scoreTrend:query.scoreTrend??'ANY'};
  return {schema:'OMEGA_R763_PORTABLE_PATH_WITNESS_V1',query:spec,result:planCanonPathR763(spec),scope:R763_SCOPE};
 }
 export function verifyCanonPathWitnessR763(raw){
