@@ -59,3 +59,32 @@ export function boundedResearchLinkR757({slot0,v8Id,pscPingId,chartId,chartStatu
   pscSemanticIdentity:false,canon5PhysicalIdentity:false,autoPingExecution:false,
   globalSharpSingmaster:'OPEN',canonicalMutation:false};
 }
+
+/** A user-selected, bounded computation. These metrics are hypothetical input,
+ * not recovered Canon rows or observations. Matching ordinals never prove
+ * identity between independent V8, PSC and Canon5 ontologies.
+ */
+export function computeTypedProvenanceWitnessR757({slot0,domain1,metrics}){
+ const v8Id=v8SourceAtlasIdR757(slot0);
+ const pscPingId=pscMasterPingIdR757(slot0);
+ const canon5Key=canon5KeyR757(domain1,slot0);
+ if(!metrics||typeof metrics!=='object'||Array.isArray(metrics))throw new TypeError('four explicit hypothetical metrics required');
+ const {c,phi,q,lambda}=metrics;
+ const decision=canonDecisionR757(c,phi,q,lambda);
+ const s=Math.floor(slot0/1728)+1,r=Math.floor(slot0/144)%12+1,m=Math.floor(slot0/12)%12+1,p=slot0%12+1;
+ return {
+  schema:'OMEGA_R757_TYPED_PROVENANCE_WITNESS_V1',
+  inputs:{slot0,domain1,metrics:{c,phi,q,lambda},metricAuthority:'USER_SUPPLIED_HYPOTHETICAL'},
+  coordinates:{v8Id,pscPingId,canon5Key,mode188:mode188ValueR757(domain1,s,r,m,p)},
+  modeledDecision:decision,
+  evidence:{numericOrdinalAlignmentOnly:true,semanticIdentityProved:false,externalCorpusVerified:false,
+   globalSingmasterProof:'OPEN',productionAuthority:false,canonicalMutation:false,deviceExecution:false}
+ };
+}
+export function verifyTypedProvenanceWitnessR757(raw){
+ const supplied=typeof raw==='string'?JSON.parse(raw):raw;
+ if(!supplied||typeof supplied!=='object'||Array.isArray(supplied)||supplied.schema!=='OMEGA_R757_TYPED_PROVENANCE_WITNESS_V1')throw new Error('invalid R757 witness schema');
+ const expected=computeTypedProvenanceWitnessR757(supplied.inputs||{});
+ if(JSON.stringify(supplied)!==JSON.stringify(expected))throw new Error('R757 witness mismatch: altered fields or unsupported authority claim');
+ return expected;
+}

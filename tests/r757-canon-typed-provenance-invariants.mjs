@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {R757_EVIDENCE_BOUNDARY,canon5KeyR757,v8SourceAtlasIdR757,pscMasterPingIdR757,mode188ValueR757,canonDecisionR757,boundedResearchLinkR757} from '../src/proof/canonCrossDomainProvenanceR757.js';
+import {R757_EVIDENCE_BOUNDARY,canon5KeyR757,v8SourceAtlasIdR757,pscMasterPingIdR757,mode188ValueR757,canonDecisionR757,boundedResearchLinkR757,computeTypedProvenanceWitnessR757,verifyTypedProvenanceWitnessR757} from '../src/proof/canonCrossDomainProvenanceR757.js';
 const v8=new Set(),canon=new Set(),psc=new Set(),mode=new Set();
 for(let i=0;i<20736;i++){
  const id=v8SourceAtlasIdR757(i),ping=pscMasterPingIdR757(i);
@@ -27,3 +27,17 @@ assert.throws(()=>canon5KeyR757(0,0));
 assert.throws(()=>mode188ValueR757(13,1,1,1,1));
 assert.equal(R757_EVIDENCE_BOUNDARY.productionAuthority,false);
 console.log('R757 exact 20736-address and 248832-five-axis bijection PASS; all cross-domain theorem promotions HELD');
+
+const witness=computeTypedProvenanceWitnessR757({slot0:20735,domain1:12,metrics:{c:.1,phi:.42,q:.1,lambda:.1}});
+assert.equal(witness.coordinates.v8Id,'D11-P11-R11-L11');
+assert.equal(witness.coordinates.pscPingId,'PSC-20736');
+assert.equal(witness.coordinates.canon5Key,'D12-S12-R12-M12-P12');
+assert.equal(witness.modeledDecision.decision,'TURN');
+assert.equal(witness.inputs.metricAuthority,'USER_SUPPLIED_HYPOTHETICAL');
+assert.equal(witness.evidence.semanticIdentityProved,false);
+assert.deepEqual(verifyTypedProvenanceWitnessR757(JSON.stringify(witness)),witness);
+assert.throws(()=>verifyTypedProvenanceWitnessR757(JSON.stringify({...witness,evidence:{...witness.evidence,productionAuthority:true}})),/mismatch/);
+assert.throws(()=>verifyTypedProvenanceWitnessR757(JSON.stringify({...witness,coordinates:{...witness.coordinates,pscPingId:'PSC-00001'}})),/mismatch/);
+assert.throws(()=>computeTypedProvenanceWitnessR757({slot0:20736,domain1:1,metrics:{c:1,phi:1,q:1,lambda:1}}),/outside/);
+assert.throws(()=>computeTypedProvenanceWitnessR757({slot0:0,domain1:1,metrics:{c:0,phi:1,q:1,lambda:1}}),/positive/);
+console.log('R757 executable typed provenance witness, recomputation and tamper refusal PASS');
