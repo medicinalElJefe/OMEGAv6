@@ -102,6 +102,18 @@ try{
    await typed.locator('[data-r757-slot]').fill('0');
    await typed.locator('[data-r757-commit]').click();
    await page.waitForFunction(()=>document.querySelector('.o7-science-workspace[data-route="Relativity"]')?.getAttribute('data-address')==='0',{timeout:10000});
+   await typed.locator('[data-r757-c]').fill('0.2654');
+   await typed.locator('[data-r757-phi]').fill('0.5444');
+   await typed.locator('[data-r757-q]').fill('0.1765');
+   await typed.locator('[data-r757-lambda]').fill('0.1667');
+   assert.equal((await typed.locator('[data-r758-precision-gate]').innerText()).trim(),'PRECISION_HOLD');
+   await typed.locator('[data-r757-c]').fill('0.5199');
+   await typed.locator('[data-r757-phi]').fill('0.5500');
+   await typed.locator('[data-r757-q]').fill('0.3824');
+   await typed.locator('[data-r757-lambda]').fill('0.9167');
+   assert.equal((await typed.locator('[data-r758-precision-gate]').innerText()).trim(),'ESCALATE');
+   assert.match(await typed.locator('[data-r758-precision-scope]').innerText(),/not original-precision or live action evidence/);
+   console.log('R758 '+label+' conditional exact interval, precision HOLD and strict no-authority UI PASS');
    console.log('R757 '+label+' executable typed provenance, atlas navigation, exact JSON recovery and tamper refusal PASS');
 
    assert.equal(errors.length,0,label+': browser errors '+errors.join(' | '));
