@@ -32,7 +32,10 @@ export function deriveCanonTrajectoryR764(witness){
    if(prev.phaseGroup!==node.phaseGroup)phaseTransitions++;
    if(prev.mode188!==node.mode188)modeTransitions++;
   }
+  const [domain,state,relation,motion,perspective]=node.axes;
+  const atlasAddress20736=(((state-1)*12+(relation-1))*12+(motion-1))*12+(perspective-1);
   return {step:i,index:node.index,key:node.key,decision:node.decision,
+   outerDomain:domain,atlasAddress20736,atlasCoordinates:[state,relation,motion,perspective],
    mode188:node.mode188,phaseGroup:node.phaseGroup,score:node.score,
    scoreNumerator:node.scoreNumerator,scoreDenominator:node.scoreDenominator,
    cumulativeExactDelta:format(running),cumulativeBoundaryScars:scars,
