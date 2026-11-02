@@ -85,6 +85,42 @@ try{
   await bridge.locator('[data-r767-load]').click();
   await bridge.locator('[data-r767-session]').waitFor({state:'visible',timeout:10000});
   console.log('R767 '+label+' source-recomputed path × historical workbook execution, real Atlas handoff and tamper refusal PASS');
+  // R768: real 7 × path-length sector sweep, clock/Atlas projection and portable
+  // recomputed recovery. Rejected imports must not alter the saved checkpoint.
+  const sweep=bridge.locator('[data-r768-instrument]');
+  await sweep.locator('[data-r768-open]').click();
+  await sweep.locator('[data-r768-sweep]').waitFor({state:'visible',timeout:15000});
+  if(await sweep.locator('tbody tr').count()!==7)throw Error(label+': R768 missing seven clock sectors');
+  if(await sweep.locator('[data-r768-cell]').count()!==7*r767Trajectory.frames.length)throw Error(label+': R768 incomplete sector × path matrix');
+  await sweep.locator('[data-r768-cell="4-2"]').click();
+  await page.waitForFunction(()=>document.querySelector('[data-r605-sector]')?.textContent?.includes('Sector 4/7'),null,{timeout:10000});
+  if(Number(await workspace.getAttribute('data-address'))!==r767Trajectory.frames[2].atlasAddress20736)
+   throw Error(label+': R768 matrix did not project the actual Atlas address');
+  if(JSON.parse(await page.evaluate(()=>localStorage.getItem('omega.r764.canonTrajectoryCheckpoint'))).frame!==2)
+   throw Error(label+': R768 matrix did not persist the chosen Science frame');
+  await sweep.locator('[data-r768-export]').click();
+  const sweepEditor=sweep.getByLabel('R768 sweep JSON');
+  const validSweep=await sweepEditor.inputValue();
+  const parsedSweep=JSON.parse(validSweep);
+  if(parsedSweep.verifiedStarTransitions!==7*r767Trajectory.frames.length||!parsedSweep.completeSevenSectorCycle)
+   throw Error(label+': R768 computed cycle certificate invalid');
+  await sweep.locator('[data-r768-recover]').click();
+  if(!(await bridge.locator('[data-r767-status]').innerText()).includes('restored'))
+   throw Error(label+': R768 valid export was not recovered');
+  const beforeTamper=await page.evaluate(()=>localStorage.getItem('omega.r764.canonTrajectoryCheckpoint'));
+  parsedSweep.sectors[3].frames[2].activeStar=parsedSweep.sectors[3].frames[2].activeStar%7+1;
+  await sweepEditor.fill(JSON.stringify(parsedSweep));
+  await sweep.locator('[data-r768-recover]').click();
+  if(!(await sweep.locator('[data-r768-error]').innerText()).includes('REFUSED:'))
+   throw Error(label+': R768 altered sweep was accepted');
+  if(await page.evaluate(()=>localStorage.getItem('omega.r764.canonTrajectoryCheckpoint'))!==beforeTamper)
+   throw Error(label+': R768 altered sweep changed persistent Science checkpoint');
+  await sweepEditor.fill(validSweep);
+  await sweep.locator('[data-r768-recover]').click();
+  await instrument.getByRole('button',{name:'Reset clock to sector 1'}).click();
+  await assertFrame(0);
+  console.log('R768 '+label+' seven-sector × path execution, real clock/Atlas projection, portable recovery and tamper refusal PASS');
+
   // R663: exercise real browser-side historical evidence comparison, discrepancy and refusal.
   const recon=instrument.locator('[data-r663-reconciliation="true"]');
   // The reconciliation tool is below the historical frame inside a scrollable
