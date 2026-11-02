@@ -27,6 +27,10 @@ const same=planCanonPathR763({start:1,targetDecision:'ESCALATE',targetMode:mode,
 assert.equal(same.distance,0);assert.equal(same.destination,1);
 assert.equal(planCanonPathR763({start:1,maxVisited:1,maxHops:8}).status,'RESOURCE_HOLD_NO_INFERENCE');
 assert.equal(planCanonPathR763({start:1,maxVisited:100,maxHops:0}).status,'DEPTH_HOLD_NO_INFERENCE');
+const monotone=planCanonPathR763({start:1,targetDecision:'STAY',scoreTrend:'NONDECREASING',maxHops:8,maxVisited:1000});
+assert.equal(monotone.status,'NO_MATCH_IN_EXHAUSTED_DECLARED_GRAPH');
+assert.equal(monotone.visited,24);
+assert.throws(()=>planCanonPathR763({start:1,scoreTrend:'INVENTED_CAUSALITY'}),/score-trend/);
 assert.equal(planCanonPathR763({start:1,targetDecision:'STAY',minScore:'10',allowedAxes:['Perspective'],maxVisited:100,maxHops:12}).status,'NO_MATCH_IN_EXHAUSTED_DECLARED_GRAPH');
 const restricted=planCanonPathR763({start:1,targetDecision:'STAY',minScore:'0.50',
  maxBurden:'1',maxContradiction:'1',maxHops:8,maxVisited:15000});
