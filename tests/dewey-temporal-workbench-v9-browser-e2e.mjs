@@ -5,6 +5,7 @@ import {verifyTemporalWorkbenchV9} from '../src/proof/deweyTemporalWorkbenchRunt
 import {verifyPellWorkbenchR755} from '../src/proof/singmasterResearchWorkbenchR755.js';
 import {verifyTypedProvenanceWitnessR757} from '../src/proof/canonCrossDomainProvenanceR757.js';
 import {verifyJointCanonWitnessR759} from '../src/proof/canonJointPrecisionR759.js';
+import {verifyCanonIndexWitnessR761} from '../src/proof/canonIndexReconstructionR761.js';
 const base=(process.env.OMEGA_E2E_URL||process.env.OMEGA_PUBLIC_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 const expected=String(process.env.OMEGA_EXPECTED_SHA||'').trim();
 if(expected){
@@ -163,6 +164,28 @@ try{
    assert.match(await typed.locator('[data-r760-status]').innerText(),/CONSTRAINT_CONTRADICTION_HOLD/);
    console.log('R760 '+label+' exact transported observer interval, fail-closed contradiction and no live authority PASS');
 
+
+   await typed.locator('[data-r761-canon-panel] summary').click();
+   for(const axis of ['D','S','R','M','P'])await typed.locator('[data-r761-axis="'+axis+'"]').selectOption('12');
+   assert.equal((await typed.locator('[data-r761-index]').innerText()).trim(),'248832');
+   assert.equal((await typed.locator('[data-r761-score]').innerText()).trim(),'1.9896');
+   assert.equal((await typed.locator('[data-r761-decision]').innerText()).trim(),'STAY');
+   const canonDownloadPromise=page.waitForEvent('download',{timeout:30000});
+   await typed.locator('[data-r761-export]').click();
+   const canonDownload=await canonDownloadPromise;
+   assert.equal(canonDownload.suggestedFilename(),'omega-r761-canon-reconstruction.json');
+   const canonWitness=JSON.parse(await readFile(await canonDownload.path(),'utf8'));
+   assert.deepEqual(verifyCanonIndexWitnessR761(JSON.stringify(canonWitness)),canonWitness);
+   await typed.locator('[data-r761-verify]').click();
+   assert.match(await typed.locator('[data-r761-recovery]').innerText(),/PASS: R761 index-only witness recomputed/);
+   await typed.locator('[data-r761-import]').fill(JSON.stringify({...canonWitness,result:{...canonWitness.result,decision:'TURN'}}));
+   await typed.locator('[data-r761-verify]').click();
+   assert.match(await typed.locator('[data-r761-recovery]').innerText(),/REFUSED:/);
+   for(const axis of ['D','S','R','M','P'])await typed.locator('[data-r761-axis="'+axis+'"]').selectOption('1');
+   assert.equal((await typed.locator('[data-r761-index]').innerText()).trim(),'1');
+   assert.equal((await typed.locator('[data-r761-decision]').innerText()).trim(),'ESCALATE');
+   assert.match(await typed.locator('[data-r761-boundary]').innerText(),/original source generator is not authenticated/);
+   console.log('R761 '+label+' 248832 Canon index reconstruction, exact source-model replay, export, recovery and tamper refusal PASS');
 
    console.log('R757 '+label+' executable typed provenance, atlas navigation, exact JSON recovery and tamper refusal PASS');
 

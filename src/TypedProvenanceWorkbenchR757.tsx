@@ -3,6 +3,7 @@ import {computeTypedProvenanceWitnessR757,verifyTypedProvenanceWitnessR757} from
 import {conditionalCanonGateR758} from './proof/canonPrecisionIntervalR758.js';
 import {jointCanonPrecisionR759,computeJointCanonWitnessR759,verifyJointCanonWitnessR759} from './proof/canonJointPrecisionR759.js';
 import {observerRelativeCanonR760} from './proof/deweyObserverTransportR760.js';
+import {reconstructCanonIndexR761,computeCanonIndexWitnessR761,verifyCanonIndexWitnessR761} from './proof/canonIndexReconstructionR761.js';
 
 type Props={address:number;onAddress:(address:number)=>void};
 const parseIndex=(value:string,max:number,name:string)=>{
@@ -25,6 +26,9 @@ export default function TypedProvenanceWorkbenchR757({address,onAddress}:Props){
  const[referenceLo,setReferenceLo]=useState('0.2090'),[referenceHi,setReferenceHi]=useState('0.2091'),[transportError,setTransportError]=useState('0.00001');
  const[importText,setImportText]=useState(''),[recovery,setRecovery]=useState('');
  const[jointImport,setJointImport]=useState(''),[jointRecovery,setJointRecovery]=useState('');
+ const[canonAxes,setCanonAxes]=useState({D:1,S:1,R:1,M:1,P:1});
+ const[canonImport,setCanonImport]=useState(''),[canonRecovery,setCanonRecovery]=useState('');
+ const canonRow=useMemo(()=>reconstructCanonIndexR761(canonAxes.D,canonAxes.S,canonAxes.R,canonAxes.M,canonAxes.P),[canonAxes]);
  useEffect(()=>setSlot(String(address)),[address]);
  const result=useMemo(()=>{
   try{return {packet:computeTypedProvenanceWitnessR757({
@@ -66,6 +70,17 @@ export default function TypedProvenanceWorkbenchR757({address,onAddress}:Props){
  const verifyJoint=()=>{
   try{verifyJointCanonWitnessR759(jointImport);setJointRecovery('PASS: exact joint witness recomputed; no live authority.');}
   catch(e){setJointRecovery('REFUSED: '+(e instanceof Error?e.message:'Invalid joint witness'));}
+ };
+ const exportCanon=()=>{
+  const raw=JSON.stringify(computeCanonIndexWitnessR761(canonAxes),null,2);
+  setCanonImport(raw);setCanonRecovery('Exported deterministic model witness; verify by recomputation.');
+  const url=URL.createObjectURL(new Blob([raw+'\n'],{type:'application/json'}));
+  const a=document.createElement('a');a.href=url;a.download='omega-r761-canon-reconstruction.json';a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+ };
+ const verifyCanon=()=>{
+  try{verifyCanonIndexWitnessR761(canonImport);setCanonRecovery('PASS: R761 index-only witness recomputed; no source authority.');}
+  catch(e){setCanonRecovery('REFUSED: '+(e instanceof Error?e.message:'Invalid reconstruction witness'));}
  };
  const verify=()=>{
   try{verifyTypedProvenanceWitnessR757(importText);setRecovery('PASS: typed witness deterministically recomputed.');}
@@ -112,6 +127,26 @@ export default function TypedProvenanceWorkbenchR757({address,onAddress}:Props){
    <p>Conditional transport gate: <strong data-r760-gate>{observer.certificate?.conditionalGate||'INVALID_INTERVAL'}</strong></p>
    <p data-r760-status>{observer.certificate?.status||observer.error}</p>
    <p>These reference measurements and their error bounds have NOT been authenticated. An apparent decision never authorizes a live Canon action.</p>
+  </details>
+  <details data-r761-canon-panel>
+   <summary>V27 executable Canon5 index-only reconstruction — 248,832 modeled states</summary>
+   <p>Choose five independent 1–12 axes. This inferred exact-rational generator reproduces the recorded source dataset at four decimals, without authenticating the historical generator or any physical measurement.</p>
+   <div className="r316-grid">
+    {(['D','S','R','M','P'] as const).map(axis=><label key={axis}>Canon {axis} axis
+     <select data-r761-axis={axis} value={String(canonAxes[axis])} onChange={e=>setCanonAxes(prev=>({...prev,[axis]:Number(e.target.value)}))}>
+      {Array.from({length:12},(_,i)=><option key={i+1} value={i+1}>{i+1}</option>)}
+     </select></label>)}
+   </div>
+   <p>Reconstructed source address: <strong data-r761-index>{canonRow.index}</strong> · <strong data-r761-key>{canonRow.key}</strong></p>
+   <p>Mode 188: <strong data-r761-mode>{canonRow.mode188}</strong> · CΩ {canonRow.C} · Φ {canonRow.Phi} · q {canonRow.q} · Λ {canonRow.lambda}</p>
+   <p>Exact-before-rounding coherence: <strong data-r761-score>{canonRow.score}</strong> · Replayed label: <strong data-r761-decision>{canonRow.decision}</strong></p>
+   <p data-r761-boundary>Model replay only: the original source generator is not authenticated; no CanonState mutation, physical 5D inference or live action is authorized.</p>
+   <button type="button" data-r761-export onClick={exportCanon}>Export reconstructed witness JSON</button>
+   <label>Recover a reconstructed witness
+    <textarea rows={5} data-r761-import aria-label="R761 reconstruction witness JSON" value={canonImport} onChange={e=>setCanonImport(e.target.value)}/>
+   </label>
+   <button type="button" data-r761-verify onClick={verifyCanon}>Recompute and verify reconstruction</button>
+   <p role="status" data-r761-recovery>{canonRecovery}</p>
   </details>
   <details data-r757-recovery-panel><summary>Recover and independently verify a witness</summary>
    <textarea rows={5} data-r757-import aria-label="R757 typed witness JSON" value={importText} onChange={e=>setImportText(e.target.value)}/>
