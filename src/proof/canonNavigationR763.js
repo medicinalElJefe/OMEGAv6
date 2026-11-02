@@ -7,6 +7,7 @@ export const R763_AXES=Object.freeze(['Domain','State','Relation','Motion','Pers
 export const R763_STRIDES=Object.freeze([20736,1728,144,12,1]);
 export const R763_SCOPE=Object.freeze({
  stateSpace:248832,modeCount:188,axisCount:5,
+ reconstructedCanonLedgerSha256:'c5560df0a6967013a46d6eb5c286298b01961329427469568407cc8a6c65eb35',
  edgeModel:'ORDINAL_PLUS_MINUS_ONE_ONLY',
  optimization:'MINIMUM_SYMBOLIC_HOPS_UNDER_DECLARED_MODEL_FILTERS',
  phaseModel:'SIX_PHASE_INDEX_FROM_RECONSTRUCTED_CONTINUITY',
