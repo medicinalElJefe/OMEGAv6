@@ -80,4 +80,30 @@ assert.ok(browser.includes(restoredRow+String.fromCharCode(10)+originalFixture),
  'R775 must restore source address 1 with real line breaks before declaring the inherited R772 fixture');
 assert.ok(!browser.includes('source-pair inspection navigates to a real source address.'+String.fromCharCode(92)+'n'),
  'R775 fixture setup must not contain escaped newline bytes inside a JavaScript comment');
+
+// R776: exact paired-source reversibility and diagonal identity, without granting
+// empirical authority. Reversal must transpose every decision cell and negate
+// its integer-scaled metric delta, not merely preserve the aggregate count.
+const forward=computeCanonPairedTransitionR775({leftDomain:3,rightDomain:8,state:4,metric:'S_Coherence'});
+const reverse=computeCanonPairedTransitionR775({leftDomain:8,rightDomain:3,state:4,metric:'S_Coherence'});
+assert.equal(forward.paired,1728);
+assert.equal(reverse.paired,forward.paired);
+assert.equal(reverse.changed,forward.changed);
+assert.equal(reverse.stable,forward.stable);
+assert.equal(reverse.sumDeltaScaled4,-forward.sumDeltaScaled4);
+for(const cell of forward.matrix){
+ const opposite=reverse.matrix.find(c=>c.from===cell.to&&c.to===cell.from);
+ assert.ok(opposite,'missing reverse decision cell');
+ assert.equal(opposite.count,cell.count);
+ assert.equal(opposite.sumDeltaScaled4,-cell.sumDeltaScaled4);
+ assert.equal(opposite.firstLeftAddress,cell.firstRightAddress);
+ assert.equal(opposite.firstRightAddress,cell.firstLeftAddress);
+}
+const diagonal=computeCanonPairedTransitionR775({leftDomain:8,rightDomain:8,state:4,metric:'S_Coherence'});
+assert.equal(diagonal.changed,0);
+assert.equal(diagonal.sumDeltaScaled4,0);
+assert.ok(diagonal.matrix.every(c=>c.from===c.to||c.count===0));
+assert.equal(diagonal.sourceModelOnly,true);
+assert.equal(diagonal.empiricalAuthority,false);
+
 console.log('R775 PAIRED CANON TRANSITIONS PASS · aligned source pairs, 3x3 decision matrix, exact deltas, local recovery and tamper refusal');
