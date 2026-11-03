@@ -3,9 +3,10 @@ import {readFileSync} from 'node:fs';
 import {R778_NATIVE_WORKSPACE_LINK_SCHEMA,nativeWorkspaceHrefR778,readNativeWorkspaceRouteR778} from '../src7/nativeWorkspaceLinksR778.js';
 assert.equal(R778_NATIVE_WORKSPACE_LINK_SCHEMA,'OMEGA7_NATIVE_WORKSPACE_LINK_R778');
 const nativeRegistry=readFileSync('src7/nativeCapabilityRegistry.tsx','utf8');
-const literal=nativeRegistry.match(/export const OMEGA7_NATIVE_ROUTES=Object\\.freeze\\(\\[([^\\]]+)\\] as const satisfies readonly OmegaRouteName\\[\\]\\)/);
-assert.ok(literal,'R778 must use the actual declared native route registry');
-const registered=[...literal[1].matchAll(/'([^']+)'/g)].map(m=>m[1]);
+const openNative=nativeRegistry.indexOf('export const OMEGA7_NATIVE_ROUTES=Object.freeze([');
+const closeNative=nativeRegistry.indexOf('] as const satisfies readonly OmegaRouteName[])',openNative);
+assert.ok(openNative>=0&&closeNative>openNative,'R778 must use the actual declared native route registry');
+const registered=[...nativeRegistry.slice(openNative,closeNative).matchAll(/'([^']+)'/g)].map(m=>m[1]);
 assert.equal(registered.length,44,'R778 must conserve all 44 native OMEGA7 routes');
 assert.equal(new Set(registered).size,44,'R778 registry must not duplicate routes');
 for(const route of registered){
