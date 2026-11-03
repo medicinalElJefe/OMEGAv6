@@ -2,7 +2,12 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {R778_NATIVE_WORKSPACE_LINK_SCHEMA,nativeWorkspaceHrefR778,readNativeWorkspaceRouteR778} from '../src7/nativeWorkspaceLinksR778.js';
 assert.equal(R778_NATIVE_WORKSPACE_LINK_SCHEMA,'OMEGA7_NATIVE_WORKSPACE_LINK_R778');
-const registered=['Relativity','Atlas','Earth Now','Hybrid Link','Memory','Full Sphere'];
+const nativeRegistry=readFileSync('src7/nativeCapabilityRegistry.tsx','utf8');
+const literal=nativeRegistry.match(/export const OMEGA7_NATIVE_ROUTES=Object\\.freeze\\(\\[([^\\]]+)\\] as const satisfies readonly OmegaRouteName\\[\\]\\)/);
+assert.ok(literal,'R778 must use the actual declared native route registry');
+const registered=[...literal[1].matchAll(/'([^']+)'/g)].map(m=>m[1]);
+assert.equal(registered.length,44,'R778 must conserve all 44 native OMEGA7 routes');
+assert.equal(new Set(registered).size,44,'R778 registry must not duplicate routes');
 for(const route of registered){
  const link=nativeWorkspaceHrefR778(route,registered);
  assert.equal(readNativeWorkspaceRouteR778(link,registered),route);
@@ -19,4 +24,4 @@ assert.ok(browser.includes("R778 '+label+' native Atlas link reopened")&&browser
 assert.ok(css.includes('.o7-native-toolbar [data-r778-native-link]')&&css.includes('min-height:44px'),'R778 direct link mobile touch contract missing');
 assert.equal(pkg.scripts['test:r778'],'node tests/r778-native-workspace-link-invariants.mjs');
 assert.ok(pkg.scripts['check:static'].includes('npm run test:r778'));
-console.log('R778 NATIVE WORKSPACE LINK PASS · 44-route allowlist binding · no untrusted URL route · shareable Atlas link and reload in desktop/mobile browser · Canon address excluded');
+console.log('R778 NATIVE WORKSPACE LINK PASS · 44 registered native route round trips · no untrusted URL route · shareable Atlas link and reload in desktop/mobile browser · Canon address excluded');
