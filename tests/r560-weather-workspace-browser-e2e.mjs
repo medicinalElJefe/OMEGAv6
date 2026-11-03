@@ -23,7 +23,8 @@ async function assertWeatherProviderUnavailable(page,widget,label){
   const refreshResponsePromise=page.waitForResponse(r=>r.url().includes('/api/earth/weather?')&&r.request().method()==='GET',{timeout:45000});
   await widget.getByRole('button',{name:'Refresh weather'}).click();
   const refreshResponse=await refreshResponsePromise;
-  await page.waitForFunction(({studio})=>{const el=studio?document.querySelector('[data-r563-forecast-panel] [data-weather-state]'):document.querySelector('[data-omega7-native="earth.weather"] [data-earth-view="WEATHER"]');return ['READY','ERROR'].includes(el?.getAttribute('data-weather-state'))}, {studio:label.includes('studio')},{timeout:45000});
+  const expectedState=refreshResponse.status()===200?'READY':'ERROR';
+  await page.waitForFunction(({studio,expectedState})=>{const el=studio?document.querySelector('[data-r563-forecast-panel] [data-weather-state]'):document.querySelector('[data-omega7-native="earth.weather"] [data-earth-view="WEATHER"]');return el?.getAttribute('data-weather-state')===expectedState}, {studio:label.includes('studio'),expectedState},{timeout:45000});
   const state=await widget.getAttribute('data-weather-state');
   if(refreshResponse.status()===200){
    if(state!=='READY')throw Error(label+': refresh HTTP 200 but widget state '+state);
