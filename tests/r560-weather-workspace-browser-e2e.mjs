@@ -18,11 +18,25 @@ async function assertWeatherProviderUnavailable(page,widget,label){
  if(!match)throw Error(label+': weather target coordinates unavailable');
  const response=await page.request.get(base+'/api/earth/weather?lat='+match[1]+'&lon='+match[2],{timeout:45000});
  if(response.status()===200){
-  // Source recovered between requests; demand that the widget can refresh to READY.
+  // A successful probe does not guarantee the next provider request succeeds.
+  // Capture the refresh request itself and classify its exact response.
+  const refreshResponsePromise=page.waitForResponse(r=>r.url().includes('/api/earth/weather?')&&r.request().method()==='GET',{timeout:45000});
   await widget.getByRole('button',{name:'Refresh weather'}).click();
-  await page.waitForFunction(({studio})=>{const el=studio?document.querySelector('[data-r563-forecast-panel] [data-weather-state]'):document.querySelector('[data-omega7-native="earth.weather"] [data-earth-view="WEATHER"]');return el?.getAttribute('data-weather-state')==='LOADING'}, {studio:label.includes('studio')},{timeout:10000});
+  const refreshResponse=await refreshResponsePromise;
   await page.waitForFunction(({studio})=>{const el=studio?document.querySelector('[data-r563-forecast-panel] [data-weather-state]'):document.querySelector('[data-omega7-native="earth.weather"] [data-earth-view="WEATHER"]');return ['READY','ERROR'].includes(el?.getAttribute('data-weather-state'))}, {studio:label.includes('studio')},{timeout:45000});
-  if(await widget.getAttribute('data-weather-state')!=='READY')throw Error(label+': source recovered but refresh failed');
+  const state=await widget.getAttribute('data-weather-state');
+  if(refreshResponse.status()===200){
+   if(state!=='READY')throw Error(label+': refresh HTTP 200 but widget state '+state);
+   console.log('R560 '+label+' provider recovered and refresh READY (HTTP 200)');
+   return;
+  }
+  if(refreshResponse.status()!==502)throw Error(label+': refresh unexpected HTTP '+refreshResponse.status()+'; state '+state);
+  const refreshPayload=await refreshResponse.json();
+  if(refreshPayload?.state!=='PROVIDER_UNAVAILABLE'||refreshPayload?.current!==null||!Array.isArray(refreshPayload?.hourly)||refreshPayload.hourly.length||!Array.isArray(refreshPayload?.daily)||refreshPayload.daily.length||refreshPayload?.canonicalMutation!==false||typeof refreshPayload?.evidenceHash!=='string'||!refreshPayload.evidenceHash)throw Error(label+': refresh 502 invalid outage envelope '+JSON.stringify(refreshPayload).slice(0,1000));
+  if(state!=='ERROR')throw Error(label+': refresh 502 did not render ERROR; state '+state);
+  if(!/OMEGA request failed \\(502\\)/.test(await widget.locator('.earth-r375-error').innerText()))throw Error(label+': refresh 502 error not visible');
+  if(await widget.locator('.earth-r375-hourly-card,.earth-r375-day-card').count())throw Error(label+': fabricated cards after refresh 502');
+  console.log('R560 '+label+' refresh provider reverted to 502; truthful unavailable UI PASS');
   return;
  }
  if(response.status()!==502)throw Error(label+': weather API unexpected HTTP '+response.status());
