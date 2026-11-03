@@ -73,4 +73,11 @@ for(const marker of ['data-r775-paired-transitions','data-r775-run','data-r775-p
  'data-r775-save','data-r775-restore','data-r775-export','data-r775-verify'])
  assert.ok(ui.includes(marker),'missing UI '+marker);
 assert.ok(parent.includes('<CanonPairedTransitionR775 onSelect={onSelect}'));
+const browser=readFileSync('tests/dewey-temporal-workbench-v9-browser-e2e.mjs','utf8');
+const restoredRow="   await navigator.locator('[data-r763-start]').fill('1');";
+const originalFixture="   const original=navigator.locator('[data-r772-source-semantics=\\\"source-matched\\\"]');";
+assert.ok(browser.includes(restoredRow+'\\n'+originalFixture),
+ 'R775 must restore source address 1 with actual line breaks before declaring the inherited R772 fixture');
+assert.ok(!browser.includes('source-pair inspection navigates to a real source address.\\\\n'),
+ 'R775 fixture setup must not contain escaped newline bytes inside a JavaScript comment');
 console.log('R775 PAIRED CANON TRANSITIONS PASS · aligned source pairs, 3x3 decision matrix, exact deltas, local recovery and tamper refusal');
