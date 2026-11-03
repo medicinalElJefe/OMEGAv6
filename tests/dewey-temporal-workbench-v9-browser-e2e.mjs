@@ -35,6 +35,17 @@ try{
    await science.waitFor({state:'visible',timeout:30000});
    const open=science.locator('.o7-open-instrument');
    if(await open.count())await open.click();
+   const focusIndex=science.locator('[data-r777-instrument-index]');
+   await focusIndex.waitFor({state:'visible',timeout:30000});
+   assert.equal((await focusIndex.getAttribute('aria-label')),'Relativity instrument navigation');
+   assert.equal(await focusIndex.locator('a').count(),5);
+   for(const id of ['relativity-lab','temporal-workbench','pell-research','typed-provenance','canon-topology']){
+    assert.equal(await science.locator('#o7-'+id).count(),1,'R777 lost instrument '+id);
+   }
+   await focusIndex.locator('a[href="#o7-temporal-workbench"]').press('Enter');
+   assert.equal(await page.evaluate(()=>document.activeElement?.id),'o7-temporal-workbench');
+   assert.equal(await science.locator('[data-dewey-v9-workbench="executable"]').count(),1);
+   console.log('R777 '+label+' Relativity instrument keyboard navigation, preserved tool mounts and target focus PASS');
    const instrument=science.locator('[data-dewey-v9-workbench="executable"]');
    await instrument.waitFor({state:'visible',timeout:30000});
    await instrument.locator('[data-v9-model]').selectOption('anisotropic');
