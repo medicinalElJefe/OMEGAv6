@@ -37,6 +37,7 @@ async function assertWeatherProviderUnavailable(page,widget,label){
   if(state!=='ERROR')throw Error(label+': refresh 502 did not render ERROR; state '+state);
   if(!/OMEGA request failed \(502\)/.test(await widget.locator('.earth-r375-error').innerText()))throw Error(label+': refresh 502 error not visible');
   if(await widget.locator('.earth-r375-hourly-card,.earth-r375-day-card').count())throw Error(label+': fabricated cards after refresh 502');
+  if(!/—/.test(await widget.locator('.earth-r375-head h3').innerText()))throw Error(label+': stale current temperature survived refresh 502');
   console.log('R560 '+label+' refresh provider reverted to 502; truthful unavailable UI PASS');
   return;
  }
