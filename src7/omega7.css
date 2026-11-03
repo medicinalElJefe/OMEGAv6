@@ -213,3 +213,13 @@
 .o7-r535-result small{display:block;margin-top:9px;color:#9aa4af}
 .o7-r535-result button{padding:10px 15px;border:1px solid #d9b66f;border-radius:9px;background:#d9b66f;color:#151515;font-weight:700;cursor:pointer}
 @media(max-width:620px){.o7-r535-live-head{align-items:flex-start;flex-direction:column}.o7-r535-address{align-items:flex-start}.o7-r535-metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+
+/* R777: navigable instrument index; never hides or unmounts historical capability. */
+.o7-science-instrument-index{display:flex;flex-wrap:wrap;gap:.5rem;position:relative;max-width:100%;padding:.75rem 0;margin:.5rem 0 1rem}
+.o7-science-instrument-index a{display:inline-flex;align-items:center;min-height:44px;padding:.55rem .85rem;border:1px solid currentColor;border-radius:.65rem;color:inherit;text-decoration:none;background:transparent;max-width:100%;overflow-wrap:anywhere}
+.o7-science-instrument-index a:hover,.o7-science-instrument-index a:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+.o7-science-workspace .o7-native-surface>section[id^="o7-"]{scroll-margin-top:1.5rem;min-width:0}
+.o7-science-workspace .o7-native-surface>section[id^="o7-"]:focus{outline:2px solid currentColor;outline-offset:4px}
+@media(max-width:600px){.o7-science-instrument-index{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.o7-science-instrument-index a{font-size:.875rem}}
+@media(prefers-reduced-motion:reduce){.o7-science-workspace .o7-native-surface>section[id^="o7-"]{scroll-behavior:auto}}
