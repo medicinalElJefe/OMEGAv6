@@ -275,7 +275,7 @@ try{
    await paired.locator('[data-r775-verify]').click();
    assert.match(await paired.locator('[data-r775-verification]').innerText(),/REFUSED:/);
    console.log('R775 '+label+' aligned source transitions, 3x3 decision matrix, address replay, local recovery and tamper refusal PASS');
-   const original=navigator.locator('[data-r772-source-semantics="source-matched"]');
+   // R774/R775 source-pair inspection navigates to a real source address.\n   // Restore the fixture's original row explicitly before asserting its semantics.\n   await navigator.locator('[data-r763-start]').fill('1');\n   const original=navigator.locator('[data-r772-source-semantics="source-matched"]');
    await original.waitFor({state:'visible',timeout:30000});
    assert.match(await original.locator('[data-r772-mirror]').innerText(),/Origin as atom \/ bond \/ rest \/ seen/);
    assert.match(await original.locator('[data-r772-water]').innerText(),/Contain origin through droplet memory/);
