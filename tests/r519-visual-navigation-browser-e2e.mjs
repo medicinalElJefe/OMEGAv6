@@ -40,6 +40,18 @@ async function prove(browser,label,viewport){
   await page.waitForFunction(()=>document.querySelector('.o7-main')?.getAttribute('data-native-route')==='Atlas',{timeout:20000});
   await page.locator('.o7-native-host').waitFor({state:'visible',timeout:20000});
   if(await page.locator('.o7-native-failure').count())throw new Error(label+': source-linked Atlas launch crashed');
+  const deepLink=page.locator('a[data-r778-native-link]');
+  await deepLink.waitFor({state:'visible'});
+  const href=await deepLink.getAttribute('href');
+  const directUrl=new URL(href||'',base+'/');
+  if(directUrl.searchParams.get('omega7')!=='1'||directUrl.searchParams.get('omega7route')!=='Atlas'||[...directUrl.searchParams].length!==2)throw new Error(label+': native instrument URL did not carry the exact route and no extra state');
+  await page.goto(directUrl.toString(),{waitUntil:'domcontentloaded',timeout:45000});
+  await page.waitForFunction(()=>document.querySelector('.o7-main')?.getAttribute('data-native-route')==='Atlas',null,{timeout:30000});
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>document.querySelector('.o7-main')?.getAttribute('data-native-route')==='Atlas',null,{timeout:30000});
+  if(!(await page.locator('.o7-nav-r519 button.active[aria-label="Explore"]').count()))throw new Error(label+': direct link failed to restore source domain');
+  console.log('R778 '+label+' native Atlas link reopened across navigation and reload with correct domain PASS');
+
   await page.locator('.o7-native-toolbar button').first().click();
   await page.waitForFunction(()=>!document.querySelector('.o7-main')?.getAttribute('data-native-route'),{timeout:10000});
   const direct=page.locator('.o7-r519-portal[data-r519-visual-navigation="EXPLORE"] button[data-r519-direct="Earth Now"]');

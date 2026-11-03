@@ -223,3 +223,8 @@
 .o7-science-workspace .o7-native-surface>section[id^="o7-"]:focus{outline:2px solid currentColor;outline-offset:4px}
 @media(max-width:600px){.o7-science-instrument-index{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.o7-science-instrument-index a{font-size:.875rem}}
 @media(prefers-reduced-motion:reduce){.o7-science-workspace .o7-native-surface>section[id^="o7-"]{scroll-behavior:auto}}
+
+/* R778 — explicit, shareable native-workspace link; never hide the primary Back control. */
+.o7-native-toolbar [data-r778-native-link]{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:0;padding:7px 12px;border:1px solid rgba(211,177,128,.44);border-radius:9px;color:#e7cba1;text-decoration:none;font:600 11px/1.35 system-ui,sans-serif;white-space:nowrap;background:rgba(211,177,128,.07)}
+.o7-native-toolbar [data-r778-native-link]:hover,.o7-native-toolbar [data-r778-native-link]:focus-visible{outline:2px solid #d4b07d;outline-offset:2px;background:rgba(211,177,128,.15)}
+@media(max-width:760px){.o7-native-toolbar [data-r778-native-link]{min-height:44px;font-size:10px;padding:7px 9px;white-space:normal;text-align:center}.o7-native-toolbar{gap:8px}}
