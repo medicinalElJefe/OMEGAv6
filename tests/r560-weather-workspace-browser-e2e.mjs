@@ -34,7 +34,7 @@ async function assertWeatherProviderUnavailable(page,widget,label){
   const refreshPayload=await refreshResponse.json();
   if(refreshPayload?.state!=='PROVIDER_UNAVAILABLE'||refreshPayload?.current!==null||!Array.isArray(refreshPayload?.hourly)||refreshPayload.hourly.length||!Array.isArray(refreshPayload?.daily)||refreshPayload.daily.length||refreshPayload?.canonicalMutation!==false||typeof refreshPayload?.evidenceHash!=='string'||!refreshPayload.evidenceHash)throw Error(label+': refresh 502 invalid outage envelope '+JSON.stringify(refreshPayload).slice(0,1000));
   if(state!=='ERROR')throw Error(label+': refresh 502 did not render ERROR; state '+state);
-  if(!/OMEGA request failed \\(502\\)/.test(await widget.locator('.earth-r375-error').innerText()))throw Error(label+': refresh 502 error not visible');
+  if(!/OMEGA request failed \(502\)/.test(await widget.locator('.earth-r375-error').innerText()))throw Error(label+': refresh 502 error not visible');
   if(await widget.locator('.earth-r375-hourly-card,.earth-r375-day-card').count())throw Error(label+': fabricated cards after refresh 502');
   console.log('R560 '+label+' refresh provider reverted to 502; truthful unavailable UI PASS');
   return;
