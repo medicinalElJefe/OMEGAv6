@@ -3,7 +3,8 @@ import {House,BriefcaseBusiness,Orbit,Palette,Code2,ShieldCheck} from 'lucide-re
 import {OMEGA7_CAPABILITIES,OMEGA7_DOMAINS,omega7CapabilitiesForDomain,searchOmega7Capabilities,type Omega7Domain} from './capabilityRegistry';
 import {Omega7AppStateProvider,useOmega7AppState} from './appState';
 import {Omega7Boundary} from './Omega7Boundary';
-import {isOmega7NativeRoute,Omega7NativeSurface} from './nativeCapabilityRegistry';
+import {OMEGA7_NATIVE_ROUTES,isOmega7NativeRoute,Omega7NativeSurface} from './nativeCapabilityRegistry';
+import {readNativeWorkspaceRouteR778,nativeWorkspaceHrefR778} from './nativeWorkspaceLinksR778.js';
 import {OMEGA7_PARITY_SUMMARY,parityEvidenceForRoute} from './parityLedgerR451';
 import {OMEGA7_ACCEPTED_PARITY_SUMMARY,acceptedParityForRoute} from './parityLedgerR453';
 import {OMEGA7_HEIGHTENED_SUMMARY} from './heightenedModeR457';
@@ -73,6 +74,17 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
   return()=>{live=false;window.removeEventListener(R468_EVENT,refresh as EventListener)};
  },[]);
 
+ // R778: explicit bookmarked instrument URLs reopen only registered native routes.
+ // Do not persist arbitrary route strings or infer execution authority from URL state.
+ useEffect(()=>{
+  const requested=readNativeWorkspaceRouteR778(window.location.search,OMEGA7_NATIVE_ROUTES);
+  if(!requested)return;
+  const cap=OMEGA7_CAPABILITIES.find(x=>x.legacyRoute===requested);
+  if(!cap||!isOmega7NativeRoute(cap.legacyRoute))return;
+  dispatch({type:'DOMAIN',domain:cap.domain});
+  dispatch({type:'SELECT_ROUTE',route:cap.legacyRoute});
+ },[dispatch]);
+
  const open=(route:string)=>{
   const cap=OMEGA7_CAPABILITIES.find(x=>x.legacyRoute===route);
   if(!cap)return;
@@ -122,7 +134,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
    <OmegaUserJourneyR536 route={state.selectedRoute} onOpen={open}/>
    {state.selectedRoute&&isOmega7NativeRoute(state.selectedRoute)?
     <section className='o7-native-host' data-native-host-route={state.selectedRoute}>
-     <div className='o7-native-toolbar'><button onClick={()=>dispatch({type:'SELECT_ROUTE',route:null})}>← Back to {DOMAIN_LABEL[state.domain]}</button><span>OMEGA7 native · OMEGAv6 engine preserved</span></div>
+     <div className='o7-native-toolbar'><button onClick={()=>dispatch({type:'SELECT_ROUTE',route:null})}>← Back to {DOMAIN_LABEL[state.domain]}</button><span>OMEGA7 native · OMEGAv6 engine preserved</span><a data-r778-native-link href={nativeWorkspaceHrefR778(state.selectedRoute,OMEGA7_NATIVE_ROUTES)} aria-label={'Direct link to '+state.selectedRoute+' workspace'} title='Bookmark or copy this link to reopen this exact instrument'>Direct instrument link</a></div>
      {activeRecovered&&activeRecovered.route===state.selectedRoute&&<aside className='o7-executor-capsule' data-r512-executor={activeRecovered.recoveredId} data-state={activeRecovered.state.toLowerCase()}>
       <div><span>Resolved historical software</span><b>{activeRecovered.recoveredName}</b><small>{activeRecovered.operation} → {activeRecovered.route}</small></div>
       <dl><div><dt>Executor</dt><dd>{activeRecovered.capabilityId}</dd></div><div><dt>Domain</dt><dd>{activeRecovered.executionDomain}</dd></div><div><dt>State</dt><dd>{activeRecovered.state.replaceAll('_',' ')}</dd></div><div><dt>Action</dt><dd>{(activeRecovered.launchKind||'EXECUTE').replaceAll('_',' ')}</dd></div><div><dt>Source</dt><dd>{(activeRecovered.sourceKind||'CAPABILITY_LINEAGE').replaceAll('_',' ')}</dd></div><div><dt>Proof</dt><dd>{activeRecovered.receiptAuthority} / {activeRecovered.admissionAuthority}</dd></div></dl>
