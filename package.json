@@ -270,7 +270,8 @@
     "test:r738": "node tests/r738-source-exchange-recovery-invariants.mjs",
     "test:r740": "node tests/r740-source-continuity-invariants.mjs",
     "test:r741": "node tests/r741-directed-source-route-invariants.mjs",
-    "test:r774": "node tests/r774-canon-slice-comparison-invariants.mjs"
+    "test:r774": "node tests/r774-canon-slice-comparison-invariants.mjs",
+    "test:r775": "node tests/r775-canon-paired-transition-invariants.mjs"
   },
   "dependencies": {
     "fflate": "^0.8.2",
