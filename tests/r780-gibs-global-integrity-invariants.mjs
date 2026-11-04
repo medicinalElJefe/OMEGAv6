@@ -62,7 +62,37 @@ try{
  globalThis.fetch=async url=>{calls.push(new URL(String(url)));return fake(actual,'text/html')};
  result=await run(path+'&date=2026-10-31');
  assert.equal(result.status,502,'HTML must never be promoted as image');
+
+ calls.length=0;
+ const missingJpegEnd=jpeg(16384);missingJpegEnd[missingJpegEnd.length-1]=0;
+ globalThis.fetch=async url=>{calls.push(new URL(String(url)));return fake(missingJpegEnd)};
+ result=await run(path+'&date=2026-10-31');
+ assert.equal(result.status,502,'JPEG header alone must not certify a truncated raster');
+ assert.equal(calls.length,1,'malformed explicit-day raster cannot trigger date substitution');
+
+ calls.length=0;
+ const shortPngSignature=new Uint8Array(16384);
+ shortPngSignature.set([137,80,78,71],0);
+ globalThis.fetch=async url=>{calls.push(new URL(String(url)));return fake(shortPngSignature,'image/png')};
+ result=await run(path+'&date=2026-10-31');
+ assert.equal(result.status,502,'four-byte PNG signature alone is not a valid raster boundary');
+
+ calls.length=0;
+ const pngNoEnd=new Uint8Array(16384);
+ pngNoEnd.set([137,80,78,71,13,10,26,10],0);
+ globalThis.fetch=async url=>{calls.push(new URL(String(url)));return fake(pngNoEnd,'image/png')};
+ result=await run(path+'&date=2026-10-31');
+ assert.equal(result.status,502,'PNG without the terminating IEND chunk must be refused');
+
+ calls.length=0;
+ const boundedPng=new Uint8Array(16384);
+ boundedPng.set([137,80,78,71,13,10,26,10],0);
+ boundedPng.set([0,0,0,0,73,69,78,68,174,66,96,130],boundedPng.length-12);
+ globalThis.fetch=async url=>{calls.push(new URL(String(url)));return fake(boundedPng,'image/png')};
+ result=await run(path+'&date=2026-10-31');
+ assert.equal(result.status,200,'well-delimited PNG container must retain supported MIME route');
+ assert.equal(result.headers.get('x-omega-date'),'2026-10-31');
 }finally{
  globalThis.fetch=originalFetch;
 }
-console.log('R780 LIVE-EARTH SOURCE INTEGRITY PASS · 1836-byte no-data rejection · exact-date immutability · bounded real-date recovery · truthful missing-evidence failure');
+console.log('R780/R781 LIVE-EARTH SOURCE INTEGRITY PASS · 1836-byte no-data rejection · exact-date immutability · bounded real-date recovery · truthful missing-evidence failure');
