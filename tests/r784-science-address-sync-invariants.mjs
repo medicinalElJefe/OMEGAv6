@@ -46,6 +46,21 @@ for(const map of Object.values(listeners))for(const set of map.values())assert.e
 stored=204;win.dispatchEvent({type:'storage'});win.dispatchEvent({type:'omega7-address-changed'});
 assert.equal(current,203,'unmounted effect must not receive events');
 assert.ok(updates>=4);
+// A remount must reattach exactly one listener per event and one fallback timer.
+const cleanupAgain=setup(win,doc,setAddress,()=>stored);
+assert.equal(intervals.size,1,'remount starts exactly one timer');
+assert.equal(listeners.window.get('storage').size,1,'remount has one storage listener');
+assert.equal(listeners.window.get('omega7-address-changed').size,1,'remount has one address listener');
+assert.equal(listeners.document.get('visibilitychange').size,1,'remount has one visibility listener');
+stored=205;win.dispatchEvent({type:'storage'});
+assert.equal(current,205,'remounted workspace receives storage updates');
+hidden=true;doc.dispatchEvent({type:'visibilitychange'});
+assert.equal(intervals.size,0,'remounted hidden workspace has no timer');
+stored=206;win.dispatchEvent({type:'omega7-address-changed'});
+assert.equal(current,206,'explicit address event remains responsive while hidden');
+cleanupAgain();
+for(const map of Object.values(listeners))for(const set of map.values())assert.equal(set.size,0,'remount cleanup removes listeners');
+assert.equal(intervals.size,0,'remount cleanup removes timers');
 assert.ok(!source.includes('window.setInterval(sync,850)'),'legacy high-frequency polling must not return');
 assert.ok(source.includes("window.dispatchEvent(new CustomEvent('omega7-address-changed'")),'same-tab address event must remain');
 assert.ok(source.includes('const commit=(next:number)=>setAddress(writeAddress(next))'),'state selection must remain');
