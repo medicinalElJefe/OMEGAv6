@@ -69,7 +69,9 @@ assert.deepEqual(exportCanonSourceCsvR783({...matter,offset:100,limit:1}).csv,cs
 const csvOnly=exportCanonSourceCsvR783({coordinates:[1,1,1,1,1],decision:'ANY',offset:0,limit:12});
 assert.equal(csvOnly.rows,1);
 assert.equal(csvOnly.csv.split('\r\n').length,3);
-const csvEmpty=exportCanonSourceCsvR783({coordinates:[1,1,1,1,1],decision:'ESCALATE'});
+const actualFirstDecision=reconstructCanonFullRowR772(1).Decision;
+const distinctDecision=actualFirstDecision==='STAY'?'ESCALATE':'STAY';
+const csvEmpty=exportCanonSourceCsvR783({coordinates:[1,1,1,1,1],decision:distinctDecision});
 assert.equal(csvEmpty.rows,0);
 assert.equal(csvEmpty.csv.split('\r\n').length,2);
 assert.throws(()=>exportCanonSourceCsvR783({coordinates:[null,null,null,null,null]}),/fix at least one/);
