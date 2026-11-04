@@ -31,8 +31,18 @@ const GIBS_GLOBAL_MIN_BYTES_R780=12000,GIBS_GLOBAL_MAX_BYTES_R780=8*1024*1024;
 function validGibsGlobalRasterR780(bytes,contentType){
  if(bytes.byteLength<GIBS_GLOBAL_MIN_BYTES_R780||bytes.byteLength>GIBS_GLOBAL_MAX_BYTES_R780)return false;
  const ct=String(contentType||'').toLowerCase();
- return ((ct.includes('jpeg')||ct.includes('jpg'))&&bytes[0]===255&&bytes[1]===216)
-  ||(ct.includes('png')&&bytes[0]===137&&bytes[1]===80&&bytes[2]===78&&bytes[3]===71);
+ // R781: enforce recognizable complete raster-container boundaries, not merely
+ // a declared image MIME type or a short header that can prefix an error body.
+ // This is a structural gate, not a claim to fully decode or authenticate pixels.
+ const jpeg=(ct.includes('jpeg')||ct.includes('jpg'))
+  &&bytes[0]===255&&bytes[1]===216
+  &&bytes[bytes.length-2]===255&&bytes[bytes.length-1]===217;
+ const pngSignature=[137,80,78,71,13,10,26,10];
+ const pngEnd=[0,0,0,0,73,69,78,68,174,66,96,130];
+ const png=ct.includes('png')
+  &&pngSignature.every((value,index)=>bytes[index]===value)
+  &&pngEnd.every((value,index)=>bytes[bytes.length-pngEnd.length+index]===value);
+ return jpeg||png;
 }
 async function gibsGlobalImage(url){
  const requestedDate=url.searchParams.has('date');
