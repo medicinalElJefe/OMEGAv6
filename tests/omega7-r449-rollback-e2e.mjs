@@ -26,6 +26,7 @@ try{
  await page.locator('.o7-v6').click();
  await page.waitForSelector('main.r71-home,.r317-product-root',{timeout:30000});
  if(await page.locator('.o7-app').count())throw new Error('R449 OMEGA7 shell remained mounted after explicit OMEGA6 rollback');
+ if(new URL(page.url()).searchParams.get('omega6')!=='1'||new URL(page.url()).searchParams.has('omega7route'))throw new Error('R779 rollback retained an OMEGA7 deep-link URL');
  if(Number(await page.evaluate(()=>localStorage.getItem('omega.v6.address')))!==expectedAddress)throw new Error('R449 rollback discarded or changed canonical address');
  if(await page.evaluate(()=>localStorage.getItem('omega7.enabled'))!=='false')throw new Error('R449 rollback failed to persist explicit OMEGA6 selection');
 
@@ -55,6 +56,7 @@ try{
  await rollback.click();
  await phone.waitForSelector('main.r71-home,.r317-product-root',{timeout:30000});
  if(await phone.locator('.o7-app').count())throw new Error('R449 phone rollback left OMEGA7 mounted');
+ if(new URL(phone.url()).searchParams.get('omega6')!=='1'||new URL(phone.url()).searchParams.has('omega7route'))throw new Error('R779 phone rollback retained an OMEGA7 deep-link URL');
  if(Number(await phone.evaluate(()=>localStorage.getItem('omega.v6.address')))!==expectedAddress)throw new Error('R449 phone rollback changed canonical address');
  if(await phone.evaluate(()=>localStorage.getItem('omega7.enabled'))!=='false')throw new Error('R449 phone rollback failed to persist explicit OMEGA6 selection');
  console.log('OMEGA7 R449 PHONE ROLLBACK PASS · default successor + explicit V6 escape remains visible and >=44px · single bottom nav preserved · canonical address continuous');

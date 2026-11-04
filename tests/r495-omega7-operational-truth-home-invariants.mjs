@@ -18,8 +18,8 @@ assert.ok(component.includes('canonicalMutation:false'),'R495 observation surfac
 assert.ok(component.includes("dispatch({type:'HEALTH',key:'cloud'")&&component.includes("dispatch({type:'HEALTH',key:'device'"),'R495 must replace OMEGA7 cloud/device UNKNOWN placeholders with returned truth');
 assert.ok(component.includes("data-r495-operational-truth='true'")&&component.includes("data-r495-state={state.toLowerCase()}"),'R495 visible/terminal browser contract missing');
 
-assert.ok(root.includes("import OperationalTruthR495 from './OperationalTruthR495'"),'OMEGA7 root must import R495');
-assert.ok(root.includes("state.domain==='HOME'&&<OperationalTruthR495 depth={state.depth} onNavigate={open}/>"),'R495 must be visible on canonical OMEGA7 Home');
+assert.ok(root.includes("const OperationalTruthR495=lazy(()=>import('./OperationalTruthR495'))"),'R495 must be deferred as a home-only specialist module under the initial entry budget');
+assert.ok(root.includes("state.domain==='HOME'&&<Suspense fallback={<p role='status'>Loading live operational evidence…</p>}><OperationalTruthR495 depth={state.depth} onNavigate={open}/></Suspense>"),'R495 must remain visible on canonical OMEGA7 Home with an accessible loading state');
 assert.ok(css.includes('.o7-operational-truth{')&&css.includes('.o7-operational-grid{'),'R495 responsive presentation missing');
 
 assert.ok(live.includes('.o7-operational-truth[data-r495-operational-truth="true"]'),'R489 exact-production browser proof must exercise R495');
