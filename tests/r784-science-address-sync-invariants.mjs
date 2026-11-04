@@ -7,7 +7,7 @@ assert.ok(start>=0,'R784 effect start missing');
 const bodyStart=start+'useEffect(()=>{'.length;
 const end=source.indexOf('\n },[]);',bodyStart);
 assert.ok(end>bodyStart,'R784 effect end missing');
-const effect=source.slice(bodyStart,end).replace('let poll:number|undefined;','let poll;').replace('sync as EventListener','sync');
+const effect=source.slice(bodyStart,end).replace('let poll:number|undefined;','let poll;').replaceAll('sync as EventListener','sync');
 const setup=new Function('window','document','setAddress','readAddress',effect);
 const listeners={window:new Map(),document:new Map()},intervals=new Map();
 let nextTimer=1,hidden=false,stored=11498,current=11498,updates=0;
