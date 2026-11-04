@@ -9,6 +9,8 @@ const lock=JSON.parse(fs.readFileSync('src7/omega7.lock.json','utf8'));
 
 for(const token of ["const exitOmega7=()=>","safeStore('omega7.enabled','false')","setOmega7(false)","setHome(true)","<Omega7Root onOpenLegacyRoute={openLegacyFromOmega7} onExitToV6={exitOmega7}/>"])assert.ok(app.includes(token),'R449 accepted rollback path missing '+token);
 for(const token of ["expectedAddress=12345",".o7-v6","main.r71-home,.r317-product-root","omega.v6.address","omega7.enabled","r449-default=1","/?omega7=1","re-entry","persisted OMEGA6 rollback"])assert.ok(browser.includes(token),'R449 browser rollback proof missing '+token);
+assert.ok(app.includes("window.history.replaceState({omega7Route:null},'', '?omega6=1')"),'R779 explicit OMEGA6 rollback must clear stale native URL and survive reload');
+assert.ok(browser.includes('R779 rollback retained an OMEGA7 deep-link URL')&&browser.includes('R779 phone rollback retained an OMEGA7 deep-link URL'),'R779 rollback URL must be exercised desktop/mobile');
 assert.ok(workflow.startsWith('name: OMEGA Cloud Bridge CI'),'R449 must not create a second workflow authority');
 assert.ok(workflow.includes('omega7-r449-rollback-e2e.mjs')&&workflow.includes('playwright@1.63.0'));
 assert.equal(lock.parityPhase,'R449_ROLLBACK_REVERSIBILITY_CANDIDATE');
