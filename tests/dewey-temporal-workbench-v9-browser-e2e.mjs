@@ -218,6 +218,16 @@ try{
    assert.equal(await sourceQuery.locator('[data-r773-axis="Domain"]').inputValue(),'1');
    await sourceQuery.locator('[data-r773-execute]').click();
    await sourceQuery.locator('[data-r773-export]').click();
+   const csvDownloadEvent=page.waitForEvent('download');
+   await sourceQuery.locator('[data-r783-export-csv]').click();
+   const csvDownload=await csvDownloadEvent;
+   assert.match(csvDownload.suggestedFilename(),/^omega-r783-canon-source-20736-rows\\.csv$/);
+   const csvDownloaded=await readFile(await csvDownload.path(),'utf8');
+   assert.ok(csvDownloaded.startsWith('\\ufeff"Atlas_Index","Atlas_Key","Domain"'));
+   assert.equal(csvDownloaded.split('\\r\\n').length,20738,'all rows must download, not just the 12 UI rows');
+   assert.ok(csvDownloaded.includes('\\r\\n"20736",'));
+   assert.match(await sourceQuery.locator('[data-r773-status]').innerText(),/EXPORTED: 20736/);
+
    await sourceQuery.locator('[data-r773-portable] summary').click();
    await sourceQuery.locator('[data-r773-verify]').click();
    assert.match(await sourceQuery.locator('[data-r773-verification]').innerText(),/PASS:/);
