@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {reconstructCanonFullRowR772,R772_ORIGINAL_SOURCE_PROOF} from '../src/proof/canonFullSourceR772.js';
-import {queryCanonSourceR773,verifyCanonSourceQueryR773,parseCanonSourceQueryR773,R773_QUERY_SCHEMA} from '../src/proof/canonSourceQueryR773.js';
+import {queryCanonSourceR773,verifyCanonSourceQueryR773,parseCanonSourceQueryR773,R773_QUERY_SCHEMA,exportCanonSourceCsvR783} from '../src/proof/canonSourceQueryR773.js';
 
 const sourceHash=R772_ORIGINAL_SOURCE_PROOF.workbookSha256;
 const matter={coordinates:[1,null,null,null,null],decision:'ANY',offset:0,limit:12};
@@ -51,6 +51,33 @@ assert.throws(()=>queryCanonSourceR773({...matter,offset:1.2}),/integer/);
 assert.throws(()=>queryCanonSourceR773({...matter,decision:'PROVEN'}),/decision/);
 assert.throws(()=>queryCanonSourceR773({...matter,authority:'CANON'}),/unknown/);
 assert.throws(()=>parseCanonSourceQueryR773(' '.repeat(2049)),/bounded/);
+
+const csvAll=exportCanonSourceCsvR783(matter);
+assert.equal(csvAll.schema,'OMEGA_R783_CANON_SOURCE_CSV_V1');
+assert.equal(csvAll.rows,20736);
+assert.equal(csvAll.examined,20736);
+assert.equal(csvAll.columns,24);
+assert.equal(csvAll.sourceWorkbookSha256,sourceHash);
+assert.equal(csvAll.canonicalMutation,false);
+assert.equal(csvAll.deviceAction,false);
+assert.ok(csvAll.csv.startsWith('\\ufeff"Atlas_Index","Atlas_Key","Domain"'));
+assert.equal(csvAll.csv.split('\\r\\n').length,20738,'header + all matching rows + terminal separator');
+assert.ok(csvAll.csv.includes('\\r\\n"1",'));
+assert.ok(csvAll.csv.includes('\\r\\n"20736",'));
+assert.deepEqual(exportCanonSourceCsvR783({...matter,offset:100,limit:1}).csv,csvAll.csv,
+ 'CSV export must include the complete selected source slice, not a paginated UI subset');
+const csvOnly=exportCanonSourceCsvR783({coordinates:[1,1,1,1,1],decision:'ANY',offset:0,limit:12});
+assert.equal(csvOnly.rows,1);
+assert.equal(csvOnly.csv.split('\\r\\n').length,3);
+const csvEmpty=exportCanonSourceCsvR783({coordinates:[1,1,1,1,1],decision:'ESCALATE'});
+assert.equal(csvEmpty.rows,0);
+assert.equal(csvEmpty.csv.split('\\r\\n').length,2);
+assert.throws(()=>exportCanonSourceCsvR783({coordinates:[null,null,null,null,null]}),/fix at least one/);
+assert.throws(()=>exportCanonSourceCsvR783({coordinates:[1,null,null,null,'2']}),/integer/);
+assert.throws(()=>exportCanonSourceCsvR783({...matter,decision:'FAKE'}),/decision/);
+const csvUi=readFileSync('src/CanonSourceQueryR773.tsx','utf8');
+assert.ok(csvUi.includes('data-r783-export-csv')&&csvUi.includes('exportCanonSourceCsvR783(query(0))'));
+
 const ui=readFileSync('src/CanonSourceQueryR773.tsx','utf8');
 const parent=readFileSync('src/CanonTopologyWorkbenchR763.tsx','utf8');
 for(const marker of ['data-r773-canon-query','data-r773-execute','data-r773-total','data-r773-next','data-r773-open','data-r773-save','data-r773-load','data-r773-export','data-r773-verify'])
