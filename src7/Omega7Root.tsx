@@ -5,6 +5,7 @@ import {Omega7AppStateProvider,useOmega7AppState} from './appState';
 import {Omega7Boundary} from './Omega7Boundary';
 import {OMEGA7_NATIVE_ROUTES,isOmega7NativeRoute,Omega7NativeSurface} from './nativeCapabilityRegistry';
 import {readNativeWorkspaceRouteR778,nativeWorkspaceHrefR778} from './nativeWorkspaceLinksR778.js';
+import {nativeHistoryHrefR779,nativeHistorySelectionR779} from './nativeWorkspaceHistoryR779.js';
 import {OMEGA7_PARITY_SUMMARY,parityEvidenceForRoute} from './parityLedgerR451';
 import {OMEGA7_ACCEPTED_PARITY_SUMMARY,acceptedParityForRoute} from './parityLedgerR453';
 import {OMEGA7_HEIGHTENED_SUMMARY} from './heightenedModeR457';
@@ -74,21 +75,42 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
   return()=>{live=false;window.removeEventListener(R468_EVENT,refresh as EventListener)};
  },[]);
 
- // R778: explicit bookmarked instrument URLs reopen only registered native routes.
- // Do not persist arbitrary route strings or infer execution authority from URL state.
+ // R779: keep the visible instrument and browser URL in lockstep. History holds
+ // only a public registered route name; Canon addresses/private source state stay local.
  useEffect(()=>{
-  const requested=readNativeWorkspaceRouteR778(window.location.search,OMEGA7_NATIVE_ROUTES);
-  if(!requested)return;
-  const cap=OMEGA7_CAPABILITIES.find(x=>x.legacyRoute===requested);
-  if(!cap||!isOmega7NativeRoute(cap.legacyRoute))return;
-  dispatch({type:'DOMAIN',domain:cap.domain});
-  dispatch({type:'SELECT_ROUTE',route:cap.legacyRoute});
+  const restore=()=>{
+   const selection=nativeHistorySelectionR779(window.location.search,OMEGA7_NATIVE_ROUTES);
+   if(!selection.managed)return;
+   const requested=readNativeWorkspaceRouteR778(window.location.search,OMEGA7_NATIVE_ROUTES);
+   if(!requested){dispatch({type:'SELECT_ROUTE',route:null});return}
+   const cap=OMEGA7_CAPABILITIES.find(x=>x.legacyRoute===requested);
+   if(!cap||!isOmega7NativeRoute(cap.legacyRoute)){dispatch({type:'SELECT_ROUTE',route:null});return}
+   dispatch({type:'DOMAIN',domain:cap.domain});
+   dispatch({type:'SELECT_ROUTE',route:cap.legacyRoute});
+  };
+  restore();
+  window.addEventListener('popstate',restore);
+  return()=>window.removeEventListener('popstate',restore);
  },[dispatch]);
 
+ const switchDomain=(domain:Omega7Domain)=>{
+  const href=nativeHistoryHrefR779(null,OMEGA7_NATIVE_ROUTES);
+  if(new URLSearchParams(window.location.search).has('omega7route'))window.history.pushState({omega7Route:null},'',href);
+  dispatch({type:'DOMAIN',domain});
+ };
+ const backToDomain=()=>{
+  const href=nativeHistoryHrefR779(null,OMEGA7_NATIVE_ROUTES);
+  if(window.location.search!==href)window.history.pushState({omega7Route:null},'',href);
+  dispatch({type:'SELECT_ROUTE',route:null});
+ };
  const open=(route:string)=>{
   const cap=OMEGA7_CAPABILITIES.find(x=>x.legacyRoute===route);
   if(!cap)return;
   setLibraryOpen(false);
+  if(isOmega7NativeRoute(cap.legacyRoute)){
+   const href=nativeHistoryHrefR779(cap.legacyRoute,OMEGA7_NATIVE_ROUTES);
+   if(window.location.search!==href)window.history.pushState({omega7Route:cap.legacyRoute},'',href);
+  }
   dispatch({type:'SELECT_ROUTE',route:cap.legacyRoute});
   dispatch({type:'COMMAND',open:false});
   if(!isOmega7NativeRoute(cap.legacyRoute))onOpenLegacyRoute(cap.legacyRoute);
@@ -109,7 +131,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
 
  return <div className='o7-app' data-omega7='true' data-depth={state.depth.toLowerCase()}>
   <header className='o7-topbar'>
-   <button className='o7-brand' onClick={()=>dispatch({type:'DOMAIN',domain:'HOME'})}><b>OMEGA</b><span>7</span></button>
+   <button className='o7-brand' onClick={()=>switchDomain('HOME')}><b>OMEGA</b><span>7</span></button>
    <button className='o7-search-trigger' onClick={()=>{dispatch({type:'COMMAND',open:true});queueMicrotask(()=>inputRef.current?.focus())}}>Search or ask OMEGA <kbd>Ctrl K</kbd></button>
    <div className='o7-top-actions'>
     <button type='button' className='o7-r520-toggle' data-r520-full-library='open' aria-label='All OMEGA functions' onClick={()=>setLibraryOpen(true)}><span aria-hidden='true'>◈</span><strong>All Functions</strong></button>
@@ -125,7 +147,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
 
   <aside className='o7-nav o7-nav-r512 o7-nav-r519' aria-label='OMEGA7 capability-first navigation' data-navigation-revision='R512' data-design-revision='R519' data-canonical-domain-count={OMEGA7_DOMAINS.length}>
    <div className='o7-r519-nav-identity' aria-hidden='true'><span>Ω</span><div><strong>THE OMEGA FIELD</strong><small>EXPLORE · CREATE · PROVE</small></div></div>
-   {R512_DOMAIN_MENU.map(menu=>{const Icon=R519_NAV_ICONS[menu.id];return <button key={menu.id} type='button' className={state.domain===menu.id?'active':''} onClick={()=>dispatch({type:'DOMAIN',domain:menu.id})} title={menu.purpose} aria-label={DOMAIN_LABEL[menu.id]}><span className='o7-r519-nav-icon'><Icon size={20} strokeWidth={1.55} aria-hidden='true'/></span><span className='o7-r519-nav-text'><strong>{menu.shortLabel}</strong><small>{menu.id==='HOME'?'Field overview':menu.id==='EXPLORE'?'Atlas · traversal · Earth':menu.id==='CREATE'?'Render · compose · visualize':menu.id==='SYSTEM'?'Proof · Canon · recovery':menu.id==='DEVELOP'?'Intelligence · build · repair':'Projects · memory · spaces'}</small></span><span className='o7-r519-nav-count'>{menu.id==='HOME'?OMEGA7_CAPABILITIES.length:menuSectionsR512(menu.id).ready.length}</span></button>})}
+   {R512_DOMAIN_MENU.map(menu=>{const Icon=R519_NAV_ICONS[menu.id];return <button key={menu.id} type='button' className={state.domain===menu.id?'active':''} onClick={()=>switchDomain(menu.id)} title={menu.purpose} aria-label={DOMAIN_LABEL[menu.id]}><span className='o7-r519-nav-icon'><Icon size={20} strokeWidth={1.55} aria-hidden='true'/></span><span className='o7-r519-nav-text'><strong>{menu.shortLabel}</strong><small>{menu.id==='HOME'?'Field overview':menu.id==='EXPLORE'?'Atlas · traversal · Earth':menu.id==='CREATE'?'Render · compose · visualize':menu.id==='SYSTEM'?'Proof · Canon · recovery':menu.id==='DEVELOP'?'Intelligence · build · repair':'Projects · memory · spaces'}</small></span><span className='o7-r519-nav-count'>{menu.id==='HOME'?OMEGA7_CAPABILITIES.length:menuSectionsR512(menu.id).ready.length}</span></button>})}
    <div className='o7-r519-nav-foot'><span>CANONICAL ACCESS</span><strong>{OMEGA7_CAPABILITIES.length} inherited routes</strong><small>Tools remain beneath their live source authority.</small></div>
   </aside>
 
@@ -134,7 +156,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
    <OmegaUserJourneyR536 route={state.selectedRoute} onOpen={open}/>
    {state.selectedRoute&&isOmega7NativeRoute(state.selectedRoute)?
     <section className='o7-native-host' data-native-host-route={state.selectedRoute}>
-     <div className='o7-native-toolbar'><button onClick={()=>dispatch({type:'SELECT_ROUTE',route:null})}>← Back to {DOMAIN_LABEL[state.domain]}</button><span>OMEGA7 native · OMEGAv6 engine preserved</span><a data-r778-native-link href={nativeWorkspaceHrefR778(state.selectedRoute,OMEGA7_NATIVE_ROUTES)} aria-label={'Direct link to '+state.selectedRoute+' workspace'} title='Bookmark or copy this link to reopen this exact instrument'>Direct instrument link</a></div>
+     <div className='o7-native-toolbar'><button onClick={backToDomain}>← Back to {DOMAIN_LABEL[state.domain]}</button><span>OMEGA7 native · OMEGAv6 engine preserved</span><a data-r778-native-link href={nativeWorkspaceHrefR778(state.selectedRoute,OMEGA7_NATIVE_ROUTES)} aria-label={'Direct link to '+state.selectedRoute+' workspace'} title='Bookmark or copy this link to reopen this exact instrument'>Direct instrument link</a></div>
      {activeRecovered&&activeRecovered.route===state.selectedRoute&&<aside className='o7-executor-capsule' data-r512-executor={activeRecovered.recoveredId} data-state={activeRecovered.state.toLowerCase()}>
       <div><span>Resolved historical software</span><b>{activeRecovered.recoveredName}</b><small>{activeRecovered.operation} → {activeRecovered.route}</small></div>
       <dl><div><dt>Executor</dt><dd>{activeRecovered.capabilityId}</dd></div><div><dt>Domain</dt><dd>{activeRecovered.executionDomain}</dd></div><div><dt>State</dt><dd>{activeRecovered.state.replaceAll('_',' ')}</dd></div><div><dt>Action</dt><dd>{(activeRecovered.launchKind||'EXECUTE').replaceAll('_',' ')}</dd></div><div><dt>Source</dt><dd>{(activeRecovered.sourceKind||'CAPABILITY_LINEAGE').replaceAll('_',' ')}</dd></div><div><dt>Proof</dt><dd>{activeRecovered.receiptAuthority} / {activeRecovered.admissionAuthority}</dd></div></dl>

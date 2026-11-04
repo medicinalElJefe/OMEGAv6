@@ -52,7 +52,24 @@ async function prove(browser,label,viewport){
   if(!(await page.locator('.o7-nav-r519 button.active[aria-label="Explore"]').count()))throw new Error(label+': direct link failed to restore source domain');
   console.log('R778 '+label+' native Atlas link reopened across navigation and reload with correct domain PASS');
 
+  // R779: switching instruments must change the URL, and browser history must
+  // restore the exact visited workspace after reload/back/forward.
+  await page.locator('.o7-search-trigger').click();
+  await page.locator('.o7-command input').fill('Earth');
+  await page.locator('.o7-command button[data-command-route="Earth Now"]').click();
+  await page.waitForFunction(()=>document.querySelector('.o7-main')?.getAttribute('data-native-route')==='Earth Now',null,{timeout:30000});
+  if(new URL(page.url()).searchParams.get('omega7route')!=='Earth Now')throw Error(label+': opening Earth left stale Atlas URL');
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>document.querySelector('.o7-main')?.getAttribute('data-native-route')==='Earth Now',null,{timeout:30000});
+  await page.goBack({waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>document.querySelector('.o7-main')?.getAttribute('data-native-route')==='Atlas',null,{timeout:30000});
+  if(new URL(page.url()).searchParams.get('omega7route')!=='Atlas')throw Error(label+': browser Back URL diverged from Atlas');
+  await page.goForward({waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>document.querySelector('.o7-main')?.getAttribute('data-native-route')==='Earth Now',null,{timeout:30000});
+  if(new URL(page.url()).searchParams.get('omega7route')!=='Earth Now')throw Error(label+': browser Forward URL diverged from Earth');
+  console.log('R779 '+label+' source-route URL and reload/Back/Forward workspace continuity PASS');
   await page.locator('.o7-native-toolbar button').first().click();
+  if(new URL(page.url()).searchParams.has('omega7route'))throw Error(label+': Back to domain retained stale instrument URL');
   await page.waitForFunction(()=>!document.querySelector('.o7-main')?.getAttribute('data-native-route'),{timeout:10000});
   const direct=page.locator('.o7-r519-portal[data-r519-visual-navigation="EXPLORE"] button[data-r519-direct="Earth Now"]');
   await direct.click();

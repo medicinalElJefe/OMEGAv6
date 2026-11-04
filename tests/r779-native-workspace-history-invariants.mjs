@@ -1,0 +1,30 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {R779_NATIVE_WORKSPACE_HISTORY_SCHEMA,nativeHistoryHrefR779,nativeHistorySelectionR779} from '../src7/nativeWorkspaceHistoryR779.js';
+const registry=readFileSync('src7/nativeCapabilityRegistry.tsx','utf8');
+const begin=registry.indexOf('export const OMEGA7_NATIVE_ROUTES=Object.freeze([');
+const end=registry.indexOf('] as const satisfies readonly OmegaRouteName[])',begin);
+assert.ok(begin>=0&&end>begin);
+const registered=[...registry.slice(begin,end).matchAll(/'([^']+)'/g)].map(x=>x[1]);
+assert.equal(registered.length,44);
+assert.equal(nativeHistoryHrefR779(null,registered),'?omega7=1');
+assert.deepEqual(nativeHistorySelectionR779('?omega7=1',registered),{managed:true,route:null});
+assert.deepEqual(nativeHistorySelectionR779('?omega7=1&cache=none',registered),{managed:true,route:null});
+for(const route of registered){
+ const href=nativeHistoryHrefR779(route,registered);
+ assert.deepEqual(nativeHistorySelectionR779(href,registered),{managed:true,route});
+ assert.equal(new URLSearchParams(href).has('address'),false);
+ assert.equal(new URLSearchParams(href).has('canon'),false);
+}
+for(const bad of ['?omega7=0&omega7route=Atlas','?omega7=1&omega7=1&omega7route=Atlas','?omega7route=Atlas'])assert.deepEqual(nativeHistorySelectionR779(bad,registered),{managed:false,route:null});
+for(const bad of ['?omega7=1&omega7route=unregistered','?omega7=1&omega7route=Atlas&omega7route=Memory','?omega7=1&omega7route=%00'])assert.deepEqual(nativeHistorySelectionR779(bad,registered),{managed:true,route:null});
+assert.throws(()=>nativeHistoryHrefR779('not-an-instrument',registered),/unregistered/);
+assert.equal(R779_NATIVE_WORKSPACE_HISTORY_SCHEMA,'OMEGA7_NATIVE_WORKSPACE_HISTORY_R779');
+const root=readFileSync('src7/Omega7Root.tsx','utf8');
+const browser=readFileSync('tests/r519-visual-navigation-browser-e2e.mjs','utf8');
+const pkg=JSON.parse(readFileSync('package.json','utf8'));
+for(const token of ["window.addEventListener('popstate',restore)","window.removeEventListener('popstate',restore)","window.history.pushState({omega7Route:cap.legacyRoute}","window.history.pushState({omega7Route:null}","const backToDomain=()=>","const switchDomain=(domain:Omega7Domain)=>","readNativeWorkspaceRouteR778(window.location.search,OMEGA7_NATIVE_ROUTES)"])assert.ok(root.includes(token),'R779 history integration absent '+token);
+for(const token of ["R779 '+label+' source-route URL","page.goBack(","page.goForward(","page.reload(","Back to domain retained stale instrument URL"])assert.ok(browser.includes(token),'R779 live browser execution absent '+token);
+assert.equal(pkg.scripts['test:r779'],'node tests/r779-native-workspace-history-invariants.mjs');
+assert.ok(pkg.scripts['check:static'].includes('npm run test:r779'),'R779 release check must be blocking');
+console.log('R779 NATIVE WORKSPACE HISTORY PASS · 44 registered route links, browser history sync/invalid refusal, live desktop/mobile reload/back/forward proof wired, no private state in URL');
