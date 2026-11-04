@@ -62,6 +62,6 @@ cleanupAgain();
 for(const map of Object.values(listeners))for(const set of map.values())assert.equal(set.size,0,'remount cleanup removes listeners');
 assert.equal(intervals.size,0,'remount cleanup removes timers');
 assert.ok(!source.includes('window.setInterval(sync,850)'),'legacy high-frequency polling must not return');
-assert.ok(source.includes("window.dispatchEvent(new CustomEvent('omega7-address-changed'")),'same-tab address event must remain');
+assert.ok(source.includes("window.dispatchEvent(new CustomEvent('omega7-address-changed'"),'same-tab address event must remain');
 assert.ok(source.includes('const commit=(next:number)=>setAddress(writeAddress(next))'),'state selection must remain');
 console.log('R784 SCIENCE ADDRESS SYNC PASS · executed events, fallback, hidden pause, resume and cleanup');
