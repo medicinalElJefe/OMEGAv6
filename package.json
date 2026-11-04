@@ -47,6 +47,7 @@
     "test:r779": "node tests/r779-native-workspace-history-invariants.mjs",
     "test:r778": "node tests/r778-native-workspace-link-invariants.mjs",
     "test:r777": "node tests/r777-science-instrument-navigation-invariants.mjs",
+    "test:r784": "node tests/r784-science-address-sync-invariants.mjs",
     "test:r773": "node tests/r773-canon-source-query-invariants.mjs",
     "test:r770": "node tests/r770-source-lens-invariants.mjs",
     "test:r769": "node tests/r769-source-tessellation-invariants.mjs",
