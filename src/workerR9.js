@@ -26,7 +26,7 @@ function gibsDate(value){
  const input=txt(value);
  // A specified day is authority, never an invitation to substitute yesterday.
  if(input){
-  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(input))return null;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(input))return null;
   const epoch=Date.parse(input+'T00:00:00Z');
   return Number.isFinite(epoch)&&new Date(epoch).toISOString().slice(0,10)===input?input:null;
  }
