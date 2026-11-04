@@ -13,7 +13,6 @@ import {R468_EVENT,developmentalStateBusSnapshotR468,type R468Snapshot} from './
 import {R486_VISIBLE_CAPABILITIES,R486_VISIBLE_SUMMARY,type VisibleFamilyR486} from './visibleCapabilityConvergenceR486';
 import {R512_DOMAIN_MENU,R512_MENU_SUMMARY,menuSectionsR512,quickActionsR512,recoveredForDomainR512,recoveredExecutionCapsuleR512,type RecoveredExecutionCapsuleR512} from './capabilityMenuR512';
 import type {R512RecoveredSystemResolution} from '../src/recoveredSoftwareExecutionR512';
-import OperationalTruthR495 from './OperationalTruthR495';
 import {R519VisualNavigation} from './visualNavigationR519';
 import './omega7.css';
 import {WorkflowSurfaceR538} from './WorkflowSurfaceR538';
@@ -21,6 +20,7 @@ import {OmegaUserJourneyR536} from './userJourneyR536';
 
 const CapabilitySurfaceR478=lazy(()=>import('../src/CapabilitySurfaceR478'));
 const OmegaHomeR71=lazy(()=>import('../src/OmegaHomeR71'));
+const OperationalTruthR495=lazy(()=>import('./OperationalTruthR495'));
 const CapabilityRecoveryAuditR705=lazy(()=>import('./CapabilityRecoveryAuditR705').then(m=>({default:m.CapabilityRecoveryAuditR705})));
 const CorpusTraversalR623=lazy(()=>import('./CorpusTraversalR623').then(m=>({default:m.CorpusTraversalR623})));
 const HistoricalConvergenceWorkbenchR667=lazy(()=>import('./workspaces/HistoricalConvergenceWorkbenchR667').then(m=>({default:m.HistoricalConvergenceWorkbenchR667})));
@@ -187,7 +187,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
       </Suspense>
      </section>}
      {state.domain==='HOME'&&<R519VisualNavigation domain='HOME' onNavigate={open}/>}
-     {state.domain==='HOME'&&<OperationalTruthR495 depth={state.depth} onNavigate={open}/>}\n     {state.domain==='HOME'&&<section className='o7-recovered' data-r486-visible-convergence='true'>
+     {state.domain==='HOME'&&<Suspense fallback={<p role='status'>Loading live operational evidence…</p>}><OperationalTruthR495 depth={state.depth} onNavigate={open}/></Suspense>}\n     {state.domain==='HOME'&&<section className='o7-recovered' data-r486-visible-convergence='true'>
       <header><div><span>Recovered capability fabric</span><h2>Your recovered work is connected to the product</h2><p>{R486_VISIBLE_SUMMARY.total} recovered capability lineages now resolve through their current OMEGA executors. Open the function you need; lineage, gate and authority stay attached underneath.</p></div><button onClick={()=>setRecoveredOpen(x=>!x)}>{recoveredOpen?'Hide recovered capabilities':'Browse recovered capabilities'}</button></header>
       <div className='o7-recovered-summary'><article><b>{R486_VISIBLE_SUMMARY.executesNow}</b><span>execute now</span></article><article><b>{R486_VISIBLE_SUMMARY.adapters}</b><span>active adapters</span></article><article><b>{R486_VISIBLE_SUMMARY.truthGated}</b><span>truth/device gated</span></article><article><b>{R486_VISIBLE_SUMMARY.routable}/{R486_VISIBLE_SUMMARY.total}</b><span>bound to current routes</span></article></div>
       {recoveredOpen&&<>
