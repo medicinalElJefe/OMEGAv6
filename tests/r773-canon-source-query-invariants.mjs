@@ -66,6 +66,36 @@ assert.ok(csvAll.csv.includes('\r\n"1",'));
 assert.ok(csvAll.csv.includes('\r\n"20736",'));
 assert.deepEqual(exportCanonSourceCsvR783({...matter,offset:100,limit:1}).csv,csvAll.csv,
  'CSV export must include the complete selected source slice, not a paginated UI subset');
+// R783 round-trip: parse RFC 4180 quoted fields rather than splitting on commas.
+// Exercise all 20,736 source records, preserving embedded quotes, commas and newlines.
+function parseQuotedCsv(text){
+ assert.equal(text.charCodeAt(0),0xfeff,'UTF-8 BOM');
+ const records=[];let record=[],cell='',inside=false;
+ for(let i=1;i<text.length;i++){
+  const ch=text[i];
+  if(inside){
+   if(ch==='"'&&text[i+1]==='"'){cell+='"';i++;}
+   else if(ch==='"')inside=false;
+   else cell+=ch;
+  }else if(ch==='"'){assert.equal(cell.length,0,'quote must start a cell');inside=true;}
+  else if(ch===','){record.push(cell);cell='';}
+  else if(ch==='\r'){assert.equal(text[i+1],'\n','CRLF required');record.push(cell);records.push(record);record=[];cell='';i++;}
+  else throw new Error('unexpected unquoted CSV character '+ch);
+ }
+ assert.equal(inside,false,'unterminated CSV field');
+ assert.deepEqual(record,[],'unterminated CSV record');
+ assert.equal(cell,'','unterminated CSV cell');
+ return records;
+}
+const csvParsed=parseQuotedCsv(csvAll.csv);
+assert.equal(csvParsed.length,20737,'header plus all 20,736 original-source rows');
+assert.equal(csvParsed[0].length,24);
+for(const [i,row] of csvParsed.entries()){
+ assert.equal(row.length,24,'all CSV records must have exactly 24 fields at '+i);
+ if(i===0)continue;
+ const source=reconstructCanonFullRowR772(i);
+ for(let j=0;j<24;j++)assert.equal(row[j],String(source[csvParsed[0][j]]??''),'source field mismatch at '+i+':'+j);
+}
 const csvOnly=exportCanonSourceCsvR783({coordinates:[1,1,1,1,1],decision:'ANY',offset:0,limit:12});
 assert.equal(csvOnly.rows,1);
 assert.equal(csvOnly.csv.split('\r\n').length,3);
