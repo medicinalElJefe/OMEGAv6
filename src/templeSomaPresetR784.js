@@ -5,7 +5,7 @@
 export const TEMPLE_ROOMS_R784=Object.freeze(['Shadow','Energy','Ocean','Trees','Cycles','Water Power','Metal Power','Reassurance']);
 export const TEMPLE_SCHEMA_R784='OMEGA_TEMPLE_SOMA_PRESET_R473';
 function exactNumber(v,name,min,max,step=1){
- if(typeof v!=='number'||!Number.isFinite(v)||v<min||v>max||!Number.isInteger(Math.round(v/step)*step/step) || Math.abs(v/step-Math.round(v/step))>1e-9)
+ if(typeof v!=='number'||!Number.isFinite(v)||v<min||v>max||Math.abs(v/step-Math.round(v/step))>1e-9)
   throw new RangeError(name+' outside bounded Temple source contract');
  return v;
 }
