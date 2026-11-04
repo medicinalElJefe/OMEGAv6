@@ -28,11 +28,68 @@ async function gibsImage(url){const lat=clamp(Number(url.searchParams.get('lat')
  const source=`https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?${params}`;try{const r=await fetch(source,{cf:{cacheTtl:300,cacheEverything:false}}),ct=r.headers.get('content-type')||'';if(!r.ok||!ct.startsWith('image/'))return json({ok:false,code:'GIBS_IMAGE_UNAVAILABLE',date,status:r.status,contentType:ct,window,truth:'NO_SYNTHETIC_SUBSTITUTE'},502);return new Response(r.body,{status:200,headers:{'content-type':ct,'cache-control':'public,max-age=300','x-omega-source':'NASA-GIBS-VIIRS-SNPP-TRUECOLOR','x-omega-date':date,'x-omega-crs':'EPSG:4326','x-omega-bbox':`${window.minLon},${window.minLat},${window.maxLon},${window.maxLat}`,'x-omega-requested-span':String(window.requestedSpan),'x-omega-effective-span':String(window.effectiveSpan),'x-omega-boundary-limited':String(window.boundaryLimited),'x-omega-center-preserved':String(window.centerPreserved)}})}catch(e){return json({ok:false,code:'GIBS_FETCH_FAILED',date,error:e instanceof Error?e.message:String(e),window,truth:'NO_SYNTHETIC_SUBSTITUTE'},502)}}
 
 const GIBS_GLOBAL_MIN_BYTES_R780=12000,GIBS_GLOBAL_MAX_BYTES_R780=8*1024*1024;
+function validGibsJpegStructureR781(bytes){
+ const n=bytes.length;
+ if(n<16||bytes[0]!==255||bytes[1]!==216||bytes[n-2]!==255||bytes[n-1]!==217)return false;
+ let i=2,seenFrame=false,seenScan=false;
+ while(i<n-2){
+  if(bytes[i++]!==255)return false;
+  while(i<n-2&&bytes[i]===255)i++;
+  const marker=bytes[i++];
+  if(marker===0||marker===216||marker===217||marker===1||marker>=208&&marker<=215)return false;
+  if(i+2>n-2)return false;
+  const size=bytes[i]*256+bytes[i+1];
+  if(size<2||i+size>n-2)return false;
+  if([192,193,194,195,198,199,201,202,203,205,206,207].includes(marker)){
+   if(size<8||bytes[i+3]*256+bytes[i+4]===0||bytes[i+5]*256+bytes[i+6]===0)return false;
+   seenFrame=true;
+  }
+  if(marker===218){
+   seenScan=true;
+   // Scan payload is entropy coded; a container boundary check does not
+   // replace a full decoder or prove the imagery depicts an observation.
+   return seenFrame&&i+size<n-2;
+  }
+  i+=size;
+ }
+ return seenFrame&&seenScan;
+}
+function validGibsPngStructureR781(bytes){
+ const n=bytes.length,sig=[137,80,78,71,13,10,26,10];
+ if(n<57||!sig.every((b,i)=>bytes[i]===b))return false;
+ const u32=i=>(bytes[i]*16777216+bytes[i+1]*65536+bytes[i+2]*256+bytes[i+3])>>>0;
+ let i=8,seenHeader=false,seenData=false,seenEnd=false,chunkCount=0;
+ while(i+12<=n&&chunkCount++<2048){
+  const length=u32(i),type=i+4,data=i+8,crcAt=data+length;
+  if(length>n-data-4)return false;
+  // Standard PNG CRC32 over four-byte chunk type and chunk data.
+  let crc=0xffffffff;
+  for(let j=type;j<crcAt;j++){
+   crc^=bytes[j];
+   for(let k=0;k<8;k++)crc=(crc>>>1)^(crc&1?0xedb88320:0);
+  }
+  if(((crc^0xffffffff)>>>0)!==u32(crcAt))return false;
+  const tag=String.fromCharCode(...bytes.subarray(type,type+4));
+  if(!seenHeader){
+   if(tag!=='IHDR'||length!==13||u32(data)===0||u32(data+4)===0)return false;
+   seenHeader=true;
+  }else if(tag==='IDAT'){
+   if(seenEnd||length===0)return false;
+   seenData=true;
+  }else if(tag==='IEND'){
+   if(!seenData||length!==0||crcAt+4!==n)return false;
+   seenEnd=true;
+   break;
+  }else if(seenEnd)return false;
+  i=crcAt+4;
+ }
+ return seenHeader&&seenData&&seenEnd;
+}
 function validGibsGlobalRasterR780(bytes,contentType){
  if(bytes.byteLength<GIBS_GLOBAL_MIN_BYTES_R780||bytes.byteLength>GIBS_GLOBAL_MAX_BYTES_R780)return false;
- const ct=String(contentType||'').toLowerCase();
- return ((ct.includes('jpeg')||ct.includes('jpg'))&&bytes[0]===255&&bytes[1]===216)
-  ||(ct.includes('png')&&bytes[0]===137&&bytes[1]===80&&bytes[2]===78&&bytes[3]===71);
+ const ct=String(contentType||'').toLowerCase().split(';')[0].trim();
+ return (ct==='image/jpeg'||ct==='image/jpg')?validGibsJpegStructureR781(bytes)
+  :ct==='image/png'&&validGibsPngStructureR781(bytes);
 }
 async function gibsGlobalImage(url){
  const requestedDate=url.searchParams.has('date');
