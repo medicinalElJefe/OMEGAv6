@@ -1,3 +1,4 @@
+// OMEGA_TEMPLE_SOMA_PRESET_R473 contract retained; R784 delegates validation to the shared transport module.
 import {compileTempleSomaPresetR784} from './templeSomaPresetR784.js';
 import {useMemo,useState} from 'react';
 import {Activity,ArrowRight,Calculator,FileUp,Play,Search,ShieldCheck,Waypoints} from 'lucide-react';
