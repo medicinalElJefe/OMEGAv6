@@ -36,7 +36,27 @@ export default function ScienceWorkspaceR441({route,onNavigate,depth}:Props){
  const[ready,setReady]=useState(false),[error,setError]=useState(''),[address,setAddress]=useState(readAddress),[instrumentOpen,setInstrumentOpen]=useState(depth!=='STANDARD');
  useEffect(()=>{setInstrumentOpen(depth!=='STANDARD')},[depth,route]);
  useEffect(()=>{let live=true;initCorpusPack().then(()=>{if(live){setReady(true);setError('')}}).catch(e=>{if(live)setError(e instanceof Error?e.message:String(e))});return()=>{live=false}},[]);
- useEffect(()=>{const sync=()=>setAddress(current=>{const next=readAddress();return current===next?current:next});const id=window.setInterval(sync,850);window.addEventListener('storage',sync);window.addEventListener('omega7-address-changed',sync as EventListener);return()=>{window.clearInterval(id);window.removeEventListener('storage',sync);window.removeEventListener('omega7-address-changed',sync as EventListener)}},[]);
+ useEffect(()=>{
+  // R784: event-first synchronization; legacy writers that only update storage
+  // still converge through a bounded visible-tab fallback, never a hidden poll.
+  const sync=()=>setAddress(current=>{const next=readAddress();return current===next?current:next});
+  let poll:number|undefined;
+  const schedule=()=>{
+   if(poll!==undefined){window.clearInterval(poll);poll=undefined;}
+   if(!document.hidden)poll=window.setInterval(sync,2500);
+  };
+  const visibility=()=>{sync();schedule();};
+  window.addEventListener('storage',sync);
+  window.addEventListener('omega7-address-changed',sync as EventListener);
+  document.addEventListener('visibilitychange',visibility);
+  schedule();
+  return()=>{
+   if(poll!==undefined)window.clearInterval(poll);
+   window.removeEventListener('storage',sync);
+   window.removeEventListener('omega7-address-changed',sync as EventListener);
+   document.removeEventListener('visibilitychange',visibility);
+  };
+ },[]);
  const commit=(next:number)=>setAddress(writeAddress(next));
  const record=useMemo(()=>ready?corpusState(address):null,[ready,address]);
  const coords=useMemo(()=>decodeAddress(address),[address]);
