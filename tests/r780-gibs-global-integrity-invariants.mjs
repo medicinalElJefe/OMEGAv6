@@ -3,6 +3,11 @@ import {readFileSync} from 'node:fs';
 import worker from '../src/workerR9.js';
 
 const source=readFileSync('src/workerR9.js','utf8');
+const globe=readFileSync('src/EarthObservedGlobeR281.tsx','utf8');
+for(const token of ["datePinned,setDatePinned","datePinned?`/api/earth/gibs/global?date=","'/api/earth/gibs/global?width=2048&height=1024'","[date,datePinned]","data-r780-observation-date-mode","value={datePinned?date:state==='OBSERVED'?meta.date:date}","setDatePinned(true);setDate(e.target.value)","setDatePinned(false);setDate(defaultDate())"]){
+ assert.ok(globe.includes(token),'R780 live globe must expose truthful explicit/default source-date selection: '+token);
+}
+
 assert.ok(source.includes('GIBS_GLOBAL_MIN_BYTES_R780=12000'),'R780 must retain the original 12 KB source threshold');
 assert.ok(source.includes('requestedDate?1:3'),'R780 must bound lookup and respect exact date');
 assert.ok(source.includes("'x-omega-date':date")&&source.includes("'x-omega-lookback-days':String(lookback)"),'returned observation date must be disclosed');
