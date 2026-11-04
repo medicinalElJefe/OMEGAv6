@@ -67,7 +67,7 @@ export function exportCanonSourceCsvR783(input){
   const valueText=String(value??'');
   // The source is reconstructed, not user-imported. Refuse spreadsheet formulas
   // if upstream source fields ever change rather than exporting executable cells.
-  if(typeof value==='string'&&/^[=+@\\-\\t\\r]/.test(valueText))throw new Error('unsafe source field for CSV');
+  if(typeof value==='string'&&/^[=+@\-\t\r]/.test(valueText))throw new Error('unsafe source field for CSV');
   return '"'+valueText.replaceAll('"','""')+'"';
  };
  const lines=[R772_FULL_SOURCE_HEADERS.map(csvCell).join(',')];
@@ -86,7 +86,7 @@ export function exportCanonSourceCsvR783(input){
   query:{coordinates:query.coordinates,decision:query.decision},
   rows:matched,examined,columns:R772_FULL_SOURCE_HEADERS.length,
   sourceWorkbookSha256:R772_ORIGINAL_SOURCE_PROOF.workbookSha256,
-  csv:'\\ufeff'+lines.join('\\r\\n')+'\\r\\n',
+  csv:'\ufeff'+lines.join('\r\n')+'\r\n',
   canonicalMutation:false,empiricalAuthority:false,deviceAction:false};
 }
 
