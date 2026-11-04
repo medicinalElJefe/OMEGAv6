@@ -1,4 +1,6 @@
 import fs from 'node:fs';
+import assert from 'node:assert/strict';
+import {compileTempleSomaPresetR784,validateTempleSomaPresetR784,parseTempleSomaPresetR784,TEMPLE_ROOMS_R784} from '../src/templeSomaPresetR784.js';
 const audio=fs.readFileSync('src/SomaAudioEngine.tsx','utf8'),atlas=fs.readFileSync('src/systemAtlasRuntime.ts','utf8'),ui=fs.readFileSync('src/SystemAtlasControl.tsx','utf8'),css=fs.readFileSync('src/somaAudio.css','utf8');
 const must=(x,m)=>{if(!x)throw new Error(m)};
 for(const token of ['Echo-Chamber / SOMA Audio Engine','PHASE_COHERENT_AUDIO','LOCAL_ACTIVE','12 discrete phase lanes','sonification only'])must(atlas.includes(token),`S17 runtime truth missing: ${token}`);
@@ -14,4 +16,35 @@ must(ui.includes('V24 INVENTORY-ALIGNED SOFTWARE UNIVERSE'),'System Atlas must r
 must(ui.includes('OMEGA_SYSTEM_ATLAS_V24_TRUTH.json'),'V24 predecessor receipt marker missing');
 must(css.includes('@media(max-width:700px)'),'S17 mobile containment missing');
 must(!audio.includes('@appdeploy/client')&&!ui.includes('@appdeploy/client'),'AppDeploy runtime dependency regression');
+
+const templeUi=fs.readFileSync('src/CorpusAdapterWorkbenchR473.tsx','utf8');
+const valid=compileTempleSomaPresetR784({room:'Ocean',step:7,breath:6.5,minutes:10});
+assert.equal(valid.schema,'OMEGA_TEMPLE_SOMA_PRESET_R473');
+assert.equal(valid.journeyStep,7);
+assert.equal(valid.activePhase,6);
+assert.equal(valid.baseFrequency,188);
+assert.equal(valid.clockSeconds,6.5);
+assert.equal(valid.autoStopMinutes,10);
+assert.equal(valid.canonicalMutation,false);
+assert.equal(TEMPLE_ROOMS_R784.length,8);
+assert.deepEqual(parseTempleSomaPresetR784(JSON.stringify(valid)),valid);
+assert.deepEqual(validateTempleSomaPresetR784(valid),valid);
+assert.throws(()=>validateTempleSomaPresetR784({...valid,canonicalMutation:true}),/cannot mutate/);
+assert.throws(()=>validateTempleSomaPresetR784({...valid,room:'Unknown'}),/Unknown Temple room/);
+assert.throws(()=>validateTempleSomaPresetR784({...valid,journeyStep:8}),/disagree/);
+assert.throws(()=>validateTempleSomaPresetR784({...valid,activePhase:6.5}),/contract/);
+assert.throws(()=>validateTempleSomaPresetR784({...valid,baseFrequency:Infinity}),/contract/);
+assert.throws(()=>validateTempleSomaPresetR784({...valid,clockSeconds:NaN}),/contract/);
+assert.throws(()=>validateTempleSomaPresetR784({...valid,clockSeconds:12.2}),/contract/);
+assert.throws(()=>validateTempleSomaPresetR784({...valid,autoStopMinutes:0}),/contract/);
+assert.throws(()=>validateTempleSomaPresetR784({...valid,autoStopMinutes:31}),/contract/);
+assert.throws(()=>compileTempleSomaPresetR784({room:'Ocean',step:13,breath:6,minutes:10}),/contract/);
+assert.throws(()=>parseTempleSomaPresetR784('{'),/Invalid Temple JSON/);
+assert.throws(()=>parseTempleSomaPresetR784(' '.repeat(4097)),/Bounded/);
+must(templeUi.includes('compileTempleSomaPresetR784({room,step,breath,minutes})'),'Temple UI must validate before storage/event dispatch');
+must(audio.includes('validateTempleSomaPresetR784(raw)'),'SOMA must validate all persisted/event preset values');
+must(audio.includes('parseTempleSomaPresetR784(raw)'),'SOMA must validate persisted JSON before use');
+must(audio.includes('if(!await start())return;stopTimer();setSequencing(true)'),'failed Web Audio start must not present fake-running sequence');
+must(audio.includes('explicit Start still required'),'a preset must never auto-play');
+
 console.log('R45/R168 SOMA AUDIO PASS · 12 packet-bound lanes · current LOCAL_ACTIVE successor gate · local WebAudio · compressor/master safety · predecessor evidence retained · no authority mutation');
