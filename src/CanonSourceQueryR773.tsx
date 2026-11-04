@@ -3,7 +3,7 @@ import {CanonSliceComparisonR774} from './CanonSliceComparisonR774';
 import {CanonPairedTransitionR775} from './CanonPairedTransitionR775';
 import {R763_AXES,R763_STRIDES} from './proof/canonNavigationR763.js';
 import {reconstructCanonFullRowR772} from './proof/canonFullSourceR772.js';
-import {R773_QUERY_LOCAL_KEY,queryCanonSourceR773,verifyCanonSourceQueryR773,parseCanonSourceQueryR773} from './proof/canonSourceQueryR773.js';
+import {R773_QUERY_LOCAL_KEY,queryCanonSourceR773,verifyCanonSourceQueryR773,parseCanonSourceQueryR773,exportCanonSourceCsvR783} from './proof/canonSourceQueryR773.js';
 
 type DecisionR773='ANY'|'STAY'|'TURN'|'ESCALATE';
 type QueryResultR773=ReturnType<typeof queryCanonSourceR773>;
@@ -50,6 +50,19 @@ export function CanonSourceQueryR773({onSelect}:{onSelect:(index:number)=>void})
    setTimeout(()=>URL.revokeObjectURL(url),1000);
   }catch(e){setVerification('REFUSED: '+(e instanceof Error?e.message:String(e)));}
  };
+ const exportFullCsv=()=>{
+  try{
+   if(!result)throw new Error('execute a source query first');
+   // Rebuild from the active, validated source query—not from paged UI rows.
+   const exportData=exportCanonSourceCsvR783(query(0));
+   const url=URL.createObjectURL(new Blob([exportData.csv],{type:'text/csv;charset=utf-8'}));
+   const a=document.createElement('a');a.href=url;
+   a.download='omega-r783-canon-source-'+exportData.rows+'-rows.csv';a.click();
+   setTimeout(()=>URL.revokeObjectURL(url),1000);
+   setStatus('EXPORTED: '+exportData.rows+' exact original-source rows × '+exportData.columns+
+    ' columns as CSV; computed locally from source, not CanonState or empirical observations.');
+  }catch(e){setStatus('REFUSED: '+(e instanceof Error?e.message:String(e)));}
+ };
  const verify=()=>{
   try{const restored=verifyCanonSourceQueryR773(snapshot);
    setVerification('PASS: '+restored.total+' matches independently recomputed from original-source formulas.');}
@@ -74,6 +87,7 @@ export function CanonSourceQueryR773({onSelect}:{onSelect:(index:number)=>void})
    <button type="button" data-r773-save onClick={save}>Save query locally</button>
    <button type="button" data-r773-load onClick={load}>Restore query</button>
    <button type="button" data-r773-export disabled={!result} onClick={exportSnapshot}>Export verified-source JSON</button>
+   <button type="button" data-r783-export-csv disabled={!result} onClick={exportFullCsv}>Export all matched rows as CSV</button>
   </div>
   <p role="status" data-r773-status>{status}</p>
   {result&&<section data-r773-results>
