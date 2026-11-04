@@ -26,8 +26,37 @@ function gibsDate(value){const m=txt(value).match(/^\d{4}-\d{2}-\d{2}$/);if(m)re
 async function gibsImage(url){const lat=clamp(Number(url.searchParams.get('lat')||0),-90,90),lon=clamp(Number(url.searchParams.get('lon')||0),-180,180),date=gibsDate(url.searchParams.get('date')),span=clamp(Number(url.searchParams.get('span')||4),.25,20),width=Math.round(clamp(Number(url.searchParams.get('width')||900),256,1400)),height=Math.round(clamp(Number(url.searchParams.get('height')||600),256,1000)),window=boundedGibsWindow(lat,lon,span);
  const params=new URLSearchParams({SERVICE:'WMS',REQUEST:'GetMap',VERSION:'1.1.1',LAYERS:'VIIRS_SNPP_CorrectedReflectance_TrueColor',STYLES:'',FORMAT:'image/jpeg',TRANSPARENT:'FALSE',SRS:'EPSG:4326',BBOX:`${window.minLon},${window.minLat},${window.maxLon},${window.maxLat}`,WIDTH:String(width),HEIGHT:String(height),TIME:date});
  const source=`https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?${params}`;try{const r=await fetch(source,{cf:{cacheTtl:300,cacheEverything:false}}),ct=r.headers.get('content-type')||'';if(!r.ok||!ct.startsWith('image/'))return json({ok:false,code:'GIBS_IMAGE_UNAVAILABLE',date,status:r.status,contentType:ct,window,truth:'NO_SYNTHETIC_SUBSTITUTE'},502);return new Response(r.body,{status:200,headers:{'content-type':ct,'cache-control':'public,max-age=300','x-omega-source':'NASA-GIBS-VIIRS-SNPP-TRUECOLOR','x-omega-date':date,'x-omega-crs':'EPSG:4326','x-omega-bbox':`${window.minLon},${window.minLat},${window.maxLon},${window.maxLat}`,'x-omega-requested-span':String(window.requestedSpan),'x-omega-effective-span':String(window.effectiveSpan),'x-omega-boundary-limited':String(window.boundaryLimited),'x-omega-center-preserved':String(window.centerPreserved)}})}catch(e){return json({ok:false,code:'GIBS_FETCH_FAILED',date,error:e instanceof Error?e.message:String(e),window,truth:'NO_SYNTHETIC_SUBSTITUTE'},502)}}
-async function gibsGlobalImage(url){const date=gibsDate(url.searchParams.get('date')),width=Math.round(clamp(Number(url.searchParams.get('width')||1440),720,2048)),height=Math.round(clamp(Number(url.searchParams.get('height')||720),360,1024));
- const params=new URLSearchParams({SERVICE:'WMS',REQUEST:'GetMap',VERSION:'1.1.1',LAYERS:'VIIRS_SNPP_CorrectedReflectance_TrueColor',STYLES:'',FORMAT:'image/jpeg',TRANSPARENT:'FALSE',SRS:'EPSG:4326',BBOX:'-180,-90,180,90',WIDTH:String(width),HEIGHT:String(height),TIME:date});
- const source=`https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?${params}`;try{const r=await fetch(source,{cf:{cacheTtl:900,cacheEverything:false}}),ct=r.headers.get('content-type')||'';if(!r.ok||!ct.startsWith('image/'))return json({ok:false,code:'GIBS_GLOBAL_UNAVAILABLE',date,status:r.status,contentType:ct,truth:'NO_SYNTHETIC_SUBSTITUTE'},502);return new Response(r.body,{status:200,headers:{'content-type':ct,'cache-control':'public,max-age=900','x-omega-source':'NASA-GIBS-VIIRS-SNPP-TRUECOLOR-GLOBAL','x-omega-date':date,'x-omega-crs':'EPSG:4326','x-omega-bbox':'-180,-90,180,90','x-omega-truth':'RETURNED_GLOBAL_OBSERVATION'}})}catch(e){return json({ok:false,code:'GIBS_GLOBAL_FETCH_FAILED',date,error:e instanceof Error?e.message:String(e),truth:'NO_SYNTHETIC_SUBSTITUTE'},502)}}
+
+const GIBS_GLOBAL_MIN_BYTES_R780=12000,GIBS_GLOBAL_MAX_BYTES_R780=8*1024*1024;
+function validGibsGlobalRasterR780(bytes,contentType){
+ if(bytes.byteLength<GIBS_GLOBAL_MIN_BYTES_R780||bytes.byteLength>GIBS_GLOBAL_MAX_BYTES_R780)return false;
+ const ct=String(contentType||'').toLowerCase();
+ return ((ct.includes('jpeg')||ct.includes('jpg'))&&bytes[0]===255&&bytes[1]===216)
+  ||(ct.includes('png')&&bytes[0]===137&&bytes[1]===80&&bytes[2]===78&&bytes[3]===71);
+}
+async function gibsGlobalImage(url){
+ const requestedDate=url.searchParams.has('date');
+ const initialDate=gibsDate(url.searchParams.get('date'));
+ const epoch=Date.parse(initialDate+'T00:00:00Z');
+ const width=Math.round(clamp(Number(url.searchParams.get('width')||1440),720,2048));
+ const height=Math.round(clamp(Number(url.searchParams.get('height')||720),360,1024));
+ const attempts=[];
+ // Explicit dates are never silently substituted. Default global view may
+ // inspect at most two earlier real NASA observation dates.
+ for(let lookback=0;lookback<(requestedDate?1:3);lookback++){
+  const date=Number.isFinite(epoch)?new Date(epoch-lookback*86400000).toISOString().slice(0,10):initialDate;
+  const params=new URLSearchParams({SERVICE:'WMS',REQUEST:'GetMap',VERSION:'1.1.1',LAYERS:'VIIRS_SNPP_CorrectedReflectance_TrueColor',STYLES:'',FORMAT:'image/jpeg',TRANSPARENT:'FALSE',SRS:'EPSG:4326',BBOX:'-180,-90,180,90',WIDTH:String(width),HEIGHT:String(height),TIME:date});
+  const source='https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?'+params;
+  try{
+   const response=await fetch(source,{cf:{cacheTtl:900,cacheEverything:false},signal:AbortSignal.timeout(10000)});
+   const ct=response.headers.get('content-type')||'';
+   if(!response.ok||!ct.startsWith('image/')){attempts.push({date,code:'UPSTREAM_NOT_IMAGE',status:response.status,contentType:ct});continue;}
+   const bytes=new Uint8Array(await response.arrayBuffer());
+   if(!validGibsGlobalRasterR780(bytes,ct)){attempts.push({date,code:'NO_VALID_OBSERVED_RASTER',bytes:bytes.byteLength,contentType:ct});continue;}
+   return new Response(bytes,{status:200,headers:{'content-type':ct,'cache-control':'public,max-age=900','x-omega-source':'NASA-GIBS-VIIRS-SNPP-TRUECOLOR-GLOBAL','x-omega-date':date,'x-omega-crs':'EPSG:4326','x-omega-bbox':'-180,-90,180,90','x-omega-truth':'RETURNED_GLOBAL_OBSERVATION','x-omega-lookback-days':String(lookback)}});
+  }catch(error){attempts.push({date,code:'UPSTREAM_FETCH_FAILED',error:error instanceof Error?error.name:'UNKNOWN'});}
+ }
+ return json({ok:false,code:'GIBS_GLOBAL_NO_VALID_OBSERVATION',requestedDate:initialDate,attempts,truth:'NO_SYNTHETIC_SUBSTITUTE'},502);
+}
 async function fetchR9(request,env){const url=new URL(request.url);if(url.pathname==='/api/earth/ground/evidence'&&request.method==='GET')return json(await groundEvidence(url));if(url.pathname==='/api/earth/gibs/image'&&request.method==='GET')return gibsImage(url);if(url.pathname==='/api/earth/gibs/global'&&request.method==='GET')return gibsGlobalImage(url);return r8.fetch(request,env)}
 export default{fetch:fetchR9};
