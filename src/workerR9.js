@@ -22,8 +22,22 @@ async function groundEvidence(url){const lat=clamp(Number(url.searchParams.get('
  const address=reverse.ok?{displayName:reverse.data?.display_name||null,road:reverse.data?.address?.road||reverse.data?.address?.pedestrian||null,neighbourhood:reverse.data?.address?.neighbourhood||reverse.data?.address?.suburb||null,city:reverse.data?.address?.city||reverse.data?.address?.town||reverse.data?.address?.village||null,state:reverse.data?.address?.state||null,country:reverse.data?.address?.country||null,countryCode:reverse.data?.address?.country_code||null}:null;
  const elevation=epqs.ok?epqsElevation(epqs.data):null,kartaMetadata=karta.ok?nearestKarta(karta.data,lat,lon):null,kartaPhoto=kartaMetadata?.imageUrl?kartaMetadata:null,osmContext=osm.ok?osmSummary(osm.data):null,reverseReturned=Boolean(address&&(address.displayName||address.road||address.city||address.state||address.country)),overpassReturned=Boolean(osm.ok&&Array.isArray(osm.data?.elements));
  const payload={schema:'OMEGA_EARTH_GROUND_EVIDENCE_V1',revision:'R309',target:{lat,lon,radiusM:radius,crs:'WGS84 / EPSG:4326'},verifiedAt:new Date().toISOString(),levels:{EARTH:{state:'WGS84_TARGET'},REGION:{state:reverseReturned?'RETURNED_OSM_REVERSE':'UNAVAILABLE',address:reverseReturned?address:null},CITY:{state:address?.city?'RETURNED_OSM_REVERSE':'UNAVAILABLE',name:address?.city||null},STREET:{state:kartaPhoto?'RETURNED_KARTAVIEW_PHOTO':address?.road?'RETURNED_OSM_ROAD_ONLY':'UNAVAILABLE',photo:kartaPhoto,returnedMetadata:kartaMetadata,road:address?.road||null},GROUND:{state:elevation!==null?'RETURNED_USGS_ELEVATION':overpassReturned?'RETURNED_OSM_CONTEXT_ONLY':'UNAVAILABLE',elevationM:elevation,osm:osmContext}},sources:{kartaView:sourceEnvelope(karta,{returned:Boolean(kartaPhoto),state:kartaPhoto?'EVIDENCE_RETURNED':'REACHABLE_NO_IMAGE',detail:kartaMetadata&&!kartaPhoto?'Geotagged metadata returned without an admissible HTTPS image asset.':!kartaMetadata&&karta.ok?'Provider responded but no nearby geotagged frame matched the bounded query.':null}),usgsEpqs:sourceEnvelope(epqs,{returned:elevation!==null,state:elevation!==null?'EVIDENCE_RETURNED':'REACHABLE_NO_NUMERIC_ELEVATION',detail:epqs.ok&&elevation===null?'Provider responded but no numeric elevation was admitted.':null}),osmReverse:sourceEnvelope(reverse,{returned:reverseReturned,state:reverseReturned?'EVIDENCE_RETURNED':'REACHABLE_NO_ADDRESS',detail:reverse.ok&&!reverseReturned?'Provider responded without a usable reverse-geocoded address.':null}),osmOverpass:sourceEnvelope(osm,{returned:overpassReturned,state:overpassReturned?(osmContext?.elements?'EVIDENCE_RETURNED':'RETURNED_EMPTY'):'REACHABLE_INVALID_ENVELOPE',detail:overpassReturned&&osmContext?.elements===0?'Valid bounded OSM query returned zero matching map elements.':null})},truthBoundary:'Earth→Region→City→Street→Ground is a navigation/evidence hierarchy. Provider reachability is not evidence return. Street imagery is shown only when KartaView returned an actual HTTPS geotagged image asset. Elevation is shown only when USGS EPQS returned a numeric value. Valid empty OSM queries remain returned-empty evidence. Missing ground evidence is never generated or inferred.'};payload.evidenceHash=await hash(payload);return payload}
-function gibsDate(value){const m=txt(value).match(/^\d{4}-\d{2}-\d{2}$/);if(m)return m[0];const d=new Date(Date.now()-86400000);return d.toISOString().slice(0,10)}
-async function gibsImage(url){const lat=clamp(Number(url.searchParams.get('lat')||0),-90,90),lon=clamp(Number(url.searchParams.get('lon')||0),-180,180),date=gibsDate(url.searchParams.get('date')),span=clamp(Number(url.searchParams.get('span')||4),.25,20),width=Math.round(clamp(Number(url.searchParams.get('width')||900),256,1400)),height=Math.round(clamp(Number(url.searchParams.get('height')||600),256,1000)),window=boundedGibsWindow(lat,lon,span);
+function gibsDate(value){
+ const input=txt(value);
+ // A specified day is authority, never an invitation to substitute yesterday.
+ if(input){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(input))return null;
+  const epoch=Date.parse(input+'T00:00:00Z');
+  return Number.isFinite(epoch)&&new Date(epoch).toISOString().slice(0,10)===input?input:null;
+ }
+ return new Date(Date.now()-86400000).toISOString().slice(0,10);
+}
+function admittedGibsDateR782(url){
+ const explicit=url.searchParams.has('date');
+ const date=explicit?gibsDate(url.searchParams.get('date')):gibsDate(null);
+ return {explicit,date:explicit&&!txt(url.searchParams.get('date'))?null:date};
+}
+async function gibsImage(url){const admitted=admittedGibsDateR782(url);if(!admitted.date)return json({ok:false,code:'GIBS_INVALID_EXPLICIT_DATE',truth:'NO_DATE_SUBSTITUTION'},400);const lat=clamp(Number(url.searchParams.get('lat')||0),-90,90),lon=clamp(Number(url.searchParams.get('lon')||0),-180,180),date=admitted.date,span=clamp(Number(url.searchParams.get('span')||4),.25,20),width=Math.round(clamp(Number(url.searchParams.get('width')||900),256,1400)),height=Math.round(clamp(Number(url.searchParams.get('height')||600),256,1000)),window=boundedGibsWindow(lat,lon,span);
  const params=new URLSearchParams({SERVICE:'WMS',REQUEST:'GetMap',VERSION:'1.1.1',LAYERS:'VIIRS_SNPP_CorrectedReflectance_TrueColor',STYLES:'',FORMAT:'image/jpeg',TRANSPARENT:'FALSE',SRS:'EPSG:4326',BBOX:`${window.minLon},${window.minLat},${window.maxLon},${window.maxLat}`,WIDTH:String(width),HEIGHT:String(height),TIME:date});
  const source=`https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?${params}`;try{const r=await fetch(source,{cf:{cacheTtl:300,cacheEverything:false}}),ct=r.headers.get('content-type')||'';if(!r.ok||!ct.startsWith('image/'))return json({ok:false,code:'GIBS_IMAGE_UNAVAILABLE',date,status:r.status,contentType:ct,window,truth:'NO_SYNTHETIC_SUBSTITUTE'},502);return new Response(r.body,{status:200,headers:{'content-type':ct,'cache-control':'public,max-age=300','x-omega-source':'NASA-GIBS-VIIRS-SNPP-TRUECOLOR','x-omega-date':date,'x-omega-crs':'EPSG:4326','x-omega-bbox':`${window.minLon},${window.minLat},${window.maxLon},${window.maxLat}`,'x-omega-requested-span':String(window.requestedSpan),'x-omega-effective-span':String(window.effectiveSpan),'x-omega-boundary-limited':String(window.boundaryLimited),'x-omega-center-preserved':String(window.centerPreserved)}})}catch(e){return json({ok:false,code:'GIBS_FETCH_FAILED',date,error:e instanceof Error?e.message:String(e),window,truth:'NO_SYNTHETIC_SUBSTITUTE'},502)}}
 
@@ -92,8 +106,10 @@ function validGibsGlobalRasterR780(bytes,contentType){
   :ct==='image/png'&&validGibsPngStructureR781(bytes);
 }
 async function gibsGlobalImage(url){
- const requestedDate=url.searchParams.has('date');
- const initialDate=gibsDate(url.searchParams.get('date'));
+ const admitted=admittedGibsDateR782(url);
+ if(!admitted.date)return json({ok:false,code:'GIBS_INVALID_EXPLICIT_DATE',truth:'NO_DATE_SUBSTITUTION'},400);
+ const requestedDate=admitted.explicit;
+ const initialDate=admitted.date;
  const epoch=Date.parse(initialDate+'T00:00:00Z');
  const width=Math.round(clamp(Number(url.searchParams.get('width')||1440),720,2048));
  const height=Math.round(clamp(Number(url.searchParams.get('height')||720),360,1024));

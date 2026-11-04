@@ -116,7 +116,32 @@ try{
  result=await run(path+'&date=2026-10-31');
  assert.equal(result.status,200,'CRC-validated PNG raster must retain supported MIME route');
  assert.equal(result.headers.get('x-omega-date'),'2026-10-31');
+ // R782: invalid explicitly requested calendar days are not silently replaced,
+ // including empty, malformed, nonexistent and non-leap-year dates.
+ for(const invalid of ['', 'not-a-date', '2026-02-29', '2026-02-30', '2026-13-01', '2026-1-2']){
+  for(const endpoint of ['/api/earth/gibs/global?width=720&height=360',
+                          '/api/earth/gibs/image?lat=32&lon=-110']){
+   calls.length=0;
+   globalThis.fetch=async url=>{calls.push(new URL(String(url)));throw Error('INVALID_DATE_MUST_NOT_FETCH_UPSTREAM')};
+   const separator=endpoint.includes('?')?'&':'?';
+   result=await run(endpoint+separator+'date='+encodeURIComponent(invalid));
+   assert.equal(result.status,400,'invalid explicit Earth date must be rejected: '+invalid);
+   const rejection=await result.json();
+   assert.equal(rejection.code,'GIBS_INVALID_EXPLICIT_DATE');
+   assert.equal(rejection.truth,'NO_DATE_SUBSTITUTION');
+   assert.equal(calls.length,0,'invalid explicit date must not invoke NASA upstream');
+  }
+ }
+ calls.length=0;
+ globalThis.fetch=async url=>{calls.push(new URL(String(url)));return fake(small)};
+ result=await run(path+'&date=2024-02-29');
+ assert.equal(result.status,502,'valid leap day remains an exact attempted observation');
+ const leap=await result.json();
+ assert.equal(leap.attempts.length,1);
+ assert.equal(leap.attempts[0].date,'2024-02-29');
+ assert.equal(calls.length,1,'valid explicit leap day must make exactly one provider request');
+
 }finally{
  globalThis.fetch=originalFetch;
 }
-console.log('R780/R781 LIVE-EARTH SOURCE INTEGRITY PASS · 1836-byte no-data rejection · exact-date immutability · bounded real-date recovery · truthful missing-evidence failure');
+console.log('R780/R781/R782 LIVE-EARTH SOURCE INTEGRITY PASS · 1836-byte no-data rejection · exact-date immutability · bounded real-date recovery · truthful missing-evidence failure');
