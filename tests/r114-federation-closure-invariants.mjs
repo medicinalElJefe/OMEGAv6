@@ -11,7 +11,7 @@ for(const route of ['/api/federation/ceremony/law','/api/federation/ceremony/sta
 for(const stage of ['INTENT','PROPOSE','SCREEN','QUEUE','SOLVE','ADMIT'])assert(worker.includes(`'${stage}'`)||worker.includes(`\"${stage}\"`),`receipt chain stage missing ${stage}`);
 assert(worker.includes('previousReceiptSha256')&&worker.includes('receiptSha256'),'R114 receipts must be predecessor-hash chained');
 assert(worker.includes('federationCeremoniesR114')&&worker.includes("this.put('federationCeremoniesR114'"),'R114 ceremony history must persist in the existing Durable Object');
-assert(worker.includes('OMEGA_GENESIS.fetch')||worker.includes('env.OMEGA_GENESIS?.fetch'),'strict PROPOSE must use the registered Genesis service path when available');
+assert(worker.includes('env.OMEGA_GENESIS_MACHINE?.fetch?env.OMEGA_GENESIS_MACHINE:env.OMEGA_GENESIS')&&worker.includes('machine.fetch.bind(machine)'),'strict PROPOSE must invoke the registered Genesis Machine service binding when available and retain the original Genesis fallback');
 assert(worker.includes('OMEGA_OPTICAL_SERVICE_TOKEN')&&worker.includes('OMEGA_OPTICAL_BYPASS_TOKEN'),'strict SCREEN must keep protected Optical credentials server-side');
 assert(worker.includes("'SERVICE_OBSERVED'")&&worker.includes("'BRIDGE_ASSERTED'"),'service observation and manual assertion must remain distinct trust classes');
 assert(worker.includes('GENESIS_PROPOSAL_ENDPOINT_REQUIRED')&&worker.includes('OPTICAL_ACCESS_GATED')&&worker.includes('TIER2_JOB_REQUIRED'),'missing upstream stages must block rather than synthesize packets');
