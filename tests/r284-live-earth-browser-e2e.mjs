@@ -13,7 +13,7 @@ async function enterEarth(page,label){
  const railEarth=page.getByLabel('Open Earth Now');
  await railEarth.waitFor({state:'visible',timeout:15000});
  await railEarth.click();
- await page.waitForFunction(()=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')==='Earth Now',{timeout:30000});
+ await page.waitForFunction(()=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')==='Earth Now',null,{timeout:30000});
  await page.waitForSelector('.earth-r279',{state:'visible',timeout:30000});
  const tabs=page.locator('.earth-r279-view-tabs button'),count=await tabs.count();if(count!==9)throw new Error(`${label}: live Earth expected nine surfaces including Weather and SAR Truth, found ${count}`);
 }
@@ -25,7 +25,7 @@ try{
   await page.goto(`${base}/?omega6=1&r284-live=${Date.now()}-${name}`,{waitUntil:'domcontentloaded',timeout:45000});await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});await enterEarth(page,name);
   const planetButton=page.locator('.earth-r279-view-tabs button').filter({hasText:'Planet'}).first();await planetButton.click();await page.waitForSelector('.earth-r281-globe[data-earth-view="PLANET"]',{state:'visible',timeout:20000});
   let observed=false;for(let attempt=1;attempt<=3;attempt++){
-   try{await page.waitForFunction(()=>document.querySelector('.earth-r281-globe')?.getAttribute('data-source-state')==='OBSERVED',{timeout:25000});observed=true;break}catch{const reload=page.getByRole('button',{name:'Reload observed texture'});if(await reload.isVisible())await reload.click()}
+   try{await page.waitForFunction(()=>document.querySelector('.earth-r281-globe')?.getAttribute('data-source-state')==='OBSERVED',null,{timeout:25000});observed=true;break}catch{const reload=page.getByRole('button',{name:'Reload observed texture'});if(await reload.isVisible())await reload.click()}
   }
   const planet=page.locator('.earth-r281-globe');if(!observed){const state=await planet.getAttribute('data-source-state'),text=await planet.innerText();throw new Error(`${name}: live observed Earth did not bind after bounded retries: ${state} · ${text.slice(0,600)}`)}
   const canvas=planet.locator('canvas'),rect=await canvas.boundingBox();if(!rect||rect.width<260||rect.height<420)throw new Error(`${name}: live R284 globe canvas unusable ${JSON.stringify(rect)}`);
@@ -41,8 +41,8 @@ try{
   if(!geocoded)throw new Error(`${name}: R356.4 place search returned no selectable Tucson result after bounded retries`);
   const resultButtons=page.locator('.r3564-sar-results button');if(await resultButtons.count()<1)throw new Error(`${name}: R356.4 place picker has no selectable results`);await resultButtons.first().click();
   const sarInstrument=page.locator('.sar-r285-live .sar-r280');
-  await page.waitForFunction(()=>{const el=document.querySelector('.sar-r285-live .sar-r280');if(!el)return false;const head=el.querySelector('.r280-screen-head b')?.textContent||'',lemma=el.querySelector('.r3565-lemma-canvas[data-truth-class="DERIVED_TRIANGULATED"]'),native=head.includes('BOUND MEASUREMENT FIELD')?el.querySelector('.r280-canvas'):null;return Boolean(lemma||native)},{timeout:45000});
-  await page.waitForFunction(()=>{const cards=[...document.querySelectorAll('.r284-lens-card')];return cards.length===12&&cards.every(card=>card.querySelector('.r3565-mini-lemma,.r284-mini-grid'))},{timeout:45000});
+  await page.waitForFunction(()=>{const el=document.querySelector('.sar-r285-live .sar-r280');if(!el)return false;const head=el.querySelector('.r280-screen-head b')?.textContent||'',lemma=el.querySelector('.r3565-lemma-canvas[data-truth-class="DERIVED_TRIANGULATED"]'),native=head.includes('BOUND MEASUREMENT FIELD')?el.querySelector('.r280-canvas'):null;return Boolean(lemma||native)},null,{timeout:45000});
+  await page.waitForFunction(()=>{const cards=[...document.querySelectorAll('.r284-lens-card')];return cards.length===12&&cards.every(card=>card.querySelector('.r3565-mini-lemma,.r284-mini-grid'))},null,{timeout:45000});
   const lensCards=page.locator('.r284-lens-card');if(await lensCards.count()!==12)throw new Error(`${name}: R356.5 expected 12 analytical lenses, found ${await lensCards.count()}`);
   const state=await sarInstrument.evaluate(el=>{const head=el.querySelector('.r280-screen-head b')?.textContent||'',lemma=el.querySelector('.r3565-lemma-canvas[data-truth-class="DERIVED_TRIANGULATED"]'),native=head.includes('BOUND MEASUREMENT FIELD')?el.querySelector('.r280-canvas'):null,field=lemma||native;if(!field)return{kind:'PENDING',count:0,unique:0,rect:null,populated:0};const r=field.getBoundingClientRect(),cells=[...field.querySelectorAll(':scope > i')],cards=[...el.querySelectorAll('.r284-lens-card')];return{kind:lemma?'DERIVED_TRIANGULATED':'BOUND_NATIVE',count:cells.length,unique:new Set(Array.from({length:Math.min(1500,cells.length)},(_,i)=>cells[Math.round(i*(cells.length-1)/Math.max(1,Math.min(1500,cells.length)-1))]).map(x=>getComputedStyle(x).backgroundColor)).size,rect:{width:r.width,height:r.height},populated:cards.filter(card=>card.querySelector('.r3565-mini-lemma,.r284-mini-grid')).length}});
   if(state.kind==='PENDING'||state.populated!==12)throw new Error(`${name}: R356.5 analytical state did not settle across all 12 lenses ${JSON.stringify(state)}`);
