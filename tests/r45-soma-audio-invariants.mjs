@@ -50,4 +50,6 @@ must(audio.includes('if(!await start())return;stopTimer();setSequencing(true)'),
 must(audio.includes('explicit Start still required'),'a preset must never auto-play');
 for(const token of ['catch(e){stopTimer();setSequencing(false);setRunning(false);clearSafetySession()','lane.osc.stop()','audio.current=null;master.current=null;compressor.current=null','failedContext.close().catch(()=>{})'])must(audio.includes(token),`failed Web Audio start must release graph and reset false-running state: ${token}`);
 
+for(const token of ['let pendingOsc:OscillatorNode|null=null','pendingOsc=osc','pendingOsc=null','if(pendingOsc){try{pendingOsc.stop()}catch{}}','for(const lane of built){try{lane.osc.stop()}catch{}}','void ctx.close().catch(()=>{});throw error'])must(audio.includes(token),`partial Web Audio initialization must release all started lanes and close context: ${token}`);
+
 console.log('R45/R168 SOMA AUDIO PASS · 12 packet-bound lanes · current LOCAL_ACTIVE successor gate · local WebAudio · compressor/master safety · predecessor evidence retained · no authority mutation');
