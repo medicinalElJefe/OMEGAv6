@@ -49,6 +49,8 @@ export default function ScienceWorkspaceR441({route,onNavigate,depth}:Props){
   window.addEventListener('storage',sync);
   window.addEventListener('omega7-address-changed',sync as EventListener);
   document.addEventListener('visibilitychange',visibility);
+  // Close the render-to-effect gap if another tab changed storage during mount.
+  sync();
   schedule();
   return()=>{
    if(poll!==undefined)window.clearInterval(poll);
