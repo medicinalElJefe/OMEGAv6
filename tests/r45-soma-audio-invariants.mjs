@@ -66,6 +66,10 @@ assert.ok(partialInit,'Web Audio initializer must exist');
 for(const token of ['pendingOsc.disconnect()','lane.osc.disconnect()','lane.gain.disconnect()','lane.pan.disconnect()'])
  must(partialInit.includes(token),'partial audio initialization must disconnect: '+token);
 
+// Partial initialization must also disconnect the compressor and output, including when lane construction fails after graph connection.
+for(const token of ['let comp:DynamicsCompressorNode|null=null,out:GainNode|null=null','try{comp?.disconnect()}catch{}','try{out?.disconnect()}catch{}'])
+ must(partialInit.includes(token),'partial initialization must release compressor/output: '+token);
+
 // R785: Stop and safety deadline must release actual oscillator resources, not merely mute them.
 const stopBody=audio.split('const stop=()=>{')[1]?.split('const toggleSequence=')[0];
 assert.ok(stopBody,'SOMA Stop handler must exist');
