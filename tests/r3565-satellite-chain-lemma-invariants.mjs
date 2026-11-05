@@ -12,6 +12,7 @@ for(const token of ['fields.SOURCE','fields.AMPLITUDE','fields.PHASE','fields.CO
 assert.ok(lemma.includes('not native Sentinel-1 SAR measurements'),'R356.5 must preserve observed-vs-derived truth boundary');
 assert.ok(lemma.includes("q.opaque>=256&&(q.bins>=4||q.span>=.025)"),'R419 must reject blank/near-uniform GIBS anchors before lemma admission');
 assert.ok(lemma.includes('ANCHOR_TIMEOUT_MS_R487=12000'),'R487 must bound each external GIBS anchor request so a stalled provider cannot hang the analytical surface');
+assert.ok(/setTimeout\(\(\)=>\{[^\n]*img\.onload=null;img\.onerror=null;img\.src='';reject\(/.test(lemma),'R787 must cancel timed-out image transfers, not merely reject while retaining browser network work');
 assert.ok(lemma.includes('Promise.all(sources.map(async candidate=>'),'R487 must launch bounded recent-date GIBS candidates concurrently instead of serially compounding provider latency');
 assert.ok(lemma.includes('for(const attempt of attempts){if(attempt.img&&attempt.quality)return{...attempt.candidate,img:attempt.img,quality:attempt.quality}'),'R487 must preserve newest-first fallback priority after concurrent materiality evaluation');
 assert.ok(!lemma.includes('for(const candidate of sources)try'),'R487 must retire the serial candidate waterfall that caused target-bound production timeouts');
@@ -29,5 +30,18 @@ assert.ok(instrument.includes('data-r3565-lemma'),'lens cards must expose derive
 for(const token of ['data-target-lat','data-target-lon','data-evidence-hash'])assert.ok(instrument.includes(token),`R398 rendered chain-lemma identity missing ${token}`);
 assert.ok(instrument.includes('triangulated satellite lemma proxy · not SAR measurement'),'lens footer must preserve truth class');
 for(const token of ['.r3565-lemma-canvas','.r3565-mini-lemma','.r3565-lemma-badge'])assert.ok(css.includes(token),`R356.5 presentation missing ${token}`);
+
+// R787: 64-cell source-derived lemmas do not require six full-size 900x600
+// remote anchor images. Smaller real imagery reduces transfer and decode load;
+// unavailable/non-material imagery must still REFUSE rather than synthesize pixels.
+assert.ok(lemma.includes('&span=2.5&width=256&height=256'), 'R787 source GIBS anchors must request bounded 256px real image samples');
+assert.ok(lemma.includes('NASA_GIBS_ANCHOR_UNAVAILABLE:'), 'R787 failed anchor admission must retain a visible source-specific error');
+const r787Browser=fs.readFileSync('tests/r284-live-earth-browser-e2e.mjs','utf8');
+for(const token of ['data-r787-lemma-state','data-r787-lemma-error','data-r787-evidence-bound','data-r787-current-anchor','R284 material source-bound SAR unavailable after 45s'])
+ assert.ok(r787Browser.includes(token),'R787 production SAR source diagnostic missing '+token);
+for(const token of ['data-r787-lemma-state','data-r787-lemma-error','data-r787-evidence-bound'])
+ assert.ok(instrument.includes(token),'R787 truth-bound SAR instrument missing '+token);
+assert.ok(r787Browser.includes('return Boolean(lemma||native)},null,{timeout:45000})'),
+ 'R787 must never accept an unavailable/non-source-bound SAR canvas as a live proof');
 
 console.log('R356.5 SATELLITE CHAIN LEMMA PASS · bounded concurrent recent GIBS current/previous anchors + returned evidence triangulated under R487 latency control · 12 derived proxy fields visible before native SAR closure · explicit DERIVED_TRIANGULATED truth class · no measurement authority inflation');
