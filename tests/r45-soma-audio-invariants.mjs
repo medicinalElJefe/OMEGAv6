@@ -46,7 +46,10 @@ assert.throws(()=>parseTempleSomaPresetR784(' '.repeat(4097)),/Bounded/);
 must(templeUi.includes('compileTempleSomaPresetR784({room,step,breath,minutes})'),'Temple UI must validate before storage/event dispatch');
 must(audio.includes('validateTempleSomaPresetR784(raw)'),'SOMA must validate all persisted/event preset values');
 must(audio.includes('parseTempleSomaPresetR784(raw)'),'SOMA must validate persisted JSON before use');
-must(audio.includes('if(!await start())return;stopTimer();setSequencing(true)'),'failed Web Audio start must not present fake-running sequence');
+must(audio.includes('if(!await start())return;const sequenceEpoch=startEpoch.current;if(!audio.current)return;stopTimer();setSequencing(true)'),'failed Web Audio start must not present fake-running sequence');
+const epochGuards=audio.match(/if\(sequenceEpoch!==startEpoch\.current\)\{stopTimer\(\);return\}/g)||[];
+assert.equal(epochGuards.length,2,'both initial and effect-restarted sequence timers must reject invalidated startup generations');
+assert.ok(audio.includes('if(!sequencing||!audio.current)return;const sequenceEpoch=startEpoch.current'),'effect must not create a phase clock without an active audio context');
 must(audio.includes('explicit Start still required'),'a preset must never auto-play');
 for(const token of ['catch(e){if(epoch!==startEpoch.current)return false;stopTimer();setSequencing(false);setRunning(false);clearSafetySession()','lane.osc.stop()','audio.current=null;master.current=null;compressor.current=null','failedContext.close().catch(()=>{})'])must(audio.includes(token),`failed Web Audio start must release graph and reset false-running state: ${token}`);
 
