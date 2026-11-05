@@ -10,7 +10,7 @@ assert.ok(end>bodyStart,'R784 effect end missing');
 const effect=source.slice(bodyStart,end).replace('let poll:number|undefined;','let poll;').replaceAll('sync as EventListener','sync');
 const setup=new Function('window','document','setAddress','readAddress',effect);
 const listeners={window:new Map(),document:new Map()},intervals=new Map();
-let nextTimer=1,hidden=false,stored=11498,current=11498,updates=0;
+let nextTimer=1,hidden=false,stored=11499,current=11498,updates=0;
 function target(kind){
  return {
   addEventListener(name,fn){const set=listeners[kind].get(name)||new Set();set.add(fn);listeners[kind].set(name,set)},
@@ -23,6 +23,7 @@ const doc={...target('document'),get hidden(){return hidden}};
 const setAddress=fn=>{const next=fn(current);if(next!==current)updates++;current=next};
 const cleanup=setup(win,doc,setAddress,()=>stored);
 assert.equal(typeof cleanup,'function');
+assert.equal(current,11499,'mount reconciles an address changed between render and effect');
 assert.equal(intervals.size,1,'visible tab starts one fallback timer');
 assert.equal(listeners.window.get('storage').size,1);
 assert.equal(listeners.window.get('omega7-address-changed').size,1);
