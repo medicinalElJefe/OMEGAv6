@@ -59,4 +59,8 @@ for(const token of ['lane.osc.stop()','lane.osc.disconnect()','lane.gain.disconn
  must(stopBody.includes(token),'Stop must release Web Audio graph: '+token);
 assert.ok(audio.includes('if(remaining<=0){stop();'),'safety timeout must use complete Stop cleanup');
 
+// A delayed AudioContext.resume() must never revive audio after an explicit Stop.
+for(const token of ['startEpoch=useRef(0)','const epoch=startEpoch.current','if(epoch!==startEpoch.current||audio.current!==ctx)return false','const stop=()=>{startEpoch.current++'])
+ must(audio.includes(token),'late Web Audio resume cancellation missing: '+token);
+
 console.log('R45/R168 SOMA AUDIO PASS · 12 packet-bound lanes · current LOCAL_ACTIVE successor gate · local WebAudio · compressor/master safety · predecessor evidence retained · no authority mutation');
