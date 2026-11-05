@@ -52,4 +52,11 @@ for(const token of ['catch(e){stopTimer();setSequencing(false);setRunning(false)
 
 for(const token of ['let pendingOsc:OscillatorNode|null=null','pendingOsc=osc','pendingOsc=null','if(pendingOsc){try{pendingOsc.stop()}catch{}}','for(const lane of built){try{lane.osc.stop()}catch{}}','void ctx.close().catch(()=>{});throw error'])must(audio.includes(token),`partial Web Audio initialization must release all started lanes and close context: ${token}`);
 
+// R785: Stop and safety deadline must release actual oscillator resources, not merely mute them.
+const stopBody=audio.split('const stop=()=>{')[1]?.split('const toggleSequence=')[0];
+assert.ok(stopBody,'SOMA Stop handler must exist');
+for(const token of ['lane.osc.stop()','lane.osc.disconnect()','lane.gain.disconnect()','lane.pan.disconnect()','lanes.current=[]','audio.current=null','ctx.close().catch(()=>{})','setRunning(false)'])
+ must(stopBody.includes(token),'Stop must release Web Audio graph: '+token);
+assert.ok(audio.includes('if(remaining<=0){stop();'),'safety timeout must use complete Stop cleanup');
+
 console.log('R45/R168 SOMA AUDIO PASS · 12 packet-bound lanes · current LOCAL_ACTIVE successor gate · local WebAudio · compressor/master safety · predecessor evidence retained · no authority mutation');
