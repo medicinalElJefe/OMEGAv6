@@ -48,5 +48,6 @@ must(audio.includes('validateTempleSomaPresetR784(raw)'),'SOMA must validate all
 must(audio.includes('parseTempleSomaPresetR784(raw)'),'SOMA must validate persisted JSON before use');
 must(audio.includes('if(!await start())return;stopTimer();setSequencing(true)'),'failed Web Audio start must not present fake-running sequence');
 must(audio.includes('explicit Start still required'),'a preset must never auto-play');
+for(const token of ['catch(e){stopTimer();setSequencing(false);setRunning(false);clearSafetySession()','lane.osc.stop()','audio.current=null;master.current=null;compressor.current=null','failedContext.close().catch(()=>{})'])must(audio.includes(token),`failed Web Audio start must release graph and reset false-running state: ${token}`);
 
 console.log('R45/R168 SOMA AUDIO PASS · 12 packet-bound lanes · current LOCAL_ACTIVE successor gate · local WebAudio · compressor/master safety · predecessor evidence retained · no authority mutation');
