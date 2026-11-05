@@ -55,6 +55,12 @@ for(const token of ['catch(e){if(epoch!==startEpoch.current)return false;stopTim
 
 for(const token of ['let pendingOsc:OscillatorNode|null=null','pendingOsc=osc','pendingOsc=null','if(pendingOsc){try{pendingOsc.stop()}catch{}}','for(const lane of built){try{lane.osc.stop()}catch{}}','void ctx.close().catch(()=>{});throw error'])must(audio.includes(token),`partial Web Audio initialization must release all started lanes and close context: ${token}`);
 
+// A partial oscillator-construction failure must disconnect every previously connected lane.
+const partialInit=audio.split('const initAudio=async()=>{')[1]?.split('const start=async()=>')[0];
+assert.ok(partialInit,'Web Audio initializer must exist');
+for(const token of ['pendingOsc.disconnect()','lane.osc.disconnect()','lane.gain.disconnect()','lane.pan.disconnect()'])
+ must(partialInit.includes(token),'partial audio initialization must disconnect: '+token);
+
 // R785: Stop and safety deadline must release actual oscillator resources, not merely mute them.
 const stopBody=audio.split('const stop=()=>{')[1]?.split('const toggleSequence=')[0];
 assert.ok(stopBody,'SOMA Stop handler must exist');
