@@ -66,4 +66,10 @@ assert.ok(audio.includes('catch(e){if(epoch!==startEpoch.current)return false;st
 for(const token of ['startEpoch=useRef(0)','const epoch=startEpoch.current','if(epoch!==startEpoch.current||audio.current!==ctx)return false','const stop=()=>{startEpoch.current++'])
  must(audio.includes(token),'late Web Audio resume cancellation missing: '+token);
 
+// Unmount must invalidate a pending resume and release the entire graph without a state update.
+const unmountBody=audio.split('useEffect(()=>()=>{startEpoch.current++')[1]?.split('},[]);')[0];
+assert.ok(unmountBody,'unmount must invalidate in-flight starts');
+for(const token of ['stopTimer()','stopSessionTimer()','audio.current=null','lane.osc.stop()','lane.osc.disconnect()','lane.gain.disconnect()','lane.pan.disconnect()','master.current=null','compressor.current=null','ctx.close().catch(()=>{})'])
+ must(unmountBody.includes(token),'unmount must release graph: '+token);
+
 console.log('R45/R168 SOMA AUDIO PASS · 12 packet-bound lanes · current LOCAL_ACTIVE successor gate · local WebAudio · compressor/master safety · predecessor evidence retained · no authority mutation');
