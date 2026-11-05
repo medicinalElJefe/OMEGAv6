@@ -17,7 +17,7 @@ export function validateTempleSomaPresetR784(preset){
  const journeyStep=exactNumber(preset.journeyStep,'journeyStep',1,12);
  const activePhase=exactNumber(preset.activePhase,'activePhase',0,11);
  if(activePhase!==journeyStep-1)throw new Error('Temple journey and phase disagree');
- const baseFrequency=exactNumber(preset.baseFrequency,'baseFrequency',36,188);
+ const baseFrequency=exactNumber(preset.baseFrequency,'baseFrequency',188,188);
  const clockSeconds=exactNumber(preset.clockSeconds,'clockSeconds',2,12,.5);
  const autoStopMinutes=exactNumber(preset.autoStopMinutes,'autoStopMinutes',1,30);
  return Object.freeze({schema:TEMPLE_SCHEMA_R784,room:preset.room,journeyStep,activePhase,baseFrequency,clockSeconds,autoStopMinutes,canonicalMutation:false,
