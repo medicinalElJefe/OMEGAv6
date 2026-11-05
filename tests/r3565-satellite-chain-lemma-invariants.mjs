@@ -12,6 +12,7 @@ for(const token of ['fields.SOURCE','fields.AMPLITUDE','fields.PHASE','fields.CO
 assert.ok(lemma.includes('not native Sentinel-1 SAR measurements'),'R356.5 must preserve observed-vs-derived truth boundary');
 assert.ok(lemma.includes("q.opaque>=256&&(q.bins>=4||q.span>=.025)"),'R419 must reject blank/near-uniform GIBS anchors before lemma admission');
 assert.ok(lemma.includes('ANCHOR_TIMEOUT_MS_R487=12000'),'R487 must bound each external GIBS anchor request so a stalled provider cannot hang the analytical surface');
+assert.ok(/setTimeout\(\(\)=>\{[^\n]*img\.onload=null;img\.onerror=null;img\.src='';reject\(/.test(lemma),'R787 must cancel timed-out image transfers, not merely reject while retaining browser network work');
 assert.ok(lemma.includes('Promise.all(sources.map(async candidate=>'),'R487 must launch bounded recent-date GIBS candidates concurrently instead of serially compounding provider latency');
 assert.ok(lemma.includes('for(const attempt of attempts){if(attempt.img&&attempt.quality)return{...attempt.candidate,img:attempt.img,quality:attempt.quality}'),'R487 must preserve newest-first fallback priority after concurrent materiality evaluation');
 assert.ok(!lemma.includes('for(const candidate of sources)try'),'R487 must retire the serial candidate waterfall that caused target-bound production timeouts');
