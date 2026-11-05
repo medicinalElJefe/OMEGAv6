@@ -62,8 +62,8 @@ assert.ok(audio.includes('if(remaining<=0){stop();'),'safety timeout must use co
 // A stale rejected resume must not tear down a newer user-started audio graph.
 assert.ok(audio.includes('catch(e){if(epoch!==startEpoch.current)return false;stopTimer()'),'stale rejected resume must not clear the newer session');
 
-// A delayed AudioContext.resume() must never revive audio after an explicit Stop.
-for(const token of ['startEpoch=useRef(0)','const epoch=startEpoch.current','if(epoch!==startEpoch.current||audio.current!==ctx)return false','const stop=()=>{startEpoch.current++'])
+// Each Start takes exclusive generation authority: a second Start supersedes a pending resume.\n// A delayed AudioContext.resume() must never revive audio after an explicit Stop.
+for(const token of ['startEpoch=useRef(0)','const epoch=++startEpoch.current','if(epoch!==startEpoch.current||audio.current!==ctx)return false','const stop=()=>{startEpoch.current++'])
  must(audio.includes(token),'late Web Audio resume cancellation missing: '+token);
 
 // Unmount must invalidate a pending resume and release the entire graph without a state update.
