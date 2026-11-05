@@ -53,7 +53,12 @@ assert.ok(audio.includes('if(!sequencing||!audio.current)return;const sequenceEp
 must(audio.includes('explicit Start still required'),'a preset must never auto-play');
 for(const token of ['catch(e){if(epoch!==startEpoch.current)return false;stopTimer();setSequencing(false);setRunning(false);clearSafetySession()','lane.osc.stop()','audio.current=null;master.current=null;compressor.current=null','failedContext.close().catch(()=>{})'])must(audio.includes(token),`failed Web Audio start must release graph and reset false-running state: ${token}`);
 
-for(const token of ['let pendingOsc:OscillatorNode|null=null','pendingOsc=osc','pendingOsc=null','if(pendingOsc){try{pendingOsc.stop()}catch{}}','for(const lane of built){try{lane.osc.stop()}catch{}}','void ctx.close().catch(()=>{});throw error'])must(audio.includes(token),`partial Web Audio initialization must release all started lanes and close context: ${token}`);
+for(const token of ['let pendingOsc:OscillatorNode|null=null','pendingOsc=osc','pendingOsc=null','void ctx.close().catch(()=>{});throw error'])must(audio.includes(token),`partial Web Audio initialization must release all started lanes and close context: ${token}`);
+// Assert the stop operations independently of adjacent disconnect cleanup.
+const partialCleanup=audio.split('const initAudio=async()=>{')[1]?.split('const start=async()=>')[0]?.split('catch(error){')[1];
+assert.ok(partialCleanup,'partial initializer failure handler must exist');
+for(const pattern of [/if\(pendingOsc\)\s*\{\s*try\s*\{\s*pendingOsc\.stop\(\)/,/for\(const lane of built\)\s*\{\s*try\s*\{\s*lane\.osc\.stop\(\)/])
+ assert.match(partialCleanup,pattern,'partial initialization must stop pending and previously started oscillators');
 
 // A partial oscillator-construction failure must disconnect every previously connected lane.
 const partialInit=audio.split('const initAudio=async()=>{')[1]?.split('const start=async()=>')[0];
