@@ -25,4 +25,18 @@ assert.match(ci,/id:\s*live_r237\s*\n\s*if:\s*always\(\) && steps\.deploy_worker
 assert.ok(verifier.includes("tests/r370-live-earth-sar-closure-browser-e2e.mjs"),'production verifier must execute R370 Earth/SAR closure');
 for(const token of ['currentCandidates=[mk(-1),mk(-2),mk(-3)]','previousCandidates=[mk(-8),mk(-9),mk(-10)]','loadFirstImage'])assert.ok(lemma.includes(token),`R370 resilient temporal anchor law missing ${token}`);
 for(const token of ['data-current-anchor-date','data-previous-anchor-date','lemma.anchors.currentDate','lemma.anchors.previousDate'])assert.ok(instrument.includes(token),`R370 resolved anchor disclosure missing ${token}`);
+// R785: Playwright waitForFunction(fn, arg, options) requires a positional
+// argument before timeout options. The prior two-argument calls silently used
+// the 30-second default despite declaring a 45-second live SAR evidence gate.
+for(const [name,source] of [['R284',earthLive],['R370',browser],['R372',totalLive]]){
+ const intended=name==='R284'?source.includes('},null,{timeout:45000});'):source.includes('},null,{timeout});');
+ assert.ok(intended,name+' must pass source-bound SAR proof timeout as the THIRD Playwright argument');
+}
+assert.ok(!earthLive.includes('return Boolean(lemma||native)},{timeout:45000})'),
+ 'R284 source-bound SAR state must not silently use the default 30s timeout');
+assert.ok(browser.includes('&&targetBound},null,{timeout});'),
+ 'R370 exact-target source-bound wait must retain original address proof and actual timeout');
+assert.ok(totalLive.includes('&&Boolean(lemma||native)},null,{timeout});'),
+ 'R372 full Earth analytical wait must retain source truth and actual timeout');
+
 console.log('R394/R393/R391/R370 EARTH/SAR RUNTIME CLOSURE PASS · transition-safe evidence disclosure · resilient temporal anchors · derived-to-native transition-safe live proofs · twelve materially populated lenses · computed parent content-box responsive geometry · independent R237 observation · no authority widening');
