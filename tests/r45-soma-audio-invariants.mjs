@@ -48,7 +48,7 @@ must(audio.includes('validateTempleSomaPresetR784(raw)'),'SOMA must validate all
 must(audio.includes('parseTempleSomaPresetR784(raw)'),'SOMA must validate persisted JSON before use');
 must(audio.includes('if(!await start())return;stopTimer();setSequencing(true)'),'failed Web Audio start must not present fake-running sequence');
 must(audio.includes('explicit Start still required'),'a preset must never auto-play');
-for(const token of ['catch(e){stopTimer();setSequencing(false);setRunning(false);clearSafetySession()','lane.osc.stop()','audio.current=null;master.current=null;compressor.current=null','failedContext.close().catch(()=>{})'])must(audio.includes(token),`failed Web Audio start must release graph and reset false-running state: ${token}`);
+for(const token of ['catch(e){if(epoch!==startEpoch.current)return false;stopTimer();setSequencing(false);setRunning(false);clearSafetySession()','lane.osc.stop()','audio.current=null;master.current=null;compressor.current=null','failedContext.close().catch(()=>{})'])must(audio.includes(token),`failed Web Audio start must release graph and reset false-running state: ${token}`);
 
 for(const token of ['let pendingOsc:OscillatorNode|null=null','pendingOsc=osc','pendingOsc=null','if(pendingOsc){try{pendingOsc.stop()}catch{}}','for(const lane of built){try{lane.osc.stop()}catch{}}','void ctx.close().catch(()=>{});throw error'])must(audio.includes(token),`partial Web Audio initialization must release all started lanes and close context: ${token}`);
 
@@ -58,6 +58,9 @@ assert.ok(stopBody,'SOMA Stop handler must exist');
 for(const token of ['lane.osc.stop()','lane.osc.disconnect()','lane.gain.disconnect()','lane.pan.disconnect()','lanes.current=[]','audio.current=null','ctx.close().catch(()=>{})','setRunning(false)'])
  must(stopBody.includes(token),'Stop must release Web Audio graph: '+token);
 assert.ok(audio.includes('if(remaining<=0){stop();'),'safety timeout must use complete Stop cleanup');
+
+// A stale rejected resume must not tear down a newer user-started audio graph.
+assert.ok(audio.includes('catch(e){if(epoch!==startEpoch.current)return false;stopTimer()'),'stale rejected resume must not clear the newer session');
 
 // A delayed AudioContext.resume() must never revive audio after an explicit Stop.
 for(const token of ['startEpoch=useRef(0)','const epoch=startEpoch.current','if(epoch!==startEpoch.current||audio.current!==ctx)return false','const stop=()=>{startEpoch.current++'])
