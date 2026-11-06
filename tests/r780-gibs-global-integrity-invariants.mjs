@@ -62,6 +62,7 @@ const testR788=async()=>{
 
 try{
  await testR788();
+ calls.length=0; // R788 test isolation: historical R780 source-count assertions begin fresh.
  globalThis.fetch=async url=>{calls.push(new URL(String(url)));return fake(small)};
  let result=await run(path+'&date=2026-10-31');
  assert.equal(result.status,502);
