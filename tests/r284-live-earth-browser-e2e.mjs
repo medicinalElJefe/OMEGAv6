@@ -56,7 +56,7 @@ try{
    for(const token of ['CHAIN LEMMA','DERIVED','OBSERVED NASA GIBS','DERIVED OPTICAL PROXY, NOT SAR MEASUREMENT'])if(!sarText.includes(token))throw new Error(`${name}: R790 derived truth/source disclosure missing ${token}`);
    const sensor=await sarInstrument.getAttribute('data-r790-source-layer'),currentDate=await sarInstrument.getAttribute('data-r790-current-date'),previousDate=await sarInstrument.getAttribute('data-r790-previous-date');
    if(!['VIIRS_SNPP_CorrectedReflectance_TrueColor','MODIS_Terra_CorrectedReflectance_TrueColor'].includes(sensor||''))throw new Error(`${name}: R790 derived optical sensor identity not admitted ${sensor}`);
-   for(const [key,date] of [['current',currentDate],['previous',previousDate]])if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(date||''))throw new Error(`${name}: R790 ${key} observed-date identity unavailable ${date}`);
+   for(const [key,date] of [['current',currentDate],['previous',previousDate]])if(!/^\d{4}-\d{2}-\d{2}$/.test(date||''))throw new Error(`${name}: R790 ${key} observed-date identity unavailable ${date}`);
    if(!sarText.includes(sensor||'')||!sarText.includes(currentDate||'')||!sarText.includes(previousDate||''))throw new Error(`${name}: R790 source/date DOM receipt not visible to user`);
   }else if(!sarText.includes('MEASUREMENT-LINKED RENDERING')&&!sarText.includes('BOUND MEASUREMENT FIELD'))throw new Error(`${name}: R356.5 native-bound truth surface is not explicitly identified`);
   const minSarWidth=name==='desktop'?260:viewport.width*.60;if(!state.rect||state.rect.width<minSarWidth||state.rect.height<260)throw new Error(`${name}: R356.5 analytical field unusable ${JSON.stringify({state,minSarWidth})}`);
