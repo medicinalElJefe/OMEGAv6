@@ -38,7 +38,31 @@ const calls=[];
 const fake=(body,contentType='image/jpeg',status=200)=>new Response(body,{status,headers:{'content-type':contentType}});
 const run=(path)=>worker.fetch(new Request('https://test.invalid'+path),{});
 const path='/api/earth/gibs/global?width=720&height=360';
+
+const localPath='/api/earth/gibs/image?lat=32.222876&lon=-110.974847&date=2026-10-20&span=2.5&width=256&height=256';
+const testR788=async()=>{
+ calls.length=0;globalThis.fetch=async url=>{calls.push(new URL(String(url)));return fake(actual)};
+ let row=await run(localPath+'&layer=MODIS_Terra_CorrectedReflectance_TrueColor');
+ assert.equal(row.status,200,'explicit NASA MODIS must return the real upstream bytes');
+ assert.equal(calls.length,1,'R788 source must not fabricate alternate fetches');
+ assert.equal(calls[0].searchParams.get('LAYERS'),'MODIS_Terra_CorrectedReflectance_TrueColor');
+ assert.equal(calls[0].searchParams.get('TIME'),'2026-10-20');
+ assert.equal(row.headers.get('x-omega-layer'),'MODIS_Terra_CorrectedReflectance_TrueColor');
+ assert.equal(row.headers.get('x-omega-source'),'NASA-GIBS-MODIS_Terra_CorrectedReflectance_TrueColor');
+ calls.length=0;
+ row=await run(localPath+'&layer=UNTRUSTED_LAYER');
+ assert.equal(row.status,400,'unrecognized source must fail closed before upstream access');
+ assert.equal((await row.json()).code,'GIBS_UNSUPPORTED_LAYER');
+ assert.equal(calls.length,0);
+ calls.length=0;
+ row=await run(localPath);
+ assert.equal(row.headers.get('x-omega-layer'),'VIIRS_SNPP_CorrectedReflectance_TrueColor','default NASA VIIRS identity retained');
+ assert.equal(calls[0].searchParams.get('LAYERS'),'VIIRS_SNPP_CorrectedReflectance_TrueColor');
+};
+
 try{
+ await testR788();
+ calls.length=0; // R788 test isolation: historical R780 source-count assertions begin fresh.
  globalThis.fetch=async url=>{calls.push(new URL(String(url)));return fake(small)};
  let result=await run(path+'&date=2026-10-31');
  assert.equal(result.status,502);

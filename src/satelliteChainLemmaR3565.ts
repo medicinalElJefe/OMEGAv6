@@ -8,7 +8,7 @@ export interface SatelliteLemmaResultR3565{
  state:SatelliteLemmaStateR3565;
  resolution:number;
  fields:Partial<Record<SatelliteLemmaViewR3565,number[]>>;
- anchors:{current:string;previous:string;currentDate?:string;previousDate?:string;evidenceBound:boolean;evidenceHash:string;lat:number;lon:number};
+ anchors:{current:string;previous:string;currentDate?:string;previousDate?:string;sourceLayer?:string;evidenceBound:boolean;evidenceHash:string;lat:number;lon:number};
  metrics:{temporalResidual:number;meanGradient:number;meanCoherence:number;scar:number;support:number;cloudPenalty:number};
  operator:string;
  truthClass:'DERIVED_TRIANGULATED';
@@ -35,7 +35,25 @@ export function useSatelliteChainLemmaR3565(lat:number,lon:number,evidence?:any,
   setResult(r=>({...r,state:'LOADING',fields:{},anchors:{current:currentCandidates[0].src,previous:previousCandidates[0].src,currentDate:currentCandidates[0].date,previousDate:previousCandidates[0].date,evidenceBound:Boolean(evidenceHash),evidenceHash,lat,lon},error:undefined}));
   if(!evidenceHash)return()=>{alive=false};
   (async()=>{try{
-   const[aAnchor,bAnchor]=await Promise.all([loadFirstImage(currentCandidates),loadFirstImage(previousCandidates)]),aPix=pixels(aAnchor.img,n),bPix=pixels(bAnchor.img,n),N=n*n;
+   // R788: require a paired, real, single-sensor source. NASA GIBS SNPP blank
+   // tiles are not observations. Try a distinct documented MODIS source only
+   // after refusing all SNPP dates, and never silently mix two sensor families.
+   let aAnchor:Awaited<ReturnType<typeof loadFirstImage>>,bAnchor:Awaited<ReturnType<typeof loadFirstImage>>;
+   let sourceLayer='VIIRS_SNPP_CorrectedReflectance_TrueColor';
+   const paired=async(current:typeof currentCandidates,previous:typeof previousCandidates)=>{
+    const [currentResult,previousResult]=await Promise.allSettled([loadFirstImage(current),loadFirstImage(previous)]);
+    if(currentResult.status!=='fulfilled'||previousResult.status!=='fulfilled')
+     throw new Error('current: '+(currentResult.status==='rejected'?String(currentResult.reason):'READY')+'; previous: '+(previousResult.status==='rejected'?String(previousResult.reason):'READY'));
+    return[currentResult.value,previousResult.value] as const;
+   };
+   try{[aAnchor,bAnchor]=await paired(currentCandidates,previousCandidates)}
+   catch(primaryError){
+    sourceLayer='MODIS_Terra_CorrectedReflectance_TrueColor';
+    const switchLayer=(rows:typeof currentCandidates)=>rows.map(row=>({...row,src:row.src+'&layer='+sourceLayer}));
+    try{[aAnchor,bAnchor]=await paired(switchLayer(currentCandidates),switchLayer(previousCandidates))}
+    catch(secondaryError){throw new Error('NASA GIBS SNPP '+String(primaryError)+'; MODIS Terra '+String(secondaryError))}
+   }
+   const aPix=pixels(aAnchor.img,n),bPix=pixels(bAnchor.img,n),N=n*n;
    const L0=new Array<number>(N),L1=new Array<number>(N),spread=new Array<number>(N);
    for(let i=0;i<N;i++){const p=i*4;L0[i]=lum(aPix,p);L1[i]=lum(bPix,p);const r=aPix[p]/255,g=aPix[p+1]/255,b=aPix[p+2]/255;spread[i]=Math.max(r,g,b)-Math.min(r,g,b)}
    const fields:Record<SatelliteLemmaViewR3565,number[]>={SOURCE:new Array(N),AMPLITUDE:new Array(N),PHASE:new Array(N),COHERENCE:new Array(N),INTERFEROGRAM:new Array(N),DEFORMATION:new Array(N),ELEVATION:new Array(N),POLARIMETRY:new Array(N),MULTI_BAND:new Array(N),TIME_STACK:new Array(N),SCAR_UNCERTAINTY:new Array(N),PROOF:new Array(N)};
@@ -47,7 +65,7 @@ export function useSatelliteChainLemmaR3565(lat:number,lon:number,evidence?:any,
     fields.SOURCE[i]=l;fields.AMPLITUDE[i]=clamp(.35*l+.65*g*3);fields.PHASE[i]=phase;fields.COHERENCE[i]=coherence;fields.INTERFEROGRAM[i]=residual;fields.DEFORMATION[i]=deform;fields.ELEVATION[i]=terrain;fields.POLARIMETRY[i]=clamp(spread[i]*1.5);fields.MULTI_BAND[i]=multi;fields.TIME_STACK[i]=clamp(temporal*2.4);fields.SCAR_UNCERTAINTY[i]=scar;fields.PROOF[i]=support;
     temporalSum+=temporal;gradSum+=g;cohSum+=coherence;scarSum+=scar;supportSum+=support;
    }
-   if(!alive)return;setResult({schema:'OMEGA_SATELLITE_CHAIN_LEMMA_R3565',state:'READY',resolution:n,fields,anchors:{current:aAnchor.src,previous:bAnchor.src,currentDate:aAnchor.date,previousDate:bAnchor.date,evidenceBound:Boolean(evidenceHash),evidenceHash,lat,lon},metrics:{temporalResidual:temporalSum/N,meanGradient:gradSum/N,meanCoherence:cohSum/N,scar:scarSum/N,support:supportSum/N,cloudPenalty},operator:'PARTITION → TRANSFORM/EXCHANGE → INVARIANT CARRY → SCAR/RESIDUAL CARRY → RE-CONTEXTUALIZE',truthClass:'DERIVED_TRIANGULATED',boundary:'NASA GIBS current/previous true-color anchors (resolved from bounded recent-date fallback sets after R419 materiality admission) plus returned local evidence are transformed into relational proxy fields immediately. SOURCE pixels are observed optical context. AMPLITUDE/PHASE/COHERENCE/INTERFEROGRAM/DEFORMATION/ELEVATION/POLARIMETRY/MULTI_BAND/TIME_STACK/SCAR/PROOF outputs are chain-lemma derived proxies, not native Sentinel-1 SAR measurements, interferometric phase, metric displacement, calibrated backscatter, DEM, or polarimetric products.'});
+   if(!alive)return;setResult({schema:'OMEGA_SATELLITE_CHAIN_LEMMA_R3565',state:'READY',resolution:n,fields,anchors:{current:aAnchor.src,previous:bAnchor.src,currentDate:aAnchor.date,previousDate:bAnchor.date,sourceLayer,evidenceBound:Boolean(evidenceHash),evidenceHash,lat,lon},metrics:{temporalResidual:temporalSum/N,meanGradient:gradSum/N,meanCoherence:cohSum/N,scar:scarSum/N,support:supportSum/N,cloudPenalty},operator:'PARTITION → TRANSFORM/EXCHANGE → INVARIANT CARRY → SCAR/RESIDUAL CARRY → RE-CONTEXTUALIZE',truthClass:'DERIVED_TRIANGULATED',boundary:'NASA GIBS '+sourceLayer+' current/previous true-color anchors (resolved from bounded recent-date fallback sets after R419 materiality admission) plus returned local evidence are transformed into relational proxy fields immediately. SOURCE pixels are observed optical context. AMPLITUDE/PHASE/COHERENCE/INTERFEROGRAM/DEFORMATION/ELEVATION/POLARIMETRY/MULTI_BAND/TIME_STACK/SCAR/PROOF outputs are chain-lemma derived proxies, not native Sentinel-1 SAR measurements, interferometric phase, metric displacement, calibrated backscatter, DEM, or polarimetric products.'});
   }catch(error){if(!alive)return;setResult(r=>({...r,state:'UNAVAILABLE',fields:{},error:'NASA_GIBS_ANCHOR_UNAVAILABLE: '+(error instanceof Error?error.message:String(error))}))}})();return()=>{alive=false}},[lat,lon,evidenceHash,resolution]);
  const current=result.anchors.lat===lat&&result.anchors.lon===lon&&result.anchors.evidenceHash===evidenceHash;
  return current?result:{...result,state:'LOADING',fields:{},anchors:{...result.anchors,evidenceBound:Boolean(evidenceHash),evidenceHash,lat,lon}};

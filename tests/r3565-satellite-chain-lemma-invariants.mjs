@@ -44,4 +44,11 @@ for(const token of ['data-r787-lemma-state','data-r787-lemma-error','data-r787-e
 assert.ok(r787Browser.includes('return Boolean(lemma||native)},null,{timeout:45000})'),
  'R787 must never accept an unavailable/non-source-bound SAR canvas as a live proof');
 
+
+for(const token of ["sourceLayer='MODIS_Terra_CorrectedReflectance_TrueColor'","Promise.allSettled([loadFirstImage(current),loadFirstImage(previous)])","currentResult.status!=='fulfilled'||previousResult.status!=='fulfilled'","src:row.src+'&layer='+sourceLayer","sourceLayer,evidenceBound:Boolean(evidenceHash)","'NASA GIBS '+sourceLayer"])
+ assert.ok(lemma.includes(token),'R788 exact paired real NASA sensor fallback/provenance missing '+token);
+assert.ok(lemma.includes('catch(secondaryError){throw new Error('),'R788 fail-closed when every NASA sensor is non-material');
+assert.ok(lemma.includes('try{[aAnchor,bAnchor]=await paired(currentCandidates,previousCandidates)}'),'R788 must prefer existing NASA VIIRS source before switching sensor');
+assert.ok(!lemma.includes('Math.random()'),'R788 must not substitute artificial observed satellite samples');
+
 console.log('R356.5 SATELLITE CHAIN LEMMA PASS · bounded concurrent recent GIBS current/previous anchors + returned evidence triangulated under R487 latency control · 12 derived proxy fields visible before native SAR closure · explicit DERIVED_TRIANGULATED truth class · no measurement authority inflation');
