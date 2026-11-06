@@ -10,7 +10,7 @@ for(const token of ["datePinned,setDatePinned","datePinned?`/api/earth/gibs/glob
 }
 
 assert.ok(source.includes('GIBS_GLOBAL_MIN_BYTES_R780=12000'),'R780 must retain the original 12 KB source threshold');
-assert.ok(source.includes('requestedDate?1:3'),'R780 must bound lookup and respect exact date');
+assert.ok(source.includes('requestedDate?1:7'),'R789 must search at most seven real dates while pinning explicit dates');
 assert.ok(source.includes("'x-omega-date':date")&&source.includes("'x-omega-lookback-days':String(lookback)"),'returned observation date must be disclosed');
 // A real, decodable 16x16 JPEG plus a legal APP2 segment to exercise the
 // existing 12,000-byte policy without pretending that random bytes are pixels.
@@ -85,6 +85,21 @@ try{
  assert.equal(result.headers.get('x-omega-truth'),'RETURNED_GLOBAL_OBSERVATION');
  assert.equal((await result.arrayBuffer()).byteLength,actual.byteLength);
 
+ // R789: Global NASA VIIRS may deliver only 1,836-byte placeholder images
+ // for three consecutive dates. Accept a later REAL and explicitly dated
+ // observation; never accept or mislabel the placeholder as a current raster.
+ calls.length=0;
+ globalThis.fetch=async url=>{calls.push(new URL(String(url)));return fake(calls.length<=3?small:actual)};
+ result=await run(path);
+ assert.equal(result.status,200,'R789 must recover a material NASA raster beyond the stale three-date window');
+ assert.equal(calls.length,4,'R789 fourth-day recovery must remain ordered and stop after materiality admission');
+ assert.equal(result.headers.get('x-omega-lookback-days'),'3');
+ assert.equal(result.headers.get('x-omega-date'),calls[3].searchParams.get('TIME'));
+ assert.equal(result.headers.get('x-omega-truth'),'RETURNED_GLOBAL_OBSERVATION');
+ assert.equal(result.headers.get('x-omega-source'),'NASA-GIBS-VIIRS-SNPP-TRUECOLOR-GLOBAL');
+ assert.equal((await result.arrayBuffer()).byteLength,actual.byteLength);
+ assert.equal(Date.parse(calls[0].searchParams.get('TIME')+'T00:00:00Z')-Date.parse(calls[3].searchParams.get('TIME')+'T00:00:00Z'),3*86400000);
+
  calls.length=0;
  globalThis.fetch=async url=>{calls.push(new URL(String(url)));return fake(actual)};
  result=await run(path+'&date=2026-10-31');
@@ -98,8 +113,8 @@ try{
  result=await run(path);
  assert.equal(result.status,502,'missing imagery must never produce synthetic pixels');
  failure=await result.json();
- assert.equal(calls.length,3);
- assert.equal(failure.attempts.length,3);
+ assert.equal(calls.length,7);
+ assert.equal(failure.attempts.length,7);
  assert.equal(failure.truth,'NO_SYNTHETIC_SUBSTITUTE');
 
  calls.length=0;
