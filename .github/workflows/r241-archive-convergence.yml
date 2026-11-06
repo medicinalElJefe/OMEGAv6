@@ -174,7 +174,7 @@ jobs:
           node-version: 24
 
       - name: Restore R408 interaction workload scar
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .omega/proof-workload
           key: r408-proof-workload-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
@@ -219,7 +219,7 @@ jobs:
 
       - name: Retain R408 interaction workload scar
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: r408-interaction-workload-scar-${{ github.run_id }}
           path: .omega/proof-workload/r408-scar.json
@@ -228,7 +228,7 @@ jobs:
 
       - name: Capture exact R313 full-control interaction failure
         if: failure() && steps.full_control.outcome == 'failure'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: r313-full-control-interaction-failure
           path: r313-full-control-interaction.log
@@ -286,7 +286,7 @@ jobs:
           node-version: 24
 
       - name: Restore R408 main proof workload scar
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .omega/proof-workload
           key: r408-proof-workload-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
@@ -449,7 +449,7 @@ jobs:
 
       - name: Capture exact R313 panel disclosure failure
         if: failure() && steps.panel_disclosure.outcome == 'failure'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: r313-panel-disclosure-failure
           path: r313-panel-disclosure-failure.txt
@@ -497,7 +497,7 @@ jobs:
 
       - name: Retain R408 main browser workload scar
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: r408-main-workload-scar-${{ github.run_id }}
           path: .omega/proof-workload/r408-scar.json
