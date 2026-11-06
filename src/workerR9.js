@@ -115,8 +115,9 @@ async function gibsGlobalImage(url){
  const height=Math.round(clamp(Number(url.searchParams.get('height')||720),360,1024));
  const attempts=[];
  // Explicit dates are never silently substituted. Default global view may
- // inspect at most two earlier real NASA observation dates.
- for(let lookback=0;lookback<(requestedDate?1:3);lookback++){
+ // inspect at most six earlier *dated, real* NASA observations to handle
+ // upstream 1.8 KB placeholders on recent days. Explicit dates stay exact.
+ for(let lookback=0;lookback<(requestedDate?1:7);lookback++){
   const date=Number.isFinite(epoch)?new Date(epoch-lookback*86400000).toISOString().slice(0,10):initialDate;
   const params=new URLSearchParams({SERVICE:'WMS',REQUEST:'GetMap',VERSION:'1.1.1',LAYERS:'VIIRS_SNPP_CorrectedReflectance_TrueColor',STYLES:'',FORMAT:'image/jpeg',TRANSPARENT:'FALSE',SRS:'EPSG:4326',BBOX:'-180,-90,180,90',WIDTH:String(width),HEIGHT:String(height),TIME:date});
   const source='https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?'+params;
