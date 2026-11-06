@@ -204,6 +204,20 @@ async function actuateSafeControl(page,item,profile,surface){
     if(!hit)throw new Error(`${profile}/${surface}: navigation control is not the pointer hit target: ${item.label}`);
     await page.mouse.click(x,y);
    }else{
+    // R790.1: overlapping mobile topology circles must be clicked as real
+    // pointer targets. Focus raises the chosen node above siblings (CSS),
+    // then prove the center is actually hit-testable before a native click.
+    if(await current.evaluate(el=>el.matches('.r356-native-node-control'))){
+     await current.focus({timeout:5000});
+     const box=await current.boundingBox();
+     if(!box)throw new Error(`${profile}/${surface}: focused topology node has no pointer box: ${item.label}`);
+     const x=box.x+box.width/2,y=box.y+box.height/2;
+     const evidence=await page.evaluate(({x,y,id})=>{
+      const target=document.querySelector(`[data-r313-probe-id="${CSS.escape(id)}"]`),hit=document.elementFromPoint(x,y);
+      return{valid:Boolean(target&&hit&&(hit===target||target.contains(hit))),topTag:hit?.tagName||'NONE',topClass:typeof hit?.className==='string'?hit.className.slice(0,120):'',targetClass:target?.className||''};
+     },{x,y,id:item.id});
+     if(!evidence.valid)throw new Error(`${profile}/${surface}: focused topology node is not a real pointer hit target ${item.label}: ${JSON.stringify(evidence)}`);
+    }
     await current.click({timeout:7000,noWaitAfter:true});
     if(item.transientToggle&&item.restoreLabel){
      await page.waitForFunction(({id})=>document.querySelector(`[data-r313-probe-id="${CSS.escape(id)}"]`)?.getAttribute('aria-pressed')==='true',{id:item.id},{timeout:5000}).catch(()=>{});
