@@ -11,6 +11,7 @@ const registry=fs.readFileSync('src/omegaExperienceRegistryR82.ts','utf8');
 const capabilities=fs.readFileSync('src/capabilityAuthority.ts','utf8');
 const interactionBinding=fs.readFileSync('src/system/interactionBindingR356.ts','utf8');
 const interactionProof=fs.readFileSync('tests/r313-full-control-interaction-browser-e2e.mjs','utf8');
+const capabilityCssR790=fs.readFileSync('src/capabilityFirstR138.css','utf8');
 const navigationProof=fs.readFileSync('tests/r239-user-navigation-browser-e2e.mjs','utf8');
 const disclosureProof=fs.readFileSync('tests/r313-panel-disclosure-browser-e2e.mjs','utf8');
 const routeLifecycle=fs.readFileSync('src/system/routeLifecycleR356.ts','utf8');
@@ -103,5 +104,14 @@ assert.equal(r28TypedButtonCount,r28ButtonCount,'R356 Field/Data Motion/Converge
 assert.ok(fieldMotion.includes("data-r313-nav-target='Data Motion'")&&fieldMotion.includes("data-r313-nav-target='Convergence'"),'R356 R28 internal route controls must expose exact interaction-proof targets');
 assert.ok(interactionProof.includes("navTarget:el.getAttribute('data-r313-nav-target')")&&interactionProof.includes('await page.mouse.click(x,y);')&&interactionProof.includes('internal route control failed to commit'),'R356 exhaustive interaction proof must pointer-actuate declared internal routes and verify exact lifecycle commit without delegating document navigation to Playwright');
 
+
+// R790 mobile Convergence pointer actionability: focus orders overlapping node
+// targets above siblings; the existing R313 browser remains required to prove an
+// actual hit-tested native pointer click rather than forced/simulated activation.
+assert.ok(capabilityCssR790.includes('.r356-native-node-control:focus{z-index:12}'),
+ 'R790 focused topology hit area must rise above overlapping mobile siblings');
+for(const token of ["el.matches('.r356-native-node-control')","await current.focus({timeout:5000});","document.elementFromPoint(x,y)","focused topology node is not a real pointer hit target","await current.click({timeout:7000,noWaitAfter:true})"])
+ assert.ok(interactionProof.includes(token),'R790 real mobile topology click proof missing '+token);
+assert.ok(!interactionProof.includes('force:true'),'R790 must not bypass native pointer hit testing');
 
 console.log('R356.6 PRODUCT COHERENCE PASS · one live root visual authority · canonical surface frame · 44-route authority-derived presentation · current convergence precedes retained lineage · 44px mobile capability interaction envelope + R188 width floor + non-blocking proof-lineage disclosure preserved · legacy presentation preserved as provenance only');

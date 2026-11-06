@@ -51,4 +51,11 @@ assert.ok(lemma.includes('catch(secondaryError){throw new Error('),'R788 fail-cl
 assert.ok(lemma.includes('try{[aAnchor,bAnchor]=await paired(currentCandidates,previousCandidates)}'),'R788 must prefer existing NASA VIIRS source before switching sensor');
 assert.ok(!lemma.includes('Math.random()'),'R788 must not substitute artificial observed satellite samples');
 
+// R790: the end-user must see which *observed optical* sensor and exact dates
+// underlie the derived analytical view; no anonymous proxy promoted as native SAR.
+for(const token of ['data-r790-source-layer','data-r790-current-date','data-r790-previous-date','OBSERVED NASA GIBS','DERIVED OPTICAL PROXY, NOT SAR MEASUREMENT'])
+ assert.ok(instrument.includes(token),'R790 source provenance disclosure missing '+token);
+for(const token of ['getAttribute(\'data-r790-source-layer\')','getAttribute(\'data-r790-current-date\')','getAttribute(\'data-r790-previous-date\')','MODIS_Terra_CorrectedReflectance_TrueColor','DERIVED OPTICAL PROXY, NOT SAR MEASUREMENT'])
+ assert.ok(r787Browser.includes(token),'R790 live source provenance acceptance missing '+token);
+
 console.log('R356.5 SATELLITE CHAIN LEMMA PASS · bounded concurrent recent GIBS current/previous anchors + returned evidence triangulated under R487 latency control · 12 derived proxy fields visible before native SAR closure · explicit DERIVED_TRIANGULATED truth class · no measurement authority inflation');
