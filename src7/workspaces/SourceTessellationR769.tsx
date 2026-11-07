@@ -54,7 +54,7 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
   try{
    if(file.size>8*1024*1024)throw Error('scene bundle exceeds 8 MiB local verification limit');
    const bundle=JSON.parse(await file.text());
-   const replay=await verifySourceSceneBundleR793(field,displayRaster,bundle);
+   const replay=await verifySourceSceneBundleR793(field,null,bundle);
    if(!replay.ok)throw Error(replay.reason||'scene not reproducible');
    const event=await emitOperationR86({type:'ANALYSIS_COMPLETED',surface:'OMEGA7_SOURCE_TESSELLATION_R793',
     stateId:address+1,address,status:'PASS',
