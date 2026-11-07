@@ -4,7 +4,7 @@ import {renderAtlasFieldRasterR734} from '../../src/atlasFieldRasterR734.mjs';
 import {computeSourceFieldLensR770,DEFAULT_SOURCE_LENS_R770,SOURCE_LENS_STORAGE_KEY_R770,serializeSourceLensSettingsR770,parseSourceLensSettingsR770} from '../../src/sourceFieldLensR770.mjs';
 import {buildSourceTessellationR769,navigateSourceTessellationR769,serializeSourceTessellationSvgR769,SOURCE_TESSELLATION_SIZES_R769} from '../../src/sourceTessellationR769.mjs';
 import type {Mandala20736Field} from '../../src/mandala20736Runtime';
-import {buildSourceSceneBundleR793,verifySourceSceneBundleR793} from '../../src/sourceSceneBundleR793.mjs';
+import {buildSourceSceneBundleR793,verifySourceSceneBundleR793,traceSourceContinuityR794} from '../../src/sourceSceneBundleR793.mjs';
 import {emitOperationR86} from '../../src/omegaOperationBusR86';
 import {activeProjectIdR87,recordProjectOperationR87} from '../../src/omegaProjectContinuityR87';
 type Props={field:Mandala20736Field;raster:any;address:number;onAddress:(address:number)=>void};
@@ -36,6 +36,7 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
   ] as [string,number][];
   return {successor,domain:field.domain[address],delta:field.C[successor]-field.C[address],channels};
  },[field,address]);
+ const trace=useMemo(()=>traceSourceContinuityR794(field,address,{maxSteps:12}),[field,address]);
  const move=(dy:number,dx:number)=>onAddress(navigateSourceTessellationR769(address,dy,dx));
  const download=()=>{
   const svg=serializeSourceTessellationSvgR769(tile,{showEdges});
@@ -167,6 +168,18 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
    <strong>Relational source · address {address}</strong>
    <p data-r794-continuity>Domain {relation.domain} · successor {relation.successor} · successor continuity Δ {relation.delta.toFixed(6)}</p>
    <button type='button' data-r794-follow-successor onClick={()=>onAddress(relation.successor)} disabled={relation.successor===address}>Follow declared source successor</button>
+   <details data-r794-traversal>
+    <summary>Trace source continuity · {trace.steps.length} steps · {trace.termination}</summary>
+    <ol style={{maxHeight:220,overflowY:'auto',paddingLeft:24}}>
+     {trace.steps.map(step=><li key={step.address}>
+      <button type='button' data-r794-trace-address={step.address} onClick={()=>onAddress(step.address)}>
+       {step.address} → {step.successor}
+      </button>
+      {' · ΔC '+step.continuityDelta.toFixed(5)+' · motion '+step.motion.toFixed(5)+' · evidence '+step.evidence.toFixed(5)}
+     </li>)}
+    </ol>
+    <small>Bounded traversal of the actual source successor graph. Cycles and step limits are explicit; no predicted future route is implied.</small>
+   </details>
    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(130px,1fr))',gap:8}}>
     {relation.channels.map(([name,value])=><div key={name} style={{padding:8,background:'#17283a',borderRadius:6}}>
      <div style={{fontSize:12,color:'#d1dbe6'}}>{name}</div>
