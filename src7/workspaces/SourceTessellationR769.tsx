@@ -4,6 +4,8 @@ import {computeSourceFieldLensR770,DEFAULT_SOURCE_LENS_R770,SOURCE_LENS_STORAGE_
 import {buildSourceTessellationR769,navigateSourceTessellationR769,serializeSourceTessellationSvgR769,SOURCE_TESSELLATION_SIZES_R769} from '../../src/sourceTessellationR769.mjs';
 import type {Mandala20736Field} from '../../src/mandala20736Runtime';
 import {buildSourceSceneBundleR793,verifySourceSceneBundleR793} from '../../src/sourceSceneBundleR793.mjs';
+import {emitOperationR86} from '../../src/omegaOperationBusR86';
+import {activeProjectIdR87,recordProjectOperationR87} from '../../src/omegaProjectContinuityR87';
 type Props={field:Mandala20736Field;raster:any;address:number;onAddress:(address:number)=>void};
 type LensSettings={mode:'single'|'woven';first:string;second:string;weightPercent:number};
 /** Executable source-field tessellation, not an authenticated historical renderer. */
@@ -36,6 +38,12 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
    const url=URL.createObjectURL(new Blob([JSON.stringify(bundle,null,2)],{type:'application/json'}));
    const a=document.createElement('a');a.href=url;a.download='omega-r793-scene-'+address+'-'+bundle.sceneFingerprintSha256.slice(0,12)+'.json';
    document.body.appendChild(a);a.click();a.remove();window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+   const event=await emitOperationR86({type:'ARTIFACT_EXPORTED',surface:'OMEGA7_SOURCE_TESSELLATION_R793',
+    stateId:address+1,address,status:'PASS',
+    detail:'Browser requested export of source-derived scene; local replay matched. Physical download and Canon admission are not claimed.',
+    payload:{sceneFingerprintSha256:bundle.sceneFingerprintSha256,sourceFieldSha256:bundle.source.fieldSha256,
+     outputSha256:bundle.scene.svgSha256,truthClass:'LOCAL_RECOMPUTED_SCENE',canonicalMutation:false}});
+   await recordProjectOperationR87(activeProjectIdR87()||undefined,event);
    setSceneProof('LOCAL REPLAY MATCH · '+bundle.sceneFingerprintSha256+' · no Canon or native execution claim');
   }catch(error){setSceneProof('REFUSED · '+(error instanceof Error?error.message:String(error)))}
   finally{setSceneBusy(false)}
@@ -48,6 +56,11 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
    const bundle=JSON.parse(await file.text());
    const replay=await verifySourceSceneBundleR793(field,displayRaster,bundle);
    if(!replay.ok)throw Error(replay.reason||'scene not reproducible');
+   const event=await emitOperationR86({type:'ANALYSIS_COMPLETED',surface:'OMEGA7_SOURCE_TESSELLATION_R793',
+    stateId:address+1,address,status:'PASS',
+    detail:'Imported scene recomputed against local source state. External witness and Canon admission not established.',
+    payload:{sceneFingerprintSha256:bundle.sceneFingerprintSha256,truthClass:'LOCAL_RECOMPUTED_SCENE',canonicalMutation:false}});
+   await recordProjectOperationR87(activeProjectIdR87()||undefined,event);
    setSceneProof('IMPORTED SCENE MATCH · '+bundle.sceneFingerprintSha256+' · local recomputation only');
   }catch(error){setSceneProof('REFUSED · '+(error instanceof Error?error.message:String(error)))}
   finally{setSceneBusy(false)}
