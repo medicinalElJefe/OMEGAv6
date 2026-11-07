@@ -94,6 +94,14 @@ function requireSettings(raster,address,tileSize,showEdges){
 }
 async function derive(field,raster,address,tileSize,showEdges){
  requireSettings(raster,address,tileSize,showEdges);
+ // An exported raster must be reproduced from the current source field and declared lens.
+ // A caller-supplied pixel buffer alone is not evidence of source provenance.
+ const expected=reconstructSceneRasterR793(field,{rasterDescriptor:sourceDescriptor(raster)});
+ if(expected.channel!==raster.channel||
+    !validRaster(expected)||
+    (await hashBytes(bytesForChannel('C',expected.values)))!==(await hashBytes(bytesForChannel('C',raster.values)))||
+    (await hashBytes(expected.rgba))!==(await hashBytes(raster.rgba)))
+  throw Error('R794 raster does not match declared live source');
  const sourceStateSha256=await fieldFingerprint(field);
  const tile=buildSourceTessellationR769(field,raster,address,tileSize);
  const svg=serializeSourceTessellationSvgR769(tile,{showEdges});
