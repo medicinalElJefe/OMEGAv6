@@ -38,18 +38,22 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
  },[field,address]);
  const trace=useMemo(()=>traceSourceContinuityR794(field,address,{maxSteps:12}),[field,address]);
  const [recoveryStatus,setRecoveryStatus]=useState('No workspace checkpoint restored.');
+ const workspaceKey=()=>{
+  const project=activeProjectIdR87();
+  return 'omega.r795.sourceWorkspace.'+(project?encodeURIComponent(project):'unassigned');
+ };
  const saveWorkspace=()=>{
   try{
    const checkpoint={schema:'OMEGA_SOURCE_WORKSPACE_R795_V1',address,tileSize,showEdges,
     lens,channelOverride:singleChannelOverride,savedAt:new Date().toISOString(),
     sourceAuthority:'SETTINGS_ONLY_RECOMPUTE_ON_RESTORE'};
-   window.localStorage.setItem('omega.r795.sourceWorkspace',JSON.stringify(checkpoint));
+   window.localStorage.setItem(workspaceKey(),JSON.stringify(checkpoint));
    setRecoveryStatus('Saved local workspace settings; no source values or Canon state stored.');
   }catch(error){setRecoveryStatus('SAVE REFUSED · '+String(error))}
  };
  const restoreWorkspace=()=>{
   try{
-   const raw=window.localStorage.getItem('omega.r795.sourceWorkspace');
+   const raw=window.localStorage.getItem(workspaceKey());
    if(!raw)throw Error('no saved workspace');
    const saved=JSON.parse(raw);
    if(saved.schema!=='OMEGA_SOURCE_WORKSPACE_R795_V1'||
