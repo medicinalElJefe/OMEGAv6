@@ -160,3 +160,42 @@ export async function verifySourceSceneBundleR793(field,raster,bundle){
   return {ok:false,state:'REFUSED',reason:error instanceof Error?error.message:String(error),canonicalMutation:false};
  }
 }
+
+/**
+ * R794 bounded traversal of the existing source successor graph.
+ * Carries continuity, motion, symmetry and evidence together without
+ * inventing an alternative topology or modifying the source field.
+ */
+export function traceSourceContinuityR794(field,start,{maxSteps=12}={}){
+ if(!field||field.count!==N||!(field.routeNext instanceof Uint32Array)||
+    field.routeNext.length!==N||!validAddress(start)||
+    !Number.isSafeInteger(maxSteps)||maxSteps<1||maxSteps>144)
+  throw Error('R794 invalid source traversal request');
+ for(const name of ['C','motion','symmetry','scar','evidence','q','forecast']){
+  if(!(field[name] instanceof Float32Array)||field[name].length!==N)
+   throw Error('R794 missing traversal source channel: '+name);
+ }
+ if(!(field.domain instanceof Uint8Array)||field.domain.length!==N)
+  throw Error('R794 missing traversal domain');
+ const visited=new Set(),steps=[];
+ let current=start,termination='STEP_LIMIT';
+ for(let i=0;i<maxSteps;i++){
+  if(visited.has(current)){termination='CYCLE';break}
+  visited.add(current);
+  const successor=field.routeNext[current];
+  if(!validAddress(successor)||field.domain[current]>=12)
+   throw Error('R794 invalid source successor or domain');
+  const values=[field.C[current],field.C[successor],field.motion[current],
+   field.symmetry[current],field.scar[current],field.evidence[current],
+   field.q[current],field.forecast[current]];
+  if(values.some(v=>!Number.isFinite(v)))throw Error('R794 nonfinite traversal metric');
+  steps.push({address:current,successor,domain:field.domain[current],
+   continuity:values[0],continuityDelta:values[1]-values[0],
+   motion:values[2],symmetry:values[3],scar:values[4],
+   evidence:values[5],contradiction:values[6],forecastModelScore:values[7]});
+  current=successor;
+  if(visited.has(current)){termination='CYCLE';break}
+ }
+ return {start,maxSteps,steps,termination,nextAddress:current,
+  sourceBound:true,canonicalMutation:false,physicalMeasurement:false};
+}
