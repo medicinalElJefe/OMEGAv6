@@ -19,6 +19,17 @@ for(let i=0;i<count;i++){
 const sourceBefore=field.C.slice(),nextBefore=field.routeNext.slice();
 const raster=renderAtlasFieldRasterR734(field,'C');
 const settings={address:11498,tileSize:12,showEdges:true};
+// R794: forged or stale raster bytes cannot be promoted into a source-bound scene.
+const forgedValues={...raster,values:raster.values.slice()};
+forgedValues.values[0]+=0.25;
+await assert.rejects(()=>buildSourceSceneBundleR793(field,forgedValues,settings),/R794 raster does not match/);
+const forgedPixels={...raster,rgba:raster.rgba.slice()};
+forgedPixels.rgba[0]^=1;
+await assert.rejects(()=>buildSourceSceneBundleR793(field,forgedPixels,settings),/R794 raster does not match/);
+const staleField={...field,C:field.C.slice()};
+staleField.C[0]+=0.5;
+await assert.rejects(()=>buildSourceSceneBundleR793(staleField,raster,settings),/R794 raster does not match/);
+
 const first=await buildSourceSceneBundleR793(field,raster,settings);
 assert.equal(first.schema,SOURCE_SCENE_BUNDLE_SCHEMA_R793);
 assert.equal(first.source.addressCount,20736);
