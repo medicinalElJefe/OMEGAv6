@@ -752,6 +752,57 @@ try{
     throw Error(device+': R770 empirical boundary missing');
    console.log('R770 '+device+' PASS: source-computed two-channel mesh, real color change, 100% endpoint, browser-local preference carry');
 
+   // R793 inherited end-to-end proof: actual portable scene download, source-bound replay,
+   // restored view and refusal of a forged proof on desktop and mobile.
+   const [sceneDownload]=await Promise.all([page.waitForEvent('download',{timeout:20000}),tess.locator('[data-r793-scene-export]').click()]);
+   if(!sceneDownload.suggestedFilename().endsWith('.json'))throw Error(device+': R793 portable scene JSON was not exported');
+   const sceneStream=await sceneDownload.createReadStream();let sceneJson='';
+   for await(const chunk of sceneStream)sceneJson+=chunk.toString();
+   const scene=JSON.parse(sceneJson);
+   if(scene.schema!=='OMEGA_SOURCE_SCENE_REPLAY_BUNDLE_R793_V1'||
+      scene.source?.addressCount!==20736||scene.source?.rasterDescriptor?.type!=='R770_WOVEN_CHANNELS'||
+      scene.source?.rasterDescriptor?.secondWeightPercent!==100||
+      !/^[a-f0-9]{64}$/.test(scene.source?.fieldSha256||'')||
+      scene.scene?.tileSize!==6||scene.scene?.address!==145||scene.scene?.triangles!==72||
+      (scene.svg.match(/<polygon /g)||[]).length!==72||
+      scene.authority?.canonicalMutation!==false)
+    throw Error(device+': R793 emitted wrong or unproven scene envelope');
+   await tess.locator('[data-r793-scene-status]').filter({hasText:'LOCAL REPLAY MATCH'}).waitFor({state:'visible',timeout:20000});
+   const eventFound=await page.evaluate(()=>{
+    const ops=JSON.parse(localStorage.getItem('omega.r86.operation.ledger')||'[]');
+    return ops.some(x=>x.surface==='OMEGA7_SOURCE_TESSELLATION_R793'&&x.type==='ARTIFACT_EXPORTED'&&x.status==='PASS');
+   });
+   if(!eventFound)throw Error(device+': R793 successful export did not enter the inherited operation ledger');
+
+   const [pngDownload]=await Promise.all([page.waitForEvent('download',{timeout:20000}),tess.locator('[data-r793-png-export]').click()]);
+   if(!pngDownload.suggestedFilename().endsWith('.png'))throw Error(device+': R793 browser PNG filename missing');
+   const pngStream=await pngDownload.createReadStream(),pngParts=[];
+   for await(const chunk of pngStream)pngParts.push(Buffer.from(chunk));
+   const pngBytes=Buffer.concat(pngParts);
+   if(pngBytes.length<24||pngBytes.subarray(0,8).toString('hex')!=='89504e470d0a1a0a'||
+      pngBytes.readUInt32BE(16)!==384||pngBytes.readUInt32BE(20)!==384)
+    throw Error(device+': R793 did not render a real 384x384 source PNG');
+   await tess.locator('[data-r793-scene-status]').filter({hasText:'PNG RENDERED FROM VERIFIED SOURCE SVG'}).waitFor({state:'visible',timeout:20000});
+
+   await tess.locator('[data-r770-mode]').selectOption('single');
+   await tess.locator('[data-r769-zoom]').selectOption('24');
+   await tess.locator('[data-r769-edges]').check();
+   const sceneFile={name:'omega-r793-replay.json',mimeType:'application/json',buffer:Buffer.from(sceneJson)};
+   await tess.locator('[data-r793-scene-import]').setInputFiles(sceneFile);
+   await tess.locator('[data-r793-scene-status]').filter({hasText:'IMPORTED SCENE MATCH'}).waitFor({state:'visible',timeout:20000});
+   if(await tess.locator('[data-r770-mode]').inputValue()!=='woven'||
+      await tess.locator('[data-r769-zoom]').inputValue()!=='6'||
+      await tess.locator('[data-r769-edges]').isChecked()||
+      await tess.locator('[data-r769-cell]').count()!==36||
+      !(await tess.locator('[data-r769-selected]').innerText()).includes('Selected address 145'))
+     throw Error(device+': R793 import failed to restore original computed source scene and address');
+   const forged={...scene,sceneFingerprintSha256:'0'.repeat(64)};
+   await tess.locator('[data-r793-scene-import]').setInputFiles({name:'tampered-scene.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(forged))});
+   await tess.locator('[data-r793-scene-status]').filter({hasText:'REFUSED'}).waitFor({state:'visible',timeout:20000});
+   if(await tess.locator('[data-r769-zoom]').inputValue()!=='6')throw Error(device+': forged R793 scene changed live view');
+   console.log('R793 '+device+' PASS: portable scene downloaded, source-replay verified, R86 ledgered, original view restored, forged artifact refused');
+
+
 
 
 

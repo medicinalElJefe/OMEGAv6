@@ -207,6 +207,7 @@ async function actuateSafeControl(page,item,profile,surface){
     // R790.1: overlapping mobile topology circles must be clicked as real
     // pointer targets. Focus raises the chosen node above siblings (CSS),
     // then prove the center is actually hit-testable before a native click.
+    let topologyPointerClicked=false;
     if(await current.evaluate(el=>el.matches('.r356-native-node-control'))){
      await current.focus({timeout:5000});
      const box=await current.boundingBox();
@@ -217,8 +218,22 @@ async function actuateSafeControl(page,item,profile,surface){
       return{valid:Boolean(target&&hit&&(hit===target||target.contains(hit))),topTag:hit?.tagName||'NONE',topClass:typeof hit?.className==='string'?hit.className.slice(0,120):'',targetClass:target?.className||''};
      },{x,y,id:item.id});
      if(!evidence.valid)throw new Error(`${profile}/${surface}: focused topology node is not a real pointer hit target ${item.label}: ${JSON.stringify(evidence)}`);
+     // R793 inherited R313 repair: source-positioned topology buttons can stay in
+     // motion and never satisfy Playwright's "stable" locator.click prerequisite.
+     // We already proved the focused native control is the actual pointer hit
+     // target. Use a real mouse click at that proved coordinate and independently
+     // witness the click event on that exact element; never force click or dispatch.
+     await page.evaluate(({id})=>{
+      const target=document.querySelector(`[data-r313-probe-id="${CSS.escape(id)}"]`);
+      window.__r313NativePointerProof=null;
+      target?.addEventListener('click',()=>{window.__r313NativePointerProof=id},{once:true});
+     },{id:item.id});
+     await page.mouse.click(x,y);
+     const received=await page.evaluate(id=>window.__r313NativePointerProof===id,item.id);
+     if(!received)throw new Error(`${profile}/${surface}: topology pointer did not actuate the proved native target ${item.label}`);
+     topologyPointerClicked=true;
     }
-    await current.click({timeout:7000,noWaitAfter:true});
+    if(!topologyPointerClicked)await current.click({timeout:7000,noWaitAfter:true});
     if(item.transientToggle&&item.restoreLabel){
      await page.waitForFunction(({id})=>document.querySelector(`[data-r313-probe-id="${CSS.escape(id)}"]`)?.getAttribute('aria-pressed')==='true',{id:item.id},{timeout:5000}).catch(()=>{});
      const restore=item.restoreLabel==='Exit full screen'
