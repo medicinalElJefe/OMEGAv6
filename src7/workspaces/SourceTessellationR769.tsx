@@ -166,6 +166,7 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
   <div data-r794-relational-view aria-label='Live source relational field view' style={{marginTop:12,padding:10,border:'1px solid #617987',borderRadius:8}}>
    <strong>Relational source · address {address}</strong>
    <p data-r794-continuity>Domain {relation.domain} · successor {relation.successor} · successor continuity Δ {relation.delta.toFixed(6)}</p>
+   <button type='button' data-r794-follow-successor onClick={()=>onAddress(relation.successor)} disabled={relation.successor===address}>Follow declared source successor</button>
    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(130px,1fr))',gap:8}}>
     {relation.channels.map(([name,value])=><div key={name} style={{padding:8,background:'#17283a',borderRadius:6}}>
      <div style={{fontSize:12,color:'#d1dbe6'}}>{name}</div>
