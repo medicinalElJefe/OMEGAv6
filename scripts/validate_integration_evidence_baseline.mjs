@@ -15,6 +15,18 @@ assert(ledger.snapshot?.coverage==='TARGETED_INITIAL_INVENTORY_NOT_COMPLETE_REPO
 assert(ledger.snapshot?.inspectedMain?.length===40,'missing inspected SHA');
 assert(ledger.modeDisclosure?.sourceImplementedContracts<=ledger.modeDisclosure?.catalog,'mode implementation cannot exceed catalog');
 assert(ledger.modeDisclosure?.catalog===ledger.modeDisclosure?.sourceImplementedContracts+ledger.modeDisclosure?.remainingCatalogOnly,'mode counts inconsistent');
+
+const modeContract=JSON.parse(fs.readFileSync(path.join(root,ledger.modeContract),'utf8'));
+assert(modeContract.canonicalAuthority?.sourceModeCatalogCount===ledger.modeDisclosure.catalog,'mode catalog drift from canonical source');
+assert(modeContract.canonicalAuthority?.sourceModeImplementedContracts===ledger.modeDisclosure.sourceImplementedContracts,'implemented mode contracts drift from canonical source');
+assert(modeContract.canonicalAuthority?.catalogMembershipMeansExecuted===false,'mode catalog membership incorrectly implies execution');
+const skinMode=(modeContract.modes||[]).find(x=>x.name==='RELATIONAL_SKIN_CALCULUS');
+const sphereMode=(modeContract.modes||[]).find(x=>x.name==='FULL_SPHERE');
+assert(skinMode?.class===ledger.modeDisclosure.relationalSkin,'RSC proof classification drift');
+assert(sphereMode?.class===ledger.modeDisclosure.fullSphere,'Full Sphere proof classification drift');
+assert(modeContract.invariants?.includes('20736_IS_ADDRESS_SPACE_NOT_PHYSICAL_DIMENSIONS'),'physical dimensional truth invariant missing');
+assert(ledger.modeDisclosure.physicalDimensionClaim===false,'unsupported physical dimension promotion');
+
 const seen=new Set();
 for(const item of ledger.instruments||[]){
  assert(item.id&&!seen.has(item.id),'missing or duplicate family id '+item.id);
