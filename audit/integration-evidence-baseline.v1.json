@@ -1,0 +1,225 @@
+{
+  "schema": "OMEGA_INTEGRATION_EVIDENCE_BASELINE_V1",
+  "snapshot": {
+    "repository": "medicinalElJefe/OMEGAv6",
+    "inspectedMain": "287a6238a820a2b3b85de2f7c9f592e2ac9da3db",
+    "date": "2026-11-06",
+    "coverage": "TARGETED_INITIAL_INVENTORY_NOT_COMPLETE_REPOSITORY_SCAN",
+    "productionBaseline": {
+      "revision": "R789",
+      "sha": "13d6ee5cd372c7bc8524ab5bfeea5a6796560955",
+      "workflowRun": 42144657822,
+      "evidence": "release-record-assertion",
+      "liveR790": "UNCONFIRMED"
+    }
+  },
+  "truthVocabulary": {
+    "file": "SOURCE_PRESENT_ONLY",
+    "test": "TEST_REGISTERED_NOT_EXECUTED_IN_THIS_AUDIT",
+    "deployment": "NOT_INFERRED_FROM_SOURCE_OR_MERGE",
+    "device": "REQUIRES_AUTHENTICATED_HOST_RECEIPT"
+  },
+  "familyContract": "src7/familyParityR452.ts",
+  "modeContract": "canon/OMEGA_ALL_MODES_EXECUTION_CONTRACT_R674.json",
+  "modeDisclosure": {
+    "catalog": 179,
+    "sourceImplementedContracts": 20,
+    "remainingCatalogOnly": 159,
+    "relationalSkin": "PARTIAL_EXECUTION",
+    "fullSphere": "PRESERVED_ROUTE_NEEDS_OWN_PROOF",
+    "physicalDimensionClaim": false
+  },
+  "instruments": [
+    {
+      "id": "command-runtime",
+      "entryRoute": "Command Center",
+      "source": {
+        "ui": "src7/Omega7Root.tsx",
+        "engine": "src7/nativeCapabilityRegistry.tsx",
+        "state": "src7/appState.ts"
+      },
+      "test": {
+        "path": "tests/r779-native-workspace-history-invariants.mjs",
+        "status": "REGISTERED_NOT_RUN"
+      },
+      "modelAuthority": "route-and-state",
+      "missingEvidence": "live-R790-pending",
+      "sourceStatus": "PATH_FOUND_BY_CODE_SEARCH_OR_CONTRACT; SOME FILES NOT YET OPENED",
+      "ci": "NOT_RECHECKED",
+      "production": "NOT_CONFIRMED_FOR_R790",
+      "nativeDevice": "NOT_PROVED"
+    },
+    {
+      "id": "earth-weather-sar",
+      "entryRoute": "Earth Now",
+      "source": {
+        "ui": "src7/workspaces/EarthWorkspaceR438.tsx",
+        "engine": "src/EarthWeatherR375.tsx",
+        "state": "src/EarthNowInstrument.tsx"
+      },
+      "test": {
+        "path": "tests/r780-gibs-global-integrity-invariants.mjs",
+        "status": "REGISTERED_NOT_RUN"
+      },
+      "modelAuthority": "real-source-plus-derived-proxy",
+      "missingEvidence": "R789-recorded-live-R790-pending",
+      "sourceStatus": "PATH_FOUND_BY_CODE_SEARCH_OR_CONTRACT; SOME FILES NOT YET OPENED",
+      "ci": "NOT_RECHECKED",
+      "production": "NOT_CONFIRMED_FOR_R790",
+      "nativeDevice": "NOT_PROVED"
+    },
+    {
+      "id": "atlas-canon-science",
+      "entryRoute": "Atlas",
+      "source": {
+        "ui": "src/CanonSourceQueryR773.tsx",
+        "engine": "src/CanonTopologyWorkbenchR763.tsx",
+        "state": "src/mandala20736Runtime.ts"
+      },
+      "test": {
+        "path": "tests/r773-canon-source-query-invariants.mjs",
+        "status": "REGISTERED_NOT_RUN"
+      },
+      "modelAuthority": "finite-source-model",
+      "missingEvidence": "R789-recorded-live-R790-pending",
+      "sourceStatus": "PATH_FOUND_BY_CODE_SEARCH_OR_CONTRACT; SOME FILES NOT YET OPENED",
+      "ci": "NOT_RECHECKED",
+      "production": "NOT_CONFIRMED_FOR_R790",
+      "nativeDevice": "NOT_PROVED"
+    },
+    {
+      "id": "motion-traversal-seven-stars",
+      "entryRoute": "Traversal",
+      "source": {
+        "ui": "src7/familyParityR452.ts",
+        "engine": "src7/nativeCapabilityRegistry.tsx",
+        "state": "src/mandala20736Runtime.ts"
+      },
+      "test": {
+        "path": "tests/r602-seven-star-historical-authority.mts",
+        "status": "REGISTERED_NOT_RUN"
+      },
+      "modelAuthority": "historical-parity-partial",
+      "missingEvidence": "donor-byte-and-visual-parity-required",
+      "sourceStatus": "PATH_FOUND_BY_CODE_SEARCH_OR_CONTRACT; SOME FILES NOT YET OPENED",
+      "ci": "NOT_RECHECKED",
+      "production": "NOT_CONFIRMED_FOR_R790",
+      "nativeDevice": "NOT_PROVED"
+    },
+    {
+      "id": "forecast-visual",
+      "entryRoute": "Forecast",
+      "source": {
+        "ui": "src7/familyParityR452.ts",
+        "engine": "src7/nativeCapabilityRegistry.tsx",
+        "state": "src7/appState.ts"
+      },
+      "test": {
+        "path": "tests/r779-native-workspace-history-invariants.mjs",
+        "status": "REGISTERED_NOT_RUN"
+      },
+      "modelAuthority": "mixed-model-and-observation",
+      "missingEvidence": "complete-route-proof-required",
+      "sourceStatus": "PATH_FOUND_BY_CODE_SEARCH_OR_CONTRACT; SOME FILES NOT YET OPENED",
+      "ci": "NOT_RECHECKED",
+      "production": "NOT_CONFIRMED_FOR_R790",
+      "nativeDevice": "NOT_PROVED"
+    },
+    {
+      "id": "work-create-memory",
+      "entryRoute": "Workspace",
+      "source": {
+        "ui": "src7/familyParityR452.ts",
+        "engine": "src7/nativeCapabilityRegistry.tsx",
+        "state": "src7/appState.ts"
+      },
+      "test": {
+        "path": "tests/r779-native-workspace-history-invariants.mjs",
+        "status": "REGISTERED_NOT_RUN"
+      },
+      "modelAuthority": "workspace-local-or-recoverable",
+      "missingEvidence": "durable-cross-device-proof-required",
+      "sourceStatus": "PATH_FOUND_BY_CODE_SEARCH_OR_CONTRACT; SOME FILES NOT YET OPENED",
+      "ci": "NOT_RECHECKED",
+      "production": "NOT_CONFIRMED_FOR_R790",
+      "nativeDevice": "NOT_PROVED"
+    },
+    {
+      "id": "sound-temple-soma",
+      "entryRoute": "Create",
+      "source": {
+        "ui": "src/SomaAudioEngine.tsx",
+        "engine": "src/templeSomaPresetR784.js",
+        "state": "src7/nativeCapabilityRegistry.tsx"
+      },
+      "test": {
+        "path": "tests/r45-soma-audio-invariants.mjs",
+        "status": "REGISTERED_NOT_RUN"
+      },
+      "modelAuthority": "browser-audio-user-gesture",
+      "missingEvidence": "full-playback-production-proof-required",
+      "sourceStatus": "PATH_FOUND_BY_CODE_SEARCH_OR_CONTRACT; SOME FILES NOT YET OPENED",
+      "ci": "NOT_RECHECKED",
+      "production": "NOT_CONFIRMED_FOR_R790",
+      "nativeDevice": "NOT_PROVED"
+    },
+    {
+      "id": "hybrid-windows-gpu",
+      "entryRoute": "Hybrid Link",
+      "source": {
+        "ui": "src/HybridHostIntelligenceR238.tsx",
+        "engine": "public/omega-hybrid-agent.py",
+        "state": "src/HybridLinkR32.tsx"
+      },
+      "test": {
+        "path": "scripts/verify_live_hybrid_host_intelligence_r238.mjs",
+        "status": "REGISTERED_NOT_RUN"
+      },
+      "modelAuthority": "authenticated-host-authority",
+      "missingEvidence": "native-device-build-test-package-required",
+      "sourceStatus": "PATH_FOUND_BY_CODE_SEARCH_OR_CONTRACT; SOME FILES NOT YET OPENED",
+      "ci": "NOT_RECHECKED",
+      "production": "NOT_CONFIRMED_FOR_R790",
+      "nativeDevice": "NOT_PROVED"
+    },
+    {
+      "id": "system-evidence-governance",
+      "entryRoute": "Evidence & Proof",
+      "source": {
+        "ui": "src7/workspaces/SystemEvidenceWorkspaceR445.tsx",
+        "engine": "src7/familyParityR452.ts",
+        "state": "src7/selfBuildTruthR539.ts"
+      },
+      "test": {
+        "path": "scripts/verify_workflow_topology_r170.mjs",
+        "status": "REGISTERED_NOT_RUN"
+      },
+      "modelAuthority": "proof-ledger",
+      "missingEvidence": "exact-SHA-R790-production-unconfirmed",
+      "sourceStatus": "PATH_FOUND_BY_CODE_SEARCH_OR_CONTRACT; SOME FILES NOT YET OPENED",
+      "ci": "NOT_RECHECKED",
+      "production": "NOT_CONFIRMED_FOR_R790",
+      "nativeDevice": "NOT_PROVED"
+    }
+  ],
+  "acceptanceGates": [
+    "SOURCE_EXISTS",
+    "ROUTE_REACHABLE",
+    "ACTION_EXECUTES",
+    "STATE_CONSERVED",
+    "TESTS_PASS_ON_EXACT_HEAD",
+    "PR_GOVERNED_MERGE",
+    "EXACT_SHA_WORKER_DEPLOYMENT",
+    "LIVE_DESKTOP_MOBILE_BEHAVIOR",
+    "R223_POSTDEPLOY",
+    "ROLLBACK_ELIGIBLE",
+    "NATIVE_HOST_PROOF_WHEN_CLAIMED"
+  ],
+  "exclusions": [
+    "Do not promote exploratory mathematics to verified physics",
+    "Do not mark donor parity from route presence",
+    "Do not treat source registry membership as implementation",
+    "Do not claim zero authenticated devices means native device is impossible",
+    "Do not disable production governance to accelerate release"
+  ]
+}
