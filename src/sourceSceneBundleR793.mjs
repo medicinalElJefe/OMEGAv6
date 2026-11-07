@@ -114,7 +114,16 @@ async function derive(field,raster,address,tileSize,showEdges){
    rasterDescriptor:sourceDescriptor(raster),
    rasterValuesSha256:valuesSha256,rasterRgbaSha256:visualSha256},
   scene:{address,tileSize,showEdges,svgSha256,triangles:tile.cells.length*2,
-   edges:showEdges?tile.edges.length:0,originRow:tile.originRow,originCol:tile.originCol},
+   edges:showEdges?tile.edges.length:0,originRow:tile.originRow,originCol:tile.originCol,
+   relation:{
+    address,successor:field.routeNext[address],domain:field.domain[address],
+    continuity:field.C[address],successorContinuity:field.C[field.routeNext[address]],
+    continuityDelta:field.C[field.routeNext[address]]-field.C[address],
+    phase:field.phase[address],motion:field.motion[address],
+    symmetry:field.symmetry[address],scar:field.scar[address],
+    evidence:field.evidence[address],contradiction:field.q[address],
+    forecastModelScore:field.forecast[address]
+   }},
   authority:{
    source:'EXISTING_MANDALA20736_FIELD_AND_R734_R770_R769',
    state:'READ_ONLY_LOCAL_DERIVED',
