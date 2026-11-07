@@ -25,6 +25,17 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
   [field,raster,lens,singleChannelOverride]);
  const tile=useMemo(()=>buildSourceTessellationR769(field,displayRaster,address,tileSize),[field,displayRaster,address,tileSize]);
  const selected=tile.cells.find((c:any)=>c.address===address);
+ // One selected source address drives all relational views; no second simulated state.
+ const relation=useMemo(()=>{
+  const successor=field.routeNext[address];
+  const channels=[
+   ['Continuity',field.C[address]],['Phase',field.phase[address]],
+   ['Motion',field.motion[address]],['Symmetry',field.symmetry[address]],
+   ['Scar',field.scar[address]],['Evidence',field.evidence[address]],
+   ['Contradiction',field.q[address]],['Forecast model',field.forecast[address]]
+  ] as [string,number][];
+  return {successor,domain:field.domain[address],delta:field.C[successor]-field.C[address],channels};
+ },[field,address]);
  const move=(dy:number,dx:number)=>onAddress(navigateSourceTessellationR769(address,dy,dx));
  const download=()=>{
   const svg=serializeSourceTessellationSvgR769(tile,{showEdges});
@@ -151,6 +162,17 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
    <button type='button' data-r769-left onClick={()=>move(0,-1)}>← Column</button>
    <button type='button' data-r769-right onClick={()=>move(0,1)}>Column →</button>
    <button type='button' data-r769-down onClick={()=>move(1,0)}>Row ↓</button>
+  </div>
+  <div data-r794-relational-view aria-label='Live source relational field view' style={{marginTop:12,padding:10,border:'1px solid #617987',borderRadius:8}}>
+   <strong>Relational source · address {address}</strong>
+   <p data-r794-continuity>Domain {relation.domain} · successor {relation.successor} · successor continuity Δ {relation.delta.toFixed(6)}</p>
+   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(130px,1fr))',gap:8}}>
+    {relation.channels.map(([name,value])=><div key={name} style={{padding:8,background:'#17283a',borderRadius:6}}>
+     <div style={{fontSize:12,color:'#d1dbe6'}}>{name}</div>
+     <output style={{fontVariantNumeric:'tabular-nums'}}>{Number.isFinite(value)?value.toFixed(6):'INVALID SOURCE'}</output>
+    </div>)}
+   </div>
+   <small data-r794-relational-boundary>These values are read directly from the same current 20,736-address Atlas field as the tessellation. The forecast value is a model score, not a measured prediction. No independent physical or Canon authority is asserted.</small>
   </div>
   <p data-r769-selected>Selected address {address} · value {selected?.value.toFixed(6)} · successor {selected?.successor} · Δ {selected?.delta.toFixed(6)}</p>
   <small data-r769-boundary>All {tile.sourceAddressCount.toLocaleString()} addresses remain reachable through the source raster and navigation. Zoom is a computed model projection, not physical geometry, authenticated historical renderer parity, a forecast, or CanonState mutation. SVG export and portable scene/replay JSON are computed from the current source field. Neither is a native-device, empirical, historical donor or CanonState proof; the current source field is recomputed on reload.</small>
