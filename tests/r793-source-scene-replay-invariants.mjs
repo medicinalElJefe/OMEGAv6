@@ -77,7 +77,7 @@ assert.deepEqual(field.C,sourceBefore);
 assert.deepEqual(field.routeNext,nextBefore);
 const ui=readFileSync(new URL('../src7/workspaces/SourceTessellationR769.tsx',import.meta.url),'utf8');
 assert.ok(ui.includes('verifySourceSceneBundleR793(field,null,bundle)'),'import must reconstruct the saved lens from current source');
-for(const marker of ['data-r794-relational-view','data-r794-continuity','data-r794-relational-boundary','field.C[successor]-field.C[address]','field.motion[address]','field.symmetry[address]','field.scar[address]','field.evidence[address]','field.forecast[address]'])
+for(const marker of ['data-r794-relational-view','data-r794-continuity','data-r794-relational-boundary','data-r794-follow-successor','onAddress(relation.successor)','field.C[successor]-field.C[address]','field.motion[address]','field.symmetry[address]','field.scar[address]','field.evidence[address]','field.forecast[address]'])
  assert.ok(ui.includes(marker),'integrated relational source view missing: '+marker);
 for(const marker of ['setTileSize(bundle.scene.tileSize)','setShowEdges(bundle.scene.showEdges)','onAddress(bundle.scene.address)','setSingleChannelOverride(saved.channel)','data-r793-reset-source'])assert.ok(ui.includes(marker),'import recovery action must be operational: '+marker);
 for(const marker of ['buildSourceSceneBundleR793','verifySourceSceneBundleR793','data-r793-scene-export','data-r793-scene-import','data-r793-png-export','BROWSER_CANVAS_FROM_SOURCE_SVG','data-r793-scene-status','data-r793-truth-boundary','emitOperationR86','activeProjectIdR87','recordProjectOperationR87'])
