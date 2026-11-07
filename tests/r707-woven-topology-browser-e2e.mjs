@@ -773,6 +773,17 @@ try{
     return ops.some(x=>x.surface==='OMEGA7_SOURCE_TESSELLATION_R793'&&x.type==='ARTIFACT_EXPORTED'&&x.status==='PASS');
    });
    if(!eventFound)throw Error(device+': R793 successful export did not enter the inherited operation ledger');
+
+   const [pngDownload]=await Promise.all([page.waitForEvent('download',{timeout:20000}),tess.locator('[data-r793-png-export]').click()]);
+   if(!pngDownload.suggestedFilename().endsWith('.png'))throw Error(device+': R793 browser PNG filename missing');
+   const pngStream=await pngDownload.createReadStream(),pngParts=[];
+   for await(const chunk of pngStream)pngParts.push(Buffer.from(chunk));
+   const pngBytes=Buffer.concat(pngParts);
+   if(pngBytes.length<24||pngBytes.subarray(0,8).toString('hex')!=='89504e470d0a1a0a'||
+      pngBytes.readUInt32BE(16)!==384||pngBytes.readUInt32BE(20)!==384)
+    throw Error(device+': R793 did not render a real 384x384 source PNG');
+   await tess.locator('[data-r793-scene-status]').filter({hasText:'PNG RENDERED FROM VERIFIED SOURCE SVG'}).waitFor({state:'visible',timeout:20000});
+
    await tess.locator('[data-r770-mode]').selectOption('single');
    await tess.locator('[data-r769-zoom]').selectOption('24');
    await tess.locator('[data-r769-edges]').check();
