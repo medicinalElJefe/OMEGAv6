@@ -48,10 +48,10 @@ const routePath=path.join(root,'audit/omega7-route-evidence.v1.json');
 const routeLedger=JSON.parse(fs.readFileSync(routePath,'utf8'));
 const nativeSource=fs.readFileSync(path.join(root,'src7/nativeCapabilityRegistry.tsx'),'utf8');
 const familySource=fs.readFileSync(path.join(root,'src7/familyParityR452.ts'),'utf8');
-const nativeDeclaration=nativeSource.match(/OMEGA7_NATIVE_ROUTES=Object\\.freeze\\(\\[([\\s\\S]*?)\\] as const/);
+const nativeDeclaration=nativeSource.match(/OMEGA7_NATIVE_ROUTES=Object\.freeze\(\[([\s\S]*?)\] as const/);
 assert(Boolean(nativeDeclaration),'native route declaration missing');
 const nativeRoutes=nativeDeclaration?[...nativeDeclaration[1].matchAll(/'([^']+)'/g)].map(x=>x[1]):[];
-const familyContracts=[...familySource.matchAll(/\\{id:'([^']+)',representativeRoute:'([^']+)',routes:\\[([^\\]]+)\\]/g)].map(m=>({
+const familyContracts=[...familySource.matchAll(/\{id:'([^']+)',representativeRoute:'([^']+)',routes:\[([^\]]+)\]/g)].map(m=>({
  id:m[1], representativeRoute:m[2],routes:[...m[3].matchAll(/'([^']+)'/g)].map(x=>x[1])
 }));
 const expected=new Map();
@@ -77,7 +77,7 @@ for(const route of routeLedger.routes||[]){
 }
 for(const route of nativeRoutes)assert(seenRoutes.has(route),'native registry route missing from audit '+route);
 for(const route of expected.keys())assert(nativeRoutes.includes(route),'family route absent from native registry '+route);
-const workspaceImportNames=[...nativeSource.matchAll(/const (\\w+)=lazy\\(\\(\\)=>import\\('([^']+)'\\)\\)/g)]
+const workspaceImportNames=[...nativeSource.matchAll(/const (\w+)=lazy\(\(\)=>import\('([^']+)'\)\)/g)]
   .map(m=>path.normalize(path.join(root,'src7',m[2])+'.tsx'));
 for(const audited of routeLedger.routes||[]){
  assert(workspaceImportNames.includes(path.join(root,audited.workspace)),'workspace has no lazy import in native registry '+audited.route);
@@ -96,7 +96,7 @@ for(const record of dependencyLedger.modules||[]){
  assert(fs.existsSync(workspaceFile),'workspace source missing '+record.workspace);
  if(!fs.existsSync(workspaceFile))continue;
  const source=fs.readFileSync(workspaceFile,'utf8');
- const parsed=[...new Set([...source.matchAll(/(?:from\\s*|import\\()\\s*['"]([^'"]+)['"]/g)]
+ const parsed=[...new Set([...source.matchAll(/(?:from\s*|import\()\s*['"]([^'"]+)['"]/g)]
   .map(x=>x[1]).filter(x=>x.startsWith('.')))].sort();
  const recorded=record.dependencySpecifiers||[];
  assert(JSON.stringify(parsed)===JSON.stringify(recorded),'workspace import drift '+record.workspace);
