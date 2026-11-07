@@ -1,6 +1,6 @@
 # OMEGA integration evidence baseline (2026-11-06)
 
-This is an **initial, targeted repository integration audit**, not a completed full-tree audit and **not** proof of R790 production acceptance. It records concrete source/test leads and explicitly preserves gaps. Source search, inspection of OMEGA7 contracts, the canonical mode contract, package scripts, Hybrid host proof contract and Seven-Star recovery gate informed the entries in `audit/integration-evidence-baseline.v1.json`.
+This is an **initial, targeted dependency audit with complete 44-route native registry coverage**, not a completed full-tree implementation audit and **not** proof of R790 production acceptance. It records concrete source/test leads and explicitly preserves gaps. Source search, inspection of OMEGA7 contracts, the canonical mode contract, package scripts, Hybrid host proof contract and Seven-Star recovery gate informed the entries in `audit/integration-evidence-baseline.v1.json`.
 
 ## Engineering decision
 Build one progressively integrated OMEGA7 system from demonstrably executable components; keep research/operator models as typed, provenance-bearing experiments rather than silently elevating them to established physical law. No replacement of CanonState admission, no donor parity by analogy, no unauthenticated host command, and no production bypass.
@@ -12,6 +12,11 @@ Build one progressively integrated OMEGA7 system from demonstrably executable co
 - **PRODUCTION PASS:** exact main SHA + actual Worker promotion + live desktop/mobile behavior + R223 closure + rollback eligibility.
 - **DEVICE PASS:** fresh authenticated non-revoked host/device attestation, actual operation and return proof; never inferred from cloud route health.
 - **HISTORICAL PARITY:** original donor byte identity and golden output comparison; never inferred from having an analogous UI.
+
+## R791 route census and executable audit gate
+- `audit/omega7-route-evidence.v1.json` maps all **44** declared OMEGA7 native routes to the **8** declared family owners and their actual lazy-loaded workspace modules. This is a complete census of the native route **registry**, not complete dependency analysis, proof of feature behavior or donor parity.
+- `scripts/validate_integration_evidence_baseline.mjs` checks unique routes and family ownership against source registries, validates workspace lazy-import paths and audited source/test path existence, and refuses unearned route/production claims.
+- `npm run test:integration-audit` is now the first step of `npm run check:static`; future registered routes or changed module paths must update the evidence baseline or fail CI. These tests are structural, not live production proof.
 
 ## Confirmed architectural anchor points
 - `src7/Omega7Root.tsx` connects route selection to the OMEGA7 state provider and native workspace registry. `src7/familyParityR452.ts` declares **8** current family contracts and checks inherited route coverage, not execution of each route.
@@ -26,8 +31,8 @@ Build one progressively integrated OMEGA7 system from demonstrably executable co
 The R790 source merge is `287a6238a820a2b3b85de2f7c9f592e2ac9da3db`. The R789 release record states success for production run `42144657822` and Worker `5f29b1b6-4704-4b2e-8306-67ebab8ebcaf`. **R790's exact-SHA production acceptance remains unconfirmed in this audit**; the connector's pull-request-run query is not an exhaustive push-workflow lookup. Verify Actions and Worker receipts before promotion.
 
 ## Next integration gates (not yet completed)
-1. Expand initial inventory to every registered capability and derive route→component→executor→state→tests mechanically; flag missing files and test paths.
-2. Execute the included read-only validator: `node scripts/validate_integration_evidence_baseline.mjs`; repair all negative results. It does not claim actual CI success.
+1. Expand the 44-route/8-family registry census to route-specific executor→state→tests dependency edges, including dynamic and indirect imports; flag missing or circular paths.
+2. Validate `npm run test:integration-audit` through mandatory exact-head CI. The validator is wired into `check:static` but does not alone claim actual CI success.
 3. Run complete source tests and browser journey tests across family transitions, shared Canon address, recovery and export, including failures.
 4. Verify R790's exact SHA in push Actions and Cloudflare Worker, with post-deploy R223 and rollback.
 5. Admit capabilities to the user-facing live availability surface only after corresponding evidence receipts. Keep research and missing-proof states visible.
