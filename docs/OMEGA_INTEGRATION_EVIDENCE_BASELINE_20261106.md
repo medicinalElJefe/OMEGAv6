@@ -28,15 +28,15 @@ Build one progressively integrated OMEGA7 system from demonstrably executable co
 - `.github/workflows/ci.yml` requires release ownership, deployment/rollback handling, exact-SHA R223 post-deploy closure and governed continuation.
 
 ## Release distinction
-The R790 source merge is `287a6238a820a2b3b85de2f7c9f592e2ac9da3db`. The R789 release record states success for production run `42144657822` and Worker `5f29b1b6-4704-4b2e-8306-67ebab8ebcaf`. **R790's exact-SHA production acceptance remains unconfirmed in this audit**; the connector's pull-request-run query is not an exhaustive push-workflow lookup. Verify Actions and Worker receipts before promotion.
+The R790 source merge is `287a6238a820a2b3b85de2f7c9f592e2ac9da3db`. The R789 release record states success for production run `42144657822` and Worker `5f29b1b6-4704-4b2e-8306-67ebab8ebcaf`. **R790 exact-SHA production is verified** in [push #42233127818](https://github.com/medicinalElJefe/OMEGAv6/actions/runs/42233127818): source/deploy/main, R223, governed continuation successful; Worker `eec94279-092e-4a3c-b97e-e95b38c5ce30` at 100%; R284/R370/R372 live Earth/SAR desktop/mobile PASS; R237/R238 cloud authority PASS; rollback eligible. Authenticated public devices remained zero and native Windows/GPU host proof is NOT established.
 
 ## Next integration gates (not yet completed)
 1. Expand the 44-route/8-family registry census to route-specific executor→state→tests dependency edges, including dynamic and indirect imports; flag missing or circular paths.
 2. Validate `npm run test:integration-audit` through mandatory exact-head CI. The validator is wired into `check:static` but does not alone claim actual CI success.
 3. Run complete source tests and browser journey tests across family transitions, shared Canon address, recovery and export, including failures.
-4. Verify R790's exact SHA in push Actions and Cloudflare Worker, with post-deploy R223 and rollback.
+4. Preserve the recovered R790 exact SHA, Worker, live Earth/SAR and R223 receipts; require a fresh, independent exact-SHA R791 production closure after merge.
 5. Admit capabilities to the user-facing live availability surface only after corresponding evidence receipts. Keep research and missing-proof states visible.
 6. Separately obtain native Windows build/test/package, one-launcher/GPU and live Hybrid proof on the actual host.
 7. Continue source-level historical donor comparison and full functional/visual fidelity work without overwriting originals.
 
-**Scope boundary:** This branch only adds an audit ledger and read-only validator. It neither claims complete system assembly nor mutates production.
+**Scope boundary:** This branch adds audit ledgers and read-only validation wired into mandatory source checks. It neither claims complete system assembly nor mutates production.
