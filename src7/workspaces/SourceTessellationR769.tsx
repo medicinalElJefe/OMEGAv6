@@ -37,6 +37,40 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
   return {successor,domain:field.domain[address],delta:field.C[successor]-field.C[address],channels};
  },[field,address]);
  const trace=useMemo(()=>traceSourceContinuityR794(field,address,{maxSteps:12}),[field,address]);
+ const [recoveryStatus,setRecoveryStatus]=useState('No workspace checkpoint restored.');
+ const saveWorkspace=()=>{
+  try{
+   const checkpoint={schema:'OMEGA_SOURCE_WORKSPACE_R795_V1',address,tileSize,showEdges,
+    lens,channelOverride:singleChannelOverride,savedAt:new Date().toISOString(),
+    sourceAuthority:'SETTINGS_ONLY_RECOMPUTE_ON_RESTORE'};
+   window.localStorage.setItem('omega.r795.sourceWorkspace',JSON.stringify(checkpoint));
+   setRecoveryStatus('Saved local workspace settings; no source values or Canon state stored.');
+  }catch(error){setRecoveryStatus('SAVE REFUSED · '+String(error))}
+ };
+ const restoreWorkspace=()=>{
+  try{
+   const raw=window.localStorage.getItem('omega.r795.sourceWorkspace');
+   if(!raw)throw Error('no saved workspace');
+   const saved=JSON.parse(raw);
+   if(saved.schema!=='OMEGA_SOURCE_WORKSPACE_R795_V1'||
+      !Number.isSafeInteger(saved.address)||saved.address<0||saved.address>=20736||
+      !SOURCE_TESSELLATION_SIZES_R769.includes(saved.tileSize)||
+      typeof saved.showEdges!=='boolean'||
+      !['single','woven'].includes(saved.lens?.mode)||
+      !Object.hasOwn(ATLAS_FIELD_CHANNELS_R734,saved.lens.first)||
+      !Object.hasOwn(ATLAS_FIELD_CHANNELS_R734,saved.lens.second)||
+      !Number.isSafeInteger(saved.lens.weightPercent)||
+      saved.lens.weightPercent<0||saved.lens.weightPercent>100||
+      (saved.channelOverride!==null&&!Object.hasOwn(ATLAS_FIELD_CHANNELS_R734,saved.channelOverride)))
+    throw Error('invalid or incompatible workspace checkpoint');
+   setTileSize(saved.tileSize);setShowEdges(saved.showEdges);
+   setLens({mode:saved.lens.mode,first:saved.lens.first,
+    second:saved.lens.second,weightPercent:saved.lens.weightPercent});
+   setSingleChannelOverride(saved.channelOverride);
+   onAddress(saved.address);
+   setRecoveryStatus('Workspace restored · source values and traversal recomputed from current field.');
+  }catch(error){setRecoveryStatus('RESTORE REFUSED · '+String(error))}
+ };
  const move=(dy:number,dx:number)=>onAddress(navigateSourceTessellationR769(address,dy,dx));
  const download=()=>{
   const svg=serializeSourceTessellationSvgR769(tile,{showEdges});
@@ -147,6 +181,11 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
    <button type='button' data-r793-png-export disabled={sceneBusy} onClick={()=>void exportPng()}>Render source PNG</button>
    {singleChannelOverride&&<button type='button' data-r793-reset-source onClick={()=>setSingleChannelOverride(null)}>Return to route source channel</button>}
    <label>Verify saved scene <input data-r793-scene-import type='file' accept='.json,application/json' disabled={sceneBusy} onChange={e=>{void importScene(e.target.files?.[0]);e.target.value='';}}/></label>
+  </div>
+  <div data-r795-workspace-recovery style={{display:'flex',flexWrap:'wrap',gap:8,alignItems:'center'}}>
+   <button type='button' data-r795-save-workspace onClick={saveWorkspace}>Save local workspace</button>
+   <button type='button' data-r795-restore-workspace onClick={restoreWorkspace}>Restore local workspace</button>
+   <span data-r795-recovery-status role='status' aria-live='polite'>{recoveryStatus}</span>
   </div>
   <p data-r793-scene-status role='status' aria-live='polite'>{sceneProof}</p>
   <small data-r793-truth-boundary>Scene JSON contains the complete generated SVG plus hashes of all current atlas field channels, selected raster and output. It can be reverified against this live source. Local hashes are integrity evidence, never a signed external execution receipt or historical renderer parity.</small>
