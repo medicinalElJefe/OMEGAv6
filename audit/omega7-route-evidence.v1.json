@@ -1,0 +1,413 @@
+{
+  "schema": "OMEGA7_ROUTE_EVIDENCE_V1",
+  "sourceCommit": "287a6238a820a2b3b85de2f7c9f592e2ac9da3db",
+  "sourceContracts": [
+    "src7/familyParityR452.ts",
+    "src7/nativeCapabilityRegistry.tsx"
+  ],
+  "scope": "ALL_DECLARED_OMEGA7_NATIVE_ROUTES",
+  "routeCount": 44,
+  "notes": [
+    "Source route/workspace mapping is verified from static registry code, not by executing React components.",
+    "Route wiring does not establish feature, GPU, original donor, native device or deployed runtime equivalence.",
+    "Unknown route-specific dependencies are explicit and require follow-up tracing."
+  ],
+  "routes": [
+    {
+      "route": "Command Center",
+      "family": "COMMAND_RUNTIME",
+      "workspace": "src7/workspaces/CommandWorkspaceR439.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Earth Now",
+      "family": "EARTH_WEATHER",
+      "workspace": "src7/workspaces/EarthWorkspaceR438.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Immersive Traversal",
+      "family": "MOTION_TRAVERSAL",
+      "workspace": "src7/workspaces/TraversalWorkspaceR440.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Matter Traversal",
+      "family": "MOTION_TRAVERSAL",
+      "workspace": "src7/workspaces/TraversalWorkspaceR440.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Extreme Traversal",
+      "family": "MOTION_TRAVERSAL",
+      "workspace": "src7/workspaces/TraversalWorkspaceR440.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Traversal",
+      "family": "MOTION_TRAVERSAL",
+      "workspace": "src7/workspaces/TraversalWorkspaceR440.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Relativity",
+      "family": "SCIENCE_RELATIVITY_ATLAS",
+      "workspace": "src7/workspaces/ScienceWorkspaceR441.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Atlas",
+      "family": "SCIENCE_RELATIVITY_ATLAS",
+      "workspace": "src7/workspaces/ScienceWorkspaceR441.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Reality Lab",
+      "family": "SCIENCE_RELATIVITY_ATLAS",
+      "workspace": "src7/workspaces/ScienceWorkspaceR441.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Atlas Calculator",
+      "family": "SCIENCE_RELATIVITY_ATLAS",
+      "workspace": "src7/workspaces/ScienceWorkspaceR441.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Infinity",
+      "family": "SCIENCE_RELATIVITY_ATLAS",
+      "workspace": "src7/workspaces/ScienceWorkspaceR441.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Scale Compiler",
+      "family": "SCIENCE_RELATIVITY_ATLAS",
+      "workspace": "src7/workspaces/ScienceWorkspaceR441.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Visual Instrument",
+      "family": "FORECAST_VISUAL_FIELD",
+      "workspace": "src7/workspaces/ForecastVisualWorkspaceR442.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Forecast",
+      "family": "FORECAST_VISUAL_FIELD",
+      "workspace": "src7/workspaces/ForecastVisualWorkspaceR442.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Field",
+      "family": "FORECAST_VISUAL_FIELD",
+      "workspace": "src7/workspaces/ForecastVisualWorkspaceR442.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Data Motion",
+      "family": "FORECAST_VISUAL_FIELD",
+      "workspace": "src7/workspaces/ForecastVisualWorkspaceR442.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Convergence",
+      "family": "FORECAST_VISUAL_FIELD",
+      "workspace": "src7/workspaces/ForecastVisualWorkspaceR442.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Workspace",
+      "family": "WORK_CREATE_CONTINUITY",
+      "workspace": "src7/workspaces/WorkCreateWorkspaceR443.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Create",
+      "family": "WORK_CREATE_CONTINUITY",
+      "workspace": "src7/workspaces/WorkCreateWorkspaceR443.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Projects",
+      "family": "WORK_CREATE_CONTINUITY",
+      "workspace": "src7/workspaces/WorkCreateWorkspaceR443.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Render Queue",
+      "family": "WORK_CREATE_CONTINUITY",
+      "workspace": "src7/workspaces/WorkCreateWorkspaceR443.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Assets",
+      "family": "WORK_CREATE_CONTINUITY",
+      "workspace": "src7/workspaces/WorkCreateWorkspaceR443.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Memory",
+      "family": "WORK_CREATE_CONTINUITY",
+      "workspace": "src7/workspaces/WorkCreateWorkspaceR443.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Hybrid Link",
+      "family": "DEVELOPMENT_COMPUTE",
+      "workspace": "src7/workspaces/DevelopmentComputeWorkspaceR444.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Quality Compiler",
+      "family": "DEVELOPMENT_COMPUTE",
+      "workspace": "src7/workspaces/DevelopmentComputeWorkspaceR444.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Build Out",
+      "family": "DEVELOPMENT_COMPUTE",
+      "workspace": "src7/workspaces/DevelopmentComputeWorkspaceR444.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Development",
+      "family": "DEVELOPMENT_COMPUTE",
+      "workspace": "src7/workspaces/DevelopmentComputeWorkspaceR444.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Kernel Intelligence",
+      "family": "DEVELOPMENT_COMPUTE",
+      "workspace": "src7/workspaces/DevelopmentComputeWorkspaceR444.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "SAI Lab",
+      "family": "DEVELOPMENT_COMPUTE",
+      "workspace": "src7/workspaces/DevelopmentComputeWorkspaceR444.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Cockpit",
+      "family": "SYSTEM_EVIDENCE_GOVERNANCE",
+      "workspace": "src7/workspaces/SystemEvidenceWorkspaceR445.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Modes",
+      "family": "SYSTEM_EVIDENCE_GOVERNANCE",
+      "workspace": "src7/workspaces/SystemEvidenceWorkspaceR445.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Evidence & Proof",
+      "family": "SYSTEM_EVIDENCE_GOVERNANCE",
+      "workspace": "src7/workspaces/SystemEvidenceWorkspaceR445.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Archive Census",
+      "family": "SYSTEM_EVIDENCE_GOVERNANCE",
+      "workspace": "src7/workspaces/SystemEvidenceWorkspaceR445.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Archive Operators",
+      "family": "SYSTEM_EVIDENCE_GOVERNANCE",
+      "workspace": "src7/workspaces/SystemEvidenceWorkspaceR445.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Canon Evolution",
+      "family": "SYSTEM_EVIDENCE_GOVERNANCE",
+      "workspace": "src7/workspaces/SystemEvidenceWorkspaceR445.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Governance",
+      "family": "SYSTEM_EVIDENCE_GOVERNANCE",
+      "workspace": "src7/workspaces/SystemEvidenceWorkspaceR445.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Consolidation",
+      "family": "SYSTEM_EVIDENCE_GOVERNANCE",
+      "workspace": "src7/workspaces/SystemEvidenceWorkspaceR445.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Instructions",
+      "family": "SYSTEM_EVIDENCE_GOVERNANCE",
+      "workspace": "src7/workspaces/SystemEvidenceWorkspaceR445.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Plugins",
+      "family": "SYSTEM_EVIDENCE_GOVERNANCE",
+      "workspace": "src7/workspaces/SystemEvidenceWorkspaceR445.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Settings",
+      "family": "SYSTEM_EVIDENCE_GOVERNANCE",
+      "workspace": "src7/workspaces/SystemEvidenceWorkspaceR445.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "System",
+      "family": "SYSTEM_EVIDENCE_GOVERNANCE",
+      "workspace": "src7/workspaces/SystemEvidenceWorkspaceR445.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Validation",
+      "family": "SYSTEM_EVIDENCE_GOVERNANCE",
+      "workspace": "src7/workspaces/SystemEvidenceWorkspaceR445.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "System Atlas",
+      "family": "SYSTEM_EVIDENCE_GOVERNANCE",
+      "workspace": "src7/workspaces/SystemEvidenceWorkspaceR445.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    },
+    {
+      "route": "Control Matrix",
+      "family": "SYSTEM_EVIDENCE_GOVERNANCE",
+      "workspace": "src7/workspaces/SystemEvidenceWorkspaceR445.tsx",
+      "routing": "REGISTERED_SOURCE_NOT_LIVE_EXECUTION_PROOF",
+      "testStatus": "TEST_NOT_EXECUTED_BY_THIS_AUDIT",
+      "backend": "ROUTE_SPECIFIC_DEPENDENCIES_NOT_FULLY_TRACED",
+      "production": "EXACT_ROUTE_LIVE_PROOF_NOT_ESTABLISHED_IN_THIS_AUDIT"
+    }
+  ]
+}

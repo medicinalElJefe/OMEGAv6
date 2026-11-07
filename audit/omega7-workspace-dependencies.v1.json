@@ -1,0 +1,155 @@
+{
+  "schema": "OMEGA7_WORKSPACE_FIRST_HOP_DEPENDENCIES_V1",
+  "sourceCommit": "287a6238a820a2b3b85de2f7c9f592e2ac9da3db",
+  "scope": "EIGHT_NATIVE_WORKSPACE_DIRECT_RELATIVE_IMPORTS",
+  "note": "Imported source existence is weaker than reachability and successful execution. Every direct relative module specifier is copied from source and checked for drift. No network, host or production assertions.",
+  "modules": [
+    {
+      "workspace": "src7/workspaces/CommandWorkspaceR439.tsx",
+      "dependencySpecifiers": [
+        "../../src/OmegaCommandDeck",
+        "../../src/OmegaRichText",
+        "../../src/corpusRuntime",
+        "../../src/fullOverallModeOrchestratorR79",
+        "../../src/platformAdapter",
+        "../../src/sourceBackedModeRuntimeR21",
+        "../../src/unifiedCalculus",
+        "../capabilityRegistry"
+      ],
+      "classification": "STATIC_FIRST_HOP_IMPORTS_ONLY",
+      "transitiveClosure": "NOT_AUDITED",
+      "runtimeProof": "NOT_ESTABLISHED_BY_IMPORT"
+    },
+    {
+      "workspace": "src7/workspaces/EarthWorkspaceR438.tsx",
+      "dependencySpecifiers": [
+        "../../src/EarthObservatoryR8",
+        "../../src/WeatherObservationStudioR563"
+      ],
+      "classification": "STATIC_FIRST_HOP_IMPORTS_ONLY",
+      "transitiveClosure": "NOT_AUDITED",
+      "runtimeProof": "NOT_ESTABLISHED_BY_IMPORT"
+    },
+    {
+      "workspace": "src7/workspaces/TraversalWorkspaceR440.tsx",
+      "dependencySpecifiers": [
+        "../../src/ExtremeTraversalUnionR60",
+        "../../src/OmegaR36LivingSurfaces",
+        "../../src/corpusRuntime",
+        "./VerifiedTrajectoryTraversalR766"
+      ],
+      "classification": "STATIC_FIRST_HOP_IMPORTS_ONLY",
+      "transitiveClosure": "NOT_AUDITED",
+      "runtimeProof": "NOT_ESTABLISHED_BY_IMPORT"
+    },
+    {
+      "workspace": "src7/workspaces/ScienceWorkspaceR441.tsx",
+      "dependencySpecifiers": [
+        "../../src/AppliedRealityLab",
+        "../../src/AtlasCalculatorPanel",
+        "../../src/AtlasViewport",
+        "../../src/CanonTopologyWorkbenchR763",
+        "../../src/DeweyTemporalWorkbenchV9",
+        "../../src/FullSphereInstrumentR525",
+        "../../src/OmegaInfinityPanel",
+        "../../src/PellResearchWorkbenchR755",
+        "../../src/RecursiveScalePanel",
+        "../../src/RelativityLab",
+        "../../src/TypedProvenanceWorkbenchR757",
+        "../../src/capabilityAtlasR43",
+        "../../src/corpusRuntime",
+        "../../src/system/canonicalDomainResolutionR436",
+        "../../src/system/scienceDomainResolutionR436",
+        "../MotionSourceInstrumentR537",
+        "../SourceExecutionWorkspaceR531",
+        "../capabilityRegistry",
+        "../resolutionPresentationR438",
+        "./RouteBasinInstrumentR732"
+      ],
+      "classification": "STATIC_FIRST_HOP_IMPORTS_ONLY",
+      "transitiveClosure": "NOT_AUDITED",
+      "runtimeProof": "NOT_ESTABLISHED_BY_IMPORT"
+    },
+    {
+      "workspace": "src7/workspaces/ForecastVisualWorkspaceR442.tsx",
+      "dependencySpecifiers": [
+        "../../src/CorpusAdapterWorkbenchR473",
+        "../../src/CorpusExecutionIntentR473",
+        "../../src/ForecastSovereignPanel",
+        "../../src/OmegaConvergenceSurfaceR416",
+        "../../src/OmegaFieldMotionConvergenceR28",
+        "../../src/OmegaR36LivingSurfaces",
+        "../../src/corpusRuntime",
+        "../../src/forecastRuntime",
+        "../capabilityRegistry",
+        "./HistoricalRHGraphR621",
+        "./HistoricalTimeMandalaR605",
+        "./SevenStarProjectionR594",
+        "./WovenMatterLabR598"
+      ],
+      "classification": "STATIC_FIRST_HOP_IMPORTS_ONLY",
+      "transitiveClosure": "NOT_AUDITED",
+      "runtimeProof": "NOT_ESTABLISHED_BY_IMPORT"
+    },
+    {
+      "workspace": "src7/workspaces/WorkCreateWorkspaceR443.tsx",
+      "dependencySpecifiers": [
+        "../../src/OmegaIntentWorkbenchR85",
+        "../../src/OmegaSpecialistSuite",
+        "../../src/OmegaWorkspaceCockpitR18",
+        "../../src/corpusRuntime",
+        "../../src/platformAdapter",
+        "../capabilityRegistry",
+        "./MemoryAnalysisR771",
+        "./MemoryRecallR723",
+        "./MemoryRecoveryR722"
+      ],
+      "classification": "STATIC_FIRST_HOP_IMPORTS_ONLY",
+      "transitiveClosure": "NOT_AUDITED",
+      "runtimeProof": "NOT_ESTABLISHED_BY_IMPORT"
+    },
+    {
+      "workspace": "src7/workspaces/DevelopmentComputeWorkspaceR444.tsx",
+      "dependencySpecifiers": [
+        "../../src/HybridMissionControlR8",
+        "../../src/IntelligenceFabricPanel",
+        "../../src/OmegaIntentWorkbenchR85",
+        "../../src/SAISovereignControl",
+        "../../src/UniversalQualityControl",
+        "../../src/WovenBuildOutPanel",
+        "../../src/corpusRuntime",
+        "../../src/platformAdapter",
+        "../../src/sourceBackedModeRuntimeR21",
+        "../SelfBuildTruthR539",
+        "../capabilityRegistry"
+      ],
+      "classification": "STATIC_FIRST_HOP_IMPORTS_ONLY",
+      "transitiveClosure": "NOT_AUDITED",
+      "runtimeProof": "NOT_ESTABLISHED_BY_IMPORT"
+    },
+    {
+      "workspace": "src7/workspaces/SystemEvidenceWorkspaceR445.tsx",
+      "dependencySpecifiers": [
+        "../../src/ArchiveGovernanceControl",
+        "../../src/OmegaSpecialistSuite",
+        "../../src/OmegaWorkspaceCockpitR18",
+        "../../src/PluginRegistryR45",
+        "../../src/SomaAudioEngine",
+        "../../src/SourceBackedModesPanelR21",
+        "../../src/SystemAtlasControl",
+        "../../src/UniversalQualityControl",
+        "../../src/corpusRuntime",
+        "../../src/platformAdapter",
+        "../../src/sourceBackedModeRuntimeR21",
+        "../capabilityRegistry",
+        "./CanonicalSessionReplayPanelR679",
+        "./NativeDecisionTruthPanelR681",
+        "./OperationalModesPanelR671",
+        "./OperatorGraphPanelR676"
+      ],
+      "classification": "STATIC_FIRST_HOP_IMPORTS_ONLY",
+      "transitiveClosure": "NOT_AUDITED",
+      "runtimeProof": "NOT_ESTABLISHED_BY_IMPORT"
+    }
+  ]
+}
