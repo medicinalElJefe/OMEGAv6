@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {renderAtlasFieldRasterR734} from '../src/atlasFieldRasterR734.mjs';
 import {computeSourceFieldLensR770} from '../src/sourceFieldLensR770.mjs';
-import {buildSourceSceneBundleR793,verifySourceSceneBundleR793,reconstructSceneRasterR793,SOURCE_SCENE_BUNDLE_SCHEMA_R793} from '../src/sourceSceneBundleR793.mjs';
+import {buildSourceSceneBundleR793,verifySourceSceneBundleR793,reconstructSceneRasterR793,traceSourceContinuityR794,SOURCE_SCENE_BUNDLE_SCHEMA_R793} from '../src/sourceSceneBundleR793.mjs';
 
 const count=20736,fields=[
  'x','y','z','phase','C','Phi','q','Lambda','scar','evidence','rsc',
@@ -17,13 +17,45 @@ for(let i=0;i<count;i++){
  for(const name of fields)field[name][i]=name==='C'?i/count:name==='q'?1-i/count:(i%144)/144;
 }
 const sourceBefore=field.C.slice(),nextBefore=field.routeNext.slice();
+const trace=traceSourceContinuityR794(field,11498,{maxSteps:12});
+assert.equal(trace.steps.length,12);
+assert.equal(trace.termination,'STEP_LIMIT');
+assert.deepEqual(trace.steps.map(x=>x.address),Array.from({length:12},(_,i)=>11498+i));
+assert.equal(trace.steps[0].continuityDelta,field.C[11499]-field.C[11498]);
+assert.equal(trace.steps[0].motion,field.motion[11498]);
+assert.equal(trace.steps[0].evidence,field.evidence[11498]);
+const cyclic={...field,routeNext:field.routeNext.slice()};
+cyclic.routeNext[11499]=11498;
+const cycle=traceSourceContinuityR794(cyclic,11498,{maxSteps:12});
+assert.equal(cycle.termination,'CYCLE');
+assert.deepEqual(cycle.steps.map(x=>x.address),[11498,11499]);
+assert.throws(()=>traceSourceContinuityR794(field,11498,{maxSteps:145}),/invalid source traversal/);
+assert.throws(()=>traceSourceContinuityR794({...field,routeNext:new Uint32Array(count).fill(count)},11498),/invalid source successor/);
 const raster=renderAtlasFieldRasterR734(field,'C');
 const settings={address:11498,tileSize:12,showEdges:true};
+// R794: forged or stale raster bytes cannot be promoted into a source-bound scene.
+const forgedValues={...raster,values:raster.values.slice()};
+forgedValues.values[0]+=0.25;
+await assert.rejects(()=>buildSourceSceneBundleR793(field,forgedValues,settings),/R794 raster does not match/);
+const forgedPixels={...raster,rgba:raster.rgba.slice()};
+forgedPixels.rgba[0]^=1;
+await assert.rejects(()=>buildSourceSceneBundleR793(field,forgedPixels,settings),/R794 raster does not match/);
+const staleField={...field,C:field.C.slice()};
+staleField.C[0]+=0.5;
+await assert.rejects(()=>buildSourceSceneBundleR793(staleField,raster,settings),/R794 raster does not match/);
+
 const first=await buildSourceSceneBundleR793(field,raster,settings);
 assert.equal(first.schema,SOURCE_SCENE_BUNDLE_SCHEMA_R793);
 assert.equal(first.source.addressCount,20736);
 assert.deepEqual(first.source.rasterDescriptor,{type:'R734_SOURCE_CHANNEL',channel:'C'});
 assert.equal(first.scene.triangles,288);
+assert.equal(first.scene.relation.address,settings.address);
+assert.equal(first.scene.relation.successor,field.routeNext[settings.address]);
+assert.equal(first.scene.relation.domain,field.domain[settings.address]);
+assert.equal(first.scene.relation.continuity,field.C[settings.address]);
+assert.equal(first.scene.relation.continuityDelta,field.C[field.routeNext[settings.address]]-field.C[settings.address]);
+assert.equal(first.scene.relation.motion,field.motion[settings.address]);
+assert.equal(first.scene.relation.forecastModelScore,field.forecast[settings.address]);
 assert.ok(first.svg.startsWith('<svg'));
 assert.match(first.sceneFingerprintSha256,/^[0-9a-f]{64}$/);
 assert.equal(first.authority.canonicalMutation,false);
@@ -59,6 +91,8 @@ assert.deepEqual(field.C,sourceBefore);
 assert.deepEqual(field.routeNext,nextBefore);
 const ui=readFileSync(new URL('../src7/workspaces/SourceTessellationR769.tsx',import.meta.url),'utf8');
 assert.ok(ui.includes('verifySourceSceneBundleR793(field,null,bundle)'),'import must reconstruct the saved lens from current source');
+for(const marker of ['data-r794-traversal','data-r794-trace-address','traceSourceContinuityR794(field,address,{maxSteps:12})','data-r794-relational-view','data-r794-continuity','data-r794-relational-boundary','data-r794-follow-successor','onAddress(relation.successor)','field.C[successor]-field.C[address]','field.motion[address]','field.symmetry[address]','field.scar[address]','field.evidence[address]','field.forecast[address]'])
+ assert.ok(ui.includes(marker),'integrated relational source view missing: '+marker);
 for(const marker of ['setTileSize(bundle.scene.tileSize)','setShowEdges(bundle.scene.showEdges)','onAddress(bundle.scene.address)','setSingleChannelOverride(saved.channel)','data-r793-reset-source'])assert.ok(ui.includes(marker),'import recovery action must be operational: '+marker);
 for(const marker of ['buildSourceSceneBundleR793','verifySourceSceneBundleR793','data-r793-scene-export','data-r793-scene-import','data-r793-png-export','BROWSER_CANVAS_FROM_SOURCE_SVG','data-r793-scene-status','data-r793-truth-boundary','emitOperationR86','activeProjectIdR87','recordProjectOperationR87'])
  assert.ok(ui.includes(marker),'R793 user-facing source scene control missing: '+marker);

@@ -94,6 +94,14 @@ function requireSettings(raster,address,tileSize,showEdges){
 }
 async function derive(field,raster,address,tileSize,showEdges){
  requireSettings(raster,address,tileSize,showEdges);
+ // An exported raster must be reproduced from the current source field and declared lens.
+ // A caller-supplied pixel buffer alone is not evidence of source provenance.
+ const expected=reconstructSceneRasterR793(field,{rasterDescriptor:sourceDescriptor(raster)});
+ if(expected.channel!==raster.channel||
+    !validRaster(expected)||
+    (await hashBytes(bytesForChannel('C',expected.values)))!==(await hashBytes(bytesForChannel('C',raster.values)))||
+    (await hashBytes(expected.rgba))!==(await hashBytes(raster.rgba)))
+  throw Error('R794 raster does not match declared live source');
  const sourceStateSha256=await fieldFingerprint(field);
  const tile=buildSourceTessellationR769(field,raster,address,tileSize);
  const svg=serializeSourceTessellationSvgR769(tile,{showEdges});
@@ -106,7 +114,16 @@ async function derive(field,raster,address,tileSize,showEdges){
    rasterDescriptor:sourceDescriptor(raster),
    rasterValuesSha256:valuesSha256,rasterRgbaSha256:visualSha256},
   scene:{address,tileSize,showEdges,svgSha256,triangles:tile.cells.length*2,
-   edges:showEdges?tile.edges.length:0,originRow:tile.originRow,originCol:tile.originCol},
+   edges:showEdges?tile.edges.length:0,originRow:tile.originRow,originCol:tile.originCol,
+   relation:{
+    address,successor:field.routeNext[address],domain:field.domain[address],
+    continuity:field.C[address],successorContinuity:field.C[field.routeNext[address]],
+    continuityDelta:field.C[field.routeNext[address]]-field.C[address],
+    phase:field.phase[address],motion:field.motion[address],
+    symmetry:field.symmetry[address],scar:field.scar[address],
+    evidence:field.evidence[address],contradiction:field.q[address],
+    forecastModelScore:field.forecast[address]
+   }},
   authority:{
    source:'EXISTING_MANDALA20736_FIELD_AND_R734_R770_R769',
    state:'READ_ONLY_LOCAL_DERIVED',
@@ -142,4 +159,43 @@ export async function verifySourceSceneBundleR793(field,raster,bundle){
  }catch(error){
   return {ok:false,state:'REFUSED',reason:error instanceof Error?error.message:String(error),canonicalMutation:false};
  }
+}
+
+/**
+ * R794 bounded traversal of the existing source successor graph.
+ * Carries continuity, motion, symmetry and evidence together without
+ * inventing an alternative topology or modifying the source field.
+ */
+export function traceSourceContinuityR794(field,start,{maxSteps=12}={}){
+ if(!field||field.count!==N||!(field.routeNext instanceof Uint32Array)||
+    field.routeNext.length!==N||!validAddress(start)||
+    !Number.isSafeInteger(maxSteps)||maxSteps<1||maxSteps>144)
+  throw Error('R794 invalid source traversal request');
+ for(const name of ['C','motion','symmetry','scar','evidence','q','forecast']){
+  if(!(field[name] instanceof Float32Array)||field[name].length!==N)
+   throw Error('R794 missing traversal source channel: '+name);
+ }
+ if(!(field.domain instanceof Uint8Array)||field.domain.length!==N)
+  throw Error('R794 missing traversal domain');
+ const visited=new Set(),steps=[];
+ let current=start,termination='STEP_LIMIT';
+ for(let i=0;i<maxSteps;i++){
+  if(visited.has(current)){termination='CYCLE';break}
+  visited.add(current);
+  const successor=field.routeNext[current];
+  if(!validAddress(successor)||field.domain[current]>=12)
+   throw Error('R794 invalid source successor or domain');
+  const values=[field.C[current],field.C[successor],field.motion[current],
+   field.symmetry[current],field.scar[current],field.evidence[current],
+   field.q[current],field.forecast[current]];
+  if(values.some(v=>!Number.isFinite(v)))throw Error('R794 nonfinite traversal metric');
+  steps.push({address:current,successor,domain:field.domain[current],
+   continuity:values[0],continuityDelta:values[1]-values[0],
+   motion:values[2],symmetry:values[3],scar:values[4],
+   evidence:values[5],contradiction:values[6],forecastModelScore:values[7]});
+  current=successor;
+  if(visited.has(current)){termination='CYCLE';break}
+ }
+ return {start,maxSteps,steps,termination,nextAddress:current,
+  sourceBound:true,canonicalMutation:false,physicalMeasurement:false};
 }
