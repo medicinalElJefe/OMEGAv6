@@ -118,6 +118,6 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
    <button type='button' data-r769-down onClick={()=>move(1,0)}>Row ↓</button>
   </div>
   <p data-r769-selected>Selected address {address} · value {selected?.value.toFixed(6)} · successor {selected?.successor} · Δ {selected?.delta.toFixed(6)}</p>
-  <small data-r769-boundary>All {tile.sourceAddressCount.toLocaleString()} addresses remain reachable through the source raster and navigation. Zoom is a computed model projection, not physical geometry, authenticated historical renderer parity, a forecast, or CanonState mutation. Export is portable SVG only; the source field is recomputed on reload.</small>
+  <small data-r769-boundary>All {tile.sourceAddressCount.toLocaleString()} addresses remain reachable through the source raster and navigation. Zoom is a computed model projection, not physical geometry, authenticated historical renderer parity, a forecast, or CanonState mutation. SVG export and portable scene/replay JSON are computed from the current source field. Neither is a native-device, empirical, historical donor or CanonState proof; the current source field is recomputed on reload.</small>
  </section>;
 }
