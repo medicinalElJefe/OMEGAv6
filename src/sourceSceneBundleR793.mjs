@@ -6,7 +6,8 @@
  * receipt, a signature, measured physical space, historical parity or native proof.
  */
 import {buildSourceTessellationR769,serializeSourceTessellationSvgR769,SOURCE_TESSELLATION_SIZES_R769} from './sourceTessellationR769.mjs';
-import {ATLAS_FIELD_RASTER_SCHEMA_R734} from './atlasFieldRasterR734.mjs';
+import {ATLAS_FIELD_RASTER_SCHEMA_R734,ATLAS_FIELD_CHANNELS_R734,renderAtlasFieldRasterR734} from './atlasFieldRasterR734.mjs';
+import {computeSourceFieldLensR770,SOURCE_LENS_SCHEMA_R770} from './sourceFieldLensR770.mjs';
 
 export const SOURCE_SCENE_BUNDLE_SCHEMA_R793='OMEGA_SOURCE_SCENE_REPLAY_BUNDLE_R793_V1';
 const N=20736;
@@ -60,8 +61,33 @@ function validRaster(raster){
  typeof raster.channel==='string'&&raster.channel.length>0&&raster.channel.length<=128;
 }
 const validAddress=a=>Number.isSafeInteger(a)&&a>=0&&a<N;
+function sourceDescriptor(raster){
+ if(Object.hasOwn(ATLAS_FIELD_CHANNELS_R734,raster.channel))
+  return {type:'R734_SOURCE_CHANNEL',channel:raster.channel};
+ const lens=raster.lens;
+ if(lens?.schema!==SOURCE_LENS_SCHEMA_R770||
+    !Object.hasOwn(ATLAS_FIELD_CHANNELS_R734,lens.first)||
+    !Object.hasOwn(ATLAS_FIELD_CHANNELS_R734,lens.second)||
+    !Number.isSafeInteger(lens.secondWeightPercent)||lens.secondWeightPercent<0||lens.secondWeightPercent>100||
+    raster.channel!=='r770-'+lens.first+'-'+lens.second+'-'+lens.secondWeightPercent)
+   throw Error('R793 unknown or inconsistent source raster provenance');
+ return {type:'R770_WOVEN_CHANNELS',first:lens.first,second:lens.second,secondWeightPercent:lens.secondWeightPercent};
+}
+/** Derive saved lens from the active current field, not a stale UI setting or serialized metric bytes. */
+export function reconstructSceneRasterR793(field,source){
+ const d=source?.rasterDescriptor;
+ if(d?.type==='R734_SOURCE_CHANNEL'&&Object.hasOwn(ATLAS_FIELD_CHANNELS_R734,d.channel))
+  return renderAtlasFieldRasterR734(field,d.channel);
+ if(d?.type==='R770_WOVEN_CHANNELS'&&
+    Object.hasOwn(ATLAS_FIELD_CHANNELS_R734,d.first)&&
+    Object.hasOwn(ATLAS_FIELD_CHANNELS_R734,d.second)&&
+    Number.isSafeInteger(d.secondWeightPercent)&&d.secondWeightPercent>=0&&d.secondWeightPercent<=100)
+  return computeSourceFieldLensR770(field,d.first,d.second,d.secondWeightPercent);
+ throw Error('R793 unavailable or unsupported replay lens');
+}
 function requireSettings(raster,address,tileSize,showEdges){
  if(!validRaster(raster))throw Error('R793 complete source-derived raster required');
+ sourceDescriptor(raster);
  if(!validAddress(address))throw Error('R793 invalid source address');
  if(!SOURCE_TESSELLATION_SIZES_R769.includes(tileSize))throw Error('R793 unsupported tessellation size');
  if(typeof showEdges!=='boolean')throw Error('R793 invalid edge visibility');
@@ -77,6 +103,7 @@ async function derive(field,raster,address,tileSize,showEdges){
  const core={
   schema:SOURCE_SCENE_BUNDLE_SCHEMA_R793,
   source:{addressCount:N,fieldSha256:sourceStateSha256,rasterChannel:raster.channel,
+   rasterDescriptor:sourceDescriptor(raster),
    rasterValuesSha256:valuesSha256,rasterRgbaSha256:visualSha256},
   scene:{address,tileSize,showEdges,svgSha256,triangles:tile.cells.length*2,
    edges:showEdges?tile.edges.length:0,originRow:tile.originRow,originCol:tile.originCol},
@@ -103,7 +130,8 @@ export async function verifySourceSceneBundleR793(field,raster,bundle){
     typeof bundle.svg!=='string'||!/^[0-9a-f]{64}$/.test(bundle.sceneFingerprintSha256||''))
   return {ok:false,state:'REFUSED',reason:'MALFORMED_SCENE_BUNDLE',canonicalMutation:false};
  try{
-  const fresh=await derive(field,raster,bundle.scene.address,bundle.scene.tileSize,bundle.scene.showEdges);
+  const activeRaster=raster||reconstructSceneRasterR793(field,bundle.source);
+  const fresh=await derive(field,activeRaster,bundle.scene.address,bundle.scene.tileSize,bundle.scene.showEdges);
   const matches=fresh.sha256===bundle.sceneFingerprintSha256&&
    fresh.svg===bundle.svg&&JSON.stringify(fresh.core)===JSON.stringify({
     schema:bundle.schema,source:bundle.source,scene:bundle.scene,authority:bundle.authority
