@@ -71,5 +71,32 @@ for(const audited of routeLedger.routes||[]){
  assert(workspaceImportNames.includes(path.join(root,audited.workspace)),'workspace has no lazy import in native registry '+audited.route);
 }
 
+
+const dependencyLedger=JSON.parse(fs.readFileSync(path.join(root,'audit/omega7-workspace-dependencies.v1.json'),'utf8'));
+assert(dependencyLedger.schema==='OMEGA7_WORKSPACE_FIRST_HOP_DEPENDENCIES_V1','dependency graph schema mismatch');
+const workspaceSet=new Set((routeLedger.routes||[]).map(x=>x.workspace));
+const seenWorkspaces=new Set();
+for(const record of dependencyLedger.modules||[]){
+ assert(workspaceSet.has(record.workspace),'unknown workspace graph node '+record.workspace);
+ assert(!seenWorkspaces.has(record.workspace),'duplicate workspace graph node '+record.workspace);
+ seenWorkspaces.add(record.workspace);
+ const workspaceFile=path.join(root,record.workspace);
+ assert(fs.existsSync(workspaceFile),'workspace source missing '+record.workspace);
+ if(!fs.existsSync(workspaceFile))continue;
+ const source=fs.readFileSync(workspaceFile,'utf8');
+ const parsed=[...new Set([...source.matchAll(/(?:from\\s*|import\\()\\s*['"]([^'"]+)['"]/g)]
+  .map(x=>x[1]).filter(x=>x.startsWith('.')))].sort();
+ const recorded=record.dependencySpecifiers||[];
+ assert(JSON.stringify(parsed)===JSON.stringify(recorded),'workspace import drift '+record.workspace);
+ assert(record.classification==='STATIC_FIRST_HOP_IMPORTS_ONLY','dependency scope overstated '+record.workspace);
+ assert(record.runtimeProof==='NOT_ESTABLISHED_BY_IMPORT','unearned import proof '+record.workspace);
+ for(const spec of recorded){
+  const base=path.resolve(path.dirname(workspaceFile),spec);
+  const allowed=['','.ts','.tsx','.js','.jsx','.json','.mjs','.css','/index.ts','/index.tsx','/index.js'];
+  assert(allowed.some(ext=>fs.existsSync(base+ext)),'missing first-hop dependency '+record.workspace+' => '+spec);
+ }
+}
+assert(seenWorkspaces.size===workspaceSet.size,'missing workspace dependency coverage');
+
 if(errors.length){for(const error of errors)console.error('INTEGRATION AUDIT FAIL: '+error);process.exit(1)}
-console.log('INTEGRATION AUDIT STRUCTURAL PASS: '+seen.size+' mapped instruments and '+seenRoutes.size+' native routes; path existence and conservative labels only. No runtime or deployment proof claimed.');
+console.log('INTEGRATION AUDIT STRUCTURAL PASS: '+seen.size+' mapped instruments and '+seenRoutes.size+' native routes and '+seenWorkspaces.size+' dependency-mapped workspaces; path existence and conservative labels only. No runtime or deployment proof claimed.');
