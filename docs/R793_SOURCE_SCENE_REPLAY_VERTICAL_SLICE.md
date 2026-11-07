@@ -7,6 +7,8 @@ R793 adds one **portable source-scene artifact** and an **import/recompute verif
 
 `getMandala20736Field → R734/R770 raster → R769 tile → R793 scene bundle → JSON with SVG + source hashes → import against current field → strict replay check`.
 
+The imported scene automatically reconstructs its recorded R734 single-channel or R770 woven lens against the **current** source field, then restores the selected address, tile size and edge mode on the existing OMEGA7 instrument. Successful browser operations use the inherited R86 event ledger and active R87 project continuity; neither is a new authority and a browser download request is not a host-file receipt.
+
 The scene artifact contains:
 - Complete source channel fingerprint over 22 declared typed-array channels and the full 20,736 addresses. Float32 components use explicit little-endian encoding; successor and domain channels have range checks.
 - Separate hashes of the chosen source raster values, actual RGBA rendering bytes, and portable SVG bytes.
