@@ -36,7 +36,7 @@
       "source": {
         "ui": "src7/Omega7Root.tsx",
         "engine": "src7/nativeCapabilityRegistry.tsx",
-        "state": "src7/appState.ts"
+        "state": "src7/appState.tsx"
       },
       "test": {
         "path": "tests/r779-native-workspace-history-invariants.mjs",
@@ -112,7 +112,7 @@
       "source": {
         "ui": "src7/familyParityR452.ts",
         "engine": "src7/nativeCapabilityRegistry.tsx",
-        "state": "src7/appState.ts"
+        "state": "src7/appState.tsx"
       },
       "test": {
         "path": "tests/r779-native-workspace-history-invariants.mjs",
@@ -131,7 +131,7 @@
       "source": {
         "ui": "src7/familyParityR452.ts",
         "engine": "src7/nativeCapabilityRegistry.tsx",
-        "state": "src7/appState.ts"
+        "state": "src7/appState.tsx"
       },
       "test": {
         "path": "tests/r779-native-workspace-history-invariants.mjs",
