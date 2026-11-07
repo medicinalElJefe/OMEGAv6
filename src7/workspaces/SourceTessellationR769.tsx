@@ -51,6 +51,40 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
   }catch(error){setSceneProof('REFUSED · '+(error instanceof Error?error.message:String(error)))}
   finally{setSceneBusy(false)}
  };
+
+ const exportPng=async()=>{
+  setSceneBusy(true);setSceneProof('Computing and rasterizing the current Atlas source scene…');
+  let svgUrl:string|null=null;
+  try{
+   const bundle=await buildSourceSceneBundleR793(field,displayRaster,{address,tileSize,showEdges});
+   const replay=await verifySourceSceneBundleR793(field,displayRaster,bundle);
+   if(!replay.ok)throw Error('source state changed during PNG projection');
+   svgUrl=URL.createObjectURL(new Blob([bundle.svg],{type:'image/svg+xml;charset=utf-8'}));
+   const img=new Image();
+   await new Promise<void>((resolve,reject)=>{
+    img.onload=()=>resolve();
+    img.onerror=()=>reject(Error('source scene SVG could not be rasterized'));
+    img.src=svgUrl!;
+   });
+   const canvas=document.createElement('canvas'),width=tileSize*64;
+   canvas.width=width;canvas.height=width;
+   const ctx=canvas.getContext('2d');if(!ctx)throw Error('canvas renderer unavailable');
+   ctx.fillStyle='#111d2c';ctx.fillRect(0,0,width,width);
+   ctx.drawImage(img,0,0,width,width);
+   const png=await new Promise<Blob>((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(Error('PNG encoding unavailable')),'image/png'));
+   const url=URL.createObjectURL(png),a=document.createElement('a');
+   a.href=url;a.download='omega-r793-source-'+address+'-'+bundle.sceneFingerprintSha256.slice(0,12)+'.png';
+   document.body.appendChild(a);a.click();a.remove();window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+   const event=await emitOperationR86({type:'ARTIFACT_EXPORTED',surface:'OMEGA7_SOURCE_TESSELLATION_R793',
+    stateId:address+1,address,status:'PASS',
+    detail:'Browser PNG conversion requested from verified source SVG; PNG bytes not independently attested by native host.',
+    payload:{format:'PNG',sceneFingerprintSha256:bundle.sceneFingerprintSha256,sourceSvgSha256:bundle.scene.svgSha256,
+     renderer:'BROWSER_CANVAS_FROM_SOURCE_SVG',canonicalMutation:false}});
+   await recordProjectOperationR87(activeProjectIdR87()||undefined,event);
+   setSceneProof('PNG RENDERED FROM VERIFIED SOURCE SVG · '+bundle.sceneFingerprintSha256+' · browser-only');
+  }catch(error){setSceneProof('REFUSED · '+(error instanceof Error?error.message:String(error)))}
+  finally{if(svgUrl)URL.revokeObjectURL(svgUrl);setSceneBusy(false)}
+ };
  const importScene=async(file:File|undefined)=>{
   if(!file)return;
   setSceneBusy(true);setSceneProof('Verifying imported scene against the current live source…');
@@ -98,6 +132,7 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
    <label><input data-r769-edges type='checkbox' checked={showEdges} onChange={e=>setShowEdges(e.target.checked)}/> Source successor lines</label>
    <button type='button' data-r769-export onClick={download}>Export computed SVG</button>
    <button type='button' data-r793-scene-export disabled={sceneBusy} onClick={()=>void exportScene()}>Export scene + replay proof</button>
+   <button type='button' data-r793-png-export disabled={sceneBusy} onClick={()=>void exportPng()}>Render source PNG</button>
    {singleChannelOverride&&<button type='button' data-r793-reset-source onClick={()=>setSingleChannelOverride(null)}>Return to route source channel</button>}
    <label>Verify saved scene <input data-r793-scene-import type='file' accept='.json,application/json' disabled={sceneBusy} onChange={e=>{void importScene(e.target.files?.[0]);e.target.value='';}}/></label>
   </div>
