@@ -1,5 +1,6 @@
 import {useEffect,useMemo,useState} from 'react';
 import {ATLAS_FIELD_CHANNELS_R734} from '../../src/atlasFieldRasterR734.mjs';
+import {renderAtlasFieldRasterR734} from '../../src/atlasFieldRasterR734.mjs';
 import {computeSourceFieldLensR770,DEFAULT_SOURCE_LENS_R770,SOURCE_LENS_STORAGE_KEY_R770,serializeSourceLensSettingsR770,parseSourceLensSettingsR770} from '../../src/sourceFieldLensR770.mjs';
 import {buildSourceTessellationR769,navigateSourceTessellationR769,serializeSourceTessellationSvgR769,SOURCE_TESSELLATION_SIZES_R769} from '../../src/sourceTessellationR769.mjs';
 import type {Mandala20736Field} from '../../src/mandala20736Runtime';
@@ -12,14 +13,16 @@ type LensSettings={mode:'single'|'woven';first:string;second:string;weightPercen
 export default function SourceTessellationR769({field,raster,address,onAddress}:Props){
  const [tileSize,setTileSize]=useState(12),[showEdges,setShowEdges]=useState(true);
  const [sceneBusy,setSceneBusy]=useState(false),[sceneProof,setSceneProof]=useState('Not yet verified against the current source state.');
+ const [singleChannelOverride,setSingleChannelOverride]=useState<string|null>(null);
  const [lens,setLens]=useState<LensSettings>(()=>{
   try{return typeof window==='undefined'?{...DEFAULT_SOURCE_LENS_R770}:parseSourceLensSettingsR770(window.localStorage.getItem(SOURCE_LENS_STORAGE_KEY_R770)||'');}
   catch{return {...DEFAULT_SOURCE_LENS_R770};}
  });
  useEffect(()=>{try{window.localStorage.setItem(SOURCE_LENS_STORAGE_KEY_R770,serializeSourceLensSettingsR770(lens));}catch{/* private browsing or quota: source recomputation remains usable */}},[lens]);
  const displayRaster=useMemo(()=>lens.mode==='woven'?
-  computeSourceFieldLensR770(field,lens.first,lens.second,lens.weightPercent):raster,
-  [field,raster,lens]);
+  computeSourceFieldLensR770(field,lens.first,lens.second,lens.weightPercent):
+  (singleChannelOverride?renderAtlasFieldRasterR734(field,singleChannelOverride):raster),
+  [field,raster,lens,singleChannelOverride]);
  const tile=useMemo(()=>buildSourceTessellationR769(field,displayRaster,address,tileSize),[field,displayRaster,address,tileSize]);
  const selected=tile.cells.find((c:any)=>c.address===address);
  const move=(dy:number,dx:number)=>onAddress(navigateSourceTessellationR769(address,dy,dx));
@@ -56,8 +59,18 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
    const bundle=JSON.parse(await file.text());
    const replay=await verifySourceSceneBundleR793(field,null,bundle);
    if(!replay.ok)throw Error(replay.reason||'scene not reproducible');
+   const saved=bundle.source.rasterDescriptor;
+   if(saved.type==='R770_WOVEN_CHANNELS'){
+    setSingleChannelOverride(null);
+    setLens({mode:'woven',first:saved.first,second:saved.second,weightPercent:saved.secondWeightPercent});
+   }else{
+    setSingleChannelOverride(saved.channel);
+    setLens(current=>({...current,mode:'single'}));
+   }
+   setTileSize(bundle.scene.tileSize);setShowEdges(bundle.scene.showEdges);
+   onAddress(bundle.scene.address);
    const event=await emitOperationR86({type:'ANALYSIS_COMPLETED',surface:'OMEGA7_SOURCE_TESSELLATION_R793',
-    stateId:address+1,address,status:'PASS',
+    stateId:bundle.scene.address+1,address:bundle.scene.address,status:'PASS',
     detail:'Imported scene recomputed against local source state. External witness and Canon admission not established.',
     payload:{sceneFingerprintSha256:bundle.sceneFingerprintSha256,truthClass:'LOCAL_RECOMPUTED_SCENE',canonicalMutation:false}});
    await recordProjectOperationR87(activeProjectIdR87()||undefined,event);
@@ -76,7 +89,7 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
    <label>Second source <select data-r770-second value={lens.second} onChange={e=>setLens({...lens,second:e.target.value})}>{Object.entries(ATLAS_FIELD_CHANNELS_R734).map(([key,label])=><option key={key} value={key}>{label}</option>)}</select></label>
    <label>Second-source weight <input data-r770-weight type='range' min='0' max='100' step='5' value={lens.weightPercent} onChange={e=>setLens({...lens,weightPercent:Number(e.target.value)})}/>{lens.weightPercent}%</label>
   </div>}
-  <p data-r770-summary role='status'>{lens.mode==='woven'?('Computed lens: '+(100-lens.weightPercent)+'% '+ATLAS_FIELD_CHANNELS_R734[lens.first]+' + '+lens.weightPercent+'% '+ATLAS_FIELD_CHANNELS_R734[lens.second]+' · '+displayRaster.values.length.toLocaleString()+' source addresses'):'Single source-channel projection (R769)'}</p>
+  <p data-r770-summary role='status'>{lens.mode==='woven'?('Computed lens: '+(100-lens.weightPercent)+'% '+ATLAS_FIELD_CHANNELS_R734[lens.first]+' + '+lens.weightPercent+'% '+ATLAS_FIELD_CHANNELS_R734[lens.second]+' · '+displayRaster.values.length.toLocaleString()+' source addresses'):('Single source-channel projection (R769)'+(singleChannelOverride?' · imported channel '+singleChannelOverride:''))}</p>
   <small data-r770-boundary>Woven lens normalizes each existing source channel independently and blends by the selected weights. Saved settings restore only this browser view; source metrics are recomputed. This is model-space color geometry, not an observed field, empirical forecast, donor renderer, or physical dimensions.</small>
   <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
    <label>Tile width <select data-r769-zoom value={tileSize} onChange={e=>setTileSize(Number(e.target.value))}>
@@ -85,6 +98,7 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
    <label><input data-r769-edges type='checkbox' checked={showEdges} onChange={e=>setShowEdges(e.target.checked)}/> Source successor lines</label>
    <button type='button' data-r769-export onClick={download}>Export computed SVG</button>
    <button type='button' data-r793-scene-export disabled={sceneBusy} onClick={()=>void exportScene()}>Export scene + replay proof</button>
+   {singleChannelOverride&&<button type='button' data-r793-reset-source onClick={()=>setSingleChannelOverride(null)}>Return to route source channel</button>}
    <label>Verify saved scene <input data-r793-scene-import type='file' accept='.json,application/json' disabled={sceneBusy} onChange={e=>{void importScene(e.target.files?.[0]);e.target.value='';}}/></label>
   </div>
   <p data-r793-scene-status role='status' aria-live='polite'>{sceneProof}</p>
