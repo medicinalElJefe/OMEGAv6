@@ -53,6 +53,6 @@ assert.rejects(()=>buildSourceSceneBundleR793({...field,routeNext:new Uint32Arra
 assert.deepEqual(field.C,sourceBefore);
 assert.deepEqual(field.routeNext,nextBefore);
 const ui=readFileSync(new URL('../src7/workspaces/SourceTessellationR769.tsx',import.meta.url),'utf8');
-for(const marker of ['buildSourceSceneBundleR793','verifySourceSceneBundleR793','data-r793-scene-export','data-r793-scene-import','data-r793-scene-status','data-r793-truth-boundary'])
+for(const marker of ['buildSourceSceneBundleR793','verifySourceSceneBundleR793','data-r793-scene-export','data-r793-scene-import','data-r793-scene-status','data-r793-truth-boundary','emitOperationR86','activeProjectIdR87','recordProjectOperationR87'])
  assert.ok(ui.includes(marker),'R793 user-facing source scene control missing: '+marker);
 console.log('R793 PASS · 20,736 source-state channel fingerprint, two-channel lens, portable rendered scene, deterministic replay, tamper refusal, no Canon or native proof upgrade');
