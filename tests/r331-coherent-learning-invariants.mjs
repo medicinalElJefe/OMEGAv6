@@ -4,7 +4,24 @@ import {
  buildCommunicationContextR331,compileConversationMemoryR331,compileLearningMemoryR331,
  compileTrainingBatchR331,coherenceVectorR331,intelligenceManifestR331,selectMemoryR331
 } from '../src/system/coherentLearningR331.js';
-import {runtimeLearningR331} from '../src/system/coherentLearningWorkerR331.js';
+import {runtimeLearningR331,sessionR331,publicLearningR331} from '../src/system/coherentLearningWorkerR331.js';
+
+// A long attacker-controlled identifier must never alias a valid Durable Object session.
+const sessionRequestR331=id=>new Request('https://omega.example/api/intelligence/r331/memory',{headers:{'x-omega-session-id':id}});
+const validSessionR331='session-12345678';
+assert.equal(sessionR331(sessionRequestR331(validSessionR331)),validSessionR331);
+assert.equal(sessionR331(sessionRequestR331('x'.repeat(160))),'x'.repeat(160));
+assert.equal(sessionR331(sessionRequestR331('x'.repeat(161))),'','overlength identifiers must be rejected, never truncated');
+assert.equal(sessionR331(sessionRequestR331('x'.repeat(160)+'evil')),'','distinct long identifiers must not resolve to a shared prefix');
+assert.equal(sessionR331(sessionRequestR331('short')),'');
+assert.equal(sessionR331(sessionRequestR331('session!invalid')),'');
+let runtimeTouchedR331=false;
+const invalidSessionResponseR331=await publicLearningR331(sessionRequestR331('x'.repeat(160)+'evil'),{
+ OMEGA_RUNTIME:{idFromName(){runtimeTouchedR331=true;throw Error('must not select a durable object')},get(){runtimeTouchedR331=true;throw Error('must not open a durable object')}}
+},async()=>{throw Error('must not delegate a protected memory route')});
+assert.equal(invalidSessionResponseR331.status,400);
+assert.equal((await invalidSessionResponseR331.json()).code,'R331_SESSION_REQUIRED');
+assert.equal(runtimeTouchedR331,false,'invalid identifier must not access durable storage');
 
 const user=compileConversationMemoryR331({role:'USER',text:'I prefer concise answers that preserve the proof boundary.',at:'2026-09-19T21:00:00Z'});
 const model=compileConversationMemoryR331({role:'ASSISTANT',text:'Model-generated interpretation.',provider:'WORKERS_AI',evidenceStatus:'MODEL_SYNTHESIS',at:'2026-09-19T21:00:01Z'});

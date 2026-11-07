@@ -6,7 +6,7 @@ import {
 
 const cleanR331=v=>String(v??'').trim();
 const jsonR331=(data,status=200)=>new Response(JSON.stringify(data,null,2),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-omega-intelligence-revision':R331_INTELLIGENCE_REVISION}});
-const sessionR331=request=>{const id=cleanR331(request.headers.get('x-omega-session-id')).slice(0,160);return /^[A-Za-z0-9._:-]{8,160}$/.test(id)?id:''};
+export const sessionR331=request=>{const id=cleanR331(request.headers.get('x-omega-session-id'));return /^[A-Za-z0-9._:-]{8,160}$/.test(id)?id:''};
 async function sha256R331(value){const bytes=new TextEncoder().encode(typeof value==='string'?value:JSON.stringify(value));const digest=await crypto.subtle.digest('SHA-256',bytes);return [...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('')}
 async function appendLedgerR331(runtime,type,payload){
  const rows=await runtime.get('intelligenceLedgerR331',[]),prior=Array.isArray(rows)?rows:[],previousHash=prior.at(-1)?.eventHash||null;
