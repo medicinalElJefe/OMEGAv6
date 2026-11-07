@@ -16,7 +16,8 @@ Build one progressively integrated OMEGA7 system from demonstrably executable co
 ## R791 route census and executable audit gate
 - `audit/omega7-route-evidence.v1.json` maps all **44** declared OMEGA7 native routes to the **8** declared family owners and their actual lazy-loaded workspace modules. This is a complete census of the native route **registry**, not complete dependency analysis, proof of feature behavior or donor parity.
 - `scripts/validate_integration_evidence_baseline.mjs` checks unique routes and family ownership against source registries, validates workspace lazy-import paths and audited source/test path existence, and refuses unearned route/production claims.
-- `npm run test:integration-audit` is now the first step of `npm run check:static`; future registered routes or changed module paths must update the evidence baseline or fail CI. These tests are structural, not live production proof.
+- `audit/omega7-workspace-dependencies.v1.json` captures **83 direct relative imports** across all eight native workspace implementations. The validator refuses an absent import target or drift between a workspace's current imports and the audited graph; deeper transitive dependencies and actual runtime behavior are explicitly unproved.
+- `npm run test:integration-audit` is now the first step of `npm run check:static`; future registered routes, changed module paths or direct dependency changes must update the evidence baseline or fail CI. These tests are structural, not live production proof.
 
 ## Confirmed architectural anchor points
 - `src7/Omega7Root.tsx` connects route selection to the OMEGA7 state provider and native workspace registry. `src7/familyParityR452.ts` declares **8** current family contracts and checks inherited route coverage, not execution of each route.
@@ -31,7 +32,7 @@ Build one progressively integrated OMEGA7 system from demonstrably executable co
 The R790 source merge is `287a6238a820a2b3b85de2f7c9f592e2ac9da3db`. The R789 release record states success for production run `42144657822` and Worker `5f29b1b6-4704-4b2e-8306-67ebab8ebcaf`. **R790 exact-SHA production is verified** in [push #42233127818](https://github.com/medicinalElJefe/OMEGAv6/actions/runs/42233127818): source/deploy/main, R223, governed continuation successful; Worker `eec94279-092e-4a3c-b97e-e95b38c5ce30` at 100%; R284/R370/R372 live Earth/SAR desktop/mobile PASS; R237/R238 cloud authority PASS; rollback eligible. Authenticated public devices remained zero and native Windows/GPU host proof is NOT established.
 
 ## Next integration gates (not yet completed)
-1. Expand the 44-route/8-family registry census to route-specific executor→state→tests dependency edges, including dynamic and indirect imports; flag missing or circular paths.
+1. Extend the 44-route/8-family/83-direct-import census into route-specific executor→state→tests dependency edges, including transitive imports, runtime service calls and cycles; flag missing or circular paths.
 2. Validate `npm run test:integration-audit` through mandatory exact-head CI. The validator is wired into `check:static` but does not alone claim actual CI success.
 3. Run complete source tests and browser journey tests across family transitions, shared Canon address, recovery and export, including failures.
 4. Preserve the recovered R790 exact SHA, Worker, live Earth/SAR and R223 receipts; require a fresh, independent exact-SHA R791 production closure after merge.
