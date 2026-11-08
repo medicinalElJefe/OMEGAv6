@@ -60,12 +60,15 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
       !Number.isSafeInteger(saved.address)||saved.address<0||saved.address>=20736||
       !SOURCE_TESSELLATION_SIZES_R769.includes(saved.tileSize)||
       typeof saved.showEdges!=='boolean'||
-      !['single','woven'].includes(saved.lens?.mode)||
+      !saved.lens||typeof saved.lens!=='object'||Array.isArray(saved.lens)||
+      !['single','woven'].includes(saved.lens.mode)||
       !Object.hasOwn(ATLAS_FIELD_CHANNELS_R734,saved.lens.first)||
       !Object.hasOwn(ATLAS_FIELD_CHANNELS_R734,saved.lens.second)||
       !Number.isSafeInteger(saved.lens.weightPercent)||
       saved.lens.weightPercent<0||saved.lens.weightPercent>100||
-      (saved.channelOverride!==null&&!Object.hasOwn(ATLAS_FIELD_CHANNELS_R734,saved.channelOverride)))
+      !Object.hasOwn(saved,'channelOverride')||
+      (saved.channelOverride!==null&&(typeof saved.channelOverride!=='string'||
+       !Object.hasOwn(ATLAS_FIELD_CHANNELS_R734,saved.channelOverride)))))
     throw Error('invalid or incompatible workspace checkpoint');
    setTileSize(saved.tileSize);setShowEdges(saved.showEdges);
    setLens({mode:saved.lens.mode,first:saved.lens.first,
