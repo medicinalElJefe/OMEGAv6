@@ -1,4 +1,4 @@
-import {useMemo,useState} from 'react';
+import {useEffect,useMemo,useRef,useState} from 'react';
 import {ArrowRight,CheckCircle2,GitBranch,Route,ShieldCheck,TriangleAlert} from 'lucide-react';
 import {api} from './platformAdapter';
 import {appendSaiLedger,compileSaiImprovementProposal} from './saiB059Runtime';
@@ -10,30 +10,36 @@ export default function SaiHybridHandoffPanelR1961({record,modeSummary}:{record:
  const proposal=useMemo(()=>compileSaiImprovementProposal(record,modeSummary),[record,modeSummary.appliedCount,modeSummary.gatedCount,modeSummary.catalogCount]);
  const handoff=useMemo(()=>compileSaiHybridHandoffR1961(proposal),[proposal]);
  const[draft,setDraft]=useState<any>(null),[validation,setValidation]=useState<any>(null),[lineage,setLineage]=useState<any>(null),[busy,setBusy]=useState(''),[error,setError]=useState('');
+ const generation=useRef(0);
+ const activeProposal=useRef(handoff.proposalId);
+ useEffect(()=>{if(activeProposal.current!==handoff.proposalId){activeProposal.current=handoff.proposalId;generation.current++;setDraft(null);setValidation(null);setLineage(null);setBusy('');setError('')}return()=>{generation.current++}},[handoff.proposalId]);
  const proof=useMemo(()=>draft?verifyHybridDraftForSaiR1961(handoff,draft,validation):null,[handoff,draft,validation]);
  const prepare=async()=>{
-  if(busy)return;setBusy('prepare');setError('');setValidation(null);setLineage(null);
+  if(busy)return;const request=++generation.current,proposalId=handoff.proposalId;setDraft(null);setBusy('prepare');setError('');setValidation(null);setLineage(null);
   try{
    const r=await api.post<any>('/api/hybrid/plan',{prompt:handoff.prompt,root:handoff.root});
+   if(request!==generation.current||proposalId!==activeProposal.current)return;
    const next=r.data?.draft||null;
    const held=verifyHybridDraftForSaiR1961(handoff,next);
    if(!held.passed)throw new Error(`Hybrid draft violated R196.1 hold boundary: ${held.errors.join(', ')}`);
    setDraft(next);
    await appendSaiLedger('R196_1_HYBRID_DRAFT_PREPARED',{proposalId:handoff.proposalId,draftFingerprint:next?.fingerprint??null,state:next?.state,confirmed:next?.confirmed,deviceId:next?.deviceId,operationCount:next?.operations?.length||0,queueMutation:false,executionClaimed:false});
-  }catch(e){setError(e instanceof Error?e.message:String(e))}finally{setBusy('')}
+  }catch(e){if(request===generation.current)setError(e instanceof Error?e.message:String(e))}finally{if(request===generation.current)setBusy('')}
  };
  const validate=async()=>{
-  if(!draft||busy)return;setBusy('validate');setError('');
+  if(!draft||busy)return;const request=++generation.current,proposalId=handoff.proposalId;setBusy('validate');setError('');
   try{
    const r=await api.post<any>('/api/hybrid/validate',{plan:draft}),next=r.data;
+   if(request!==generation.current||proposalId!==activeProposal.current)return;
    const checked=verifyHybridDraftForSaiR1961(handoff,draft,next);
    setValidation(next);
    await appendSaiLedger('R196_1_HYBRID_DRAFT_VALIDATED',{proposalId:handoff.proposalId,draftFingerprint:draft?.fingerprint??null,valid:next?.valid===true,proof:checked});
    if(!checked.passed)throw new Error(`Hybrid validation did not satisfy R196.1: ${checked.errors.join(', ')}`);
    const correlated=await compileSaiHybridLineageR209({proposalId:handoff.proposalId,stateId:handoff.stateId,address:handoff.address,draft,validation:next,evidenceRefs:[]});
+   if(request!==generation.current||proposalId!==activeProposal.current)return;
    publishPendingLineageR209(correlated);setLineage(correlated);
    await appendSaiLedger('R209_LINEAGE_HELD_FOR_OPERATOR_IMPORT',{lineageId:correlated.lineageId,ancestrySha256:correlated.ancestrySha256,proposalId:correlated.proposalId,draftFingerprint:correlated.draftFingerprint,state:correlated.validationState,operatorImportRequired:true,queueMutation:false,dispatchMutation:false,executionClaimed:false,canonicalMutation:false,canonicalAdmissionAuthority:'R125'});
-  }catch(e){setError(e instanceof Error?e.message:String(e))}finally{setBusy('')}
+  }catch(e){if(request===generation.current)setError(e instanceof Error?e.message:String(e))}finally{if(request===generation.current)setBusy('')}
  };
  return <section className='sai-r1961' data-sai-hybrid-handoff='R196.1' data-r209-lineage={lineage?.lineageId||'NONE'} data-queue-mutation='false'>
   <header><div><span>R196.1 → R209 · SAI → HYBRID GOVERNED HANDOFF</span><h3>Proposal becomes a typed draft—not a hidden action.</h3><p>B059 diagnoses and proposes. R196.1 translates that exact proposal into the existing V90 Hybrid planning contract. R209 binds the validated held draft to a SHA-256 ancestry envelope for explicit operator import. Neither layer confirms, binds a device, queues, dispatches or executes native work.</p></div><ShieldCheck/></header>
