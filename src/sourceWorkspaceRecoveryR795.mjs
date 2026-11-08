@@ -22,3 +22,9 @@ export function parseSourceWorkspaceR795(raw,channels,sizes){
   lens:{mode:saved.lens.mode,first:saved.lens.first,second:saved.lens.second,
    weightPercent:saved.lens.weightPercent},channelOverride:saved.channelOverride};
 }
+
+/** Capture a project boundary before asynchronous I/O and refuse cross-project application. */
+export function assertSourceWorkspaceProjectR795(startingProject,currentProject){
+ if(startingProject!==currentProject)throw Error('active project changed during import');
+ return true;
+}
