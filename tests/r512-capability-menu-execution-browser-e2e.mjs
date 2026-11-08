@@ -94,12 +94,9 @@ async function prove(browser,label,viewport){
 
  // R806: Create exposes the real inherited SOMA executor without starting audio on navigation.
  await nav.getByRole('button',{name:/Create/i}).click();
- const createLaunch=page.locator('[data-r519-direct="Create"]');
- if(await createLaunch.count())await createLaunch.first().click();
- else{
-  const createAction=page.locator('.o7-r519-portal button').filter({hasText:/Create/}).first();
-  await createAction.click();
- }
+ const createAction=page.locator('.o7-quick-menu button').filter({hasText:/Create/}).first();
+ if(await createAction.count())await createAction.click();
+ else await page.locator('.o7-capability-grid-r512 button').filter({hasText:/Create/}).first().click();
  await page.waitForFunction(()=>document.querySelector('.o7-main')?.getAttribute('data-native-route')==='Create',null,{timeout:20000});
  const temple=page.locator('[data-r805-create-sound-temple="true"]');
  await temple.waitFor({state:'visible',timeout:20000});
