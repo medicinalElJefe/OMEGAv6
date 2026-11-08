@@ -207,10 +207,14 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
     stateId:bundle.scene.address+1,address:bundle.scene.address,status:'PASS',
     detail:'Imported scene recomputed against local source state. External witness and Canon admission not established.',
     payload:{sceneFingerprintSha256:bundle.sceneFingerprintSha256,truthClass:'LOCAL_RECOMPUTED_SCENE',canonicalMutation:false}});
-   await recordProjectOperationR87(activeProjectIdR87()||undefined,event);
+   importGate.current.assertCurrent(request);
+   assertSourceWorkspaceProjectR795(startingProject,activeProjectIdR87());
+   await recordProjectOperationR87(startingProject||undefined,event);
+   importGate.current.assertCurrent(request);
+   assertSourceWorkspaceProjectR795(startingProject,activeProjectIdR87());
    setSceneProof('IMPORTED SCENE MATCH · '+bundle.sceneFingerprintSha256+' · local recomputation only');
   }catch(error){if(importGate.current.isCurrent(request))setSceneProof('REFUSED · '+(error instanceof Error?error.message:String(error)))}
-  finally{setSceneBusy(false)}
+  finally{if(importGate.current.isCurrent(request))setSceneBusy(false)}
  };
  return <section data-r769-tessellation='source-field' aria-label='Source field multiscale tessellation' style={{margin:'12px 0',padding:10,border:'1px solid #617987',borderRadius:8,maxWidth:580}}>
   <h4>R769 · Source-field multiscale tessellation</h4>
