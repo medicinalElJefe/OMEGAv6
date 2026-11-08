@@ -5,6 +5,7 @@ import {computeSourceFieldLensR770,DEFAULT_SOURCE_LENS_R770,SOURCE_LENS_STORAGE_
 import {buildSourceTessellationR769,navigateSourceTessellationR769,serializeSourceTessellationSvgR769,SOURCE_TESSELLATION_SIZES_R769} from '../../src/sourceTessellationR769.mjs';
 import type {Mandala20736Field} from '../../src/mandala20736Runtime';
 import {buildSourceSceneBundleR793,verifySourceSceneBundleR793,traceSourceContinuityR794} from '../../src/sourceSceneBundleR793.mjs';
+import {sourceTraversalCsvR796} from '../../src/sourceTraversalCsvR796.mjs';
 import {parseSourceWorkspaceR795,assertSourceWorkspaceProjectR795,createSourceWorkspaceImportGateR795} from '../../src/sourceWorkspaceRecoveryR795.mjs';
 import {emitOperationR86} from '../../src/omegaOperationBusR86';
 import {activeProjectIdR87,recordProjectOperationR87} from '../../src/omegaProjectContinuityR87';
@@ -108,6 +109,15 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
    setSingleChannelOverride(saved.channelOverride);onAddress(saved.address);
    setRecoveryStatus('Portable settings imported · live source and traversal recomputed; Save to retain locally.');
   }catch(error){if(importGate.current.isCurrent(request))setRecoveryStatus('IMPORT REFUSED · '+String(error))}
+ };
+ const exportTraversalCsv=()=>{
+  try{
+   const csv=sourceTraversalCsvR796(trace);
+   const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+   const a=document.createElement('a');a.href=url;a.download='omega-source-traversal-'+address+'.csv';
+   document.body.appendChild(a);a.click();a.remove();window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+   setRecoveryStatus('Source traversal CSV export requested · '+trace.steps.length+' actual steps; browser download not independently attested.');
+  }catch(error){setRecoveryStatus('TRAVERSAL EXPORT REFUSED · '+String(error))}
  };
  const move=(dy:number,dx:number)=>onAddress(navigateSourceTessellationR769(address,dy,dx));
  const download=()=>{
@@ -250,6 +260,7 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
    <button type='button' data-r794-follow-successor onClick={()=>onAddress(relation.successor)} disabled={relation.successor===address}>Follow declared source successor</button>
    <details data-r794-traversal>
     <summary>Trace source continuity · {trace.steps.length} steps · {trace.termination}</summary>
+    <button type='button' data-r796-traversal-csv onClick={exportTraversalCsv}>Export actual traversal CSV</button>
     <ol style={{maxHeight:220,overflowY:'auto',paddingLeft:24}}>
      {trace.steps.map(step=><li key={step.address}>
       <button type='button' data-r794-trace-address={step.address} onClick={()=>onAddress(step.address)}>
