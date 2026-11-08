@@ -89,3 +89,9 @@ const weatherUi=readFileSync(new URL('../src/WeatherObservationStudioR563.tsx',i
 assert.ok(weatherUi.includes('data-r798-tucson-weather'));
 assert.ok(weatherUi.includes('setTarget({lat:32.2226,lon:-110.9747})'));
 assert.ok(weatherUi.includes('<WeatherRadarMapR580 lat={target.lat} lon={target.lon}/>'));
+
+// R799: weather geocoding must refuse superseded responses and invalid coordinates.
+assert.ok(weatherUi.includes('generation!==geocodeGeneration.current'));
+assert.ok(weatherUi.includes('generation===geocodeGeneration.current'));
+assert.ok(weatherUi.includes('cancelGeocode();setTarget({lat:32.2226,lon:-110.9747})'));
+assert.ok(weatherUi.includes('Math.abs(Number(x.lat))<=90&&Math.abs(Number(x.lon))<=180'));
