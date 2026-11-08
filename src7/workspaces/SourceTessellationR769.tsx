@@ -54,6 +54,13 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
    setRecoveryStatus('Saved local workspace settings; no source values or Canon state stored.');
   }catch(error){setRecoveryStatus('SAVE REFUSED · '+String(error))}
  };
+ const clearWorkspace=()=>{
+  try{
+   // Remove only the active project's checkpoint, never its source or other projects' data.
+   window.localStorage.removeItem(workspaceKey());
+   setRecoveryStatus('Active project checkpoint cleared · current live workspace unchanged.');
+  }catch(error){setRecoveryStatus('CLEAR REFUSED · '+String(error))}
+ };
  const restoreWorkspace=()=>{
   try{
    const raw=window.localStorage.getItem(workspaceKey());
@@ -216,6 +223,7 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
   <div data-r795-workspace-recovery style={{display:'flex',flexWrap:'wrap',gap:8,alignItems:'center'}}>
    <button type='button' data-r795-save-workspace onClick={saveWorkspace}>Save local workspace</button>
    <button type='button' data-r795-restore-workspace onClick={restoreWorkspace}>Restore local workspace</button>
+   <button type='button' data-r795-clear-workspace onClick={clearWorkspace}>Clear saved checkpoint</button>
    <button type='button' data-r795-export-workspace onClick={exportWorkspace}>Export portable settings</button>
    <label>Import portable settings <input data-r795-import-workspace type='file' accept='.json,application/json' onChange={e=>{void importWorkspace(e.target.files?.[0]);e.target.value='';}}/></label>
    <span data-r795-recovery-status role='status' aria-live='polite'>{recoveryStatus}</span>
