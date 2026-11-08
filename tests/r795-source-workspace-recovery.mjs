@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {parseSourceWorkspaceR795,assertSourceWorkspaceProjectR795} from '../src/sourceWorkspaceRecoveryR795.mjs';
+import {parseSourceWorkspaceR795,assertSourceWorkspaceProjectR795,createSourceWorkspaceImportGateR795} from '../src/sourceWorkspaceRecoveryR795.mjs';
 import {ATLAS_FIELD_CHANNELS_R734} from '../src/atlasFieldRasterR734.mjs';
 import {SOURCE_TESSELLATION_SIZES_R769} from '../src/sourceTessellationR769.mjs';
 const parse=raw=>parseSourceWorkspaceR795(raw,ATLAS_FIELD_CHANNELS_R734,SOURCE_TESSELLATION_SIZES_R769);
@@ -36,9 +36,9 @@ for(const marker of ['data-r795-export-workspace','data-r795-import-workspace',
  'parseSourceWorkspaceR795(raw,ATLAS_FIELD_CHANNELS_R734,SOURCE_TESSELLATION_SIZES_R769)',
  'if(file.size>8192)','onAddress(saved.address)',
  'const startingProject=activeProjectIdR87()',
- 'const request=++importSequence.current',
- "if(request!==importSequence.current)throw Error('superseded workspace import')",
- "if(request===importSequence.current)setRecoveryStatus('IMPORT REFUSED",
+ 'const request=importGate.current.begin()',
+ 'importGate.current.assertCurrent(request)',
+ "if(importGate.current.isCurrent(request))setRecoveryStatus('IMPORT REFUSED",
  'assertSourceWorkspaceProjectR795(startingProject,activeProjectIdR87())',
  'source values excluded','Save to retain locally'])
  assert.ok(ui.includes(marker),'portable workspace control absent: '+marker);
@@ -49,3 +49,28 @@ assert.equal(assertSourceWorkspaceProjectR795(null,null),true);
 assert.throws(()=>assertSourceWorkspaceProjectR795('project-A','project-B'),/active project changed/);
 assert.throws(()=>assertSourceWorkspaceProjectR795(null,'project-A'),/active project changed/);
 console.log('R795 PASS · executable workspace checkpoint validation and refusal; browser interaction unproved');
+
+const gate=createSourceWorkspaceImportGateR795();
+const first=gate.begin();
+assert.equal(gate.isCurrent(first),true);
+const second=gate.begin();
+assert.equal(gate.isCurrent(first),false);
+assert.throws(()=>gate.assertCurrent(first),/superseded/);
+assert.equal(gate.assertCurrent(second),true);
+gate.cancel();
+assert.equal(gate.isCurrent(second),false);
+assert.throws(()=>gate.assertCurrent(second),/superseded/);
+// Simulate out-of-order file reads: only the most recently requested payload is admitted.
+const asyncGate=createSourceWorkspaceImportGateR795();
+let resolveOld,resolveNew;
+const oldRead=new Promise(resolve=>{resolveOld=resolve});
+const newRead=new Promise(resolve=>{resolveNew=resolve});
+const applied=[];
+async function simulateImport(read){const token=asyncGate.begin();const raw=await read;asyncGate.assertCurrent(token);applied.push(parse(raw).address)}
+const old=simulateImport(oldRead).catch(e=>e.message);
+const newer=simulateImport(newRead);
+resolveNew(JSON.stringify({...base,address:17}));
+await newer;
+resolveOld(JSON.stringify({...base,address:42}));
+assert.match(await old,/superseded/);
+assert.deepEqual(applied,[17]);
