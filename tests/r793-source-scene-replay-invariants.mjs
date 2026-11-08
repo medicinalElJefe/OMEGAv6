@@ -96,4 +96,22 @@ for(const marker of ['data-r794-traversal','data-r794-trace-address','traceSourc
 for(const marker of ['setTileSize(bundle.scene.tileSize)','setShowEdges(bundle.scene.showEdges)','onAddress(bundle.scene.address)','setSingleChannelOverride(saved.channel)','data-r793-reset-source'])assert.ok(ui.includes(marker),'import recovery action must be operational: '+marker);
 for(const marker of ['buildSourceSceneBundleR793','verifySourceSceneBundleR793','data-r793-scene-export','data-r793-scene-import','data-r793-png-export','BROWSER_CANVAS_FROM_SOURCE_SVG','data-r793-scene-status','data-r793-truth-boundary','emitOperationR86','activeProjectIdR87','recordProjectOperationR87'])
  assert.ok(ui.includes(marker),'R793 user-facing source scene control missing: '+marker);
+for(const marker of ['data-r795-workspace-recovery','data-r795-save-workspace','data-r795-restore-workspace','data-r795-recovery-status','OMEGA_SOURCE_WORKSPACE_R795_V1','onAddress(saved.address)','SETTINGS_ONLY_RECOMPUTE_ON_RESTORE','activeProjectIdR87()','encodeURIComponent(project)','window.localStorage.setItem(workspaceKey()','window.localStorage.getItem(workspaceKey()','parseSourceWorkspaceR795(raw,ATLAS_FIELD_CHANNELS_R734,SOURCE_TESSELLATION_SIZES_R769)'])
+ assert.ok(ui.includes(marker),'R795 workspace recovery binding missing: '+marker);
+const {parseSourceWorkspaceR795}=await import('../src/sourceWorkspaceRecoveryR795.mjs');
+const channels={C:true,q:true},sizes=[6,12],checkpoint={schema:'OMEGA_SOURCE_WORKSPACE_R795_V1',address:11498,tileSize:12,showEdges:true,lens:{mode:'woven',first:'C',second:'q',weightPercent:37},channelOverride:null,sourceAuthority:'SETTINGS_ONLY_RECOMPUTE_ON_RESTORE'};
+const parse=v=>parseSourceWorkspaceR795(JSON.stringify(v),channels,sizes);
+assert.equal(parse(checkpoint).address,11498);
+assert.deepEqual(parse(checkpoint).lens,checkpoint.lens);
+for(const invalid of [
+ {...checkpoint,address:20736},{...checkpoint,tileSize:7},
+ {...checkpoint,lens:null},{...checkpoint,lens:{...checkpoint.lens,first:'FAKE'}},
+ {...checkpoint,lens:{...checkpoint.lens,weightPercent:101}},
+ {...checkpoint,channelOverride:'FAKE'},
+ {...checkpoint,sourceAuthority:'CANON_MUTATED'},
+ (()=>{const x={...checkpoint};delete x.channelOverride;return x})()
+])assert.throws(()=>parse(invalid),/invalid or incompatible/);
+assert.throws(()=>parseSourceWorkspaceR795('{',channels,sizes),/invalid checkpoint JSON/);
+assert.throws(()=>parseSourceWorkspaceR795(' '.repeat(8193),channels,sizes),/invalid checkpoint payload/);
+assert.ok(ui.includes('parseSourceWorkspaceR795(serialized,ATLAS_FIELD_CHANNELS_R734,SOURCE_TESSELLATION_SIZES_R769)'), 'R795 save must refuse invalid settings before persistence');
 console.log('R793 PASS · 20,736 source-state channel fingerprint, two-channel lens, portable rendered scene, deterministic replay, tamper refusal, no Canon or native proof upgrade');

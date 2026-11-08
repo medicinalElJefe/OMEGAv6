@@ -1,10 +1,12 @@
-import {useEffect,useMemo,useState} from 'react';
+import {useEffect,useMemo,useRef,useState} from 'react';
 import {ATLAS_FIELD_CHANNELS_R734} from '../../src/atlasFieldRasterR734.mjs';
 import {renderAtlasFieldRasterR734} from '../../src/atlasFieldRasterR734.mjs';
 import {computeSourceFieldLensR770,DEFAULT_SOURCE_LENS_R770,SOURCE_LENS_STORAGE_KEY_R770,serializeSourceLensSettingsR770,parseSourceLensSettingsR770} from '../../src/sourceFieldLensR770.mjs';
 import {buildSourceTessellationR769,navigateSourceTessellationR769,serializeSourceTessellationSvgR769,SOURCE_TESSELLATION_SIZES_R769} from '../../src/sourceTessellationR769.mjs';
 import type {Mandala20736Field} from '../../src/mandala20736Runtime';
 import {buildSourceSceneBundleR793,verifySourceSceneBundleR793,traceSourceContinuityR794} from '../../src/sourceSceneBundleR793.mjs';
+import {sourceTraversalCsvR796} from '../../src/sourceTraversalCsvR796.mjs';
+import {parseSourceWorkspaceR795,assertSourceWorkspaceProjectR795,createSourceWorkspaceImportGateR795} from '../../src/sourceWorkspaceRecoveryR795.mjs';
 import {emitOperationR86} from '../../src/omegaOperationBusR86';
 import {activeProjectIdR87,recordProjectOperationR87} from '../../src/omegaProjectContinuityR87';
 type Props={field:Mandala20736Field;raster:any;address:number;onAddress:(address:number)=>void};
@@ -37,6 +39,86 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
   return {successor,domain:field.domain[address],delta:field.C[successor]-field.C[address],channels};
  },[field,address]);
  const trace=useMemo(()=>traceSourceContinuityR794(field,address,{maxSteps:12}),[field,address]);
+ const [recoveryStatus,setRecoveryStatus]=useState('No workspace checkpoint restored.');
+ const workspaceKey=()=>{
+  const project=activeProjectIdR87();
+  return 'omega.r795.sourceWorkspace.'+(project?encodeURIComponent(project):'unassigned');
+ };
+ const saveWorkspace=()=>{
+  try{
+   const checkpoint={schema:'OMEGA_SOURCE_WORKSPACE_R795_V1',address,tileSize,showEdges,
+    lens,channelOverride:singleChannelOverride,savedAt:new Date().toISOString(),
+    sourceAuthority:'SETTINGS_ONLY_RECOMPUTE_ON_RESTORE'};
+   const serialized=JSON.stringify(checkpoint);
+   parseSourceWorkspaceR795(serialized,ATLAS_FIELD_CHANNELS_R734,SOURCE_TESSELLATION_SIZES_R769);
+   window.localStorage.setItem(workspaceKey(),serialized);
+   setRecoveryStatus('Saved local workspace settings; no source values or Canon state stored.');
+  }catch(error){setRecoveryStatus('SAVE REFUSED · '+String(error))}
+ };
+ const clearWorkspace=()=>{
+  try{
+   // Remove only the active project's checkpoint, never its source or other projects' data.
+   window.localStorage.removeItem(workspaceKey());
+   setRecoveryStatus('Active project checkpoint cleared · current live workspace unchanged.');
+  }catch(error){setRecoveryStatus('CLEAR REFUSED · '+String(error))}
+ };
+ const restoreWorkspace=()=>{
+  try{
+   const raw=window.localStorage.getItem(workspaceKey());
+   if(!raw)throw Error('no saved workspace');
+   const saved=parseSourceWorkspaceR795(raw,ATLAS_FIELD_CHANNELS_R734,SOURCE_TESSELLATION_SIZES_R769);
+   setTileSize(saved.tileSize);setShowEdges(saved.showEdges);
+   setLens({mode:saved.lens.mode,first:saved.lens.first,
+    second:saved.lens.second,weightPercent:saved.lens.weightPercent});
+   setSingleChannelOverride(saved.channelOverride);
+   onAddress(saved.address);
+   setRecoveryStatus('Workspace restored · source values and traversal recomputed from current field.');
+  }catch(error){setRecoveryStatus('RESTORE REFUSED · '+String(error))}
+ };
+ const exportWorkspace=()=>{
+  try{
+   const checkpoint={schema:'OMEGA_SOURCE_WORKSPACE_R795_V1',address,tileSize,showEdges,
+    lens,channelOverride:singleChannelOverride,savedAt:new Date().toISOString(),
+    sourceAuthority:'SETTINGS_ONLY_RECOMPUTE_ON_RESTORE'};
+   const serialized=JSON.stringify(checkpoint);
+   parseSourceWorkspaceR795(serialized,ATLAS_FIELD_CHANNELS_R734,SOURCE_TESSELLATION_SIZES_R769);
+   const url=URL.createObjectURL(new Blob([serialized],{type:'application/json'}));
+   const a=document.createElement('a');a.href=url;a.download='omega-r795-source-workspace-settings.json';
+   document.body.appendChild(a);a.click();a.remove();window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+   setRecoveryStatus('Portable settings export requested · source values excluded; download not independently verified.');
+  }catch(error){setRecoveryStatus('EXPORT REFUSED · '+String(error))}
+ };
+ const importGate=useRef(createSourceWorkspaceImportGateR795());
+ // Invalidate outstanding file reads when the workspace leaves the tree.
+ useEffect(()=>()=>{importGate.current.cancel()},[]);
+ const importWorkspace=async(file?:File)=>{
+  if(!file)return;
+  const request=importGate.current.begin();
+  const startingProject=activeProjectIdR87();
+  try{
+   if(file.size>8192)throw Error('checkpoint exceeds 8192-byte limit');
+   const raw=await file.text();
+   importGate.current.assertCurrent(request);
+   // A slow file read must never apply one project's settings to another active project.
+   assertSourceWorkspaceProjectR795(startingProject,activeProjectIdR87());
+   const saved=parseSourceWorkspaceR795(raw,ATLAS_FIELD_CHANNELS_R734,SOURCE_TESSELLATION_SIZES_R769);
+   // Do not write imported settings to local storage without explicit Save.
+   setTileSize(saved.tileSize);setShowEdges(saved.showEdges);
+   setLens({mode:saved.lens.mode,first:saved.lens.first,
+    second:saved.lens.second,weightPercent:saved.lens.weightPercent});
+   setSingleChannelOverride(saved.channelOverride);onAddress(saved.address);
+   setRecoveryStatus('Portable settings imported · live source and traversal recomputed; Save to retain locally.');
+  }catch(error){if(importGate.current.isCurrent(request))setRecoveryStatus('IMPORT REFUSED · '+String(error))}
+ };
+ const exportTraversalCsv=()=>{
+  try{
+   const csv=sourceTraversalCsvR796(trace);
+   const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+   const a=document.createElement('a');a.href=url;a.download='omega-source-traversal-'+address+'.csv';
+   document.body.appendChild(a);a.click();a.remove();window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+   setRecoveryStatus('Source traversal CSV export requested · '+trace.steps.length+' actual steps; browser download not independently attested.');
+  }catch(error){setRecoveryStatus('TRAVERSAL EXPORT REFUSED · '+String(error))}
+ };
  const move=(dy:number,dx:number)=>onAddress(navigateSourceTessellationR769(address,dy,dx));
  const download=()=>{
   const svg=serializeSourceTessellationSvgR769(tile,{showEdges});
@@ -99,11 +181,17 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
  };
  const importScene=async(file:File|undefined)=>{
   if(!file)return;
+  const startingProject=activeProjectIdR87();
+  const request=importGate.current.begin();
   setSceneBusy(true);setSceneProof('Verifying imported scene against the current live source…');
   try{
    if(file.size>8*1024*1024)throw Error('scene bundle exceeds 8 MiB local verification limit');
    const bundle=JSON.parse(await file.text());
+   importGate.current.assertCurrent(request);
+   assertSourceWorkspaceProjectR795(startingProject,activeProjectIdR87());
    const replay=await verifySourceSceneBundleR793(field,null,bundle);
+   importGate.current.assertCurrent(request);
+   assertSourceWorkspaceProjectR795(startingProject,activeProjectIdR87());
    if(!replay.ok)throw Error(replay.reason||'scene not reproducible');
    const saved=bundle.source.rasterDescriptor;
    if(saved.type==='R770_WOVEN_CHANNELS'){
@@ -121,7 +209,7 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
     payload:{sceneFingerprintSha256:bundle.sceneFingerprintSha256,truthClass:'LOCAL_RECOMPUTED_SCENE',canonicalMutation:false}});
    await recordProjectOperationR87(activeProjectIdR87()||undefined,event);
    setSceneProof('IMPORTED SCENE MATCH · '+bundle.sceneFingerprintSha256+' · local recomputation only');
-  }catch(error){setSceneProof('REFUSED · '+(error instanceof Error?error.message:String(error)))}
+  }catch(error){if(importGate.current.isCurrent(request))setSceneProof('REFUSED · '+(error instanceof Error?error.message:String(error)))}
   finally{setSceneBusy(false)}
  };
  return <section data-r769-tessellation='source-field' aria-label='Source field multiscale tessellation' style={{margin:'12px 0',padding:10,border:'1px solid #617987',borderRadius:8,maxWidth:580}}>
@@ -148,6 +236,14 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
    {singleChannelOverride&&<button type='button' data-r793-reset-source onClick={()=>setSingleChannelOverride(null)}>Return to route source channel</button>}
    <label>Verify saved scene <input data-r793-scene-import type='file' accept='.json,application/json' disabled={sceneBusy} onChange={e=>{void importScene(e.target.files?.[0]);e.target.value='';}}/></label>
   </div>
+  <div data-r795-workspace-recovery style={{display:'flex',flexWrap:'wrap',gap:8,alignItems:'center'}}>
+   <button type='button' data-r795-save-workspace onClick={saveWorkspace}>Save local workspace</button>
+   <button type='button' data-r795-restore-workspace onClick={restoreWorkspace}>Restore local workspace</button>
+   <button type='button' data-r795-clear-workspace onClick={clearWorkspace}>Clear saved checkpoint</button>
+   <button type='button' data-r795-export-workspace onClick={exportWorkspace}>Export portable settings</button>
+   <label>Import portable settings <input data-r795-import-workspace type='file' accept='.json,application/json' onChange={e=>{void importWorkspace(e.target.files?.[0]);e.target.value='';}}/></label>
+   <span data-r795-recovery-status role='status' aria-live='polite'>{recoveryStatus}</span>
+  </div>
   <p data-r793-scene-status role='status' aria-live='polite'>{sceneProof}</p>
   <small data-r793-truth-boundary>Scene JSON contains the complete generated SVG plus hashes of all current atlas field channels, selected raster and output. It can be reverified against this live source. Local hashes are integrity evidence, never a signed external execution receipt or historical renderer parity.</small>
   <p data-r769-summary role='status'>Channel {tile.label} · {tile.cells.length} addresses · {tile.cells.length*2} triangles · {tile.edges.length} in-tile source edges · tile origin ({tile.originCol}, {tile.originRow})</p>
@@ -170,6 +266,7 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
    <button type='button' data-r794-follow-successor onClick={()=>onAddress(relation.successor)} disabled={relation.successor===address}>Follow declared source successor</button>
    <details data-r794-traversal>
     <summary>Trace source continuity · {trace.steps.length} steps · {trace.termination}</summary>
+    <button type='button' data-r796-traversal-csv onClick={exportTraversalCsv}>Export actual traversal CSV</button>
     <ol style={{maxHeight:220,overflowY:'auto',paddingLeft:24}}>
      {trace.steps.map(step=><li key={step.address}>
       <button type='button' data-r794-trace-address={step.address} onClick={()=>onAddress(step.address)}>
