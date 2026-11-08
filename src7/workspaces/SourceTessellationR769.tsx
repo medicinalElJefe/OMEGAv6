@@ -181,11 +181,17 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
  };
  const importScene=async(file:File|undefined)=>{
   if(!file)return;
+  const startingProject=activeProjectIdR87();
+  const request=importGate.current.begin();
   setSceneBusy(true);setSceneProof('Verifying imported scene against the current live source…');
   try{
    if(file.size>8*1024*1024)throw Error('scene bundle exceeds 8 MiB local verification limit');
    const bundle=JSON.parse(await file.text());
+   importGate.current.assertCurrent(request);
+   assertSourceWorkspaceProjectR795(startingProject,activeProjectIdR87());
    const replay=await verifySourceSceneBundleR793(field,null,bundle);
+   importGate.current.assertCurrent(request);
+   assertSourceWorkspaceProjectR795(startingProject,activeProjectIdR87());
    if(!replay.ok)throw Error(replay.reason||'scene not reproducible');
    const saved=bundle.source.rasterDescriptor;
    if(saved.type==='R770_WOVEN_CHANNELS'){
@@ -203,7 +209,7 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
     payload:{sceneFingerprintSha256:bundle.sceneFingerprintSha256,truthClass:'LOCAL_RECOMPUTED_SCENE',canonicalMutation:false}});
    await recordProjectOperationR87(activeProjectIdR87()||undefined,event);
    setSceneProof('IMPORTED SCENE MATCH · '+bundle.sceneFingerprintSha256+' · local recomputation only');
-  }catch(error){setSceneProof('REFUSED · '+(error instanceof Error?error.message:String(error)))}
+  }catch(error){if(importGate.current.isCurrent(request))setSceneProof('REFUSED · '+(error instanceof Error?error.message:String(error)))}
   finally{setSceneBusy(false)}
  };
  return <section data-r769-tessellation='source-field' aria-label='Source field multiscale tessellation' style={{margin:'12px 0',padding:10,border:'1px solid #617987',borderRadius:8,maxWidth:580}}>
