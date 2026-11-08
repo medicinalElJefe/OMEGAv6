@@ -103,9 +103,9 @@ async function prove(browser,label,viewport){
  await page.waitForFunction(()=>document.querySelector('.o7-main')?.getAttribute('data-native-route')==='Create',null,{timeout:20000});
  const temple=page.locator('[data-r805-create-sound-temple="true"]');
  await temple.waitFor({state:'visible',timeout:20000});
- if(await temple.locator('.soma-audio-engine').count())throw Error(label+': SOMA eagerly mounted before user opened it');
+ if(await temple.locator('.soma-audio-r45').count())throw Error(label+': SOMA eagerly mounted before user opened it');
  await temple.getByRole('button',{name:'Open Sound Temple',exact:true}).click();
- await temple.getByText('Sound Temple · SOMA').waitFor({state:'visible',timeout:20000});
+ await temple.locator('.soma-audio-r45').waitFor({state:'visible',timeout:20000});
  if(!(await temple.locator('button').allInnerTexts()).some(t=>/Start/i.test(t)))throw Error(label+': SOMA audio start control missing');
  await temple.getByRole('button',{name:'Close Sound Temple',exact:true}).click();
  if(await temple.getByRole('button',{name:'Open Sound Temple',exact:true}).count()!==1)throw Error(label+': SOMA did not close');
