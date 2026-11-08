@@ -22,5 +22,5 @@ export function sourceTraversalCsvR796(trace){
     trace.steps.at(-1).successor!==trace.nextAddress||
     (trace.termination==='CYCLE'&&!seen.has(trace.nextAddress)))
   throw Error('R796 broken successor lineage');
- return rows.join('\\n')+'\\n';
+ return rows.join('\n')+'\n';
 }
