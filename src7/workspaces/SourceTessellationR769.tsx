@@ -5,6 +5,7 @@ import {computeSourceFieldLensR770,DEFAULT_SOURCE_LENS_R770,SOURCE_LENS_STORAGE_
 import {buildSourceTessellationR769,navigateSourceTessellationR769,serializeSourceTessellationSvgR769,SOURCE_TESSELLATION_SIZES_R769} from '../../src/sourceTessellationR769.mjs';
 import type {Mandala20736Field} from '../../src/mandala20736Runtime';
 import {buildSourceSceneBundleR793,verifySourceSceneBundleR793,traceSourceContinuityR794} from '../../src/sourceSceneBundleR793.mjs';
+import {parseSourceWorkspaceR795} from '../../src/sourceWorkspaceRecoveryR795.mjs';
 import {emitOperationR86} from '../../src/omegaOperationBusR86';
 import {activeProjectIdR87,recordProjectOperationR87} from '../../src/omegaProjectContinuityR87';
 type Props={field:Mandala20736Field;raster:any;address:number;onAddress:(address:number)=>void};
@@ -55,21 +56,7 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
   try{
    const raw=window.localStorage.getItem(workspaceKey());
    if(!raw)throw Error('no saved workspace');
-   const saved=JSON.parse(raw);
-   if(saved.schema!=='OMEGA_SOURCE_WORKSPACE_R795_V1'||
-      !Number.isSafeInteger(saved.address)||saved.address<0||saved.address>=20736||
-      !SOURCE_TESSELLATION_SIZES_R769.includes(saved.tileSize)||
-      typeof saved.showEdges!=='boolean'||
-      !saved.lens||typeof saved.lens!=='object'||Array.isArray(saved.lens)||
-      !['single','woven'].includes(saved.lens.mode)||
-      !Object.hasOwn(ATLAS_FIELD_CHANNELS_R734,saved.lens.first)||
-      !Object.hasOwn(ATLAS_FIELD_CHANNELS_R734,saved.lens.second)||
-      !Number.isSafeInteger(saved.lens.weightPercent)||
-      saved.lens.weightPercent<0||saved.lens.weightPercent>100||
-      !Object.hasOwn(saved,'channelOverride')||
-      (saved.channelOverride!==null&&(typeof saved.channelOverride!=='string'||
-       !Object.hasOwn(ATLAS_FIELD_CHANNELS_R734,saved.channelOverride))))
-    throw Error('invalid or incompatible workspace checkpoint');
+   const saved=parseSourceWorkspaceR795(raw,ATLAS_FIELD_CHANNELS_R734,SOURCE_TESSELLATION_SIZES_R769);
    setTileSize(saved.tileSize);setShowEdges(saved.showEdges);
    setLens({mode:saved.lens.mode,first:saved.lens.first,
     second:saved.lens.second,weightPercent:saved.lens.weightPercent});
