@@ -76,3 +76,10 @@ await newer;
 resolveOld(JSON.stringify({...base,address:42}));
 assert.match(await old,/superseded/);
 assert.deepEqual(applied,[17]);
+
+// Scene JSON import must enforce the same async project and latest-request boundaries.
+const sceneImport=ui.slice(ui.indexOf('const importScene=async('),ui.indexOf('return <section'));
+assert.ok(sceneImport.includes('const startingProject=activeProjectIdR87()'));
+assert.ok(sceneImport.includes('const request=importGate.current.begin()'));
+assert.ok((sceneImport.match(/importGate\.current\.assertCurrent\(request\)/g)||[]).length>=2);
+assert.ok((sceneImport.match(/assertSourceWorkspaceProjectR795\(startingProject,activeProjectIdR87\(\)\)/g)||[]).length>=2);
