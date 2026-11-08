@@ -100,3 +100,6 @@ assert.ok(weatherUi.includes('Math.abs(Number(x.lat))<=90&&Math.abs(Number(x.lon
 assert.ok(sceneImport.includes('recordProjectOperationR87(startingProject||undefined,event)'));
 assert.ok(sceneImport.includes('finally{if(importGate.current.isCurrent(request))setSceneBusy(false)}'));
 assert.ok((sceneImport.match(/assertSourceWorkspaceProjectR795\(startingProject,activeProjectIdR87\(\)\)/g)||[]).length>=4);
+
+// R802: editing the location input must invalidate any pending geocode response.
+assert.ok(weatherUi.includes('onChange={e=>{cancelGeocode();setPlaceQuery(e.target.value);setPlaceResults([]);setPlaceError(\'\')}}'));
