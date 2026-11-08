@@ -104,6 +104,10 @@ async function prove(browser,label,viewport){
  await temple.getByRole('button',{name:'Open Sound Temple',exact:true}).click();
  await temple.locator('.soma-audio-r45').waitFor({state:'visible',timeout:20000});
  if(!(await temple.locator('button').allInnerTexts()).some(t=>/Start/i.test(t)))throw Error(label+': SOMA audio start control missing');
+ const audio=temple.locator('.soma-audio-r45');
+ if(!(await audio.locator('header strong').innerText()).includes('READY'))throw Error(label+': SOMA unexpectedly active before explicit Start audio');
+ await audio.getByRole('button',{name:'Stop',exact:true}).click();
+ if(!(await audio.locator('header strong').innerText()).includes('READY'))throw Error(label+': SOMA stop control failed to preserve inactive state');
  await temple.getByRole('button',{name:'Close Sound Temple',exact:true}).click();
  if(await temple.getByRole('button',{name:'Open Sound Temple',exact:true}).count()!==1)throw Error(label+': SOMA did not close');
  // R807: changing domains must leave the active native route and restore the selected domain overview.
