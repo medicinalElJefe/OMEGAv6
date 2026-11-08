@@ -203,6 +203,8 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
    }
    setTileSize(bundle.scene.tileSize);setShowEdges(bundle.scene.showEdges);
    onAddress(bundle.scene.address);
+   importGate.current.assertCurrent(request);
+   assertSourceWorkspaceProjectR795(startingProject,activeProjectIdR87());
    const event=await emitOperationR86({type:'ANALYSIS_COMPLETED',surface:'OMEGA7_SOURCE_TESSELLATION_R793',
     stateId:bundle.scene.address+1,address:bundle.scene.address,status:'PASS',
     detail:'Imported scene recomputed against local source state. External witness and Canon admission not established.',
