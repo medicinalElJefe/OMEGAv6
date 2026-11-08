@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {parseSourceWorkspaceR795} from '../src/sourceWorkspaceRecoveryR795.mjs';
 import {ATLAS_FIELD_CHANNELS_R734} from '../src/atlasFieldRasterR734.mjs';
 import {SOURCE_TESSELLATION_SIZES_R769} from '../src/sourceTessellationR769.mjs';
@@ -30,4 +31,12 @@ assert.throws(()=>parse('[]'),/invalid/);
 const restored=parse(JSON.stringify(base));
 assert.equal(Object.hasOwn(restored,'sourceField'),false);
 assert.equal(Object.hasOwn(restored,'canon'),false);
+const ui=readFileSync(new URL('../src7/workspaces/SourceTessellationR769.tsx',import.meta.url),'utf8');
+for(const marker of ['data-r795-export-workspace','data-r795-import-workspace',
+ 'parseSourceWorkspaceR795(raw,ATLAS_FIELD_CHANNELS_R734,SOURCE_TESSELLATION_SIZES_R769)',
+ 'if(file.size>8192)','onAddress(saved.address)',
+ 'source values excluded','Save to retain locally'])
+ assert.ok(ui.includes(marker),'portable workspace control absent: '+marker);
+const portable=JSON.stringify({...base,savedAt:'2026-11-07T00:00:00.000Z'});
+assert.deepEqual(parse(portable),valid,'portable checkpoint must reconstruct settings only');
 console.log('R795 PASS · executable workspace checkpoint validation and refusal; browser interaction unproved');
