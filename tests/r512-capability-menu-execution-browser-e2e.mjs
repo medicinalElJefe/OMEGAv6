@@ -106,6 +106,10 @@ async function prove(browser,label,viewport){
  if(!(await temple.locator('button').allInnerTexts()).some(t=>/Start/i.test(t)))throw Error(label+': SOMA audio start control missing');
  await temple.getByRole('button',{name:'Close Sound Temple',exact:true}).click();
  if(await temple.getByRole('button',{name:'Open Sound Temple',exact:true}).count()!==1)throw Error(label+': SOMA did not close');
+ // R807: changing domains must leave the active native route and restore the selected domain overview.
+ await nav.getByRole('button',{name:/Explore/i}).click();
+ await page.waitForFunction(()=>!document.querySelector('.o7-main')?.getAttribute('data-native-route'),null,{timeout:10000});
+ await page.locator('.o7-intro-r512').waitFor({state:'visible',timeout:10000});
 
  const overflow=await page.evaluate(()=>Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-window.innerWidth);
  if(overflow>8)throw new Error(`${label}: R512 navigation/executor UI creates horizontal overflow ${overflow}px`);
