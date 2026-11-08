@@ -68,7 +68,7 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
       saved.lens.weightPercent<0||saved.lens.weightPercent>100||
       !Object.hasOwn(saved,'channelOverride')||
       (saved.channelOverride!==null&&(typeof saved.channelOverride!=='string'||
-       !Object.hasOwn(ATLAS_FIELD_CHANNELS_R734,saved.channelOverride)))))
+       !Object.hasOwn(ATLAS_FIELD_CHANNELS_R734,saved.channelOverride))))
     throw Error('invalid or incompatible workspace checkpoint');
    setTileSize(saved.tileSize);setShowEdges(saved.showEdges);
    setLens({mode:saved.lens.mode,first:saved.lens.first,
