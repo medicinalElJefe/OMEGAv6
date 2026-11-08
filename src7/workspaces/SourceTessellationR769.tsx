@@ -81,6 +81,8 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
   }catch(error){setRecoveryStatus('EXPORT REFUSED · '+String(error))}
  };
  const importGate=useRef(createSourceWorkspaceImportGateR795());
+ // Invalidate outstanding file reads when the workspace leaves the tree.
+ useEffect(()=>()=>{importGate.current.cancel()},[]);
  const importWorkspace=async(file?:File)=>{
   if(!file)return;
   const request=importGate.current.begin();
