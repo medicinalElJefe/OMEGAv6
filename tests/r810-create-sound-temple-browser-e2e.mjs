@@ -20,7 +20,9 @@ try{
   if(!(await audio.locator('header strong').innerText()).includes('READY'))throw Error(name+': audio active without user start');
   if(await audio.locator('.soma-lanes button').count()!==12)throw Error(name+': missing inherited 12 phase controls');
   // Exercise actual Web Audio and phase advance; the timer must not reset on every tick.
-  await audio.locator('input[type="range"][min=".5"]').evaluate(input=>{input.value='0.5';input.dispatchEvent(new Event('input',{bubbles:true}));input.dispatchEvent(new Event('change',{bubbles:true}))});
+  const phaseClock=audio.locator('input[type="range"][min=".5"]');
+  await phaseClock.focus();
+  await phaseClock.press('Home');
   const initial=await audio.locator('.soma-lanes button.active').innerText();
   await audio.getByRole('button',{name:'Sequence 12 phases',exact:true}).click();
   await page.waitForFunction(previous=>{const active=document.querySelector('.soma-audio-r45 .soma-lanes button.active');return active&&active.textContent!==previous},initial,{timeout:8000});
