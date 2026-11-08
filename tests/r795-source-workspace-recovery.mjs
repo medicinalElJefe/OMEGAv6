@@ -109,3 +109,10 @@ const emissionIndex=sceneImport.indexOf('const event=await emitOperationR86');
 assert.ok(emissionIndex>0);
 assert.ok(sceneImport.slice(emissionIndex-180,emissionIndex).includes('importGate.current.assertCurrent(request)'));
 assert.ok(sceneImport.slice(emissionIndex-180,emissionIndex).includes('assertSourceWorkspaceProjectR795(startingProject,activeProjectIdR87())'));
+
+// R805: native Create must expose the inherited SOMA executor, without auto-starting audio.
+const createUi=readFileSync(new URL('../src7/workspaces/WorkCreateWorkspaceR443.tsx',import.meta.url),'utf8');
+assert.ok(createUi.includes("lazy(()=>import('../../src/SomaAudioEngine'))"));
+assert.ok(createUi.includes("route==='Create'&&<section data-r805-create-sound-temple"));
+assert.ok(createUi.includes('soundOpen&&<Suspense'));
+assert.ok(createUi.includes('<SomaAudioEngine record={record}/>'));
