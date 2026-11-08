@@ -5,7 +5,7 @@ import {computeSourceFieldLensR770,DEFAULT_SOURCE_LENS_R770,SOURCE_LENS_STORAGE_
 import {buildSourceTessellationR769,navigateSourceTessellationR769,serializeSourceTessellationSvgR769,SOURCE_TESSELLATION_SIZES_R769} from '../../src/sourceTessellationR769.mjs';
 import type {Mandala20736Field} from '../../src/mandala20736Runtime';
 import {buildSourceSceneBundleR793,verifySourceSceneBundleR793,traceSourceContinuityR794} from '../../src/sourceSceneBundleR793.mjs';
-import {parseSourceWorkspaceR795,assertSourceWorkspaceProjectR795} from '../../src/sourceWorkspaceRecoveryR795.mjs';
+import {parseSourceWorkspaceR795,assertSourceWorkspaceProjectR795,createSourceWorkspaceImportGateR795} from '../../src/sourceWorkspaceRecoveryR795.mjs';
 import {emitOperationR86} from '../../src/omegaOperationBusR86';
 import {activeProjectIdR87,recordProjectOperationR87} from '../../src/omegaProjectContinuityR87';
 type Props={field:Mandala20736Field;raster:any;address:number;onAddress:(address:number)=>void};
@@ -80,15 +80,15 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
    setRecoveryStatus('Portable settings export requested · source values excluded; download not independently verified.');
   }catch(error){setRecoveryStatus('EXPORT REFUSED · '+String(error))}
  };
- const importSequence=useRef(0);
+ const importGate=useRef(createSourceWorkspaceImportGateR795());
  const importWorkspace=async(file?:File)=>{
   if(!file)return;
-  const request=++importSequence.current;
+  const request=importGate.current.begin();
   const startingProject=activeProjectIdR87();
   try{
    if(file.size>8192)throw Error('checkpoint exceeds 8192-byte limit');
    const raw=await file.text();
-   if(request!==importSequence.current)throw Error('superseded workspace import');
+   importGate.current.assertCurrent(request);
    // A slow file read must never apply one project's settings to another active project.
    assertSourceWorkspaceProjectR795(startingProject,activeProjectIdR87());
    const saved=parseSourceWorkspaceR795(raw,ATLAS_FIELD_CHANNELS_R734,SOURCE_TESSELLATION_SIZES_R769);
@@ -98,7 +98,7 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
     second:saved.lens.second,weightPercent:saved.lens.weightPercent});
    setSingleChannelOverride(saved.channelOverride);onAddress(saved.address);
    setRecoveryStatus('Portable settings imported · live source and traversal recomputed; Save to retain locally.');
-  }catch(error){if(request===importSequence.current)setRecoveryStatus('IMPORT REFUSED · '+String(error))}
+  }catch(error){if(importGate.current.isCurrent(request))setRecoveryStatus('IMPORT REFUSED · '+String(error))}
  };
  const move=(dy:number,dx:number)=>onAddress(navigateSourceTessellationR769(address,dy,dx));
  const download=()=>{
