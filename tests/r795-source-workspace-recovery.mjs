@@ -103,3 +103,9 @@ assert.ok((sceneImport.match(/assertSourceWorkspaceProjectR795\(startingProject,
 
 // R802: editing the location input must invalidate any pending geocode response.
 assert.ok(weatherUi.includes('onChange={e=>{cancelGeocode();setPlaceQuery(e.target.value);setPlaceResults([]);setPlaceError(\'\')}}'));
+
+// R803: check project and latest-request authority before publishing imported scene evidence.
+const emissionIndex=sceneImport.indexOf('const event=await emitOperationR86');
+assert.ok(emissionIndex>0);
+assert.ok(sceneImport.slice(emissionIndex-180,emissionIndex).includes('importGate.current.assertCurrent(request)'));
+assert.ok(sceneImport.slice(emissionIndex-180,emissionIndex).includes('assertSourceWorkspaceProjectR795(startingProject,activeProjectIdR87())'));
