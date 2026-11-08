@@ -35,6 +35,8 @@ const ui=readFileSync(new URL('../src7/workspaces/SourceTessellationR769.tsx',im
 for(const marker of ['data-r795-export-workspace','data-r795-import-workspace',
  'parseSourceWorkspaceR795(raw,ATLAS_FIELD_CHANNELS_R734,SOURCE_TESSELLATION_SIZES_R769)',
  'if(file.size>8192)','onAddress(saved.address)',
+ 'const startingProject=activeProjectIdR87()',
+ "if(activeProjectIdR87()!==startingProject)throw Error('active project changed during import')",
  'source values excluded','Save to retain locally'])
  assert.ok(ui.includes(marker),'portable workspace control absent: '+marker);
 const portable=JSON.stringify({...base,savedAt:'2026-11-07T00:00:00.000Z'});
