@@ -7,7 +7,7 @@ const steps=[
 ];
 const trace={start:1,maxSteps:12,steps,termination:'CYCLE',nextAddress:1,sourceBound:true,canonicalMutation:false,physicalMeasurement:false};
 const csv=sourceTraversalCsvR796(trace);
-assert.equal(csv.trim().split('\\n').length,3);
+assert.equal(csv.trim().split('\n').length,3);
 assert.match(csv,/address,successor,domain,continuity,continuityDelta,motion,symmetry,scar,evidence,contradiction,forecastModelScore/);
 assert.match(csv,/1,2,0,0.25,0.5,1,0.1,0,0.9,0.2,0.4/);
 for(const altered of [
