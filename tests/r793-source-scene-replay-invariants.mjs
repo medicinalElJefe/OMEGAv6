@@ -113,4 +113,5 @@ for(const invalid of [
 ])assert.throws(()=>parse(invalid),/invalid or incompatible/);
 assert.throws(()=>parseSourceWorkspaceR795('{',channels,sizes),/invalid checkpoint JSON/);
 assert.throws(()=>parseSourceWorkspaceR795(' '.repeat(8193),channels,sizes),/invalid checkpoint payload/);
+assert.ok(ui.includes('parseSourceWorkspaceR795(serialized,ATLAS_FIELD_CHANNELS_R734,SOURCE_TESSELLATION_SIZES_R769)'), 'R795 save must refuse invalid settings before persistence');
 console.log('R793 PASS · 20,736 source-state channel fingerprint, two-channel lens, portable rendered scene, deterministic replay, tamper refusal, no Canon or native proof upgrade');
