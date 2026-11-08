@@ -82,9 +82,12 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
  };
  const importWorkspace=async(file?:File)=>{
   if(!file)return;
+  const startingProject=activeProjectIdR87();
   try{
    if(file.size>8192)throw Error('checkpoint exceeds 8192-byte limit');
    const raw=await file.text();
+   // A slow file read must never apply one project's settings to another active project.
+   if(activeProjectIdR87()!==startingProject)throw Error('active project changed during import');
    const saved=parseSourceWorkspaceR795(raw,ATLAS_FIELD_CHANNELS_R734,SOURCE_TESSELLATION_SIZES_R769);
    // Do not write imported settings to local storage without explicit Save.
    setTileSize(saved.tileSize);setShowEdges(saved.showEdges);
