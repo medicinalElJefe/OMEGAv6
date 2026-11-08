@@ -67,6 +67,33 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
    setRecoveryStatus('Workspace restored · source values and traversal recomputed from current field.');
   }catch(error){setRecoveryStatus('RESTORE REFUSED · '+String(error))}
  };
+ const exportWorkspace=()=>{
+  try{
+   const checkpoint={schema:'OMEGA_SOURCE_WORKSPACE_R795_V1',address,tileSize,showEdges,
+    lens,channelOverride:singleChannelOverride,savedAt:new Date().toISOString(),
+    sourceAuthority:'SETTINGS_ONLY_RECOMPUTE_ON_RESTORE'};
+   const serialized=JSON.stringify(checkpoint);
+   parseSourceWorkspaceR795(serialized,ATLAS_FIELD_CHANNELS_R734,SOURCE_TESSELLATION_SIZES_R769);
+   const url=URL.createObjectURL(new Blob([serialized],{type:'application/json'}));
+   const a=document.createElement('a');a.href=url;a.download='omega-r795-source-workspace-settings.json';
+   document.body.appendChild(a);a.click();a.remove();window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+   setRecoveryStatus('Portable settings export requested · source values excluded; download not independently verified.');
+  }catch(error){setRecoveryStatus('EXPORT REFUSED · '+String(error))}
+ };
+ const importWorkspace=async(file?:File)=>{
+  if(!file)return;
+  try{
+   if(file.size>8192)throw Error('checkpoint exceeds 8192-byte limit');
+   const raw=await file.text();
+   const saved=parseSourceWorkspaceR795(raw,ATLAS_FIELD_CHANNELS_R734,SOURCE_TESSELLATION_SIZES_R769);
+   // Do not write imported settings to local storage without explicit Save.
+   setTileSize(saved.tileSize);setShowEdges(saved.showEdges);
+   setLens({mode:saved.lens.mode,first:saved.lens.first,
+    second:saved.lens.second,weightPercent:saved.lens.weightPercent});
+   setSingleChannelOverride(saved.channelOverride);onAddress(saved.address);
+   setRecoveryStatus('Portable settings imported · live source and traversal recomputed; Save to retain locally.');
+  }catch(error){setRecoveryStatus('IMPORT REFUSED · '+String(error))}
+ };
  const move=(dy:number,dx:number)=>onAddress(navigateSourceTessellationR769(address,dy,dx));
  const download=()=>{
   const svg=serializeSourceTessellationSvgR769(tile,{showEdges});
@@ -181,6 +208,8 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
   <div data-r795-workspace-recovery style={{display:'flex',flexWrap:'wrap',gap:8,alignItems:'center'}}>
    <button type='button' data-r795-save-workspace onClick={saveWorkspace}>Save local workspace</button>
    <button type='button' data-r795-restore-workspace onClick={restoreWorkspace}>Restore local workspace</button>
+   <button type='button' data-r795-export-workspace onClick={exportWorkspace}>Export portable settings</button>
+   <label>Import portable settings <input data-r795-import-workspace type='file' accept='.json,application/json' onChange={e=>{void importWorkspace(e.target.files?.[0]);e.target.value='';}}/></label>
    <span data-r795-recovery-status role='status' aria-live='polite'>{recoveryStatus}</span>
   </div>
   <p data-r793-scene-status role='status' aria-live='polite'>{sceneProof}</p>
