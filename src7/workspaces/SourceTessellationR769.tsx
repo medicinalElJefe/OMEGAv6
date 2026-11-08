@@ -1,4 +1,4 @@
-import {useEffect,useMemo,useState} from 'react';
+import {useEffect,useMemo,useRef,useState} from 'react';
 import {ATLAS_FIELD_CHANNELS_R734} from '../../src/atlasFieldRasterR734.mjs';
 import {renderAtlasFieldRasterR734} from '../../src/atlasFieldRasterR734.mjs';
 import {computeSourceFieldLensR770,DEFAULT_SOURCE_LENS_R770,SOURCE_LENS_STORAGE_KEY_R770,serializeSourceLensSettingsR770,parseSourceLensSettingsR770} from '../../src/sourceFieldLensR770.mjs';
@@ -80,12 +80,15 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
    setRecoveryStatus('Portable settings export requested · source values excluded; download not independently verified.');
   }catch(error){setRecoveryStatus('EXPORT REFUSED · '+String(error))}
  };
+ const importSequence=useRef(0);
  const importWorkspace=async(file?:File)=>{
   if(!file)return;
+  const request=++importSequence.current;
   const startingProject=activeProjectIdR87();
   try{
    if(file.size>8192)throw Error('checkpoint exceeds 8192-byte limit');
    const raw=await file.text();
+   if(request!==importSequence.current)throw Error('superseded workspace import');
    // A slow file read must never apply one project's settings to another active project.
    assertSourceWorkspaceProjectR795(startingProject,activeProjectIdR87());
    const saved=parseSourceWorkspaceR795(raw,ATLAS_FIELD_CHANNELS_R734,SOURCE_TESSELLATION_SIZES_R769);
@@ -95,7 +98,7 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
     second:saved.lens.second,weightPercent:saved.lens.weightPercent});
    setSingleChannelOverride(saved.channelOverride);onAddress(saved.address);
    setRecoveryStatus('Portable settings imported · live source and traversal recomputed; Save to retain locally.');
-  }catch(error){setRecoveryStatus('IMPORT REFUSED · '+String(error))}
+  }catch(error){if(request===importSequence.current)setRecoveryStatus('IMPORT REFUSED · '+String(error))}
  };
  const move=(dy:number,dx:number)=>onAddress(navigateSourceTessellationR769(address,dy,dx));
  const download=()=>{
