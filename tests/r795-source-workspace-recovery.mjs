@@ -95,3 +95,8 @@ assert.ok(weatherUi.includes('generation!==geocodeGeneration.current'));
 assert.ok(weatherUi.includes('generation===geocodeGeneration.current'));
 assert.ok(weatherUi.includes('cancelGeocode();setTarget({lat:32.2226,lon:-110.9747})'));
 assert.ok(weatherUi.includes('Math.abs(Number(x.lat))<=90&&Math.abs(Number(x.lon))<=180'));
+
+// R801: asynchronous scene evidence must remain tied to the originating project.
+assert.ok(sceneImport.includes('recordProjectOperationR87(startingProject||undefined,event)'));
+assert.ok(sceneImport.includes('finally{if(importGate.current.isCurrent(request))setSceneBusy(false)}'));
+assert.ok((sceneImport.match(/assertSourceWorkspaceProjectR795\(startingProject,activeProjectIdR87\(\)\)/g)||[]).length>=4);
