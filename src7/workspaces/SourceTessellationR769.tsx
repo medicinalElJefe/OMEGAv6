@@ -5,7 +5,7 @@ import {computeSourceFieldLensR770,DEFAULT_SOURCE_LENS_R770,SOURCE_LENS_STORAGE_
 import {buildSourceTessellationR769,navigateSourceTessellationR769,serializeSourceTessellationSvgR769,SOURCE_TESSELLATION_SIZES_R769} from '../../src/sourceTessellationR769.mjs';
 import type {Mandala20736Field} from '../../src/mandala20736Runtime';
 import {buildSourceSceneBundleR793,verifySourceSceneBundleR793,traceSourceContinuityR794} from '../../src/sourceSceneBundleR793.mjs';
-import {parseSourceWorkspaceR795} from '../../src/sourceWorkspaceRecoveryR795.mjs';
+import {parseSourceWorkspaceR795,assertSourceWorkspaceProjectR795} from '../../src/sourceWorkspaceRecoveryR795.mjs';
 import {emitOperationR86} from '../../src/omegaOperationBusR86';
 import {activeProjectIdR87,recordProjectOperationR87} from '../../src/omegaProjectContinuityR87';
 type Props={field:Mandala20736Field;raster:any;address:number;onAddress:(address:number)=>void};
@@ -87,7 +87,7 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
    if(file.size>8192)throw Error('checkpoint exceeds 8192-byte limit');
    const raw=await file.text();
    // A slow file read must never apply one project's settings to another active project.
-   if(activeProjectIdR87()!==startingProject)throw Error('active project changed during import');
+   assertSourceWorkspaceProjectR795(startingProject,activeProjectIdR87());
    const saved=parseSourceWorkspaceR795(raw,ATLAS_FIELD_CHANNELS_R734,SOURCE_TESSELLATION_SIZES_R769);
    // Do not write imported settings to local storage without explicit Save.
    setTileSize(saved.tileSize);setShowEdges(saved.showEdges);
