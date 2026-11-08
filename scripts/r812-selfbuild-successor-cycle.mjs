@@ -12,7 +12,7 @@ export function prepareSuccessorCycleR812({priorState,manifest,root=process.cwd(
  // A manifest-supplied deploymentProof is a claim, not an independently checked GitHub/Worker receipt.
  // Never issue a pipeline-ready decision from self-asserted production evidence.
  const sourceReady=bytes.valid&&admission.status==='READY_FOR_SEPARATE_GOVERNED_REVIEW';
- const ready=false;
+ const ready=false; // Source-only evaluation cannot authorize promotion.
  const cycle=ready?{
   schema:R812_SCHEMA,revision:'R812',active:true,generation:0,maxAutonomousGenerations:manifest.capsules.length,
   currentCapsuleId:null,admittedSourceCapsules:[],receipts:[],
@@ -26,6 +26,38 @@ export function prepareSuccessorCycleR812({priorState,manifest,root=process.cwd(
   requiresR245GeneratorExtension:true,requiresR503WorkerAdmission:true,requiresR164ResidualGate:true
  }:null;
  return{schema:R812_SCHEMA,status:sourceReady?'SOURCE_VERIFIED_AWAITING_INDEPENDENT_PRODUCTION_PROOF':'HELD',reasons:sourceReady?[...reasons,'INDEPENDENT_PRODUCTION_PROOF_REQUIRED']:reasons,sourceProof:bytes,admission,cycle};
+}
+
+/** Only a trusted external verifier may authorize the successor proposal.
+ * The verifier must independently query the exact GitHub production run and live
+ * deployment; values copied from the candidate manifest are never evidence. */
+export async function verifyAndPrepareSuccessorCycleR812({priorState,manifest,root=process.cwd(),verifyProduction}){
+ const source=prepareSuccessorCycleR812({priorState,manifest,root});
+ if(source.status!=='SOURCE_VERIFIED_AWAITING_INDEPENDENT_PRODUCTION_PROOF')return source;
+ if(typeof verifyProduction!=='function')return source;
+ let proof;
+ try{proof=await verifyProduction({expectedSha:manifest.deploymentProof.exactPromotedSha})}
+ catch{return{...source,status:'HELD',reasons:[...source.reasons,'INDEPENDENT_PRODUCTION_QUERY_FAILED']}}
+ const sha=manifest.deploymentProof.exactPromotedSha;
+ const verified=proof?.verified===true&&proof?.source==='GITHUB_CI_AND_LIVE_WORKER'&&
+  proof?.exactPromotedSha===sha&&proof?.liveRuntimeSha===sha&&
+  proof?.productionBrowserVerified===true&&proof?.githubRunConclusion==='success'&&
+  typeof proof?.githubRunId==='number'&&Number.isSafeInteger(proof.githubRunId)&&proof.githubRunId>0;
+ if(!verified)return{...source,status:'HELD',reasons:[...source.reasons,'INDEPENDENT_PRODUCTION_PROOF_INVALID']};
+ const admission=source.admission;
+ const cycle={
+  schema:R812_SCHEMA,revision:'R812',active:false,generation:0,maxAutonomousGenerations:manifest.capsules.length,
+  currentCapsuleId:null,admittedSourceCapsules:[],receipts:[],
+  predecessor:{schema:priorState.schema||null,generation:priorState.generation,admittedSourceCapsules:[...priorState.admittedSourceCapsules],productionSha:sha,githubRunId:proof.githubRunId},
+  roadmap:admission.executionOrder.map(id=>{
+   const capsule=manifest.capsules.find(c=>c.id===id);
+   const row=source.sourceProof.checked.find(p=>p.capsuleId===id);
+   return{id,title:String(capsule.title||id),target:capsule.target,prerequisites:[...capsule.prerequisites],sourceSha256:row.actualSha256,risk:'REVIEW_REQUIRED'};
+  }),
+  sourceMutationAuthorized:false,canonicalAdmission:false,productionAdmissionAuthorized:false,
+  requiresR245GeneratorExtension:true,requiresR503WorkerAdmission:true,requiresR164ResidualGate:true
+ };
+ return{...source,status:'VERIFIED_FOR_SEPARATE_GOVERNED_REVIEW',reasons:[],cycle,independentProductionProof:{githubRunId:proof.githubRunId,exactPromotedSha:sha}};
 }
 
 export function writeSuccessorProposalR812({priorState,manifest,root=process.cwd(),output}){
