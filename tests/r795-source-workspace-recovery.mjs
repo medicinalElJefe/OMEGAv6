@@ -33,6 +33,7 @@ assert.equal(Object.hasOwn(restored,'sourceField'),false);
 assert.equal(Object.hasOwn(restored,'canon'),false);
 const ui=readFileSync(new URL('../src7/workspaces/SourceTessellationR769.tsx',import.meta.url),'utf8');
 for(const marker of ['data-r795-export-workspace','data-r795-import-workspace',
+ 'data-r795-clear-workspace','window.localStorage.removeItem(workspaceKey())',
  'parseSourceWorkspaceR795(raw,ATLAS_FIELD_CHANNELS_R734,SOURCE_TESSELLATION_SIZES_R769)',
  'if(file.size>8192)','onAddress(saved.address)',
  'const startingProject=activeProjectIdR87()',
