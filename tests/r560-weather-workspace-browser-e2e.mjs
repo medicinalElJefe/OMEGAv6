@@ -99,6 +99,22 @@ try{
     const tx=(lon+180)/360*n,ty=(1-Math.asinh(Math.tan(latitude*Math.PI/180))/Math.PI)/2*n;
     return Math.abs(x-tx)<=3&&Math.abs(y-ty)<=3;
    },{lat:Number(expected.lat),lon:Number(expected.lon)},{timeout:30000});
+   // R804: changing search text must invalidate an older, deliberately delayed geocode response.
+   const pendingQuery='OMEGA stale geocode sentinel';
+   let releaseStale;
+   const staleRelease=new Promise(resolve=>{releaseStale=resolve});
+   await page.route('**/api/earth/geocode?q=*',async route=>{
+    if(new URL(route.request().url()).searchParams.get('q')!==pendingQuery){await route.continue();return}
+    await staleRelease;
+    try{await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({results:[{lat:1,lon:1,name:'Stale location'}]})})}catch{}
+   });
+   await location.getByRole('textbox',{name:'Search Weather Studio location'}).fill(pendingQuery);
+   await location.getByRole('button',{name:'Find location'}).click();
+   await location.getByRole('textbox',{name:'Search Weather Studio location'}).fill('Tucson');
+   releaseStale();
+   await page.waitForTimeout(250);
+   if(await location.getByRole('listbox',{name:'Weather location results'}).count())throw Error(name+': stale geocode results were applied after input edit');
+   await page.unroute('**/api/earth/geocode?q=*');
    await location.getByRole('button',{name:'Return to Earth target'}).click();
    const satPanel=studio.locator('[data-r563-satellite-panel="true"]');
    const forecastPanel=studio.locator('[data-r563-forecast-panel="true"]');
