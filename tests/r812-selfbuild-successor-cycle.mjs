@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
-import {prepareSuccessorCycleR812,writeSuccessorProposalR812} from '../scripts/r812-selfbuild-successor-cycle.mjs';
+import {prepareSuccessorCycleR812,writeSuccessorProposalR812,verifyAndPrepareSuccessorCycleR812} from '../scripts/r812-selfbuild-successor-cycle.mjs';
 
 const root=fs.mkdtempSync(path.join(os.tmpdir(),'omega-r812-'));
 try{
@@ -23,6 +23,17 @@ try{
  const output=path.join(root,'proposals','next.json');
  assert.equal(writeSuccessorProposalR812({priorState,manifest,root,output}).status,'SOURCE_VERIFIED_AWAITING_INDEPENDENT_PRODUCTION_PROOF');
  assert.equal(fs.existsSync(output),false,'Unverified production evidence must not create a runnable successor cycle');
+ const expected='a'.repeat(40);
+ const verified=await verifyAndPrepareSuccessorCycleR812({priorState,manifest,root,verifyProduction:async({expectedSha})=>{
+  assert.equal(expectedSha,expected);
+  return{verified:true,source:'GITHUB_CI_AND_LIVE_WORKER',exactPromotedSha:expected,liveRuntimeSha:expected,productionBrowserVerified:true,githubRunConclusion:'success',githubRunId:12345};
+ }});
+ assert.equal(verified.status,'VERIFIED_FOR_SEPARATE_GOVERNED_REVIEW');
+ assert.equal(verified.cycle.active,false);
+ assert.equal(verified.cycle.sourceMutationAuthorized,false);
+ assert.equal(verified.cycle.roadmap[0].sourceSha256,sha);
+ assert.equal((await verifyAndPrepareSuccessorCycleR812({priorState,manifest,root,verifyProduction:async()=>({verified:true,source:'MANIFEST',exactPromotedSha:expected,liveRuntimeSha:expected,productionBrowserVerified:true,githubRunConclusion:'success',githubRunId:12345})})).status,'HELD');
+ assert.equal((await verifyAndPrepareSuccessorCycleR812({priorState,manifest,root,verifyProduction:async()=>{throw Error('offline')}})).status,'HELD');
  fs.writeFileSync(file,'tampered');
  assert.equal(prepareSuccessorCycleR812({priorState,manifest,root}).status,'HELD');
  fs.writeFileSync(file,body);
