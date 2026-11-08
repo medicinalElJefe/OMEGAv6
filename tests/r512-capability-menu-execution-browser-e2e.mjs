@@ -92,6 +92,24 @@ async function prove(browser,label,viewport){
  const donorCapsuleText=(await donorCapsule.innerText()).toLowerCase();
  if(!donorCapsuleText.includes('archive only')||!donorCapsuleText.includes('inspect_archive_lineage'))throw new Error(`${label}: donor archive truth boundary was lost`);
 
+ // R806: Create exposes the real inherited SOMA executor without starting audio on navigation.
+ await nav.getByRole('button',{name:/Create/i}).click();
+ const createLaunch=page.locator('[data-r519-direct="Create"]');
+ if(await createLaunch.count())await createLaunch.first().click();
+ else{
+  const createAction=page.locator('.o7-r519-portal button').filter({hasText:/Create/}).first();
+  await createAction.click();
+ }
+ await page.waitForFunction(()=>document.querySelector('.o7-main')?.getAttribute('data-native-route')==='Create',null,{timeout:20000});
+ const temple=page.locator('[data-r805-create-sound-temple="true"]');
+ await temple.waitFor({state:'visible',timeout:20000});
+ if(await temple.locator('.soma-audio-engine').count())throw Error(label+': SOMA eagerly mounted before user opened it');
+ await temple.getByRole('button',{name:'Open Sound Temple',exact:true}).click();
+ await temple.getByText('Sound Temple · SOMA').waitFor({state:'visible',timeout:20000});
+ if(!(await temple.locator('button').allInnerTexts()).some(t=>/Start/i.test(t)))throw Error(label+': SOMA audio start control missing');
+ await temple.getByRole('button',{name:'Close Sound Temple',exact:true}).click();
+ if(await temple.getByRole('button',{name:'Open Sound Temple',exact:true}).count()!==1)throw Error(label+': SOMA did not close');
+
  const overflow=await page.evaluate(()=>Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-window.innerWidth);
  if(overflow>8)throw new Error(`${label}: R512 navigation/executor UI creates horizontal overflow ${overflow}px`);
  if(errors.length)throw new Error(`${label}: unhandled page errors ${errors.join(' | ').slice(0,1800)}`);
