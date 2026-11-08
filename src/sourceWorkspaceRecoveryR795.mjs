@@ -28,3 +28,17 @@ export function assertSourceWorkspaceProjectR795(startingProject,currentProject)
  if(startingProject!==currentProject)throw Error('active project changed during import');
  return true;
 }
+
+/** Monotonic request admission for asynchronous browser file reads. */
+export function createSourceWorkspaceImportGateR795(){
+ let latest=0;
+ return {
+  begin(){return ++latest},
+  assertCurrent(request){
+   if(!Number.isSafeInteger(request)||request!==latest)throw Error('superseded workspace import');
+   return true;
+  },
+  isCurrent(request){return Number.isSafeInteger(request)&&request===latest},
+  cancel(){++latest}
+ };
+}
