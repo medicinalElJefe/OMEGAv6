@@ -65,6 +65,14 @@ try{
    // R590: returned geocoding must change both forecast and radar target, not just search text.
    const location=studio.locator('[data-r589-weather-location="true"]');
    await location.waitFor({state:'visible'});
+   // R800: execute the Tucson target on both desktop and mobile; verify forecast and map receive it.
+   await location.locator('[data-r798-tucson-weather]').click();
+   await page.waitForFunction(()=>{
+    const target=document.querySelector('[data-r589-weather-target]')?.textContent||'';
+    const forecast=document.querySelector('[data-r563-forecast-panel] .earth-r375-head small')?.textContent||'';
+    return target.includes('32.22260')&&target.includes('-110.97470')&&forecast.includes('32.2226')&&forecast.includes('-110.9747');
+   },null,{timeout:30000});
+   await location.getByRole('button',{name:'Return to Earth target'}).click();
    await location.getByRole('textbox',{name:'Search Weather Studio location'}).fill('Tucson, Arizona');
    const responsePromise=page.waitForResponse(r=>r.url().includes('/api/earth/geocode?q=')&&r.request().method()==='GET',{timeout:45000});
    await location.getByRole('button',{name:'Find location'}).click();
