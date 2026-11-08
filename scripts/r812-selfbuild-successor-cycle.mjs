@@ -9,7 +9,10 @@ export function prepareSuccessorCycleR812({priorState,manifest,root=process.cwd(
  const bytes=verifySuccessorSourcesR542(manifest,{root});
  const admission=evaluateSuccessorCycleR535({priorState,capsules:manifest?.capsules,sourceProofs:manifest?.sourceProofs,deploymentProof:manifest?.deploymentProof});
  const reasons=[...bytes.reasons,...admission.reasons];
- const ready=bytes.valid&&admission.status==='READY_FOR_SEPARATE_GOVERNED_REVIEW';
+ // A manifest-supplied deploymentProof is a claim, not an independently checked GitHub/Worker receipt.
+ // Never issue a pipeline-ready decision from self-asserted production evidence.
+ const sourceReady=bytes.valid&&admission.status==='READY_FOR_SEPARATE_GOVERNED_REVIEW';
+ const ready=false;
  const cycle=ready?{
   schema:R812_SCHEMA,revision:'R812',active:true,generation:0,maxAutonomousGenerations:manifest.capsules.length,
   currentCapsuleId:null,admittedSourceCapsules:[],receipts:[],
@@ -22,7 +25,7 @@ export function prepareSuccessorCycleR812({priorState,manifest,root=process.cwd(
   sourceMutationAuthorized:false,canonicalAdmission:false,productionAdmissionAuthorized:false,
   requiresR245GeneratorExtension:true,requiresR503WorkerAdmission:true,requiresR164ResidualGate:true
  }:null;
- return{schema:R812_SCHEMA,status:ready?'READY_FOR_GOVERNED_CANDIDATE_PIPELINE':'HELD',reasons,sourceProof:bytes,admission,cycle};
+ return{schema:R812_SCHEMA,status:sourceReady?'SOURCE_VERIFIED_AWAITING_INDEPENDENT_PRODUCTION_PROOF':'HELD',reasons:sourceReady?[...reasons,'INDEPENDENT_PRODUCTION_PROOF_REQUIRED']:reasons,sourceProof:bytes,admission,cycle};
 }
 
 export function writeSuccessorProposalR812({priorState,manifest,root=process.cwd(),output}){
