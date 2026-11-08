@@ -109,7 +109,9 @@ try{
     try{await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({results:[{lat:1,lon:1,name:'Stale location'}]})})}catch{}
    });
    await location.getByRole('textbox',{name:'Search Weather Studio location'}).fill(pendingQuery);
+   const staleRequest=page.waitForRequest(r=>r.url().includes('/api/earth/geocode?')&&new URL(r.url()).searchParams.get('q')===pendingQuery,{timeout:15000});
    await location.getByRole('button',{name:'Find location'}).click();
+   await staleRequest;
    await location.getByRole('textbox',{name:'Search Weather Studio location'}).fill('Tucson');
    releaseStale();
    await page.waitForTimeout(250);
