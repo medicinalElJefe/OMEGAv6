@@ -83,3 +83,9 @@ assert.ok(sceneImport.includes('const startingProject=activeProjectIdR87()'));
 assert.ok(sceneImport.includes('const request=importGate.current.begin()'));
 assert.ok((sceneImport.match(/importGate\.current\.assertCurrent\(request\)/g)||[]).length>=2);
 assert.ok((sceneImport.match(/assertSourceWorkspaceProjectR795\(startingProject,activeProjectIdR87\(\)\)/g)||[]).length>=2);
+
+// R798 dedicated weather target must use a real geographic coordinate, not an Atlas address projection.
+const weatherUi=readFileSync(new URL('../src/WeatherObservationStudioR563.tsx',import.meta.url),'utf8');
+assert.ok(weatherUi.includes('data-r798-tucson-weather'));
+assert.ok(weatherUi.includes('setTarget({lat:32.2226,lon:-110.9747})'));
+assert.ok(weatherUi.includes('<WeatherRadarMapR580 lat={target.lat} lon={target.lon}/>'));
