@@ -13,7 +13,7 @@ export default function WeatherObservationStudioR563({lat,lon}:{lat:number;lon:n
  const[imageError,setImageError]=useState('');
  const[revision,setRevision]=useState(0);
  const[target,setTarget]=useState({lat,lon}),[placeQuery,setPlaceQuery]=useState(''),[placeResults,setPlaceResults]=useState<any[]>([]),[placeBusy,setPlaceBusy]=useState(false),[placeError,setPlaceError]=useState('');
- useEffect(()=>setTarget({lat,lon}),[lat,lon]);
+ useEffect(()=>{geocodeGeneration.current++;setPlaceBusy(false);setPlaceResults([]);setPlaceError('');setTarget({lat,lon})},[lat,lon]);
  const geocodeGeneration=useRef(0);
  useEffect(()=>()=>{geocodeGeneration.current++},[]);
  const cancelGeocode=()=>{geocodeGeneration.current++;setPlaceBusy(false)};
