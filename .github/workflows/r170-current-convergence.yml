@@ -178,6 +178,7 @@ jobs:
           OMEGA_E2E_URL: http://127.0.0.1:4173
           OMEGA_R512_USE_FIXTURES: '1'
         run: |
+          node tests/r812-selfbuild-successor-cycle.mjs
           node tests/r795-source-workspace-recovery.mjs
           node tests/r810-create-sound-temple-browser-e2e.mjs
           node tests/r512-capability-menu-execution-browser-e2e.mjs
