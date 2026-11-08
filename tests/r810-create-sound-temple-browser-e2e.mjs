@@ -19,7 +19,14 @@ try{
   await audio.waitFor({state:'visible',timeout:30000});
   if(!(await audio.locator('header strong').innerText()).includes('READY'))throw Error(name+': audio active without user start');
   if(await audio.locator('.soma-lanes button').count()!==12)throw Error(name+': missing inherited 12 phase controls');
+  // Exercise actual Web Audio and phase advance; the timer must not reset on every tick.
+  await audio.locator('input[type="range"][min=".5"]').evaluate(input=>{input.value='0.5';input.dispatchEvent(new Event('input',{bubbles:true}));input.dispatchEvent(new Event('change',{bubbles:true}))});
+  const initial=await audio.locator('.soma-lanes button.active').innerText();
+  await audio.getByRole('button',{name:'Sequence 12 phases',exact:true}).click();
+  await page.waitForFunction(previous=>{const active=document.querySelector('.soma-audio-r45 .soma-lanes button.active');return active&&active.textContent!==previous},initial,{timeout:8000});
+  if(!(await audio.locator('header strong').innerText()).includes('LOCAL ACTIVE'))throw Error(name+': Web Audio sequence did not start');
   await audio.getByRole('button',{name:'Stop',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('.soma-audio-r45 header strong')?.textContent?.includes('READY'),null,{timeout:10000});
   await temple.getByRole('button',{name:'Close Sound Temple',exact:true}).click();
   await audio.waitFor({state:'detached',timeout:15000});
   await page.locator('.o7-nav-r512').getByRole('button',{name:/Explore/i}).click();
