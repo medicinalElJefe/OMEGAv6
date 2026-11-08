@@ -36,6 +36,9 @@ for(const marker of ['data-r795-export-workspace','data-r795-import-workspace',
  'parseSourceWorkspaceR795(raw,ATLAS_FIELD_CHANNELS_R734,SOURCE_TESSELLATION_SIZES_R769)',
  'if(file.size>8192)','onAddress(saved.address)',
  'const startingProject=activeProjectIdR87()',
+ 'const request=++importSequence.current',
+ "if(request!==importSequence.current)throw Error('superseded workspace import')",
+ "if(request===importSequence.current)setRecoveryStatus('IMPORT REFUSED",
  'assertSourceWorkspaceProjectR795(startingProject,activeProjectIdR87())',
  'source values excluded','Save to retain locally'])
  assert.ok(ui.includes(marker),'portable workspace control absent: '+marker);
