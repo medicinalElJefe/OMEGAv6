@@ -48,7 +48,9 @@ export default function SourceTessellationR769({field,raster,address,onAddress}:
    const checkpoint={schema:'OMEGA_SOURCE_WORKSPACE_R795_V1',address,tileSize,showEdges,
     lens,channelOverride:singleChannelOverride,savedAt:new Date().toISOString(),
     sourceAuthority:'SETTINGS_ONLY_RECOMPUTE_ON_RESTORE'};
-   window.localStorage.setItem(workspaceKey(),JSON.stringify(checkpoint));
+   const serialized=JSON.stringify(checkpoint);
+   parseSourceWorkspaceR795(serialized,ATLAS_FIELD_CHANNELS_R734,SOURCE_TESSELLATION_SIZES_R769);
+   window.localStorage.setItem(workspaceKey(),serialized);
    setRecoveryStatus('Saved local workspace settings; no source values or Canon state stored.');
   }catch(error){setRecoveryStatus('SAVE REFUSED · '+String(error))}
  };
