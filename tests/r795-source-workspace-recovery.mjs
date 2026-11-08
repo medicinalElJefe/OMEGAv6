@@ -1,0 +1,33 @@
+import assert from 'node:assert/strict';
+import {parseSourceWorkspaceR795} from '../src/sourceWorkspaceRecoveryR795.mjs';
+import {ATLAS_FIELD_CHANNELS_R734} from '../src/atlasFieldRasterR734.mjs';
+import {SOURCE_TESSELLATION_SIZES_R769} from '../src/sourceTessellationR769.mjs';
+const parse=raw=>parseSourceWorkspaceR795(raw,ATLAS_FIELD_CHANNELS_R734,SOURCE_TESSELLATION_SIZES_R769);
+const base={schema:'OMEGA_SOURCE_WORKSPACE_R795_V1',address:11498,
+ tileSize:SOURCE_TESSELLATION_SIZES_R769[0],showEdges:true,
+ lens:{mode:'woven',first:'C',second:'q',weightPercent:37},
+ channelOverride:null,sourceAuthority:'SETTINGS_ONLY_RECOMPUTE_ON_RESTORE'};
+const valid=parse(JSON.stringify(base));
+assert.equal(valid.address,11498);
+assert.deepEqual(valid.lens,base.lens);
+assert.equal(valid.channelOverride,null);
+for(const patch of [
+ {address:20736},{address:-1},{tileSize:7},{showEdges:'yes'},
+ {lens:null},{lens:{...base.lens,first:'INVALID'}},
+ {lens:{...base.lens,weightPercent:101}},
+ {channelOverride:'INVALID'},{sourceAuthority:'CANON'},
+ {schema:'OTHER'}
+]){
+ const bad={...base,...patch};
+ assert.throws(()=>parse(JSON.stringify(bad)),/invalid|incompatible/);
+}
+const noOverride={...base};delete noOverride.channelOverride;
+assert.throws(()=>parse(JSON.stringify(noOverride)),/invalid|incompatible/);
+assert.throws(()=>parse('not json'),/invalid/);
+assert.throws(()=>parse('x'.repeat(8193)),/invalid/);
+assert.throws(()=>parse('null'),/invalid/);
+assert.throws(()=>parse('[]'),/invalid/);
+const restored=parse(JSON.stringify(base));
+assert.equal(Object.hasOwn(restored,'sourceField'),false);
+assert.equal(Object.hasOwn(restored,'canon'),false);
+console.log('R795 PASS · executable workspace checkpoint validation and refusal; browser interaction unproved');
