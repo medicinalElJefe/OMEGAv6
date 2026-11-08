@@ -98,4 +98,6 @@ for(const marker of ['buildSourceSceneBundleR793','verifySourceSceneBundleR793',
  assert.ok(ui.includes(marker),'R793 user-facing source scene control missing: '+marker);
 for(const marker of ['data-r795-workspace-recovery','data-r795-save-workspace','data-r795-restore-workspace','data-r795-recovery-status','OMEGA_SOURCE_WORKSPACE_R795_V1','SOURCE_TESSELLATION_SIZES_R769.includes(saved.tileSize)','onAddress(saved.address)','SETTINGS_ONLY_RECOMPUTE_ON_RESTORE','activeProjectIdR87()','encodeURIComponent(project)','window.localStorage.setItem(workspaceKey()','window.localStorage.getItem(workspaceKey()'])
  assert.ok(ui.includes(marker),'R795 workspace recovery binding missing: '+marker);
+for(const marker of ["!saved.lens||typeof saved.lens!=='object'","!Object.hasOwn(saved,'channelOverride')","typeof saved.channelOverride!=='string'"])
+ assert.ok(ui.includes(marker),'R795 malformed-checkpoint refusal missing: '+marker);
 console.log('R793 PASS · 20,736 source-state channel fingerprint, two-channel lens, portable rendered scene, deterministic replay, tamper refusal, no Canon or native proof upgrade');
