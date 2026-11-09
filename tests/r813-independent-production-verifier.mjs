@@ -7,6 +7,7 @@ const fetchImpl=async url=>String(url).startsWith('https://api.github.com/')?jso
 const verifyBrowser=async()=>({verified:true,observedSha:sha,origin:'https://omegav6.example.workers.dev'});
 const base={expectedSha:sha,repository,productionUrl,token:'test-only',fetchImpl,verifyBrowser};
 assert.equal((await verifyIndependentProductionR813(base)).verified,true);
+assert.equal((await verifyIndependentProductionR813({...base,fetchImpl:async url=>String(url).includes('api.github.com')?json({workflow_runs:[{...run,event:'workflow_dispatch',path:repository+'/.github/workflows/ci.yml@refs/heads/main'}]}):json({schema:'OMEGA_GOVERNED_BUILD_RECEIPT_V1',source:{sha},promotion:{promotedMergeSha:sha,authority:'GITHUB_MERGE_PARENTS'}})})).verified,true);
 for(const change of [
  {token:''},{fetchImpl:async url=>String(url).includes('api.github.com')?json({workflow_runs:[{...run,path:'.github/workflows/other.yml'}]}):json({})},{expectedSha:'bad'},{repository:'wrong'},{productionUrl:'http://omegav6.example.workers.dev/'},
  {productionUrl:'https://evil.example.com/'},{productionUrl:'https://omegav6.example.workers.dev/redirect'},
