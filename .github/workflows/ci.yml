@@ -34,6 +34,7 @@ jobs:
           node tests/r813-independent-production-verifier.mjs
           node tests/r815-lemma-chain-atlas.mjs
           node tests/r816-executed-lemma-workers.mjs
+          node tests/r817-staged-live-hybrid-truth.mjs
       - name: Execute and record R816 PR-level 20,736-cell proof
         run: node scripts/r816-ci-execution-receipt.mjs
       - name: Preserve actual R816 hash-chain execution artifact

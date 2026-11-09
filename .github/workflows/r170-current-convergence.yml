@@ -187,6 +187,7 @@ jobs:
           node tests/r813-independent-production-verifier.mjs
           node tests/r815-lemma-chain-atlas.mjs
           node tests/r816-executed-lemma-workers.mjs
+          node tests/r817-staged-live-hybrid-truth.mjs
           node tests/r795-source-workspace-recovery.mjs
           node tests/r810-create-sound-temple-browser-e2e.mjs
           node tests/r512-capability-menu-execution-browser-e2e.mjs
