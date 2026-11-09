@@ -30,6 +30,8 @@ jobs:
         run: |
           node tests/r812-selfbuild-successor-cycle.mjs
           node tests/r813-independent-production-verifier.mjs
+          node tests/r815-lemma-chain-atlas.mjs
+          node tests/r816-executed-lemma-workers.mjs
       - name: Verify live production and prepare inactive successor review
         env:
           GITHUB_TOKEN: ${{ github.token }}
