@@ -97,6 +97,7 @@
         "../../src/OmegaIntentWorkbenchR85",
         "../../src/OmegaSpecialistSuite",
         "../../src/OmegaWorkspaceCockpitR18",
+        "../../src/SomaAudioEngine",
         "../../src/corpusRuntime",
         "../../src/platformAdapter",
         "../capabilityRegistry",
