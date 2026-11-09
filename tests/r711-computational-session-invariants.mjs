@@ -22,7 +22,7 @@ for(const field of ['schema','scenario','origin','target','mirrored']){
 }
 for(const field of ['origin','target','mirrored']){
  const nullField={...exportedEnvelope,[field]:null};
- assert.throws(()=>restoreComputationalSessionR711(JSON.stringify(nullField)),/endpoints|boolean/, 'null '+field+' must not select defaults');
+ assert.throws(()=>restoreComputationalSessionR711(JSON.stringify(nullField)),/session envelope/, 'null '+field+' must not select defaults');
 }
 
 assert.throws(()=>restoreComputationalSessionR711(JSON.stringify({...JSON.parse(a.sessionJson),origin:'FORGED'})),/endpoints/);
