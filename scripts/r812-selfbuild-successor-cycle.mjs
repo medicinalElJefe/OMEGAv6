@@ -57,7 +57,7 @@ export async function verifyAndPrepareSuccessorCycleR812({priorState,manifest,ro
   sourceMutationAuthorized:false,canonicalAdmission:false,productionAdmissionAuthorized:false,
   requiresR245GeneratorExtension:true,requiresR503WorkerAdmission:true,requiresR164ResidualGate:true
  };
- return{...source,status:'VERIFIED_FOR_SEPARATE_GOVERNED_REVIEW',reasons:[],cycle,independentProductionProof:{githubRunId:proof.githubRunId,exactPromotedSha:sha}};
+ return{...source,status:'VERIFIED_FOR_SEPARATE_GOVERNED_REVIEW',reasons:[],cycle,independentProductionProof:{source:proof.source,exactPromotedSha:sha,liveRuntimeSha:proof.liveRuntimeSha,productionBrowserVerified:true,githubRunConclusion:'success',githubRunId:proof.githubRunId}};
 }
 
 export function writeSuccessorProposalR812({priorState,manifest,root=process.cwd(),output}){
