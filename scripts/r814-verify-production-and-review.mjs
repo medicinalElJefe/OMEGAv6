@@ -7,9 +7,12 @@ import {verifyAndPrepareSuccessorCycleR812} from './r812-selfbuild-successor-cyc
 const exec=promisify(execFile);
 const [manifestPath,outputPath]=process.argv.slice(2);
 if(!manifestPath||!outputPath)throw Error('Usage: node scripts/r814-verify-production-and-review.mjs manifest.json output.json');
-const manifest=JSON.parse(fs.readFileSync(manifestPath,'utf8'));
-const priorState=JSON.parse(fs.readFileSync('public/omega-r170-selfbuild-state.json','utf8'));
 const root=process.cwd();
+if(!/^manifests\/selfbuild\/[A-Za-z0-9_-]+\.json$/.test(manifestPath))throw Error('Untrusted manifest path');
+const manifestFile=path.resolve(root,manifestPath);
+if(fs.lstatSync(manifestFile).isSymbolicLink()||!fs.statSync(manifestFile).isFile())throw Error('Manifest must be regular');
+const manifest=JSON.parse(fs.readFileSync(manifestFile,'utf8'));
+const priorState=JSON.parse(fs.readFileSync('public/omega-r170-selfbuild-state.json','utf8'));
 const target=path.resolve(outputPath);
 if(!target.startsWith(root+path.sep)||fs.existsSync(target))throw Error('Output must be a new file inside checkout');
 const productionUrl=process.env.OMEGA_PUBLIC_URL||'';
@@ -18,6 +21,7 @@ const repository=process.env.GITHUB_REPOSITORY||'';
 const token=process.env.GITHUB_TOKEN||'';
 const verifyBrowser=async({url,expectedSha})=>{
  const base=url.replace(/\/$/,'');
+ const {OMEGA_WORKER_VERSION_ID:ignoredVersion,OMEGA_WORKER_NAME:ignoredWorker,...cleanEnv}=process.env;
  // Inherit the existing real desktop/mobile Playwright proof rather than inventing
  // a success flag or using browser test output supplied by the candidate.
  await exec(process.execPath,['tests/r200-current-browser-proof-e2e.mjs'],{
