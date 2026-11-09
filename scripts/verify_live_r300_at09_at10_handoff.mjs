@@ -15,7 +15,21 @@ async function text(path){
  }
  return body
 }
-const [html,client,contractRaw,statusRaw]=await Promise.all([text('/omega-pc-proof-r205.html'),text('/omega-pc-proof-r205.js'),text('/omega-r205-pc-proof-contract.json'),text('/api/hybrid/status')]);
+// R817: a freshly staged Durable Object may be briefly unavailable. Retry only
+// the read-only status probe; never infer an offline host or promote a 503 to PASS.
+async function hybridStatusWithBoundedRetry(){
+ const attempts=process.env.OMEGA_STAGED_READ_ONLY==='1'?4:1;
+ for(let attempt=1;attempt<=attempts;attempt++){
+  try{return await text('/api/hybrid/status')}
+  catch(error){
+   if(attempt===attempts||!String(error?.message||'').includes('HYBRID_STATUS_RUNTIME_UNREACHABLE'))throw error;
+   console.warn(`R817 staged Hybrid Durable Object status UNKNOWN on attempt ${attempt}/${attempts}; retrying read-only, no proof promoted`);
+   await new Promise(resolve=>setTimeout(resolve,1500*attempt));
+  }
+ }
+ throw new Error('R817_STATUS_RETRY_EXHAUSTED');
+}
+const [html,client,contractRaw,statusRaw]=await Promise.all([text('/omega-pc-proof-r205.html'),text('/omega-pc-proof-r205.js'),text('/omega-r205-pc-proof-contract.json'),hybridStatusWithBoundedRetry()]);
 const contract=JSON.parse(contractRaw),status=JSON.parse(statusRaw);const must=(ok,msg)=>{if(!ok)throw new Error(`R300 live handoff failed: ${msg}`)};
 must(html.includes('data-r300-handoff="ARMED_EXPLICIT_CONFIRMATION"'),'served proof surface lacks R300 handoff identity');
 must(html.includes('Arm once even when the host is offline.'),'served proof surface lacks offline-arm instruction');
