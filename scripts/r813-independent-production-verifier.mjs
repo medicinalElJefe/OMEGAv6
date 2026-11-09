@@ -8,7 +8,7 @@ const SAFE_REPO=/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
 const shaOf=(value)=>typeof value==='string'&&SHA.test(value)?value:null;
 const repositoryPath=(name)=>typeof name==='string'?name+'/.github/workflows/ci.yml@refs/heads/main':null;
 const validRun=(run,expected,repository)=>run&&run.head_sha===expected&&run.status==='completed'&&run.conclusion==='success'&&
- run.event==='push'&&run.head_branch==='main'&&
+ ['push','workflow_dispatch'].includes(run.event)&&run.head_branch==='main'&&
  (run.path==='.github/workflows/ci.yml'||run.path===repositoryPath(repository))&&
  Number.isSafeInteger(run.id)&&run.id>0;
 export async function verifyIndependentProductionR813({
