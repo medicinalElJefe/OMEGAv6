@@ -22,7 +22,7 @@ const verifyBrowser=async({url,expectedSha})=>{
  // a success flag or using browser test output supplied by the candidate.
  await exec(process.execPath,['tests/r200-current-browser-proof-e2e.mjs'],{
   cwd:root,timeout:240000,maxBuffer:4*1024*1024,
-  env:{...process.env,OMEGA_E2E_URL:base,OMEGA_EXPECTED_SHA:expectedSha}
+  env:{...cleanEnv,OMEGA_E2E_URL:base,OMEGA_EXPECTED_SHA:expectedSha}
  });
  return{verified:true,observedSha:expectedSha,origin:new URL(url).origin};
 };
