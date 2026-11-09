@@ -55,6 +55,11 @@ for(const token of ["if(!r.ok)", "r.headers.get('cf-ray')", "r.headers.get('cont
  must(liveVerifier.includes(token),`R690 diagnostic source lost fail-closed HTTP evidence: ${token}`);
 }
 must(!liveVerifier.includes('if(r.status===500)continue')&&!liveVerifier.includes('if(r.status===500)return'),'R690 cannot bypass an HTTP 500');
+must(liveVerifier.includes("staged?Promise.resolve(null):text('/api/hybrid/status')"),'R817 staged 0%-traffic cannot claim promoted Durable Object heartbeat');
+must(liveVerifier.includes('if(staged){')&&liveVerifier.includes('Hybrid DO/heartbeat status UNKNOWN'),'R817 staged status must be explicitly UNKNOWN');
+must(liveVerifier.includes("status=statusRaw===null?null:JSON.parse(statusRaw)"),'R817 live mode must parse real runtime response');
+must(liveVerifier.includes("else throw new Error(`R300 live handoff received unsupported Hybrid truth state"),'R817 promoted-live must retain strict status refusal');
+
 
 const workerR101=read('src/workerR101.js');
 const statusStart=workerR101.indexOf('async function hybridStatusR101('),statusEnd=workerR101.indexOf('async function reconnectHybridR101(',statusStart);
