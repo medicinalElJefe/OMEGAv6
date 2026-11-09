@@ -13,6 +13,18 @@ for(const f of a.frames){
 }
 const b=restoreComputationalSessionR711(a.sessionJson);
 assert.deepEqual(b,a);
+// R818: every exported input field is mandatory; no restore-time defaults.
+const exportedEnvelope=JSON.parse(a.sessionJson);
+for(const field of ['schema','scenario','origin','target','mirrored']){
+ const missing={...exportedEnvelope};
+ delete missing[field];
+ assert.throws(()=>restoreComputationalSessionR711(JSON.stringify(missing)),/session envelope/, 'missing '+field+' must fail closed');
+}
+for(const field of ['origin','target','mirrored']){
+ const nullField={...exportedEnvelope,[field]:null};
+ assert.throws(()=>restoreComputationalSessionR711(JSON.stringify(nullField)),/endpoints|boolean/, 'null '+field+' must not select defaults');
+}
+
 assert.throws(()=>restoreComputationalSessionR711(JSON.stringify({...JSON.parse(a.sessionJson),origin:'FORGED'})),/endpoints/);
 assert.throws(()=>restoreComputationalSessionR711(JSON.stringify({...JSON.parse(a.sessionJson),authority:'PRODUCTION'})),/session envelope/);
 const mirrored=executeComputationalSessionR711(DEFAULT_SCENARIO_R706,{origin:'A',target:'B',mirrored:true});
