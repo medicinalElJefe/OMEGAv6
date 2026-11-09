@@ -9,7 +9,7 @@ const shaOf=(value)=>typeof value==='string'&&SHA.test(value)?value:null;
 const validRun=(run,expected)=>run&&run.head_sha===expected&&run.status==='completed'&&run.conclusion==='success'&&
  ['push','workflow_dispatch'].includes(run.event)&&run.head_branch==='main'&&Number.isSafeInteger(run.id)&&run.id>0;
 export async function verifyIndependentProductionR813({
- expectedSha,repository,productionUrl,token,fetchImpl=fetch,timeoutMs=12000
+ expectedSha,repository,productionUrl,token,fetchImpl=fetch,verifyBrowser,timeoutMs=12000
 }={}){
  const fail=(reason)=>({verified:false,reason});
  if(!shaOf(expectedSha))return fail('INVALID_EXPECTED_SHA');
@@ -34,7 +34,11 @@ export async function verifyIndependentProductionR813({
   // Explicit identity contract: never infer SHA from HTML, package versions, or manifest claims.
   const live=shaOf(deployment?.gitSha)||shaOf(deployment?.commitSha);
   if(live!==expectedSha)return fail('LIVE_RUNTIME_SHA_MISMATCH_OR_ABSENT');
-  if(deployment?.production!==true||deployment?.browserVerified!==true)return fail('LIVE_PRODUCTION_BROWSER_PROOF_ABSENT');
+  if(deployment?.production!==true)return fail('LIVE_PRODUCTION_IDENTITY_ABSENT');
+  // A JSON flag from the Worker cannot independently prove browser behavior.
+  if(typeof verifyBrowser!=='function')return fail('INDEPENDENT_BROWSER_VERIFIER_REQUIRED');
+  const browser=await verifyBrowser({url:target.href,expectedSha,timeoutMs});
+  if(browser?.verified!==true||browser?.observedSha!==expectedSha||browser?.origin!==target.origin)return fail('INDEPENDENT_BROWSER_PROOF_FAILED');
   return{verified:true,source:'GITHUB_CI_AND_LIVE_WORKER',exactPromotedSha:expectedSha,
    liveRuntimeSha:live,productionBrowserVerified:true,githubRunConclusion:'success',githubRunId:run.id};
  }catch(e){return fail('INDEPENDENT_PRODUCTION_QUERY_FAILED:'+String(e?.message||e))}
