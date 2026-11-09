@@ -1,5 +1,7 @@
 import {createHash} from 'node:crypto';
 import fs from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
 const AXIS=12,WORKERS=144,CELLS=20736;
 const hash=x=>createHash('sha256').update(x).digest('hex');
 export const LEMMAS=Object.freeze(['SOURCE','IDENTITY','CONTINUITY','DEPENDENCY','ADMISSIBILITY','RESIDUAL','WORKER','BROWSER','RELEASE','PROVENANCE','CONSERVATION','RETURN_PROOF']);
@@ -33,7 +35,7 @@ export function compileLemmaAtlasR815({evidence={},workerCount=WORKERS}={}){
   actualCloudWorkersDispatched:0,stages,counts,chainRoot:previous,partitions,
   decision:allProven?'ELIGIBLE_FOR_SEPARATE_GOVERNED_REVIEW':'HELD',sourceMutationAuthorized:false,productionAdmissionAuthorized:false};
 }
-if(process.argv[1]&&process.argv[1].endsWith('r815-lemma-chain-atlas.mjs')){
+if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  const [input,output]=process.argv.slice(2);
  if(!input||!output)throw Error('Usage: node scripts/r815-lemma-chain-atlas.mjs evidence.json output.json');
  const evidence=JSON.parse(fs.readFileSync(input,'utf8'));
