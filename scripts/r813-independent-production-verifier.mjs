@@ -7,7 +7,7 @@ const SHA=/^[a-f0-9]{40}$/;
 const SAFE_REPO=/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
 const shaOf=(value)=>typeof value==='string'&&SHA.test(value)?value:null;
 const repositoryPath=(name)=>typeof name==='string'?name+'/.github/workflows/ci.yml@refs/heads/main':null;
-const validRun=(run,expected)=>run&&run.head_sha===expected&&run.status==='completed'&&run.conclusion==='success'&&
+const validRun=(run,expected,repository)=>run&&run.head_sha===expected&&run.status==='completed'&&run.conclusion==='success'&&
  ['push','workflow_dispatch'].includes(run.event)&&run.head_branch==='main'&&Number.isSafeInteger(run.id)&&run.id>0;
 export async function verifyIndependentProductionR813({
  expectedSha,repository,productionUrl,token,fetchImpl=fetch,verifyBrowser,timeoutMs=12000
@@ -29,7 +29,7 @@ export async function verifyIndependentProductionR813({
  };
  try{
   const runs=await get('https://api.github.com/repos/'+repository+'/actions/runs?head_sha='+expectedSha+'&per_page=100',{headers});
-  const run=(Array.isArray(runs.workflow_runs)?runs.workflow_runs:[]).find(r=>validRun(r,expectedSha));
+  const run=(Array.isArray(runs.workflow_runs)?runs.workflow_runs:[]).find(r=>validRun(r,expectedSha,repository));
   if(!run)return fail('NO_SUCCESSFUL_EXACT_MAIN_WORKFLOW_RUN');
   const receiptUrl=new URL('/omega-build-receipt.json',target.origin);
   const deployment=await get(receiptUrl.href,{headers:{Accept:'application/json','Cache-Control':'no-cache'}});
