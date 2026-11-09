@@ -39,13 +39,10 @@ for(const path of ['/api/health','/api/core-health']){
 }
 await get('/api/status');
 await get('/api/restoration');
-const hybrid=(await get('/api/hybrid/status')).body;
-const current=Array.isArray(hybrid?.devices)?hybrid.devices.filter(d=>d?.online&&!d?.revoked):[];
-if(hybrid?.state==='VERIFIED_DEVICE_ONLINE'){
-  if(hybrid?.nativeExecutionClaimed!==true||current.length<1)throw new Error('staged Hybrid claims PC online without authenticated heartbeat');
-}else if(hybrid?.state==='DEVICE_PROOF_REQUIRED'){
-  if(hybrid?.nativeExecutionClaimed!==false||current.length!==0)throw new Error('staged Hybrid device-proof state contradicts online proof');
-}else throw new Error(`staged Hybrid unsupported truth state ${hybrid?.state}`);
+// A 0%-traffic version override cannot establish Durable Object ownership.
+// Do not query /api/hybrid/status at staging: the promoted-live R202/R237/R238
+// chain must independently prove actual status and refuse HTTP 503.
+console.log('R817 STAGED Hybrid heartbeat UNKNOWN · promoted-live verification required');
 
 const agent=await get('/api/hybrid/agent-download');
 if(agent.raw.length<1000||!agent.raw.startsWith('#!/usr/bin/env python3')||!agent.raw.includes('OMEGA Hybrid Link agent'))throw new Error('staged Hybrid agent source contract failed');
