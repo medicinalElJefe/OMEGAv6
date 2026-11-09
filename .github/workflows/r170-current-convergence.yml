@@ -2,6 +2,11 @@ name: R170 Current Convergence
 
 on:
   workflow_dispatch:
+    inputs:
+      manifest_path:
+        description: 'Optional checked-in successor manifest for R814 read-only proof'
+        required: false
+        type: string
   pull_request:
     branches: [main]
   schedule:
@@ -173,7 +178,58 @@ jobs:
         env:
           OMEGA_E2E_URL: http://127.0.0.1:4173
         run: node tests/r517-phase-turn-browser-e2e.mjs
+      - name: Prove R795-R807 source continuity and Create Sound Temple navigation
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+          OMEGA_R512_USE_FIXTURES: '1'
+        run: |
+          node tests/r812-selfbuild-successor-cycle.mjs
+          node tests/r813-independent-production-verifier.mjs
+          node tests/r815-lemma-chain-atlas.mjs
+          node tests/r816-executed-lemma-workers.mjs
+          node tests/r795-source-workspace-recovery.mjs
+          node tests/r810-create-sound-temple-browser-e2e.mjs
+          node tests/r512-capability-menu-execution-browser-e2e.mjs
       - name: Stop preview
         if: always()
         run: |
           if [ -f /tmp/r517-preview.pid ]; then kill "$(cat /tmp/r517-preview.pid)" || true; fi
+
+  verify-source-backed-successor-review:
+    if: github.event_name == 'workflow_dispatch' && inputs.manifest_path != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    environment: production
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm ci --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Verify R812-R816 source and execution refusal gates
+        run: |
+          node tests/r812-selfbuild-successor-cycle.mjs
+          node tests/r813-independent-production-verifier.mjs
+          node tests/r815-lemma-chain-atlas.mjs
+          node tests/r816-executed-lemma-workers.mjs
+      - name: Execute bounded real workers against verified production review
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+          MANIFEST_PATH: ${{ inputs.manifest_path }}
+        run: |
+          node scripts/r814-verify-production-and-review.mjs "$MANIFEST_PATH" artifacts/omega-r814-successor-review.json
+      - name: Upload inactive review artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: omega-r814-r816-verified-successor-review
+          path: artifacts/omega-r814-successor-review.json
+          retention-days: 14

@@ -92,6 +92,29 @@ async function prove(browser,label,viewport){
  const donorCapsuleText=(await donorCapsule.innerText()).toLowerCase();
  if(!donorCapsuleText.includes('archive only')||!donorCapsuleText.includes('inspect_archive_lineage'))throw new Error(`${label}: donor archive truth boundary was lost`);
 
+ // R806: Create exposes the real inherited SOMA executor without starting audio on navigation.
+ await nav.getByRole('button',{name:/Create/i}).click();
+ const createAction=page.locator('.o7-quick-menu button').filter({hasText:/Create/}).first();
+ if(await createAction.count())await createAction.click();
+ else await page.locator('.o7-capability-grid-r512 button').filter({hasText:/Create/}).first().click();
+ await page.waitForFunction(()=>document.querySelector('.o7-main')?.getAttribute('data-native-route')==='Create',null,{timeout:20000});
+ const temple=page.locator('[data-r805-create-sound-temple="true"]');
+ await temple.waitFor({state:'visible',timeout:20000});
+ if(await temple.locator('.soma-audio-r45').count())throw Error(label+': SOMA eagerly mounted before user opened it');
+ await temple.getByRole('button',{name:'Open Sound Temple',exact:true}).click();
+ await temple.locator('.soma-audio-r45').waitFor({state:'visible',timeout:20000});
+ if(!(await temple.locator('button').allInnerTexts()).some(t=>/Start/i.test(t)))throw Error(label+': SOMA audio start control missing');
+ const audio=temple.locator('.soma-audio-r45');
+ if(!(await audio.locator('header strong').innerText()).includes('READY'))throw Error(label+': SOMA unexpectedly active before explicit Start audio');
+ await audio.getByRole('button',{name:'Stop',exact:true}).click();
+ if(!(await audio.locator('header strong').innerText()).includes('READY'))throw Error(label+': SOMA stop control failed to preserve inactive state');
+ await temple.getByRole('button',{name:'Close Sound Temple',exact:true}).click();
+ if(await temple.getByRole('button',{name:'Open Sound Temple',exact:true}).count()!==1)throw Error(label+': SOMA did not close');
+ // R807: changing domains must leave the active native route and restore the selected domain overview.
+ await nav.getByRole('button',{name:/Explore/i}).click();
+ await page.waitForFunction(()=>!document.querySelector('.o7-main')?.getAttribute('data-native-route'),null,{timeout:10000});
+ await page.locator('.o7-intro-r512').waitFor({state:'visible',timeout:10000});
+
  const overflow=await page.evaluate(()=>Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-window.innerWidth);
  if(overflow>8)throw new Error(`${label}: R512 navigation/executor UI creates horizontal overflow ${overflow}px`);
  if(errors.length)throw new Error(`${label}: unhandled page errors ${errors.join(' | ').slice(0,1800)}`);

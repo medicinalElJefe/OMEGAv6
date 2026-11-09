@@ -65,6 +65,14 @@ try{
    // R590: returned geocoding must change both forecast and radar target, not just search text.
    const location=studio.locator('[data-r589-weather-location="true"]');
    await location.waitFor({state:'visible'});
+   // R800: execute the Tucson target on both desktop and mobile; verify forecast and map receive it.
+   await location.locator('[data-r798-tucson-weather]').click();
+   await page.waitForFunction(()=>{
+    const target=document.querySelector('[data-r589-weather-target]')?.textContent||'';
+    const forecast=document.querySelector('[data-r563-forecast-panel] .earth-r375-head small')?.textContent||'';
+    return target.includes('32.22260')&&target.includes('-110.97470')&&forecast.includes('32.2226')&&forecast.includes('-110.9747');
+   },null,{timeout:30000});
+   await location.getByRole('button',{name:'Return to Earth target'}).click();
    await location.getByRole('textbox',{name:'Search Weather Studio location'}).fill('Tucson, Arizona');
    const responsePromise=page.waitForResponse(r=>r.url().includes('/api/earth/geocode?q=')&&r.request().method()==='GET',{timeout:45000});
    await location.getByRole('button',{name:'Find location'}).click();
@@ -91,6 +99,24 @@ try{
     const tx=(lon+180)/360*n,ty=(1-Math.asinh(Math.tan(latitude*Math.PI/180))/Math.PI)/2*n;
     return Math.abs(x-tx)<=3&&Math.abs(y-ty)<=3;
    },{lat:Number(expected.lat),lon:Number(expected.lon)},{timeout:30000});
+   // R804: changing search text must invalidate an older, deliberately delayed geocode response.
+   const pendingQuery='OMEGA stale geocode sentinel';
+   let releaseStale;
+   const staleRelease=new Promise(resolve=>{releaseStale=resolve});
+   await page.route('**/api/earth/geocode?q=*',async route=>{
+    if(new URL(route.request().url()).searchParams.get('q')!==pendingQuery){await route.continue();return}
+    await staleRelease;
+    try{await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({results:[{lat:1,lon:1,name:'Stale location'}]})})}catch{}
+   });
+   await location.getByRole('textbox',{name:'Search Weather Studio location'}).fill(pendingQuery);
+   const staleRequest=page.waitForRequest(r=>r.url().includes('/api/earth/geocode?')&&new URL(r.url()).searchParams.get('q')===pendingQuery,{timeout:15000});
+   await location.getByRole('button',{name:'Find location'}).click();
+   await staleRequest;
+   await location.getByRole('textbox',{name:'Search Weather Studio location'}).fill('Tucson');
+   releaseStale();
+   await page.waitForTimeout(250);
+   if(await location.getByRole('listbox',{name:'Weather location results'}).count())throw Error(name+': stale geocode results were applied after input edit');
+   await page.unroute('**/api/earth/geocode?q=*');
    await location.getByRole('button',{name:'Return to Earth target'}).click();
    const satPanel=studio.locator('[data-r563-satellite-panel="true"]');
    const forecastPanel=studio.locator('[data-r563-forecast-panel="true"]');

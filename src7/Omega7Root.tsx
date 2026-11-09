@@ -97,6 +97,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
   const href=nativeHistoryHrefR779(null,OMEGA7_NATIVE_ROUTES);
   if(new URLSearchParams(window.location.search).has('omega7route'))window.history.pushState({omega7Route:null},'',href);
   dispatch({type:'DOMAIN',domain});
+  dispatch({type:'SELECT_ROUTE',route:null});
  };
  const backToDomain=()=>{
   const href=nativeHistoryHrefR779(null,OMEGA7_NATIVE_ROUTES);

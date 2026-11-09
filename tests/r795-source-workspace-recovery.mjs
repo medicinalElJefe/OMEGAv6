@@ -83,3 +83,36 @@ assert.ok(sceneImport.includes('const startingProject=activeProjectIdR87()'));
 assert.ok(sceneImport.includes('const request=importGate.current.begin()'));
 assert.ok((sceneImport.match(/importGate\.current\.assertCurrent\(request\)/g)||[]).length>=2);
 assert.ok((sceneImport.match(/assertSourceWorkspaceProjectR795\(startingProject,activeProjectIdR87\(\)\)/g)||[]).length>=2);
+
+// R798 dedicated weather target must use a real geographic coordinate, not an Atlas address projection.
+const weatherUi=readFileSync(new URL('../src/WeatherObservationStudioR563.tsx',import.meta.url),'utf8');
+assert.ok(weatherUi.includes('data-r798-tucson-weather'));
+assert.ok(weatherUi.includes('setTarget({lat:32.2226,lon:-110.9747})'));
+assert.ok(weatherUi.includes('<WeatherRadarMapR580 lat={target.lat} lon={target.lon}/>'));
+
+// R799: weather geocoding must refuse superseded responses and invalid coordinates.
+assert.ok(weatherUi.includes('generation!==geocodeGeneration.current'));
+assert.ok(weatherUi.includes('generation===geocodeGeneration.current'));
+assert.ok(weatherUi.includes('cancelGeocode();setTarget({lat:32.2226,lon:-110.9747})'));
+assert.ok(weatherUi.includes('Math.abs(Number(x.lat))<=90&&Math.abs(Number(x.lon))<=180'));
+
+// R801: asynchronous scene evidence must remain tied to the originating project.
+assert.ok(sceneImport.includes('recordProjectOperationR87(startingProject||undefined,event)'));
+assert.ok(sceneImport.includes('finally{if(importGate.current.isCurrent(request))setSceneBusy(false)}'));
+assert.ok((sceneImport.match(/assertSourceWorkspaceProjectR795\(startingProject,activeProjectIdR87\(\)\)/g)||[]).length>=4);
+
+// R802: editing the location input must invalidate any pending geocode response.
+assert.ok(weatherUi.includes('onChange={e=>{cancelGeocode();setPlaceQuery(e.target.value);setPlaceResults([]);setPlaceError(\'\')}}'));
+
+// R803: check project and latest-request authority before publishing imported scene evidence.
+const emissionIndex=sceneImport.indexOf('const event=await emitOperationR86');
+assert.ok(emissionIndex>0);
+assert.ok(sceneImport.slice(emissionIndex-180,emissionIndex).includes('importGate.current.assertCurrent(request)'));
+assert.ok(sceneImport.slice(emissionIndex-180,emissionIndex).includes('assertSourceWorkspaceProjectR795(startingProject,activeProjectIdR87())'));
+
+// R805: native Create must expose the inherited SOMA executor, without auto-starting audio.
+const createUi=readFileSync(new URL('../src7/workspaces/WorkCreateWorkspaceR443.tsx',import.meta.url),'utf8');
+assert.ok(createUi.includes("lazy(()=>import('../../src/SomaAudioEngine'))"));
+assert.ok(createUi.includes("route==='Create'&&<section data-r805-create-sound-temple"));
+assert.ok(createUi.includes('soundOpen&&<Suspense'));
+assert.ok(createUi.includes('<SomaAudioEngine record={record}/>'));

@@ -1,4 +1,4 @@
-import {useEffect,useMemo,useState} from 'react';
+import {lazy,Suspense,useEffect,useMemo,useState} from 'react';
 import OmegaWorkspaceCockpitR18 from '../../src/OmegaWorkspaceCockpitR18';
 import OmegaSpecialistSuite from '../../src/OmegaSpecialistSuite';
 import {MemoryRecoveryR722} from './MemoryRecoveryR722';
@@ -8,6 +8,8 @@ import OmegaIntentWorkbenchR85 from '../../src/OmegaIntentWorkbenchR85';
 import {api} from '../../src/platformAdapter';
 import {corpusState,decodeAddress,evaluateCorpusModes,initCorpusPack} from '../../src/corpusRuntime';
 import type {Omega7Depth} from '../capabilityRegistry';
+
+const SomaAudioEngine=lazy(()=>import('../../src/SomaAudioEngine'));
 
 export type Omega7WorkCreateRoute='Workspace'|'Projects'|'Memory'|'Create'|'Render Queue'|'Assets';
 type Props={route:Omega7WorkCreateRoute;onNavigate:(route:string)=>void;depth:Omega7Depth;autoOpen?:boolean};
@@ -19,6 +21,8 @@ const writeAddress=(n:number)=>{const next=clamp(n);try{localStorage.setItem('om
 export default function WorkCreateWorkspaceR443({route,onNavigate,depth,autoOpen=false}:Props){
  const[ready,setReady]=useState(false),[error,setError]=useState(''),[address,setAddress]=useState(readAddress),[instrumentOpen,setInstrumentOpen]=useState(depth!=='STANDARD'||autoOpen);
  const[status,setStatus]=useState<any>(null),[restore,setRestore]=useState<any>(null),[uiMode,setUiMode]=useState('AUTO');
+ const[soundOpen,setSoundOpen]=useState(false);
+ useEffect(()=>{if(route!=='Create')setSoundOpen(false)},[route]);
  useEffect(()=>{setInstrumentOpen(depth!=='STANDARD'||autoOpen)},[depth,route,autoOpen]);
  useEffect(()=>{let live=true;initCorpusPack().then(()=>{if(live){setReady(true);setError('')}}).catch(e=>{if(live)setError(e instanceof Error?e.message:String(e))});return()=>{live=false}},[]);
  useEffect(()=>{let live=true;Promise.all([api.get<any>('/api/status'),api.get<any>('/api/restoration')]).then(([s,r])=>{if(live){setStatus(s.data);setRestore(r.data)}}).catch(()=>{});return()=>{live=false}},[]);
@@ -58,6 +62,13 @@ export default function WorkCreateWorkspaceR443({route,onNavigate,depth,autoOpen
     <div><span>Authority boundary</span><b>Preserved</b><small>local work does not silently become CanonState or external execution</small></div>
    </div>
    <button className='o7-open-instrument' onClick={()=>setInstrumentOpen(true)}>Open full {route} workspace</button>
+  </section>}
+
+  {route==='Create'&&<section data-r805-create-sound-temple='true' aria-label='Sound Temple' className='o7-native-surface'>
+   <h2>Sound Temple · SOMA</h2>
+   <p>12-phase local Atlas sonification. Audio is off until explicitly started in the instrument. These tones represent model states, not measured physical frequencies.</p>
+   <button type='button' aria-expanded={soundOpen} onClick={()=>setSoundOpen(open=>!open)}>{soundOpen?'Close Sound Temple':'Open Sound Temple'}</button>
+   {soundOpen&&<Suspense fallback={<p role='status'>Loading local sound instrument…</p>}><SomaAudioEngine record={record}/></Suspense>}
   </section>}
 
   {instrumentOpen&&<div className='o7-native-surface'>

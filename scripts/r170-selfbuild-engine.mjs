@@ -5,6 +5,7 @@ import path from 'node:path';
 import {planGovernedCandidateR245} from './lib/r245-governed-selfbuild-selection.mjs';
 import {capsuleBodyR245,deriveResidualGateR245,R245_GOVERNED_SELFBUILD_CONTRACT,R245_CAPSULE_GENERATOR_REVISION} from '../src/system/governedSelfBuildContractR245.js';
 import {validateWorkerAttestationR503} from '../src/system/calculusNativeAutonomyR503.js';
+import {writeSuccessorProposalR812} from './r812-selfbuild-successor-cycle.mjs';
 
 const STATE_PATH='public/omega-r170-selfbuild-state.json';
 const CANDIDATE_PATH='public/omega-r170-selfbuild-candidate.json';
@@ -61,6 +62,12 @@ if((state.admittedSourceCapsules||[]).length>=Number(state.maxAutonomousGenerati
  if(successorManifestPath){
   try{
    const manifest=JSON.parse(fs.readFileSync(successorManifestPath,'utf8'));
+   const proposalOutput=String(process.env.OMEGA_R812_SUCCESSOR_PROPOSAL_PATH||'').trim();
+   if(proposalOutput){
+    const proposed=writeSuccessorProposalR812({priorState:state,manifest,output:proposalOutput});
+    emitProposal({status:proposed.status,generation:state.generation,reasons:proposed.reasons,successorProposalPath:proposed.cycle?proposalOutput:null,sourceMutationAuthorized:false,canonicalAdmission:false},true);
+    process.exit(0);
+   }
    const bytesProof=verifySuccessorSourcesR542(manifest);
    const residualGate=deriveResidualGateR245(readResidualEvidence(),state.residualPolicy);
    const workerProofRequired=REQUIRE_R503&&workerAdmissionR503.valid;
