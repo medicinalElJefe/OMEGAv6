@@ -42,11 +42,11 @@ jobs:
             *) echo "Untrusted manifest path"; exit 1 ;;
           esac
           test -f "$MANIFEST_PATH"
-          node scripts/r814-verify-production-and-review.mjs "$MANIFEST_PATH" /tmp/omega-r814-successor-review.json
+          node scripts/r814-verify-production-and-review.mjs "$MANIFEST_PATH" artifacts/omega-r814-successor-review.json
       - name: Upload read-only review evidence
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: omega-r814-successor-review
-          path: /tmp/omega-r814-successor-review.json
+          path: artifacts/omega-r814-successor-review.json
           retention-days: 14
