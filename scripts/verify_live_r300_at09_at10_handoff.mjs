@@ -15,22 +15,16 @@ async function text(path){
  }
  return body
 }
-// R817: a freshly staged Durable Object may be briefly unavailable. Retry only
-// the read-only status probe; never infer an offline host or promote a 503 to PASS.
-async function hybridStatusWithBoundedRetry(){
- const attempts=process.env.OMEGA_STAGED_READ_ONLY==='1'?4:1;
- for(let attempt=1;attempt<=attempts;attempt++){
-  try{return await text('/api/hybrid/status')}
-  catch(error){
-   if(attempt===attempts||!String(error?.message||'').includes('HYBRID_STATUS_RUNTIME_UNREACHABLE'))throw error;
-   console.warn(`R817 staged Hybrid Durable Object status UNKNOWN on attempt ${attempt}/${attempts}; retrying read-only, no proof promoted`);
-   await new Promise(resolve=>setTimeout(resolve,1500*attempt));
-  }
- }
- throw new Error('R817_STATUS_RETRY_EXHAUSTED');
-}
-const [html,client,contractRaw,statusRaw]=await Promise.all([text('/omega-pc-proof-r205.html'),text('/omega-pc-proof-r205.js'),text('/omega-r205-pc-proof-contract.json'),hybridStatusWithBoundedRetry()]);
-const contract=JSON.parse(contractRaw),status=JSON.parse(statusRaw);const must=(ok,msg)=>{if(!ok)throw new Error(`R300 live handoff failed: ${msg}`)};
+// The 0%-traffic candidate owns no promoted-live Durable Object status proof.
+// Verify immutable R300 surface/contract at staging; defer heartbeat to the
+// promoted-live R202 chain. No online/offline assertion is manufactured here.
+const staged=process.env.OMEGA_STAGED_READ_ONLY==='1';
+const [html,client,contractRaw,statusRaw]=await Promise.all([
+ text('/omega-pc-proof-r205.html'),text('/omega-pc-proof-r205.js'),
+ text('/omega-r205-pc-proof-contract.json'),
+ staged?Promise.resolve(null):text('/api/hybrid/status')
+]);
+const contract=JSON.parse(contractRaw),status=statusRaw===null?null:JSON.parse(statusRaw);const must=(ok,msg)=>{if(!ok)throw new Error(`R300 live handoff failed: ${msg}`)};
 must(html.includes('data-r300-handoff="ARMED_EXPLICIT_CONFIRMATION"'),'served proof surface lacks R300 handoff identity');
 must(html.includes('Arm once even when the host is offline.'),'served proof surface lacks offline-arm instruction');
 must(html.includes('no command is queued while no eligible authenticated R205 host exists'),'served proof surface lost non-execution truth boundary');
@@ -42,6 +36,11 @@ must(contract.schema==='OMEGA_PC_PROOF_CLOSURE_R205','R205 contract identity dri
 must(contract.authority?.explicitConfirmationRequired===true,'explicit confirmation requirement drifted');
 must(contract.authority?.r141FingerprintVerificationRequired===true,'R141 fingerprint requirement drifted');
 must(contract.authority?.canonicalAdmissionAuthority==='R125'&&contract.authority?.canonicalMutation===false,'R125/no-Canon-mutation boundary drifted');
+if(staged){
+ console.log(`R300 STAGED AT09/AT10 SURFACE PASS · ${base}/omega-pc-proof-r205.html · Hybrid DO/heartbeat status UNKNOWN (deferred to promoted-live R202) · armed state non-execution · one governed /api/missions path · R141 + R125 authority preserved`);
+}else{
 const current=Array.isArray(status.devices)?status.devices.filter(d=>d?.online&&!d?.revoked):[];
 if(status.state==='VERIFIED_DEVICE_ONLINE')must(status.nativeExecutionClaimed===true&&current.length>0,'live status claims verified device without current authenticated heartbeat');else if(status.state==='DEVICE_PROOF_REQUIRED')must(status.nativeExecutionClaimed===false&&current.length===0,'device-proof-required state conflicts with current heartbeat truth');else throw new Error(`R300 live handoff received unsupported Hybrid truth state ${status.state}`);
 console.log(`R300 LIVE AT09/AT10 HANDOFF PASS · ${base}/omega-pc-proof-r205.html · ${current.length} current authenticated host(s) · armed state remains non-execution · one governed /api/missions path · DESKTOP_HEALTH + FORENSIC_HASH_LEDGER only · R141 verification + R125 Canon authority preserved`);
+
+}
