@@ -33,6 +33,7 @@ jobs:
           node tests/r812-selfbuild-successor-cycle.mjs
           node tests/r813-independent-production-verifier.mjs
           node tests/r815-lemma-chain-atlas.mjs
+          node tests/r816-executed-lemma-workers.mjs
       - name: Prove R163 canonical core-health boundary
         run: node tests/r163-canonical-core-health-truth-invariants.mjs
       - name: Prove R200.1 deployed total-experience proof boundaries
