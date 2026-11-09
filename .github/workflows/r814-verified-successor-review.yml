@@ -41,6 +41,7 @@ jobs:
             manifests/selfbuild/*.json) ;;
             *) echo "Untrusted manifest path"; exit 1 ;;
           esac
+          case "$MANIFEST_PATH" in *..*|*//*|*\\\\*) echo "Manifest traversal refused"; exit 1 ;; esac
           test -f "$MANIFEST_PATH"
           node scripts/r814-verify-production-and-review.mjs "$MANIFEST_PATH" artifacts/omega-r814-successor-review.json
       - name: Upload read-only review evidence
