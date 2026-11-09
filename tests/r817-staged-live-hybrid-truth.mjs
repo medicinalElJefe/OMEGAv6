@@ -45,4 +45,13 @@ for(const mode of ['staged','live-pass','live-fail']){
  assert.equal(result.status,0,`R817 ${mode} execution failed: ${result.stderr} ${result.stdout}`);
  assert.match(result.stdout,/R817_FIXTURE_PASS:/);
 }
+
+// The outer staged release verifier previously queried the Durable Object
+// directly even after the R300 child verifier was corrected. Guard both paths.
+const stagedRelease=await import('node:fs').then(fs=>fs.readFileSync('scripts/verify_staged_release.mjs','utf8'));
+assert.doesNotMatch(stagedRelease,/get\(['"]\/api\/hybrid\/status['"]\)/,
+  '0%-traffic staged release must not request Hybrid Durable Object status');
+assert.match(stagedRelease,/OMEGA_STAGED_READ_ONLY:'1'/,
+  'staged child source-authority verifier must receive read-only mode');
+
 console.log('R817 PASS: staged avoids DO status, promoted-live checks real status, 503 fails closed');
