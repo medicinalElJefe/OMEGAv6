@@ -1,0 +1,52 @@
+name: R814 · Independently verified SAI successor review
+on:
+  workflow_dispatch:
+    inputs:
+      manifest_path:
+        description: 'Checked-in successor manifest path'
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: omega-r814-successor-review
+  cancel-in-progress: false
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: production
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Verify R812 and R813 refusal controls
+        run: |
+          node tests/r812-selfbuild-successor-cycle.mjs
+          node tests/r813-independent-production-verifier.mjs
+      - name: Verify live production and prepare inactive successor review
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+          MANIFEST_PATH: ${{ inputs.manifest_path }}
+        run: |
+          case "$MANIFEST_PATH" in
+            manifests/selfbuild/*.json) ;;
+            *) echo "Untrusted manifest path"; exit 1 ;;
+          esac
+          test -f "$MANIFEST_PATH"
+          node scripts/r814-verify-production-and-review.mjs "$MANIFEST_PATH" /tmp/omega-r814-successor-review.json
+      - name: Upload read-only review evidence
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: omega-r814-successor-review
+          path: /tmp/omega-r814-successor-review.json
+          retention-days: 14
