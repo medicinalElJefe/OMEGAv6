@@ -46,6 +46,6 @@ try{
  fs.writeFileSync(absolute,'export const r816Fixture = 0;\n');
  const drift=deriveSourceBackedLemmasR816({root,manifest,priorState});
  assert.equal(drift.evidence.SOURCE.status,'FAIL');
- assert.throws(()=>executeSourceBackedLemmaWorkersR816({root,manifest,priorState,parallelism:0}));
+ await assert.rejects(executeSourceBackedLemmaWorkersR816({root,manifest,priorState,parallelism:0}),/INVALID_PARALLELISM/);
  console.log('R816 PASS: 4 real Node worker threads, 144 independently checked receipts, 20,736 evaluated addresses, source drift refusal');
 }finally{fs.rmSync(root,{recursive:true,force:true})}
