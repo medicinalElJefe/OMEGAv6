@@ -30,11 +30,12 @@ export async function verifyIndependentProductionR813({
   const runs=await get('https://api.github.com/repos/'+repository+'/actions/runs?head_sha='+expectedSha+'&per_page=100',{headers});
   const run=(Array.isArray(runs.workflow_runs)?runs.workflow_runs:[]).find(r=>validRun(r,expectedSha));
   if(!run)return fail('NO_SUCCESSFUL_EXACT_MAIN_WORKFLOW_RUN');
-  const deployment=await get(target.href,{headers:{Accept:'application/json','Cache-Control':'no-cache'}});
-  // Explicit identity contract: never infer SHA from HTML, package versions, or manifest claims.
-  const live=shaOf(deployment?.gitSha)||shaOf(deployment?.commitSha);
-  if(live!==expectedSha)return fail('LIVE_RUNTIME_SHA_MISMATCH_OR_ABSENT');
-  if(deployment?.production!==true)return fail('LIVE_PRODUCTION_IDENTITY_ABSENT');
+  const receiptUrl=new URL('/omega-build-receipt.json',target.origin);
+  const deployment=await get(receiptUrl.href,{headers:{Accept:'application/json','Cache-Control':'no-cache'}});
+  if(deployment?.schema!=='OMEGA_GOVERNED_BUILD_RECEIPT_V1')return fail('LIVE_BUILD_RECEIPT_SCHEMA_INVALID');
+  const live=shaOf(deployment?.source?.sha);
+  if(live!==expectedSha||deployment?.promotion?.promotedMergeSha!==expectedSha)return fail('LIVE_RUNTIME_SHA_MISMATCH_OR_ABSENT');
+  if(deployment?.promotion?.authority!=='GITHUB_MERGE_PARENTS')return fail('LIVE_PROMOTION_AUTHORITY_INVALID');
   // A JSON flag from the Worker cannot independently prove browser behavior.
   if(typeof verifyBrowser!=='function')return fail('INDEPENDENT_BROWSER_VERIFIER_REQUIRED');
   const browser=await verifyBrowser({url:target.href,expectedSha,timeoutMs});
