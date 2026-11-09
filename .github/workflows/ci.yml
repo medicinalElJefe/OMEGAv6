@@ -34,6 +34,14 @@ jobs:
           node tests/r813-independent-production-verifier.mjs
           node tests/r815-lemma-chain-atlas.mjs
           node tests/r816-executed-lemma-workers.mjs
+      - name: Execute and record R816 PR-level 20,736-cell proof
+        run: node scripts/r816-ci-execution-receipt.mjs
+      - name: Preserve actual R816 hash-chain execution artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: omega-r816-20736-cell-ci-receipts
+          path: artifacts/r816-ci-cell-execution-receipt.json
+          retention-days: 14
       - name: Prove R163 canonical core-health boundary
         run: node tests/r163-canonical-core-health-truth-invariants.mjs
       - name: Prove R200.1 deployed total-experience proof boundaries
