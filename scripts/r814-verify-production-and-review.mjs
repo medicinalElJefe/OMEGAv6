@@ -4,7 +4,7 @@ import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {verifyIndependentProductionR813} from './r813-independent-production-verifier.mjs';
 import {verifyAndPrepareSuccessorCycleR812} from './r812-selfbuild-successor-cycle.mjs';
-import {compileLemmaAtlasR815} from './r815-lemma-chain-atlas.mjs';
+import {executeSourceBackedLemmaWorkersR816} from './r816-executed-lemma-workers.mjs';
 const exec=promisify(execFile);
 const [manifestPath,outputPath]=process.argv.slice(2);
 if(!manifestPath||!outputPath)throw Error('Usage: node scripts/r814-verify-production-and-review.mjs manifest.json output.json');
@@ -38,18 +38,17 @@ const result=await verifyAndPrepareSuccessorCycleR812({
  })
 });
 const verified=result.status==='VERIFIED_FOR_SEPARATE_GOVERNED_REVIEW';
-const proofSha=verified?result.cycle?.predecessor?.productionSha:null;
-const {createHash}=await import('node:crypto');
-const proofDigest=proofSha?createHash('sha256').update(JSON.stringify(result.independentProductionProof)).digest('hex'):null;
-const atlas=compileLemmaAtlasR815({evidence:verified?{
- SOURCE:{status:'PASS',proofSha256:proofDigest},IDENTITY:{status:'PASS',proofSha256:proofDigest},
- BROWSER:{status:'PASS',proofSha256:proofDigest},RELEASE:{status:'PASS',proofSha256:proofDigest}
-}: {}});
 if(!verified){
  console.error(JSON.stringify({status:result.status,reasons:result.reasons}));
  process.exitCode=2;
 }else{
+ const execution=await executeSourceBackedLemmaWorkersR816({
+  root,manifest,priorState,independentProductionProof:result.independentProductionProof,parallelism:12
+ });
+ if(!execution.audit.valid||execution.executedCellCount!==20736){
+  throw Error('R816_EXECUTION_RECEIPT_VERIFICATION_FAILED');
+ }
  fs.mkdirSync(path.dirname(target),{recursive:true});
- fs.writeFileSync(target,JSON.stringify({schema:'OMEGA_R814_VERIFIED_SUCCESSOR_REVIEW',cycle:result.cycle,proof:result.independentProductionProof,lemmaAtlasR815:atlas},null,2)+'\n',{flag:'wx'});
- console.log(JSON.stringify({status:result.status,output:target,active:result.cycle.active,sourceMutationAuthorized:result.cycle.sourceMutationAuthorized}));
+ fs.writeFileSync(target,JSON.stringify({schema:'OMEGA_R814_VERIFIED_SUCCESSOR_REVIEW',cycle:result.cycle,proof:result.independentProductionProof,lemmaAtlasR815:execution.atlas,executedLemmaWorkersR816:execution},null,2)+'\n',{flag:'wx'});
+ console.log(JSON.stringify({status:result.status,output:target,active:result.cycle.active,sourceMutationAuthorized:result.cycle.sourceMutationAuthorized,executedCellCount:execution.executedCellCount,lemmaDecision:execution.decision}));
 }
