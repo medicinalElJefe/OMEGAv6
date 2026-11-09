@@ -8,7 +8,10 @@ async function text(path){
   const ray=r.headers.get('cf-ray')||'UNAVAILABLE';
   const type=r.headers.get('content-type')||'UNAVAILABLE';
   const stage=process.env.OMEGA_STAGED_READ_ONLY==='1'?'STAGED_READ_ONLY':'LIVE';
-  throw new Error(`R300 ${path} HTTP ${r.status} stage=${stage} cf-ray=${ray} content-type=${type} body=${body.slice(0,240)}`);
+  let code='UNPARSEABLE',truth='UNAVAILABLE';
+  try{const payload=JSON.parse(body);code=String(payload?.code||'UNSPECIFIED');truth=String(payload?.truthBoundary||'UNAVAILABLE')}catch{}
+  const candidateOverride=process.env.OMEGA_WORKER_VERSION_ID?'PRESENT':'ABSENT';
+  throw new Error(`R300 ${path} HTTP ${r.status} stage=${stage} cf-ray=${ray} content-type=${type} code=${code} truthBoundary=${truth} versionOverride=${candidateOverride} body=${body.slice(0,240)}`);
  }
  return body
 }
