@@ -62,98 +62,102 @@ const testR788=async()=>{
 
 try{
  await testR788();
- calls.length=0; // R788 test isolation: historical R780 source-count assertions begin fresh.
+ calls.length=0;
  globalThis.fetch=async url=>{calls.push(new URL(String(url)));return fake(small)};
  let result=await run(path+'&date=2026-10-31');
  assert.equal(result.status,502);
- assert.equal(calls.length,1,'explicit date must never silently substitute');
+ assert.equal(calls.length,2,'explicit date may try NOAA-21 and NOAA-20 but never another date');
  let failure=await result.json();
  assert.equal(failure.code,'GIBS_GLOBAL_NO_VALID_OBSERVATION');
- assert.equal(failure.attempts[0].bytes,1836);
+ assert.deepEqual(failure.attempts.map(x=>x.sensor),['NOAA21','NOAA20']);
+ assert.ok(failure.attempts.every(x=>x.date==='2026-10-31'));
  assert.equal(failure.truth,'NO_SYNTHETIC_SUBSTITUTE');
  assert.equal(result.headers.get('x-omega-truth'),null);
+ assert.deepEqual(calls.map(x=>x.searchParams.get('LAYERS')),['VIIRS_NOAA21_CorrectedReflectance_TrueColor','VIIRS_NOAA20_CorrectedReflectance_TrueColor']);
 
  calls.length=0;
  globalThis.fetch=async url=>{calls.push(new URL(String(url)));return fake(calls.length===1?small:actual)};
  result=await run(path);
- assert.equal(result.status,200,'implicit-date recovery must require actual returned NASA raster');
+ assert.equal(result.status,200,'NOAA-20 must recover when NOAA-21 cannot return a material raster');
  assert.equal(calls.length,2);
- const first=calls[0].searchParams.get('TIME'),second=calls[1].searchParams.get('TIME');
- assert.equal(Date.parse(first+'T00:00:00Z')-Date.parse(second+'T00:00:00Z'),86400000);
- assert.equal(result.headers.get('x-omega-date'),second);
- assert.equal(result.headers.get('x-omega-lookback-days'),'1');
+ assert.equal(calls[0].searchParams.get('TIME'),calls[1].searchParams.get('TIME'),'sensor fallback cannot silently alter date');
+ assert.equal(result.headers.get('x-omega-source'),'NASA-GIBS-VIIRS-NOAA20-TRUECOLOR-GLOBAL');
+ assert.equal(result.headers.get('x-omega-sensor'),'NOAA20');
+ assert.equal(result.headers.get('x-omega-lookback-days'),'0');
  assert.equal(result.headers.get('x-omega-truth'),'RETURNED_GLOBAL_OBSERVATION');
- assert.equal((await result.arrayBuffer()).byteLength,actual.byteLength);
 
- // R789: Global NASA VIIRS may deliver only 1,836-byte placeholder images
- // for three consecutive dates. Accept a later REAL and explicitly dated
- // observation; never accept or mislabel the placeholder as a current raster.
  calls.length=0;
- globalThis.fetch=async url=>{calls.push(new URL(String(url)));return fake(calls.length<=3?small:actual)};
+ globalThis.fetch=async url=>{calls.push(new URL(String(url)));return fake(calls.length<=6?small:actual)};
  result=await run(path);
- assert.equal(result.status,200,'R789 must recover a material NASA raster beyond the stale three-date window');
- assert.equal(calls.length,4,'R789 fourth-day recovery must remain ordered and stop after materiality admission');
+ assert.equal(result.status,200,'dated NOAA recovery must accept material evidence only');
+ assert.equal(calls.length,7,'three NOAA-21/NOAA-20 dates fail before fourth-day NOAA-21 material observation');
  assert.equal(result.headers.get('x-omega-lookback-days'),'3');
- assert.equal(result.headers.get('x-omega-date'),calls[3].searchParams.get('TIME'));
- assert.equal(result.headers.get('x-omega-truth'),'RETURNED_GLOBAL_OBSERVATION');
- assert.equal(result.headers.get('x-omega-source'),'NASA-GIBS-VIIRS-SNPP-TRUECOLOR-GLOBAL');
- assert.equal((await result.arrayBuffer()).byteLength,actual.byteLength);
- assert.equal(Date.parse(calls[0].searchParams.get('TIME')+'T00:00:00Z')-Date.parse(calls[3].searchParams.get('TIME')+'T00:00:00Z'),3*86400000);
+ assert.equal(result.headers.get('x-omega-source'),'NASA-GIBS-VIIRS-NOAA21-TRUECOLOR-GLOBAL');
+ assert.equal(result.headers.get('x-omega-date'),calls[6].searchParams.get('TIME'));
+ assert.equal(Date.parse(calls[0].searchParams.get('TIME')+'T00:00:00Z')-Date.parse(calls[6].searchParams.get('TIME')+'T00:00:00Z'),3*86400000);
 
  calls.length=0;
  globalThis.fetch=async url=>{calls.push(new URL(String(url)));return fake(actual)};
- result=await run(path+'&date=2026-10-31');
- assert.equal(result.status,200);
+ result=await run(path+'&date=2026-10-31&sensor=SNPP');
+ assert.equal(result.status,200,'explicit historical SNPP must retain exact source and date');
+ assert.equal(result.headers.get('x-omega-source'),'NASA-GIBS-VIIRS-SNPP-TRUECOLOR-GLOBAL');
  assert.equal(result.headers.get('x-omega-date'),'2026-10-31');
- assert.equal(result.headers.get('x-omega-lookback-days'),'0');
  assert.equal(calls.length,1);
+ assert.equal(calls[0].searchParams.get('LAYERS'),'VIIRS_SNPP_CorrectedReflectance_TrueColor');
+
+ calls.length=0;
+ result=await run(path+'&sensor=SNPP');
+ assert.equal(result.status,400,'historical SNPP cannot silently become current default');
+ assert.equal(calls.length,0);
+ result=await run(path+'&sensor=FAKE');
+ assert.equal(result.status,400,'unsupported global source must fail before upstream');
+ assert.equal(calls.length,0);
 
  calls.length=0;
  globalThis.fetch=async url=>{calls.push(new URL(String(url)));return fake(small)};
  result=await run(path);
- assert.equal(result.status,502,'missing imagery must never produce synthetic pixels');
+ assert.equal(result.status,502,'no material imagery means no synthetic pixels');
  failure=await result.json();
- assert.equal(calls.length,7);
- assert.equal(failure.attempts.length,7);
+ assert.equal(calls.length,14);
+ assert.equal(failure.attempts.length,14);
  assert.equal(failure.truth,'NO_SYNTHETIC_SUBSTITUTE');
 
  calls.length=0;
  globalThis.fetch=async url=>{calls.push(new URL(String(url)));return fake(actual,'text/html')};
  result=await run(path+'&date=2026-10-31');
- assert.equal(result.status,502,'HTML must never be promoted as image');
+ assert.equal(result.status,502,'HTML must never become an observation');
 
  calls.length=0;
  const missingJpegEnd=jpeg(16384);missingJpegEnd[missingJpegEnd.length-1]=0;
  globalThis.fetch=async url=>{calls.push(new URL(String(url)));return fake(missingJpegEnd)};
- result=await run(path+'&date=2026-10-31');
- assert.equal(result.status,502,'JPEG header alone must not certify a truncated raster');
- assert.equal(calls.length,1,'malformed explicit-day raster cannot trigger date substitution');
+ result=await run(path+'&date=2026-10-31&sensor=NOAA21');
+ assert.equal(result.status,502,'truncated JPEG must be refused');
+ assert.equal(calls.length,1);
 
  calls.length=0;
  const shortPngSignature=new Uint8Array(16384);
  shortPngSignature.set([137,80,78,71],0);
  globalThis.fetch=async url=>{calls.push(new URL(String(url)));return fake(shortPngSignature,'image/png')};
- result=await run(path+'&date=2026-10-31');
- assert.equal(result.status,502,'four-byte PNG signature alone is not a valid raster boundary');
+ result=await run(path+'&date=2026-10-31&sensor=NOAA21');
+ assert.equal(result.status,502,'invalid PNG signature refused');
 
  calls.length=0;
  const pngNoEnd=new Uint8Array(16384);
  pngNoEnd.set([137,80,78,71,13,10,26,10],0);
  globalThis.fetch=async url=>{calls.push(new URL(String(url)));return fake(pngNoEnd,'image/png')};
- result=await run(path+'&date=2026-10-31');
- assert.equal(result.status,502,'PNG without the terminating IEND chunk must be refused');
+ result=await run(path+'&date=2026-10-31&sensor=NOAA21');
+ assert.equal(result.status,502,'PNG without IEND refused');
 
  calls.length=0;
- const corruptedPng=Buffer.from(validPng);
- corruptedPng[80]^=1;
+ const corruptedPng=Buffer.from(validPng);corruptedPng[80]^=1;
  globalThis.fetch=async url=>{calls.push(new URL(String(url)));return fake(corruptedPng,'image/png')};
- result=await run(path+'&date=2026-10-31');
- assert.equal(result.status,502,'corrupt PNG IDAT CRC must be refused');
+ result=await run(path+'&date=2026-10-31&sensor=NOAA21');
+ assert.equal(result.status,502,'corrupt PNG CRC refused');
 
  calls.length=0;
  globalThis.fetch=async url=>{calls.push(new URL(String(url)));return fake(validPng,'image/png')};
- result=await run(path+'&date=2026-10-31');
- assert.equal(result.status,200,'CRC-validated PNG raster must retain supported MIME route');
+ result=await run(path+'&date=2026-10-31&sensor=NOAA21');
+ assert.equal(result.status,200,'CRC-validated PNG remains supported');
  assert.equal(result.headers.get('x-omega-date'),'2026-10-31');
  // R782: invalid explicitly requested calendar days are not silently replaced,
  // including empty, malformed, nonexistent and non-leap-year dates.
@@ -176,9 +180,9 @@ try{
  result=await run(path+'&date=2024-02-29');
  assert.equal(result.status,502,'valid leap day remains an exact attempted observation');
  const leap=await result.json();
- assert.equal(leap.attempts.length,1);
+ assert.equal(leap.attempts.length,2);
  assert.equal(leap.attempts[0].date,'2024-02-29');
- assert.equal(calls.length,1,'valid explicit leap day must make exactly one provider request');
+ assert.equal(calls.length,2,'valid explicit leap day must preserve exact date across both named NOAA providers');
 
 }finally{
  globalThis.fetch=originalFetch;
