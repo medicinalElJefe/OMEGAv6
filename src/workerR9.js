@@ -105,6 +105,11 @@ function validGibsGlobalRasterR780(bytes,contentType){
  return (ct==='image/jpeg'||ct==='image/jpg')?validGibsJpegStructureR781(bytes)
   :ct==='image/png'&&validGibsPngStructureR781(bytes);
 }
+const GLOBAL_GIBS_SENSORS_R821=Object.freeze({
+ NOAA21:{layer:'VIIRS_NOAA21_CorrectedReflectance_TrueColor',source:'NASA-GIBS-VIIRS-NOAA21-TRUECOLOR-GLOBAL'},
+ NOAA20:{layer:'VIIRS_NOAA20_CorrectedReflectance_TrueColor',source:'NASA-GIBS-VIIRS-NOAA20-TRUECOLOR-GLOBAL'},
+ SNPP:{layer:'VIIRS_SNPP_CorrectedReflectance_TrueColor',source:'NASA-GIBS-VIIRS-SNPP-TRUECOLOR-GLOBAL'}
+});
 async function gibsGlobalImage(url){
  const admitted=admittedGibsDateR782(url);
  if(!admitted.date)return json({ok:false,code:'GIBS_INVALID_EXPLICIT_DATE',truth:'NO_DATE_SUBSTITUTION'},400);
@@ -113,22 +118,30 @@ async function gibsGlobalImage(url){
  const epoch=Date.parse(initialDate+'T00:00:00Z');
  const width=Math.round(clamp(Number(url.searchParams.get('width')||1440),720,2048));
  const height=Math.round(clamp(Number(url.searchParams.get('height')||720),360,1024));
+ const sensor=txt(url.searchParams.get('sensor')).toUpperCase();
+ if(sensor&&!Object.hasOwn(GLOBAL_GIBS_SENSORS_R821,sensor))return json({ok:false,code:'GIBS_UNSUPPORTED_GLOBAL_SENSOR',truth:'NO_SENSOR_SUBSTITUTION'},400);
+ // SNPP is historical and never the default latest source; a caller must
+ // explicitly choose it and pin a date. NOAA-21 primary, NOAA-20 secondary.
+ if(sensor==='SNPP'&&!requestedDate)return json({ok:false,code:'GIBS_SNPP_HISTORICAL_DATE_REQUIRED',truth:'NO_SENSOR_SUBSTITUTION'},400);
+ const candidates=sensor?[sensor]:['NOAA21','NOAA20'];
  const attempts=[];
- // Explicit dates are never silently substituted. Default global view may
- // inspect at most six earlier *dated, real* NASA observations to handle
- // upstream 1.8 KB placeholders on recent days. Explicit dates stay exact.
+ // Explicit dates are never silently substituted; implicit dates may search
+ // at most six preceding calendar days for each independently named sensor.
  for(let lookback=0;lookback<(requestedDate?1:7);lookback++){
   const date=Number.isFinite(epoch)?new Date(epoch-lookback*86400000).toISOString().slice(0,10):initialDate;
-  const params=new URLSearchParams({SERVICE:'WMS',REQUEST:'GetMap',VERSION:'1.1.1',LAYERS:'VIIRS_SNPP_CorrectedReflectance_TrueColor',STYLES:'',FORMAT:'image/jpeg',TRANSPARENT:'FALSE',SRS:'EPSG:4326',BBOX:'-180,-90,180,90',WIDTH:String(width),HEIGHT:String(height),TIME:date});
-  const source='https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?'+params;
-  try{
-   const response=await fetch(source,{cf:{cacheTtl:900,cacheEverything:false},signal:AbortSignal.timeout(10000)});
-   const ct=response.headers.get('content-type')||'';
-   if(!response.ok||!ct.startsWith('image/')){attempts.push({date,code:'UPSTREAM_NOT_IMAGE',status:response.status,contentType:ct});continue;}
-   const bytes=new Uint8Array(await response.arrayBuffer());
-   if(!validGibsGlobalRasterR780(bytes,ct)){attempts.push({date,code:'NO_VALID_OBSERVED_RASTER',bytes:bytes.byteLength,contentType:ct});continue;}
-   return new Response(bytes,{status:200,headers:{'content-type':ct,'cache-control':'public,max-age=900','x-omega-source':'NASA-GIBS-VIIRS-SNPP-TRUECOLOR-GLOBAL','x-omega-date':date,'x-omega-crs':'EPSG:4326','x-omega-bbox':'-180,-90,180,90','x-omega-truth':'RETURNED_GLOBAL_OBSERVATION','x-omega-lookback-days':String(lookback)}});
-  }catch(error){attempts.push({date,code:'UPSTREAM_FETCH_FAILED',error:error instanceof Error?error.name:'UNKNOWN'});}
+  for(const name of candidates){
+   const sensorConfig=GLOBAL_GIBS_SENSORS_R821[name];
+   const params=new URLSearchParams({SERVICE:'WMS',REQUEST:'GetMap',VERSION:'1.1.1',LAYERS:sensorConfig.layer,STYLES:'',FORMAT:'image/jpeg',TRANSPARENT:'FALSE',SRS:'EPSG:4326',BBOX:'-180,-90,180,90',WIDTH:String(width),HEIGHT:String(height),TIME:date});
+   const source='https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?'+params;
+   try{
+    const response=await fetch(source,{cf:{cacheTtl:900,cacheEverything:false},signal:AbortSignal.timeout(10000)});
+    const ct=response.headers.get('content-type')||'';
+    if(!response.ok||!ct.startsWith('image/')){attempts.push({date,sensor:name,code:'UPSTREAM_NOT_IMAGE',status:response.status,contentType:ct});continue;}
+    const bytes=new Uint8Array(await response.arrayBuffer());
+    if(!validGibsGlobalRasterR780(bytes,ct)){attempts.push({date,sensor:name,code:'NO_VALID_OBSERVED_RASTER',bytes:bytes.byteLength,contentType:ct});continue;}
+    return new Response(bytes,{status:200,headers:{'content-type':ct,'cache-control':'public,max-age=900','x-omega-source':sensorConfig.source,'x-omega-sensor':name,'x-omega-layer':sensorConfig.layer,'x-omega-date':date,'x-omega-crs':'EPSG:4326','x-omega-bbox':'-180,-90,180,90','x-omega-truth':'RETURNED_GLOBAL_OBSERVATION','x-omega-lookback-days':String(lookback)}});
+   }catch(error){attempts.push({date,sensor:name,code:'UPSTREAM_FETCH_FAILED',error:error instanceof Error?error.name:'UNKNOWN'});}
+  }
  }
  return json({ok:false,code:'GIBS_GLOBAL_NO_VALID_OBSERVATION',requestedDate:initialDate,attempts,truth:'NO_SYNTHETIC_SUBSTITUTE'},502);
 }
