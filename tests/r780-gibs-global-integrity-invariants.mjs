@@ -122,6 +122,21 @@ try{
  assert.equal(failure.attempts.length,14);
  assert.equal(failure.truth,'NO_SYNTHETIC_SUBSTITUTE');
 
+ // One wall-clock budget governs all seven dates/two sensors. Exhaustion is
+ // explicitly returned; it cannot hang beyond the UI deadline or invent pixels.
+ const actualDateNow=Date.now;
+ try{
+  let clock=0;Date.now=()=>clock;calls.length=0;
+  globalThis.fetch=async url=>{calls.push(new URL(String(url)));clock+=7500;return fake(small)};
+  result=await run(path);
+  assert.equal(result.status,502);
+  const budget=await result.json();
+  assert.equal(calls.length,2,'total source budget must stop serial NOAA fetches');
+  assert.equal(budget.attempts.length,3,'budget exhaustion must be an explicit final attempt');
+  assert.equal(budget.attempts.at(-1).code,'SOURCE_BUDGET_EXHAUSTED');
+  assert.equal(budget.truth,'NO_SYNTHETIC_SUBSTITUTE');
+ }finally{Date.now=actualDateNow}
+
  calls.length=0;
  globalThis.fetch=async url=>{calls.push(new URL(String(url)));return fake(actual,'text/html')};
  result=await run(path+'&date=2026-10-31');
