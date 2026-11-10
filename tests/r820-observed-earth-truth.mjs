@@ -3,7 +3,7 @@ import {readFileSync} from 'node:fs';
 import {classifyObservedEarthR820} from '../scripts/r820-observed-earth-truth.mjs';
 
 const path='/api/earth/gibs/global?width=720&height=360';
-const genuine={ok:false,code:'GIBS_GLOBAL_NO_VALID_OBSERVATION',requestedDate:'2026-11-09',attempts:[{date:'2026-11-09',code:'NO_VALID_OBSERVED_RASTER',bytes:1836,contentType:'image/jpeg'},{date:'2026-11-08',code:'UPSTREAM_FETCH_FAILED'}],truth:'NO_SYNTHETIC_SUBSTITUTE'};
+const genuine={ok:false,code:'GIBS_GLOBAL_NO_VALID_OBSERVATION',requestedDate:'2026-11-09',attempts:[{date:'2026-11-09',sensor:'NOAA21',code:'NO_VALID_OBSERVED_RASTER',bytes:1836,contentType:'image/jpeg'},{date:'2026-11-08',sensor:'NOAA20',code:'UPSTREAM_FETCH_FAILED'}],truth:'NO_SYNTHETIC_SUBSTITUTE'};
 const diagnostic=(value,status=502)=>new Response(JSON.stringify(value),{status,headers:{'content-type':'application/json'}});
 const missing=await classifyObservedEarthR820(diagnostic(genuine),path);
 assert.equal(missing.state,'DEGRADED');
@@ -12,14 +12,14 @@ assert.equal(missing.bytes,0);
 assert.equal(missing.sha,null);
 assert.equal(missing.attemptCount,2);
 assert.equal(missing.truth,'NO_SYNTHETIC_SUBSTITUTE');
-const imageHeaders={'content-type':'image/jpeg','x-omega-source':'NASA-GIBS-VIIRS-SNPP-TRUECOLOR-GLOBAL','x-omega-date':'2026-11-08','x-omega-crs':'EPSG:4326','x-omega-truth':'RETURNED_GLOBAL_OBSERVATION','x-omega-bbox':'-180,-90,180,90'};
+const imageHeaders={'content-type':'image/jpeg','x-omega-source':'NASA-GIBS-VIIRS-NOAA21-TRUECOLOR-GLOBAL','x-omega-date':'2026-11-08','x-omega-crs':'EPSG:4326','x-omega-truth':'RETURNED_GLOBAL_OBSERVATION','x-omega-bbox':'-180,-90,180,90'};
 const observed=await classifyObservedEarthR820(new Response(new Uint8Array(12032),{status:200,headers:imageHeaders}),path);
 assert.equal(observed.state,'OBSERVED');assert.equal(observed.bytes,12032);assert.match(observed.sha,/^[a-f0-9]{64}$/);
 async function refuses(response){await assert.rejects(()=>classifyObservedEarthR820(response,path))}
 await refuses(diagnostic({...genuine,code:'UNKNOWN_UPSTREAM_FAILURE'}));
 await refuses(diagnostic({...genuine,truth:'RETURNED_GLOBAL_OBSERVATION'}));
 await refuses(diagnostic({...genuine,attempts:[]}));
-await refuses(diagnostic({...genuine,attempts:[{date:'2026-11-09',code:'FABRICATED_OBSERVATION'}]}));
+await refuses(diagnostic({...genuine,attempts:[{date:'2026-11-09',sensor:'NOAA21',code:'FABRICATED_OBSERVATION'}]}));
 await refuses(diagnostic(genuine,503));
 await refuses(new Response('not-json',{status:502}));
 await refuses(new Response(new Uint8Array(1800),{status:200,headers:imageHeaders}));
