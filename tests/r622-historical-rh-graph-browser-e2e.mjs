@@ -25,6 +25,18 @@ try{
   const instrument=workspace.locator('[data-r621-historical-rh-graph="true"]');
   await instrument.waitFor({state:'visible',timeout:10000});
   if(!(await instrument.innerText()).includes('complete historical graph is not deployed'))throw Error(label+': source-completeness disclosure missing');
+  // R823: any original graph import is private to the browser session. Forged
+  // workbook bytes (even if the file has exactly the correct byte length)
+  // must not replace the independently admitted two-edge preview.
+  const upload=instrument.locator('[data-r823-original-workbook-input="true"]');
+  if(await upload.count()!==1)throw Error(label+': R823 original donor import control missing');
+  await upload.setInputFiles({name:'invalid.xlsx',mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',buffer:Buffer.alloc(64)});
+  await instrument.locator('[data-r823-import-status="REFUSED"]').waitFor({state:'visible',timeout:12000});
+  if(!(await instrument.locator('[data-r823-import-status="REFUSED"]').innerText()).includes('exact original workbook byte count'))throw Error(label+': undersized source not refused');
+  await upload.setInputFiles({name:'forged-sized.xlsx',mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',buffer:Buffer.alloc(2150619)});
+  await instrument.locator('[data-r823-import-status="REFUSED"]').waitFor({state:'visible',timeout:12000});
+  if(!(await instrument.locator('[data-r823-import-status="REFUSED"]').innerText()).includes('fingerprint mismatch'))throw Error(label+': same-sized forged donor was not rejected');
+  if(await instrument.locator('[data-r823-address-multiplicity]').count())throw Error(label+': forged donor gained full-graph authority');
   // Exercise actual canonical address propagation through the same handler used by the rest of OMEGA.
   const setAddress=async(value)=>{
    await page.evaluate(n=>{
