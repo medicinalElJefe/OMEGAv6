@@ -29,6 +29,9 @@ export function restoreComputationalSessionR711(serialized){
  const envelope=JSON.parse(serialized);
  if(envelope===null||typeof envelope!=='object'||Array.isArray(envelope)||
   envelope.schema!=='OMEGA_COMPUTATIONAL_SESSION_INPUT_R711'||
-  Object.keys(envelope).some(k=>!['schema','scenario','origin','target','mirrored'].includes(k)))throw Error('R711 unsupported session envelope');
+  Object.keys(envelope).length!==5||
+  !['schema','scenario','origin','target','mirrored'].every(k=>Object.hasOwn(envelope,k))||
+  typeof envelope.origin!=='string'||typeof envelope.target!=='string'||
+  typeof envelope.mirrored!=='boolean')throw Error('R711 unsupported session envelope');
  return executeComputationalSessionR711(envelope.scenario,{origin:envelope.origin,target:envelope.target,mirrored:envelope.mirrored});
 }
