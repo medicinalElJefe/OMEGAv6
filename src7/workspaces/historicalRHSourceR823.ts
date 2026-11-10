@@ -21,7 +21,6 @@ export type R823Graph={
  uniqueSourceAddresses:number;maxConceptsAtAddress:number
 };
 
-const fail=(condition:unknown,message:string):asserts condition=>{if(!condition)throw Error('R823 '+message)};
 function integer(value:Cell|undefined,label:string):number{
  if(typeof value==='boolean'||value===undefined||value===null)throw Error('R823 '+label+' invalid');
  const text=String(value);
