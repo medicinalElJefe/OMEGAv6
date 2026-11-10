@@ -34,8 +34,7 @@ try{
   await instrument.locator('[data-r823-import-status="REFUSED"]').waitFor({state:'visible',timeout:12000});
   if(!(await instrument.locator('[data-r823-import-status="REFUSED"]').innerText()).includes('exact original workbook byte count'))throw Error(label+': undersized source not refused');
   await upload.setInputFiles({name:'forged-sized.xlsx',mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',buffer:Buffer.alloc(2150619)});
-  await instrument.locator('[data-r823-import-status="REFUSED"]').waitFor({state:'visible',timeout:12000});
-  if(!(await instrument.locator('[data-r823-import-status="REFUSED"]').innerText()).includes('fingerprint mismatch'))throw Error(label+': same-sized forged donor was not rejected');
+  await page.waitForFunction(()=>document.querySelector('[data-r823-import-status="REFUSED"]')?.textContent?.includes('fingerprint mismatch'),null,{timeout:15000});
   if(await instrument.locator('[data-r823-address-multiplicity]').count())throw Error(label+': forged donor gained full-graph authority');
   // Exercise actual canonical address propagation through the same handler used by the rest of OMEGA.
   const setAddress=async(value)=>{
