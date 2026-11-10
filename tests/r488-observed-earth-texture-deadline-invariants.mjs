@@ -15,7 +15,7 @@ for(const token of [
  'Reload observed texture'
 ])assert.ok(globe.includes(token),`R488 observed-Earth transaction contract missing ${token}`);
 
-for(const token of ['EXPECTED_SOURCE','EXPECTED_CRS','EXPECTED_BBOX','EXPECTED_TRUTH','global source identity mismatch','global source CRS mismatch','global source bbox mismatch','global source truth mismatch','global source aspect mismatch'])assert.ok(globe.includes(token),`R488 must preserve R284 fail-close source identity rule ${token}`);
+for(const token of ['GLOBAL_SOURCES_R821','NASA-GIBS-VIIRS-NOAA21-TRUECOLOR-GLOBAL','NASA-GIBS-VIIRS-NOAA20-TRUECOLOR-GLOBAL','EXPECTED_CRS','EXPECTED_BBOX','EXPECTED_TRUTH','global source identity mismatch','global source CRS mismatch','global source bbox mismatch','global source truth mismatch','global source aspect mismatch'])assert.ok(globe.includes(token),`R488 must preserve R284 fail-close source identity rule ${token}`);
 assert.ok(globe.includes('unavailable source imagery is not replaced with invented satellite detail'),'R488 must preserve no-fabrication truth boundary');
 assert.ok(live.includes("data-source-state')==='OBSERVED'"),'R488 must not weaken R284 production acceptance below OBSERVED');
 assert.ok(live.includes("getByRole('button',{name:'Reload observed texture'})"),'R488 must retain bounded live reload exercise');
