@@ -13,7 +13,7 @@ try{
   const context=await browser.newContext({viewport});
   const page=await context.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(String(e)));
-  await page.route('**/api/earth/gibs/global?*',route=>route.fulfill({status:502,contentType:'application/json',body:JSON.stringify(fault)}));
+  await page.route(url=>url.pathname==='/api/earth/gibs/global',route=>route.fulfill({status:502,contentType:'application/json',body:JSON.stringify(fault)}));
   await page.goto(base+'/?omega6=1&r820-degraded='+name,{waitUntil:'domcontentloaded',timeout:45000});
   await page.getByLabel('Open Earth Now').click({timeout:20000});
   await page.waitForSelector('.earth-r279',{state:'visible',timeout:30000});
