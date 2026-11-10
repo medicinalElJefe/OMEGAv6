@@ -9,7 +9,7 @@ type Texture={width:number;height:number;data:Uint8ClampedArray;date:string;sour
 type Drag={x:number;y:number;lon:number;lat:number};
 type HoverSample={lat:number;lon:number;rgb:[number,number,number];solarElevation:number}|null;
 const defaultDate=()=>new Date(Date.now()-86400000).toISOString().slice(0,10);
-const EXPECTED_SOURCE='NASA-GIBS-VIIRS-SNPP-TRUECOLOR-GLOBAL';
+const GLOBAL_SOURCES_R821=['NASA-GIBS-VIIRS-NOAA21-TRUECOLOR-GLOBAL','NASA-GIBS-VIIRS-NOAA20-TRUECOLOR-GLOBAL'] as const;
 const EXPECTED_CRS='EPSG:4326';
 const EXPECTED_BBOX='-180,-90,180,90';
 const EXPECTED_TRUTH='RETURNED_GLOBAL_OBSERVATION';
@@ -58,7 +58,7 @@ export default function EarthObservedGlobeR281({address,targetLat,targetLon,evid
      const ct=r.headers.get('content-type')||'';
      if(!ct.startsWith('image/'))throw new Error(`global observed image returned ${ct||'unknown content type'}`);
      const source=r.headers.get('x-omega-source')||'',returnedDate=r.headers.get('x-omega-date')||date,crs=r.headers.get('x-omega-crs')||'',bbox=r.headers.get('x-omega-bbox')||'',truth=r.headers.get('x-omega-truth')||'';
-     if(source!==EXPECTED_SOURCE)throw new Error(`global source identity mismatch: ${source||'missing'}`);
+     if(!(GLOBAL_SOURCES_R821 as readonly string[]).includes(source))throw new Error(`global source identity mismatch: ${source||'missing'}`);
      if(crs!==EXPECTED_CRS)throw new Error(`global source CRS mismatch: ${crs||'missing'}`);
      if(bbox!==EXPECTED_BBOX)throw new Error(`global source bbox mismatch: ${bbox||'missing'}`);
      if(truth!==EXPECTED_TRUTH)throw new Error(`global source truth mismatch: ${truth||'missing'}`);
