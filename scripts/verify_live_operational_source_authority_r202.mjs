@@ -1,11 +1,12 @@
 import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {readFileSync} from 'node:fs';
+import {classifyObservedEarthR820} from './r820-observed-earth-truth.mjs';
 const base=(process.env.OMEGA_PUBLIC_URL||'https://omegav6.jeffdeweyeljefe.workers.dev').replace(/\/$/,'');
 const R205_BASE_SHA256='49a3be453b1e67e5eb7e8e29411e82f07d30d2fd45fa52fa0bf28ef57774a046';
 async function response(path){const r=await fetch(base+path,{headers:{'cache-control':'no-cache'}}),body=await r.text();if(!r.ok)throw new Error(`${path} HTTP ${r.status}: ${body.slice(0,240)}`);return{r,body}}
 async function text(path){return(await response(path)).body}
-async function observedEarth(){const path='/api/earth/gibs/global?width=720&height=360';const r=await fetch(base+path,{headers:{'cache-control':'no-cache','accept':'image/*'}});const body=new Uint8Array(await r.arrayBuffer());const ct=r.headers.get('content-type')||'',source=r.headers.get('x-omega-source')||'',date=r.headers.get('x-omega-date')||'',crs=r.headers.get('x-omega-crs')||'',truth=r.headers.get('x-omega-truth')||'',bbox=r.headers.get('x-omega-bbox')||'';if(!r.ok)throw new Error(`R282.1 global observed Earth ${path} HTTP ${r.status}: ${new TextDecoder().decode(body.slice(0,240))}`);if(!ct.startsWith('image/'))throw new Error(`R282.1 global observed Earth returned non-image ${ct||'NONE'}`);if(body.byteLength<12000)throw new Error(`R282.1 global observed Earth image too small: ${body.byteLength} bytes`);if(source!=='NASA-GIBS-VIIRS-SNPP-TRUECOLOR-GLOBAL')throw new Error(`R282.1 global source identity mismatch: ${source||'NONE'}`);if(!/^\d{4}-\d{2}-\d{2}$/.test(date))throw new Error(`R282.1 global observation date missing: ${date||'NONE'}`);if(crs!=='EPSG:4326'||truth!=='RETURNED_GLOBAL_OBSERVATION'||bbox!=='-180,-90,180,90')throw new Error(`R282.1 global projection/truth headers invalid: crs=${crs} truth=${truth} bbox=${bbox}`);const sha=createHash('sha256').update(body).digest('hex');return{bytes:body.byteLength,sha,source,date,crs,truth,bbox}}
+async function observedEarth(){const path='/api/earth/gibs/global?width=720&height=360';return classifyObservedEarthR820(await fetch(base+path,{headers:{'cache-control':'no-cache','accept':'image/*'}}),path)}
 const [html,core,client,health,r205html,r205client,r205contract,r2061html,r2061client,wrapperLive,baseLive,earthGlobal]=await Promise.all([
  text('/omega-operational-source-authority-r202.html'),text('/omega-operational-source-authority-r202-core.js'),text('/omega-operational-source-authority-r202.js'),text('/api/core-health'),text('/omega-pc-proof-r205.html'),text('/omega-pc-proof-r205.js'),text('/omega-r205-pc-proof-contract.json'),text('/omega-host-evidence-r2061.html'),text('/omega-host-evidence-r2061.js'),response('/api/hybrid/agent-download?r117=1&r120=1&r127=1&validator=zero-drift'),response('/omega-hybrid-agent-base-r205.py'),observedEarth()
 ]);
@@ -29,11 +30,12 @@ if(expectedBaseSha!==R205_BASE_SHA256)throw new Error(`repository immutable R205
 if(servedBaseSha!==R205_BASE_SHA256||baseLive.body!==expectedBaseText)throw new Error(`live immutable R205 base mismatch expected ${R205_BASE_SHA256} served ${servedBaseSha}`);
 for(const token of ["VERSION='R34.1'","CAPABILITY_REVISION='R132'","R205_PROOF_EXTENSION='R205'",'DESKTOP_HEALTH','FORENSIC_HASH_LEDGER','root-confined','shell=False',"'/api/hybrid/agent/heartbeat'", "'/api/hybrid/agent/result'"])if(!baseLive.body.includes(token))throw new Error(`live immutable R205 base contract missing ${token}`);
 await import('./verify_live_r300_at09_at10_handoff.mjs');
-console.log(`R202/R205/R206/R206.1/R207.2 LIVE PASS · R300 LIVE HANDOFF PASS · R282.1 GLOBAL OBSERVED EARTH PASS · ${base}/omega-operational-source-authority-r202.html · R141 wrapper sha256 ${servedWrapperSha} · immutable R205 base sha256 ${servedBaseSha} · global observed Earth ${earthGlobal.date} ${earthGlobal.bytes} bytes sha256 ${earthGlobal.sha} ${earthGlobal.crs} · exact-return truth gate · R206.1 read-only host evidence · armed AT09/AT10 handoff · R125 preserved`);
+console.log(`R202/R205/R206/R206.1/R207.2 LIVE PASS · R300 LIVE HANDOFF PASS · ${earthGlobal.state==='OBSERVED'?'R282.1 GLOBAL OBSERVED EARTH PASS':'R282.1 GLOBAL OBSERVED EARTH DEGRADED (NO_SYNTHETIC_SUBSTITUTE)'} · ${base}/omega-operational-source-authority-r202.html · R141 wrapper sha256 ${servedWrapperSha} · immutable R205 base sha256 ${servedBaseSha} · ${earthGlobal.state==='OBSERVED'?`global observed Earth ${earthGlobal.date} ${earthGlobal.bytes} bytes sha256 ${earthGlobal.sha} ${earthGlobal.crs}`:`global observed Earth unavailable for ${earthGlobal.date}; ${earthGlobal.code}, ${earthGlobal.attemptCount} upstream attempts; NO_SYNTHETIC_SUBSTITUTE`} · exact-return truth gate · R206.1 read-only host evidence · armed AT09/AT10 handoff · R125 preserved`);
 const promoted=String(process.env.OMEGA_PROMOTED_SHA||'').trim();
 if(promoted){
  await import('./verify_live_hybrid_direct_poll_r2074.mjs');
  await import('./verify_live_hybrid_command_authority_r237.mjs');
+ if(earthGlobal.state==='OBSERVED'){
  const visual=spawnSync(process.execPath,['tests/r284-live-earth-browser-e2e.mjs'],{cwd:process.cwd(),env:{...process.env,OMEGA_E2E_URL:base,OMEGA_EXPECTED_SHA:promoted},stdio:'inherit'});
  if(visual.error)throw visual.error;
  if(visual.status!==0)throw new Error(`R284 exact-production live Earth browser proof failed with exit ${visual.status}`);
@@ -43,6 +45,15 @@ if(promoted){
  const earthTotal=spawnSync(process.execPath,['tests/r372-live-earth-total-interaction-browser-e2e.mjs'],{cwd:process.cwd(),env:{...process.env,OMEGA_E2E_URL:base,OMEGA_EXPECTED_SHA:promoted},stdio:'inherit'});
  if(earthTotal.error)throw earthTotal.error;
  if(earthTotal.status!==0)throw new Error(`R372 exact-production Earth total interaction proof failed with exit ${earthTotal.status}`);
+ }else{
+  // R820: external NASA outage is disclosed, never promoted into a false
+  // observed-data or SAR acceptance receipt. Exercise the REAL deployed UI's
+  // fail-closed behavior under a deterministic HTTP 502 simulation instead.
+  const degraded=spawnSync(process.execPath,['tests/r820-live-earth-degraded-browser-e2e.mjs'],{cwd:process.cwd(),env:{...process.env,OMEGA_E2E_URL:base,OMEGA_EXPECTED_SHA:promoted},stdio:'inherit'});
+  if(degraded.error)throw degraded.error;
+  if(degraded.status!==0)throw new Error(`R820 exact-production external Earth degradation UI proof failed with exit ${degraded.status}`);
+  console.log('R820 NASA GIBS OBSERVATION DEGRADED · R284/R370/R372 observed-Earth/SAR acceptance NOT CLAIMED · direct external observation missing · source truth NO_SYNTHETIC_SUBSTITUTE · all independent live proof remains mandatory');
+ }
  const visible=spawnSync(process.execPath,['tests/r489-live-visible-capability-browser-e2e.mjs'],{cwd:process.cwd(),env:{...process.env,OMEGA_E2E_URL:base,OMEGA_EXPECTED_SHA:promoted},stdio:'inherit'});
  if(visible.error)throw visible.error;
  if(visible.status!==0)throw new Error(`R489 exact-production visible capability proof failed with exit ${visible.status}`);
