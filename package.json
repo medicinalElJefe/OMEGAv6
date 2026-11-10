@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test:r823": "tsx tests/r823-historical-rh-source-invariants.mts",
+    "test:r823": "npx --yes tsx tests/r823-historical-rh-source-invariants.mts",
     "test:r796": "node tests/r796-source-traversal-csv.mjs",
     "test:r749": "node tests/r749-source-frontier-sweep-invariants.mjs",
     "test:r748": "node tests/r748-blended-atlas-invariants.mjs",
