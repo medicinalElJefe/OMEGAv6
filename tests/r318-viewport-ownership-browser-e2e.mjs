@@ -58,6 +58,17 @@ try{
   await summary.click({timeout:10000});await page.waitForTimeout(80);
   if(await diagnostics.getAttribute('open')===null)fail(name,'diagnostics disclosure did not open on explicit request');
   if(['fixed','sticky','absolute'].includes(await diagnostics.evaluate(el=>getComputedStyle(el).position)))fail(name,'opened diagnostics became an overlay');
+  // R822: prove both independently deferred legacy diagnostic executors really
+  // mount after user disclosure; a source-only import assertion is insufficient.
+  const mission=diagnostics.locator('section[aria-label="Living world mission continuity"]');
+  const terrain=diagnostics.locator('section[aria-label="Living world source-backed terrain"]');
+  await Promise.all([
+   mission.waitFor({state:'visible',timeout:30000}),
+   terrain.waitFor({state:'visible',timeout:30000})
+  ]);
+  if(await diagnostics.locator('.r319-bounded-surface-error').count())fail(name,'deferred diagnostics failed at component load boundary');
+  if(await diagnostics.locator('[data-r822-legacy-diagnostics-loading]').count())fail(name,'deferred diagnostics remained in loading state after both source components mounted');
+  if(await mission.count()!==1||await terrain.count()!==1)fail(name,'deferred diagnostic source render duplicated',{mission:await mission.count(),terrain:await terrain.count()});
   await summary.click({timeout:10000});
 
   await page.reload({waitUntil:'domcontentloaded',timeout:45000});
