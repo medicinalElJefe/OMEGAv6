@@ -11,12 +11,12 @@ const colName=(n:number)=>{let s='',x=n+1;while(x>0){const r=(x-1)%26;s=String.f
 const direct=(node:Element,tag:string)=>Array.from(node.children).find(x=>x.localName===tag)||null;
 const valueText=(node:Element,tag:string)=>direct(node,tag)?.textContent||'';
 
-export function readXlsxLite(buffer:ArrayBuffer,maxRows=1000,maxCols=128):XlsxLiteResult{
+export function readXlsxLite(buffer:ArrayBuffer,maxRows=1000,maxCols=128,sheetName?:string):XlsxLiteResult{
  const files=unzipSync(new Uint8Array(buffer));
  const workbook=xml(text(files,'xl/workbook.xml')),rels=xml(text(files,'xl/_rels/workbook.xml.rels'));
  const relMap=new Map(Array.from(rels.getElementsByTagName('*')).filter(x=>x.localName==='Relationship').map(x=>[x.getAttribute('Id')||'',x.getAttribute('Target')||'']));
  const sheets=Array.from(workbook.getElementsByTagName('*')).filter(x=>x.localName==='sheet');
- const first=sheets[0];if(!first)throw new Error('Workbook contains no worksheets.');
+ const first=sheetName?sheets.find(x=>x.getAttribute('name')===sheetName):sheets[0];if(!first)throw new Error(sheetName?'Named worksheet is absent.':'Workbook contains no worksheets.');
  const rid=first.getAttribute('r:id')||first.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','id')||'';
  let target=relMap.get(rid)||'worksheets/sheet1.xml';target=target.replace(/^\//,'').replace(/^xl\//,'');const sheetPath='xl/'+target.replace(/^\.\//,'');
  const sheet=xml(text(files,sheetPath));if(sheet.documentElement.localName==='parsererror')throw new Error('Worksheet XML could not be parsed.');
