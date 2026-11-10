@@ -105,6 +105,7 @@ function validGibsGlobalRasterR780(bytes,contentType){
  return (ct==='image/jpeg'||ct==='image/jpg')?validGibsJpegStructureR781(bytes)
   :ct==='image/png'&&validGibsPngStructureR781(bytes);
 }
+const GLOBAL_GIBS_WALL_BUDGET_MS_R821=14000; // Stay below the browser's 18s observation deadline.
 const GLOBAL_GIBS_SENSORS_R821=Object.freeze({
  NOAA21:{layer:'VIIRS_NOAA21_CorrectedReflectance_TrueColor',source:'NASA-GIBS-VIIRS-NOAA21-TRUECOLOR-GLOBAL'},
  NOAA20:{layer:'VIIRS_NOAA20_CorrectedReflectance_TrueColor',source:'NASA-GIBS-VIIRS-NOAA20-TRUECOLOR-GLOBAL'},
@@ -125,16 +126,19 @@ async function gibsGlobalImage(url){
  if(sensor==='SNPP'&&!requestedDate)return json({ok:false,code:'GIBS_SNPP_HISTORICAL_DATE_REQUIRED',truth:'NO_SENSOR_SUBSTITUTION'},400);
  const candidates=sensor?[sensor]:['NOAA21','NOAA20'];
  const attempts=[];
+ const deadline=Date.now()+GLOBAL_GIBS_WALL_BUDGET_MS_R821;
  // Explicit dates are never silently substituted; implicit dates may search
  // at most six preceding calendar days for each independently named sensor.
- for(let lookback=0;lookback<(requestedDate?1:7);lookback++){
+ sourceSearch: for(let lookback=0;lookback<(requestedDate?1:7);lookback++){
   const date=Number.isFinite(epoch)?new Date(epoch-lookback*86400000).toISOString().slice(0,10):initialDate;
   for(const name of candidates){
    const sensorConfig=GLOBAL_GIBS_SENSORS_R821[name];
+   const remaining=deadline-Date.now();
+   if(remaining<=0){attempts.push({date,sensor:name,code:'SOURCE_BUDGET_EXHAUSTED'});break sourceSearch;}
    const params=new URLSearchParams({SERVICE:'WMS',REQUEST:'GetMap',VERSION:'1.1.1',LAYERS:sensorConfig.layer,STYLES:'',FORMAT:'image/jpeg',TRANSPARENT:'FALSE',SRS:'EPSG:4326',BBOX:'-180,-90,180,90',WIDTH:String(width),HEIGHT:String(height),TIME:date});
    const source='https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?'+params;
    try{
-    const response=await fetch(source,{cf:{cacheTtl:900,cacheEverything:false},signal:AbortSignal.timeout(10000)});
+    const response=await fetch(source,{cf:{cacheTtl:900,cacheEverything:false},signal:AbortSignal.timeout(Math.min(10000,remaining))});
     const ct=response.headers.get('content-type')||'';
     if(!response.ok||!ct.startsWith('image/')){attempts.push({date,sensor:name,code:'UPSTREAM_NOT_IMAGE',status:response.status,contentType:ct});continue;}
     const bytes=new Uint8Array(await response.arrayBuffer());
