@@ -35,6 +35,7 @@ const promoted=String(process.env.OMEGA_PROMOTED_SHA||'').trim();
 if(promoted){
  await import('./verify_live_hybrid_direct_poll_r2074.mjs');
  await import('./verify_live_hybrid_command_authority_r237.mjs');
+ if(earthGlobal.state==='OBSERVED'){
  const visual=spawnSync(process.execPath,['tests/r284-live-earth-browser-e2e.mjs'],{cwd:process.cwd(),env:{...process.env,OMEGA_E2E_URL:base,OMEGA_EXPECTED_SHA:promoted},stdio:'inherit'});
  if(visual.error)throw visual.error;
  if(visual.status!==0)throw new Error(`R284 exact-production live Earth browser proof failed with exit ${visual.status}`);
@@ -44,6 +45,15 @@ if(promoted){
  const earthTotal=spawnSync(process.execPath,['tests/r372-live-earth-total-interaction-browser-e2e.mjs'],{cwd:process.cwd(),env:{...process.env,OMEGA_E2E_URL:base,OMEGA_EXPECTED_SHA:promoted},stdio:'inherit'});
  if(earthTotal.error)throw earthTotal.error;
  if(earthTotal.status!==0)throw new Error(`R372 exact-production Earth total interaction proof failed with exit ${earthTotal.status}`);
+ }else{
+  // R820: external NASA outage is disclosed, never promoted into a false
+  // observed-data or SAR acceptance receipt. Exercise the REAL deployed UI's
+  // fail-closed behavior under a deterministic HTTP 502 simulation instead.
+  const degraded=spawnSync(process.execPath,['tests/r820-live-earth-degraded-browser-e2e.mjs'],{cwd:process.cwd(),env:{...process.env,OMEGA_E2E_URL:base,OMEGA_EXPECTED_SHA:promoted},stdio:'inherit'});
+  if(degraded.error)throw degraded.error;
+  if(degraded.status!==0)throw new Error(`R820 exact-production external Earth degradation UI proof failed with exit ${degraded.status}`);
+  console.log('R820 NASA GIBS OBSERVATION DEGRADED · R284/R370/R372 observed-Earth/SAR acceptance NOT CLAIMED · direct external observation missing · source truth NO_SYNTHETIC_SUBSTITUTE · all independent live proof remains mandatory');
+ }
  const visible=spawnSync(process.execPath,['tests/r489-live-visible-capability-browser-e2e.mjs'],{cwd:process.cwd(),env:{...process.env,OMEGA_E2E_URL:base,OMEGA_EXPECTED_SHA:promoted},stdio:'inherit'});
  if(visible.error)throw visible.error;
  if(visible.status!==0)throw new Error(`R489 exact-production visible capability proof failed with exit ${visible.status}`);
