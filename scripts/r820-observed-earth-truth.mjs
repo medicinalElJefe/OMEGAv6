@@ -12,7 +12,7 @@ export async function classifyObservedEarthR820(response, path='/api/earth/gibs/
   const dated=typeof diagnostic?.requestedDate==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(diagnostic.requestedDate);
   const admissible=Array.isArray(attempts)&&attempts.length>0&&attempts.length<=14&&attempts.every(a=>
    ['NOAA21','NOAA20','SNPP'].includes(a?.sensor)&&typeof a?.date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(a.date)&&
-   ['NO_VALID_OBSERVED_RASTER','UPSTREAM_NOT_IMAGE','UPSTREAM_FETCH_FAILED'].includes(a.code));
+   ['NO_VALID_OBSERVED_RASTER','UPSTREAM_NOT_IMAGE','UPSTREAM_FETCH_FAILED','SOURCE_BUDGET_EXHAUSTED'].includes(a.code));
   if(response.status===502&&diagnostic?.ok===false&&diagnostic?.code==='GIBS_GLOBAL_NO_VALID_OBSERVATION'&&diagnostic?.truth==='NO_SYNTHETIC_SUBSTITUTE'&&dated&&admissible){
    return{state:'DEGRADED',code:diagnostic.code,date:diagnostic.requestedDate,attemptCount:attempts.length,bytes:0,sha:null,truth:'NO_SYNTHETIC_SUBSTITUTE'};
   }
