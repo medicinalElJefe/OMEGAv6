@@ -21,7 +21,8 @@ export default function HistoricalRHGraphR621({address,onAddress}:{address:numbe
  const[error,setError]=useState('');
  const[kind,setKind]=useState<Filter>('ALL');
  const onImport=async(event:ChangeEvent<HTMLInputElement>)=>{
-  const file=event.currentTarget.files?.[0];if(!file)return;
+  const input=event.currentTarget;
+  const file=input.files?.[0];if(!file)return;
   // A failure must invalidate any previously imported graph rather than leaving
   // stale source data presented as the result of a rejected new import.
   setFull(null);setStatus('READING');setError('');
@@ -31,7 +32,9 @@ export default function HistoricalRHGraphR621({address,onAddress}:{address:numbe
    const admitted=await loadOriginalRHWorkbookR823(await file.arrayBuffer());
    setFull(admitted);setStatus('VERIFIED_FULL_LOCAL');
   }catch(e){setFull(null);setStatus('REFUSED');setError(e instanceof Error?e.message:String(e))}
-  event.currentTarget.value='';
+  // React clears currentTarget after dispatch; preserve the element before
+  // asynchronous SHA/import work so resetting the upload cannot throw.
+  input.value='';
  };
  const edges=useMemo<readonly Edge[]>(()=>{
   const selected=full
