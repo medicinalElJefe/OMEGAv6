@@ -14,7 +14,7 @@ for(const token of ['R284 · OBSERVED EARTH VISUAL INSTRUMENT','/api/earth/gibs/
 for(const token of ['WGS84_F=1/298.257223563','geodeticToEcef','createWgs84Orthographic','inverseOrthoWgs84','forwardOrthoWgs84','solarPoint','terminatorGeodetic','solarElevationDegrees'])must(projection.includes(token),'R284 WGS84 projection kernel missing '+token);
 must(observed.includes('2048&height=1024'),'Planet must request a materially detailed global observed texture');
 must(observed.includes("data-source-state={state}")&&observed.includes("data-projection='WGS84_ELLIPSOID_ORTHOGRAPHIC'"),'R284 source/projection state must remain machine-visible');
-for(const token of ['EXPECTED_SOURCE','EXPECTED_CRS','EXPECTED_BBOX','EXPECTED_TRUTH','global source identity mismatch','global source CRS mismatch','global source bbox mismatch','global source truth mismatch','global source aspect mismatch'])must(observed.includes(token),'R284 source truth fail-close missing '+token);
+for(const token of ['GLOBAL_SOURCES_R821','NASA-GIBS-VIIRS-NOAA21-TRUECOLOR-GLOBAL','NASA-GIBS-VIIRS-NOAA20-TRUECOLOR-GLOBAL','EXPECTED_CRS','EXPECTED_BBOX','EXPECTED_TRUTH','global source identity mismatch','global source CRS mismatch','global source bbox mismatch','global source truth mismatch','global source aspect mismatch'])must(observed.includes(token),'R284 source truth fail-close missing '+token);
 must(observed.includes('(x0+1)%texture.width'),'R284 texture sampling must wrap across the ±180° seam');
 must(observed.includes('ResizeObserver')&&observed.includes('devicePixelRatio'),'R284 resize/DPR fidelity contract missing');
 must(observed.includes('source RGB sampled before illumination transform'),'R284 inspector must distinguish observed RGB from derived illumination');
