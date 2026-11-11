@@ -1,4 +1,4 @@
-import {useMemo,useState,type ChangeEvent} from 'react';
+import {useEffect,useMemo,useRef,useState,type ChangeEvent} from 'react';
 import type {R823Graph} from './historicalRHSourceR823';
 /** Source-gated historical RH graph within the existing Visual Instrument.
  * Two original admitted golden examples are always available. An exact
@@ -17,12 +17,16 @@ export function admittedHistoricalEdgesR621(address:number):readonly Edge[]{
 type Filter='ALL'|'antipode_state'|'prereq';
 export default function HistoricalRHGraphR621({address,onAddress}:{address:number;onAddress:(n:number)=>void}){
  const[full,setFull]=useState<R823Graph|null>(null);
+ // Only the latest import may publish a result; invalidate pending work on unmount.
+ const importGeneration=useRef(0);
+ useEffect(()=>()=>{importGeneration.current+=1},[]);
  const[status,setStatus]=useState<'PREVIEW_ONLY'|'READING'|'VERIFIED_FULL_LOCAL'|'REFUSED'>('PREVIEW_ONLY');
  const[error,setError]=useState('');
  const[kind,setKind]=useState<Filter>('ALL');
  const onImport=async(event:ChangeEvent<HTMLInputElement>)=>{
   const input=event.currentTarget;
   const file=input.files?.[0];if(!file)return;
+  const generation=++importGeneration.current;
   // A failure must invalidate any previously imported graph rather than leaving
   // stale source data presented as the result of a rejected new import.
   setFull(null);setStatus('READING');setError('');
@@ -30,8 +34,12 @@ export default function HistoricalRHGraphR621({address,onAddress}:{address:numbe
    if(file.size>2_500_000)throw Error('Original v21 workbook must be within the 2.5 MB import cap.');
    const {loadOriginalRHWorkbookR823}=await import('./historicalRHSourceR823');
    const admitted=await loadOriginalRHWorkbookR823(await file.arrayBuffer());
+   if(generation!==importGeneration.current)return;
    setFull(admitted);setStatus('VERIFIED_FULL_LOCAL');
-  }catch(e){setFull(null);setStatus('REFUSED');setError(e instanceof Error?e.message:String(e))}
+  }catch(e){
+   if(generation!==importGeneration.current)return;
+   setFull(null);setStatus('REFUSED');setError(e instanceof Error?e.message:String(e));
+  }
   // React clears currentTarget after dispatch; preserve the element before
   // asynchronous SHA/import work so resetting the upload cannot throw.
   input.value='';
@@ -56,7 +64,7 @@ export default function HistoricalRHGraphR621({address,onAddress}:{address:numbe
     :status==='READING'?'Verifying original workbook SHA-256 and all typed RH relationships…'
     :status==='REFUSED'?'REFUSED · '+error:'PREVIEW_ONLY · original workbook source bytes not loaded'}
   </div>
-  {full&&<button type='button' onClick={()=>{setFull(null);setStatus('PREVIEW_ONLY');setError('');setKind('ALL')}}>Clear imported graph</button>}
+  {full&&<button type='button' onClick={()=>{importGeneration.current+=1;setFull(null);setStatus('PREVIEW_ONLY');setError('');setKind('ALL')}}>Clear imported graph</button>}
   <p>Current canonical address: <strong>{address}</strong> (workbook row {address+1}). {full?'Verified original workbook rows, session-local execution only.':'Source admission: local sample PASS; production graph execution: not verified.'}</p>
   {full&&<p data-r823-address-multiplicity='true'>This address contains {concepts.length} distinct RH concept{concepts.length===1?'':'s'}; conceptual identity is never collapsed into its shared state address.
    {concepts.length>0&&<span> {concepts.slice(0,8).map(n=>n.id+' ('+n.name+')').join(' · ')}{concepts.length>8?' · …':''}</span>}</p>}
