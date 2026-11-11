@@ -45,6 +45,11 @@ assert.equal(R823_ORIGINAL_WORKBOOK_SHA256,'1daa73b90ab07453141056e74db1a5488232
 assert.ok(readFileSync('docs/R614_GRAPH_RUNTIME_JOIN_INTEGRITY.md','utf8').includes(R823_ORIGINAL_WORKBOOK_SHA256),'original workbook SHA must agree with previously witnessed archive-member bytes');
 const app=readFileSync('src7/workspaces/HistoricalRHGraphR621.tsx','utf8');
 for(const token of ["admittedHistoricalEdgesR621","E00001","E00002","data-r621-historical-rh-graph","data-r823-original-workbook-input","VERIFIED_FULL_LOCAL","loadOriginalRHWorkbookR823","Clear imported graph","No source-recorded edge","sourceRow-1===address"])assert.ok(app.includes(token),'retained Visual source or R823 interaction missing '+token);
+// R824: a late completion from an earlier import must never replace the latest
+// selected workbook, nor resurrect data after explicit clear or unmount.
+for(const token of ["useRef(0)","const generation=++importGeneration.current","generation!==importGeneration.current","importGeneration.current+=1","useEffect(()=>()=>{importGeneration.current+=1},[])"])assert.ok(app.includes(token),'R824 latest-request-wins lifecycle guard missing '+token);
+assert.ok(app.indexOf('if(generation!==importGeneration.current)return;')<app.indexOf("setFull(admitted);setStatus('VERIFIED_FULL_LOCAL')"),'success must check generation before publishing');
+assert.match(app,/}catch\(e\)\{\s*if\(generation!==importGeneration\.current\)return;\s*setFull\(null\);setStatus\('REFUSED'\)/,'rejection must check generation before publishing');
 assert.ok(!app.includes("fetch(")&&!app.includes("localStorage.setItem("),'original donor must never be uploaded or persisted');
 const lite=readFileSync('src/xlsxLiteR153.ts','utf8');
 assert.ok(lite.includes('maxCols=128,sheetName?:string')&&lite.includes("sheets.find(x=>x.getAttribute('name')===sheetName)"),'reuse existing R153 parser with explicit named-sheet selection');
