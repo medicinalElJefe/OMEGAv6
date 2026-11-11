@@ -49,7 +49,7 @@ for(const token of ["admittedHistoricalEdgesR621","E00001","E00002","data-r621-h
 // selected workbook, nor resurrect data after explicit clear or unmount.
 for(const token of ["useRef(0)","const generation=++importGeneration.current","generation!==importGeneration.current","importGeneration.current+=1","useEffect(()=>()=>{importGeneration.current+=1},[])"])assert.ok(app.includes(token),'R824 latest-request-wins lifecycle guard missing '+token);
 assert.ok(app.indexOf('if(generation!==importGeneration.current)return;')<app.indexOf("setFull(admitted);setStatus('VERIFIED_FULL_LOCAL')"),'success must check generation before publishing');
-assert.ok(app.includes("if(generation!==importGeneration.current)return;\\n   setFull(null);setStatus('REFUSED')"),'rejection must check generation before publishing');
+assert.match(app,/}catch\(e\)\{\s*if\(generation!==importGeneration\.current\)return;\s*setFull\(null\);setStatus\('REFUSED'\)/,'rejection must check generation before publishing');
 assert.ok(!app.includes("fetch(")&&!app.includes("localStorage.setItem("),'original donor must never be uploaded or persisted');
 const lite=readFileSync('src/xlsxLiteR153.ts','utf8');
 assert.ok(lite.includes('maxCols=128,sheetName?:string')&&lite.includes("sheets.find(x=>x.getAttribute('name')===sheetName)"),'reuse existing R153 parser with explicit named-sheet selection');
