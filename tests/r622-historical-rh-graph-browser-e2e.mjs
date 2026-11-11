@@ -62,6 +62,7 @@ try{
   if(!(await refusal.innerText()).includes('exact original workbook byte count'))
    throw Error(label+': late prior import rejection replaced latest request');
   if(await instrument.locator('[data-r823-address-multiplicity]').count())throw Error(label+': stale import acquired full graph authority');
+  await page.evaluate(()=>{window.__r824ReleaseSlowRead=undefined;window.__r825ReleaseNewRead=undefined});
   // R825: keep the newer request pending while the older request completes.
   // Its file selection must survive the older request's asynchronous cleanup.
   await upload.setInputFiles({name:'r824-slow-forged.xlsx',mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',buffer:Buffer.alloc(2150619)});
