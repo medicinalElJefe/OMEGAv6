@@ -42,7 +42,9 @@ export default function HistoricalRHGraphR621({address,onAddress}:{address:numbe
   }
   // React clears currentTarget after dispatch; preserve the element before
   // asynchronous SHA/import work so resetting the upload cannot throw.
-  input.value='';
+  // Only the request still owning this input may clear its selection.
+  // A late older request must not erase a newer file chosen in the same control.
+  if(generation===importGeneration.current)input.value='';
  };
  const edges=useMemo<readonly Edge[]>(()=>{
   const selected=full
