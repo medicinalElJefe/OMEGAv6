@@ -14,6 +14,18 @@ try{
  for(const [label,viewport] of [['desktop',{width:1440,height:900}],['mobile',{width:390,height:844}]]){
   const page=await browser.newPage({viewport});
   const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+  // R824 adversarial timing: hold one forged donor's File.arrayBuffer in the
+  // browser, submit a newer invalid donor, then release the old completion.
+  // The older rejection may not replace the latest request's refusal.
+  await page.addInitScript(()=>{
+   const read=File.prototype.arrayBuffer;
+   File.prototype.arrayBuffer=function(){
+    if(this.name==='r824-slow-forged.xlsx')return new Promise((resolve,reject)=>{
+     window.__r824ReleaseSlowRead=()=>read.call(this).then(resolve,reject);
+    });
+    return read.call(this);
+   };
+  });
   await page.goto(base+'/?omega7=1&r622='+Date.now(),{waitUntil:'domcontentloaded',timeout:45000});
   await page.locator('.o7-app[data-omega7="true"]').waitFor({state:'visible',timeout:30000});
   await page.locator('.o7-nav-r519').getByRole('button',{name:'Create'}).click();
@@ -36,6 +48,20 @@ try{
   await upload.setInputFiles({name:'forged-sized.xlsx',mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',buffer:Buffer.alloc(2150619)});
   await page.waitForFunction(()=>document.querySelector('[data-r823-import-status="REFUSED"]')?.textContent?.includes('fingerprint mismatch'),null,{timeout:15000});
   if(await instrument.locator('[data-r823-address-multiplicity]').count())throw Error(label+': forged donor gained full-graph authority');
+
+  // R824 latest-request-wins browser proof using two actual input change events:
+  // late reject of old SHA-mismatched bytes cannot replace newer size refusal.
+  await upload.setInputFiles({name:'r824-slow-forged.xlsx',mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',buffer:Buffer.alloc(2150619)});
+  await page.waitForFunction(()=>typeof window.__r824ReleaseSlowRead==='function',null,{timeout:15000});
+  await upload.setInputFiles({name:'r824-latest-invalid.xlsx',mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',buffer:Buffer.alloc(72)});
+  const refusal=instrument.locator('[data-r823-import-status="REFUSED"]');
+  await refusal.waitFor({state:'visible',timeout:15000});
+  if(!(await refusal.innerText()).includes('exact original workbook byte count'))throw Error(label+': newer selection did not own refusal');
+  await page.evaluate(()=>window.__r824ReleaseSlowRead());
+  await page.waitForTimeout(350);
+  if(!(await refusal.innerText()).includes('exact original workbook byte count'))
+   throw Error(label+': late prior import rejection replaced latest request');
+  if(await instrument.locator('[data-r823-address-multiplicity]').count())throw Error(label+': stale import acquired full graph authority');
   // Exercise actual canonical address propagation through the same handler used by the rest of OMEGA.
   const setAddress=async(value)=>{
    await page.evaluate(n=>{
