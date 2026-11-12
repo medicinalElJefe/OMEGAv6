@@ -74,7 +74,7 @@ try{
   });
   const input=()=>instrument.locator('[data-r823-original-workbook-input="true"]');
   watchImport=true;
-  await input().setInputFiles(workbookPath);
+  await input().setInputFiles({name:'original-v21-rh.xlsx',mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',buffer:original});
   await instrument.locator('[data-r823-import-status="VERIFIED_FULL_LOCAL"]').waitFor({state:'visible',timeout:45000});
   assert.match(await status().innerText(),/ORIGINAL-SHA MATCHED.*320 RH concepts.*25 distinct addresses.*416 typed edges/,label+' source admission incomplete');
   assert.equal(networkViolations.length,0,label+' attempted network writes or oversized URL during private import');
@@ -102,7 +102,7 @@ try{
   assert.equal(await status().getAttribute('data-r823-import-status'),'PREVIEW_ONLY',label+' local graph not cleared');
   assert.equal(await instrument.locator('[data-r823-address-multiplicity]').count(),0,label+' private graph survived explicit clear');
   watchImport=true;
-  await input().setInputFiles(workbookPath);
+  await input().setInputFiles({name:'original-v21-rh.xlsx',mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',buffer:original});
   await instrument.locator('[data-r823-import-status="VERIFIED_FULL_LOCAL"]').waitFor({state:'visible',timeout:45000});
   watchImport=false;
   await page.reload({waitUntil:'domcontentloaded',timeout:45000});
