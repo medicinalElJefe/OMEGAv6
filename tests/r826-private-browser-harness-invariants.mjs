@@ -8,7 +8,7 @@ const required=[
  'OMEGA_GOVERNED_BUILD_RECEIPT_V1','promotedMergeSha','R823_ORIGINAL_WORKBOOK_SHA256',
  'R823_ORIGINAL_WORKBOOK_BYTES',"createHash('sha256')",
  "assertExactReceipt()","['desktop'","['mobile'",
- 'setInputFiles(workbookPath)','VERIFIED_FULL_LOCAL','PREVIEW_ONLY',
+ 'buffer:original','setInputFiles({name:','VERIFIED_FULL_LOCAL','PREVIEW_ONLY',
  'data-r823-address-multiplicity','E00001','E00011',
  "selectOption('prereq')","Clear imported graph",
  "page.reload(", "page.on('pageerror'",
