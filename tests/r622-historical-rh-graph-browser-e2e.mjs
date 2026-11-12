@@ -20,8 +20,8 @@ try{
   await page.addInitScript(()=>{
    const read=File.prototype.arrayBuffer;
    File.prototype.arrayBuffer=function(){
-    if(this.name==='r824-slow-forged.xlsx')return new Promise((resolve,reject)=>{
-     window.__r824ReleaseSlowRead=()=>read.call(this).then(resolve,reject);
+    if(this.name==='r824-slow-forged.xlsx'||this.name==='r825-newer-pending.xlsx')return new Promise((resolve,reject)=>{
+     window[this.name==='r824-slow-forged.xlsx'?'__r824ReleaseSlowRead':'__r825ReleaseNewRead']=()=>read.call(this).then(resolve,reject);
     });
     return read.call(this);
    };
@@ -62,6 +62,21 @@ try{
   if(!(await refusal.innerText()).includes('exact original workbook byte count'))
    throw Error(label+': late prior import rejection replaced latest request');
   if(await instrument.locator('[data-r823-address-multiplicity]').count())throw Error(label+': stale import acquired full graph authority');
+  await page.evaluate(()=>{window.__r824ReleaseSlowRead=undefined;window.__r825ReleaseNewRead=undefined});
+  // R825: keep the newer request pending while the older request completes.
+  // Its file selection must survive the older request's asynchronous cleanup.
+  await upload.setInputFiles({name:'r824-slow-forged.xlsx',mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',buffer:Buffer.alloc(2150619)});
+  await page.waitForFunction(()=>typeof window.__r824ReleaseSlowRead==='function',null,{timeout:15000});
+  await upload.setInputFiles({name:'r825-newer-pending.xlsx',mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',buffer:Buffer.alloc(2150619)});
+  await page.waitForFunction(()=>typeof window.__r825ReleaseNewRead==='function',null,{timeout:15000});
+  await page.evaluate(()=>window.__r824ReleaseSlowRead());
+  await page.waitForTimeout(350);
+  const selected=await upload.evaluate(el=>el.files?.[0]?.name||'');
+  if(selected!=='r825-newer-pending.xlsx')throw Error(label+': stale request erased newer pending file selection: '+selected);
+  await page.evaluate(()=>window.__r825ReleaseNewRead());
+  await page.waitForFunction(()=>document.querySelector('[data-r823-import-status="REFUSED"]')?.textContent?.includes('fingerprint mismatch'),null,{timeout:15000});
+  if(await upload.evaluate(el=>el.files?.length||0))throw Error(label+': latest completed request did not clear its own input');
+
   // Exercise actual canonical address propagation through the same handler used by the rest of OMEGA.
   const setAddress=async(value)=>{
    await page.evaluate(n=>{
