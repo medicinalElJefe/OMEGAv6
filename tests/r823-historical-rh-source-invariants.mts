@@ -54,4 +54,10 @@ assert.match(app,/if\(generation===importGeneration\.current\)input\.value='';/,
 assert.ok(!app.includes("fetch(")&&!app.includes("localStorage.setItem("),'original donor must never be uploaded or persisted');
 const lite=readFileSync('src/xlsxLiteR153.ts','utf8');
 assert.ok(lite.includes('maxCols=128,sheetName?:string')&&lite.includes("sheets.find(x=>x.getAttribute('name')===sheetName)"),'reuse existing R153 parser with explicit named-sheet selection');
+// R827: source-bound concept lookup must remain browser-local, gated on full
+// verified workbook admission, bounded, and traverse the selected concept row.
+for(const token of ["data-r827-concept-lookup","data-r827-concept-results","full.concepts.filter","slice(0,12)","onAddress(n.row-1)","setConceptQuery('')"])
+ assert.ok(app.includes(token),'R827 concept lookup executor missing '+token);
+assert.match(app,/if\(!full\|\|!q\)return \[\]/,'R827 must refuse lookup without verified source');
+assert.match(app,/\{full&&<div data-r827-concept-lookup/,'R827 lookup must not appear in preview-only state');
 console.log('R823 SOURCE-GATED FULL RH GRAPH PASS · 320 conceptual identities on 25 addresses · 416 typed edge constraints · original 2150619-byte fingerprint refusal · existing route authority conserved');
