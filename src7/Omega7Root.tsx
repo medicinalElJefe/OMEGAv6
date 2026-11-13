@@ -211,7 +211,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
      </section>}
      {state.domain!=='HOME'&&domainRecovered.length>0&&<section className='o7-domain-recovered' data-r512-domain-recovered={state.domain}>
       <header><div><span>Recovered software</span><b>Previous software, resolved to current executors</b><small>These are historical identities with a specific current operation—not menu aliases.</small></div><strong>{domainRecovered.filter(x=>x.state!=='TRUTH_GATED').length} runnable · {domainRecovered.filter(x=>x.state==='TRUTH_GATED').length} gated</strong></header>
-      <div>{domainRecovered.slice(0,8).map(x=><button key={x.id} onClick={()=>launchRecovered(x)} data-state={x.state.toLowerCase()} data-r512-recovered-launch={x.id} data-r512-recovered-route={x.route}><span><b>{x.name}</b><small>{x.operation}</small></span><em>{x.state==='TRUTH_GATED'?'Evidence gate':x.state==='EXECUTES_AS_ADAPTER'?'Adapter':'Run now'}</em></button>)}</div>
+      <div>{domainRecovered.map(x=><button key={x.id} onClick={()=>launchRecovered(x)} data-state={x.state.toLowerCase()} data-r512-recovered-launch={x.id} data-r512-recovered-route={x.route}><span><b>{x.name}</b><small>{x.operation}</small></span><em>{x.state==='TRUTH_GATED'?'Evidence gate':x.state==='EXECUTES_AS_ADAPTER'?'Adapter':'Run now'}</em></button>)}</div>
      </section>}
 
      <section className='o7-capability-section'>
