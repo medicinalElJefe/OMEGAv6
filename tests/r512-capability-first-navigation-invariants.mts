@@ -98,6 +98,8 @@ for(const token of [
 
 assert.ok(root.includes('domainRecovered.map(x=><button'),'all recovered capabilities must be reachable from their domain menu');
 assert.ok(root.includes('data-command-recovered={x.id}'),'global command search must expose recovered executor identities');
+assert.ok(root.includes("[x.id,x.name,x.operation,x.contribution,x.route,...x.aliases]"),'global search must include stable recovered identity and source aliases');
+assert.ok(root.includes("split(/\\s+/).every(term=>haystack.includes(term))"),'multiword recovered search must match all terms independently of their order');
 assert.ok(root.includes("onClick={()=>launchRecovered(x)}"),'command results must launch the resolved recovered executor');
 assert.ok(!root.includes('domainRecovered.slice('),'domain navigation must never silently truncate recovered capabilities');
 assert.equal(root.includes("button onClick={()=>open(x.route)}>Open {x.route}</button>"),false,'recovered software must not fall back to a generic route-only button');
