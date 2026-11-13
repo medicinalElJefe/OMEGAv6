@@ -82,6 +82,8 @@ for(const token of [
  "softwareLaunch={activeRecovered}"
 ])assert.ok(root.includes(token),'R512 UI integration missing '+token);
 
+assert.ok(root.includes('domainRecovered.map(x=><button'),'all recovered capabilities must be reachable from their domain menu');
+assert.ok(!root.includes('domainRecovered.slice('),'domain navigation must never silently truncate recovered capabilities');
 assert.equal(root.includes("button onClick={()=>open(x.route)}>Open {x.route}</button>"),false,'recovered software must not fall back to a generic route-only button');
 assert.ok(root.includes("launchRecovered(x)"),'recovered software must use the resolved execution launcher');
 assert.ok(root.includes("import('./recoveredSystemSearchR512')"),'100-system ledger must stay deferred from the initial shell bundle');
