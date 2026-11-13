@@ -23,6 +23,20 @@ for(const menu of R512_DOMAIN_MENU){
  if(menu.id!=='HOME')assert.ok(recovered.length>0,menu.id+' must expose resolved historical software where applicable');
 }
 
+// A recovered executor must be discoverable in its owning domain and the full library.
+// Keep this source-level coverage separate from browser execution and production proof.
+const inheritedRoutes=new Set(OMEGA7_CAPABILITIES.map(x=>x.legacyRoute));
+const recoveredIds=new Set<string>();
+for(const entry of R486_VISIBLE_CAPABILITIES){
+ assert.ok(!recoveredIds.has(entry.id),'duplicate recovered identity '+entry.id);
+ recoveredIds.add(entry.id);
+ assert.ok(inheritedRoutes.has(entry.route as any),'recovered capability points to an unregistered route '+entry.id+' -> '+entry.route);
+ const owningDomain=OMEGA7_CAPABILITIES.find(x=>x.legacyRoute===entry.route)?.domain;
+ assert.ok(owningDomain,'recovered capability lacks owning menu '+entry.id);
+ assert.equal(recoveredForDomainR512(owningDomain!).filter(x=>x.id===entry.id).length,1,'recovered capability missing or duplicated in domain menu '+entry.id);
+ assert.equal(recoveredForDomainR512('HOME').filter(x=>x.id===entry.id).length,1,'recovered capability missing or duplicated in full recovered menu '+entry.id);
+}
+
 for(const entry of R486_VISIBLE_CAPABILITIES){
  assert.ok(entry.capabilityId,'recovered entry missing concrete capability executor '+entry.id);
  assert.ok(entry.executionDomain,'recovered entry missing execution domain '+entry.id);
