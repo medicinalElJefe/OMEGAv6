@@ -35,6 +35,7 @@ const R519_NAV_ICONS={HOME:House,WORK:BriefcaseBusiness,EXPLORE:Orbit,CREATE:Pal
 function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
  const{state,dispatch}=useOmega7AppState();
  const inputRef=useRef<HTMLInputElement|null>(null);
+ const returnDomainRef=useRef<Omega7Domain|null>(null);
  const [development,setDevelopment]=useState<R468Snapshot|null>(null);
  const [recoveredOpen,setRecoveredOpen]=useState(false);
  const [libraryOpen,setLibraryOpen]=useState(false);
@@ -94,19 +95,24 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
  },[dispatch]);
 
  const switchDomain=(domain:Omega7Domain)=>{
+  returnDomainRef.current=null;
   const href=nativeHistoryHrefR779(null,OMEGA7_NATIVE_ROUTES);
   if(new URLSearchParams(window.location.search).has('omega7route'))window.history.pushState({omega7Route:null},'',href);
   dispatch({type:'DOMAIN',domain});
   dispatch({type:'SELECT_ROUTE',route:null});
  };
  const backToDomain=()=>{
+  const destination=returnDomainRef.current||state.domain;
+  returnDomainRef.current=null;
   const href=nativeHistoryHrefR779(null,OMEGA7_NATIVE_ROUTES);
   if(window.location.search!==href)window.history.pushState({omega7Route:null},'',href);
+  dispatch({type:'DOMAIN',domain:destination});
   dispatch({type:'SELECT_ROUTE',route:null});
  };
  const open=(route:string)=>{
   const cap=OMEGA7_CAPABILITIES.find(x=>x.legacyRoute===route);
   if(!cap)return;
+  if(!state.selectedRoute&&returnDomainRef.current===null)returnDomainRef.current=state.domain;
   setLibraryOpen(false);
   if(isOmega7NativeRoute(cap.legacyRoute)){
    const href=nativeHistoryHrefR779(cap.legacyRoute,OMEGA7_NATIVE_ROUTES);
