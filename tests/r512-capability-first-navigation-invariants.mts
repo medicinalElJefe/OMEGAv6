@@ -96,6 +96,7 @@ for(const token of [
  "softwareLaunch={activeRecovered}"
 ])assert.ok(root.includes(token),'R512 UI integration missing '+token);
 
+assert.ok(root.includes("dispatch({type:'DOMAIN',domain:cap.domain});\n  dispatch({type:'SELECT_ROUTE',route:cap.legacyRoute});"),'global and recovered launches must select the owning domain before the target route');
 assert.ok(root.includes('domainRecovered.map(x=><button'),'all recovered capabilities must be reachable from their domain menu');
 assert.ok(root.includes('data-command-recovered={x.id}'),'global command search must expose recovered executor identities');
 assert.ok(root.includes("[x.id,x.name,x.operation,x.contribution,x.route,...x.aliases]"),'global search must include stable recovered identity and source aliases');
