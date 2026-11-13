@@ -240,6 +240,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
     <input ref={inputRef} value={state.query} onChange={e=>dispatch({type:'QUERY',query:e.target.value})} placeholder='Search capabilities or type what you want to do…'/>
     <div>
      {(state.query?searchOmega7Capabilities(state.query):OMEGA7_CAPABILITIES.slice(0,12)).slice(0,16).map(cap=><button key={cap.id} data-command-route={cap.legacyRoute} onClick={()=>open(cap.legacyRoute)}><span><b>{cap.label}</b><small>{cap.description}</small></span><em>{cap.availability}</em></button>)}
+     {state.query.trim()&&R486_VISIBLE_CAPABILITIES.filter(x=>[x.name,x.operation,x.contribution,x.route,...x.aliases].join(' ').toLowerCase().includes(state.query.trim().toLowerCase())).slice(0,16).map(x=><button key={'recovered-'+x.id} data-command-recovered={x.id} onClick={()=>launchRecovered(x)}><span><b>{x.name}</b><small>{x.operation} · {x.route}</small></span><em>{x.state==='TRUTH_GATED'?'GATED':x.state==='EXECUTES_AS_ADAPTER'?'ADAPTER':'EXECUTOR'}</em></button>)}
      {state.query&&commandPreviousSoftware.length>0&&<div className='o7-command-divider'>Previous software → current successor</div>}
      {state.query&&commandPreviousSoftware.map(row=><button key={'system-'+row.systemId} data-command-system={row.systemId} onClick={()=>launchRecoveredSystem(row)}><span><b>{row.artifact}</b><small>{row.family} · {row.route}</small></span><em>{row.state==='WORKING_SUCCESSOR'?'LIVE':row.state==='GATED_SUCCESSOR'?'GATED':row.state==='ARCHIVE_ONLY'?'ARCHIVE':'RESTORE'}</em></button>)}
     </div>
