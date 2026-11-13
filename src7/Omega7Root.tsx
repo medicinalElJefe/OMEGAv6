@@ -112,6 +112,9 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
    const href=nativeHistoryHrefR779(cap.legacyRoute,OMEGA7_NATIVE_ROUTES);
    if(window.location.search!==href)window.history.pushState({omega7Route:cap.legacyRoute},'',href);
   }
+  // A global search or recovered launcher may target a different domain.
+  // Keep the owning menu, back navigation, and selected workspace coherent.
+  dispatch({type:'DOMAIN',domain:cap.domain});
   dispatch({type:'SELECT_ROUTE',route:cap.legacyRoute});
   dispatch({type:'COMMAND',open:false});
   if(!isOmega7NativeRoute(cap.legacyRoute))onOpenLegacyRoute(cap.legacyRoute);
