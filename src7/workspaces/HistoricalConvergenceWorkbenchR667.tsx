@@ -3,7 +3,7 @@ import {getMandala20736Field,type Mandala20736Field} from '../../src/mandala2073
 import {defaultObserverR666,stepObserverR666,normalizeAddressR666,SCALES_R666,motionDecisionR666,type ObserverR666} from './historicalObserverR666';
 import {B053_RECOVERY_R665,B053_CAPABILITIES_R665,capabilityAdmissionR665} from './historicalConvergenceR665';
 import {createModelTaskSessionR842,type OmegaTaskR842,type OmegaTaskRecordR842} from './omegaModelTaskRuntimeR842';
-import {encodeReplayR843,decodeReplayR843,replayModelTasksR843} from './omegaModelReplayR843';
+import {encodeReplayR843,decodeReplayR843,replayModelTasksR843,recoverModelTaskSessionR849} from './omegaModelReplayR843';
 import {dispatchCapabilityComputeR846} from './omegaExecutorRegistryR846';
 import {executeModelPipelineR847} from './omegaModelPipelineR847';
 import {saveModelTasksR848,loadModelTasksR848} from './omegaModelStorageR848';
@@ -67,10 +67,10 @@ export function HistoricalConvergenceWorkbenchR667(){
   return record.result;
  };
  const persistRequests=()=>{try{saveModelTasksR848(localStorage,taskRecords);setReplayStatus('Validated task requests saved in this browser; model results are not trusted or stored as proof.')}catch(e){setReplayStatus('Task persistence rejected: '+String(e))}};
- const restoreRequests=()=>{if(!field)return;try{const saved=loadModelTasksR848(localStorage);if(!saved){setReplayStatus('No saved task requests.');return}const outcome=replayModelTasksR843(field,JSON.stringify(saved));setReplayStatus(`${outcome.taskCount} saved tasks recomputed from the current source; no Canon or host authority.`);const last=outcome.results[outcome.results.length-1];if(last?.kind==='TRACE_MODEL_SUCCESSORS'){setRoute(last.route);setRouteCursor(0)}}catch(e){setReplayStatus('Stored task recovery rejected: '+String(e))}};
+ const restoreRequests=()=>{if(!field)return;try{const saved=loadModelTasksR848(localStorage);if(!saved){setReplayStatus('No saved task requests.');return}const recovered=recoverModelTaskSessionR849(field,JSON.stringify(saved));setTaskRecords([...recovered.records]);setReplayStatus(`${recovered.taskCount} saved tasks recomputed and restored to editable session history; no Canon or host authority.`);const last=recovered.records[recovered.records.length-1]?.result;if(last?.kind==='TRACE_MODEL_SUCCESSORS'){setRoute(last.route);setRouteCursor(0)}}catch(e){setReplayStatus('Stored task recovery rejected: '+String(e))}};
  const runPipeline=()=>{if(!field)return;try{const result=executeModelPipelineR847(field,{route:'Atlas',startAddress:i,limit:64});setRoute(result.trace.route);setRouteCursor(0);setError('');setReplayStatus(`${result.export.rowCount} source-derived states computed, traversed and validated through Atlas route admission.`)}catch(e){setError('Pipeline rejected: '+String(e))}};
  const saveReplay=()=>{try{setReplayText(encodeReplayR843(taskRecords));setReplayStatus('Task requests prepared for portable replay; no external execution receipt.')}catch(e){setReplayStatus('Replay export rejected: '+String(e))}};
- const runReplay=()=>{if(!field)return;try{const replay=decodeReplayR843(replayText);const outcome=replayModelTasksR843(field,replayText);setReplayStatus(`${outcome.taskCount} tasks recomputed from the current compiled field; model-derived only.`);setTaskRecords([]);if(replay.tasks.length){const last=outcome.results[outcome.results.length-1];if(last.kind==='TRACE_MODEL_SUCCESSORS'){setRoute(last.route);setRouteCursor(0)}}}catch(e){setReplayStatus('Replay rejected: '+String(e))}};
+ const runReplay=()=>{if(!field)return;try{const replay=decodeReplayR843(replayText);const outcome=recoverModelTaskSessionR849(field,replayText);setReplayStatus(`${outcome.taskCount} tasks recomputed and restored to session history; model-derived only.`);setTaskRecords([...outcome.records]);if(replay.tasks.length){const last=outcome.records[outcome.records.length-1].result;if(last.kind==='TRACE_MODEL_SUCCESSORS'){setRoute(last.route);setRouteCursor(0)}}}catch(e){setReplayStatus('Replay rejected: '+String(e))}};
  const [routeCursor,setRouteCursor]=useState(()=>recovered?.routeCursor??0);
  // Recovery is advisory until the regenerated field proves the saved route is an actual successor chain.
  useEffect(()=>{

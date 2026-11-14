@@ -1,5 +1,5 @@
 import type {Mandala20736Field} from '../../src/mandala20736Runtime';
-import {executeModelTaskR842,type OmegaTaskR842,type OmegaTaskRecordR842} from './omegaModelTaskRuntimeR842';
+import {createModelTaskSessionR842,executeModelTaskR842,type OmegaTaskR842,type OmegaTaskRecordR842} from './omegaModelTaskRuntimeR842';
 /** Portable, explicitly untrusted browser-local task replay. No host or Canon authority. */
 export const R843_SESSION_SCHEMA='OMEGA_MODEL_REPLAY_R843' as const;
 export type ReplayR843={schema:typeof R843_SESSION_SCHEMA;tasks:OmegaTaskR842[]};
@@ -32,4 +32,12 @@ export function replayModelTasksR843(field:Mandala20736Field,raw:string){
  const {tasks}=decodeReplayR843(raw);
  const results=tasks.map(task=>executeModelTaskR842(field,task));
  return {schema:R843_SESSION_SCHEMA,results,taskCount:results.length,authority:'MODEL_DERIVED_RECOMPUTED' as const};
+}
+
+/** Rebuild a portable task history with fresh, source-derived records for continued UI use. */
+export function recoverModelTaskSessionR849(field:Mandala20736Field,raw:string){
+ const {tasks}=decodeReplayR843(raw);
+ const session=createModelTaskSessionR842(field);
+ for(const task of tasks)session.execute(task);
+ return {records:session.history(),taskCount:tasks.length,authority:'MODEL_DERIVED_RECOMPUTED' as const};
 }

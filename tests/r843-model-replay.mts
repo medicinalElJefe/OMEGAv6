@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import type {Mandala20736Field} from '../src/mandala20736Runtime.ts';
 import {createModelTaskSessionR842} from '../src7/workspaces/omegaModelTaskRuntimeR842.ts';
-import {encodeReplayR843,decodeReplayR843,replayModelTasksR843,R843_SESSION_SCHEMA} from '../src7/workspaces/omegaModelReplayR843.ts';
+import {encodeReplayR843,decodeReplayR843,replayModelTasksR843,recoverModelTaskSessionR849,R843_SESSION_SCHEMA} from '../src7/workspaces/omegaModelReplayR843.ts';
 function field(){
  const make=()=>new Float32Array(20736);
  const f={count:20736,C:make(),Phi:make(),q:make(),Lambda:make(),scar:make(),evidence:make(),continuityGate:make(),forecast:make(),motionDrive:make(),routeNext:new Uint32Array(20736)} as Mandala20736Field;
@@ -38,4 +38,16 @@ test('replay writer refuses non-portable history rather than emitting unloadable
  const portable=createModelTaskSessionR842(f);
  portable.execute({kind:'EXPORT_MODEL_TRACE',route:[0,1]});
  assert.equal(decodeReplayR843(encodeReplayR843(portable.history())).tasks.length,1);
+});
+
+test('recovered replay retains recomputed session records for subsequent export and persistence',()=>{
+ const f=field(),session=createModelTaskSessionR842(f);
+ session.execute({kind:'INSPECT_MODEL_STATE',address:0});
+ session.execute({kind:'TRACE_MODEL_SUCCESSORS',address:0,limit:4});
+ const restored=recoverModelTaskSessionR849(f,encodeReplayR843(session.history()));
+ assert.equal(restored.taskCount,2);
+ assert.deepEqual(restored.records.map(r=>r.sequence),[1,2]);
+ assert.equal(restored.records[1].authority,'MODEL_DERIVED');
+ assert.deepEqual(decodeReplayR843(encodeReplayR843(restored.records)).tasks,decodeReplayR843(encodeReplayR843(session.history())).tasks);
+ assert.equal(restored.records[1].result.kind,'TRACE_MODEL_SUCCESSORS');
 });
