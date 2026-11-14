@@ -60,4 +60,8 @@ for(const token of ["data-r827-concept-lookup","data-r827-concept-results","full
  assert.ok(app.includes(token),'R827 concept lookup executor missing '+token);
 assert.match(app,/if\(!full\|\|!q\)return \[\]/,'R827 must refuse lookup without verified source');
 assert.match(app,/\{full&&<div data-r827-concept-lookup/,'R827 lookup must not appear in preview-only state');
+// R839 reverse traversal is derived exclusively from verified original typed edges.
+for(const token of ["data-r839-incoming-edges","full.edges.filter(e=>e.toRow-1===address)","onAddress(e.fromRow-1)"])
+ assert.ok(app.includes(token),'R839 verified reverse traversal missing '+token);
+assert.match(app,/\{full&&<section data-r839-incoming-edges/,'R839 reverse relationships must remain source-gated');
 console.log('R823 SOURCE-GATED FULL RH GRAPH PASS · 320 conceptual identities on 25 addresses · 416 typed edge constraints · original 2150619-byte fingerprint refusal · existing route authority conserved');
