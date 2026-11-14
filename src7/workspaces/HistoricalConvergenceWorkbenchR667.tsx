@@ -1,6 +1,6 @@
 import {useEffect,useState} from 'react';
 import {getMandala20736Field,type Mandala20736Field} from '../../src/mandala20736Runtime';
-import {defaultObserverR666,stepObserverR666,normalizeAddressR666,SCALES_R666,type ObserverR666} from './historicalObserverR666';
+import {defaultObserverR666,stepObserverR666,normalizeAddressR666,SCALES_R666,motionDecisionR666,type ObserverR666} from './historicalObserverR666';
 import {B053_RECOVERY_R665,B053_CAPABILITIES_R665,capabilityAdmissionR665} from './historicalConvergenceR665';
 // Browser-local recovery for the actual R666 observer and computed route playback.
 // Never restore an untrusted address as CanonState or as an execution receipt.
@@ -49,6 +49,9 @@ export function HistoricalConvergenceWorkbenchR667(){
  };
  const select=(n:number)=>{if(!Number.isInteger(n)||n<0||n>=20736)return;setObserver(s=>({...s,address:address(n),revision:s.revision+1}))};
  const metrics=field?{continuity:field.C[i],plasticity:field.Phi[i],contradiction:field.q[i],burden:field.Lambda[i],scar:field.scar[i],evidence:field.evidence[i],geometry:field.geometry[i],motion:field.motion[i],velocity:field.velocity[i],acceleration:field.acceleration[i]}:null;
+ // Execute the recovered R666 decision calculus against actual selected field metrics.
+ // This is advisory model output; it does not authorize Canon admission or host action.
+ const decision=metrics?motionDecisionR666({continuity:metrics.continuity,burden:metrics.burden,contradiction:metrics.contradiction,future_plasticity:metrics.plasticity}):null;
  return <section data-r667-historical-workbench='true' style={{margin:'18px 0',padding:18,border:'1px solid #56718a',borderRadius:12}}>
  <h2>Recovered canonical state and observer</h2><p>Historical B053 observer operations bound to the existing 20,736-state model. Computed model-space, not calibrated physical matter.</p>
  {error&&<p role='alert'>{error}</p>}{!field&&<p role='status'>Compiling canonical field…</p>}
@@ -69,6 +72,7 @@ export function HistoricalConvergenceWorkbenchR667(){
  <circle cx={320+field.x[i]*235} cy={150-field.y[i]*115} r='7' fill='none' stroke='#ffca70' strokeWidth='2'/>
  <text x='12' y='20' fill='#c8d9e8' fontSize='12'>MODEL XY PROJECTION · sampled canonical states · selected address outlined</text>
  </svg>}
+ {decision&&<section data-r830-motion-decision={decision.decision} aria-label='Recovered motion decision' style={{marginTop:12,padding:12,border:'1px solid #47617a',borderRadius:8}}><h3>Recovered R666 motion decision · {decision.decision}</h3><p>Computed ratio {decision.ratio.toFixed(5)} from selected state continuity, plasticity, contradiction and burden. STAY ≥ 0.92; TURN ≥ 0.46; otherwise ESCALATE. Advisory model decision only; no Canon admission or host execution.</p><button type='button' disabled={!field||!Number.isInteger(next)||next<0||next>=20736} onClick={()=>select(next)}>Inspect computed successor</button></section>}
  {metrics&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(130px,1fr))',gap:8,marginTop:12}}>{Object.entries(metrics).map(([key,value])=><div key={key} style={{padding:10,border:'1px solid #47617a',borderRadius:8}}><small>{key}</small><div>{value.toFixed(5)}</div></div>)}</div>}
  {route.length>0&&<div><h3>Computed routeNext sequence</h3><button type='button' onClick={exportTrace}>Export computed traversal CSV</button><small> Model-space values only; no Canon admission or host proof.</small><p>Route playback position {routeCursor+1} / {route.length} · selected address {i+1}</p><button disabled={routeCursor===0} onClick={()=>{const k=Math.max(0,routeCursor-1);setRouteCursor(k);select(route[k])}}>Previous route state</button><button disabled={routeCursor>=route.length-1} onClick={()=>{const k=Math.min(route.length-1,routeCursor+1);setRouteCursor(k);select(route[k])}}>Next route state</button><div style={{display:'flex',flexWrap:'wrap',gap:5}}>{route.map((n,k)=><button key={k} onClick={()=>{setRouteCursor(k);select(n)}}>{n+1}</button>)}</div></div>}
  <button type='button' aria-expanded={showProof} onClick={()=>setShowProof(x=>!x)}>{showProof?'Hide':'Show'} verification details</button>
