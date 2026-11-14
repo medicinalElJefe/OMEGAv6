@@ -2,6 +2,7 @@ import {useEffect,useState} from 'react';
 import {getMandala20736Field,type Mandala20736Field} from '../../src/mandala20736Runtime';
 import {defaultObserverR666,stepObserverR666,normalizeAddressR666,SCALES_R666,motionDecisionR666,type ObserverR666} from './historicalObserverR666';
 import {B053_RECOVERY_R665,B053_CAPABILITIES_R665,capabilityAdmissionR665} from './historicalConvergenceR665';
+import {exportTraversalCsvR838} from './historicalTraversalExportR838';
 // Browser-local recovery for the actual R666 observer and computed route playback.
 // Never restore an untrusted address as CanonState or as an execution receipt.
 const SESSION_KEY_R828='omega.r828.historicalObserver';
@@ -48,13 +49,8 @@ export function HistoricalConvergenceWorkbenchR667(){
  // Export the actual computed traversal with model metrics, not a fabricated proof receipt.
  const exportTrace=()=>{
   if(!field||route.length===0)return;
-  const columns=['step','address_0_based','node_id','continuity','plasticity','contradiction','burden','scar','evidence','next_address_0_based','continuity_gate','forecast_score','motion_drive','motion_decision','decision_ratio','delta_continuity','delta_plasticity','delta_scar'];
-  const rows=route.map((n,k)=>{
-   const next=field.routeNext[n];
-   const d=motionDecisionR666({continuity:field.C[n],future_plasticity:field.Phi[n],contradiction:field.q[n],burden:field.Lambda[n]});
-   return [k+1,n,address(n).node_id,field.C[n],field.Phi[n],field.q[n],field.Lambda[n],field.scar[n],field.evidence[n],next,field.continuityGate[n],field.forecast[n],field.motionDrive[n],d.decision,d.ratio,field.C[next]-field.C[n],field.Phi[next]-field.Phi[n],field.scar[next]-field.scar[n]];
-  });
-  const csv=[columns.join(','),...rows.map(row=>row.join(','))].join('\r\n')+'\r\n';
+  let csv:string;
+  try{csv=exportTraversalCsvR838(field,route)}catch(e){setError('Traversal export rejected: '+String(e));return}
   const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
   const link=document.createElement('a');link.href=url;link.download='omega-r829-model-traversal.csv';document.body.appendChild(link);link.click();link.remove();
   window.setTimeout(()=>URL.revokeObjectURL(url),1000);
