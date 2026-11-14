@@ -4,6 +4,7 @@ import {defaultObserverR666,stepObserverR666,normalizeAddressR666,SCALES_R666,mo
 import {B053_RECOVERY_R665,B053_CAPABILITIES_R665,capabilityAdmissionR665} from './historicalConvergenceR665';
 import {createModelTaskSessionR842,type OmegaTaskR842,type OmegaTaskRecordR842} from './omegaModelTaskRuntimeR842';
 import {encodeReplayR843,decodeReplayR843,replayModelTasksR843} from './omegaModelReplayR843';
+import {executeComputeR845} from './omegaComputeRouterR845';
 import {parseModelAddressR841,coordinatesToAddressR841,OMEGA_ADDRESS_KEY_R841,OMEGA_ADDRESS_EVENT_R841} from './historicalAddressBusR841';
 // Browser-local recovery for the actual R666 observer and computed route playback.
 // Never restore an untrusted address as CanonState or as an execution receipt.
@@ -73,7 +74,7 @@ export function HistoricalConvergenceWorkbenchR667(){
   if(!valid){setRoute([]);setRouteCursor(0)}
  },[field,route]);
  useEffect(()=>{try{sessionStorage.setItem(SESSION_KEY_R828,JSON.stringify({observer,route,routeCursor}))}catch{/* Browser storage may be disabled; live execution remains available. */}},[observer,route,routeCursor]);
- const move=(forward:number,strafe:number,vertical=0)=>setObserver(s=>stepObserverR666(s,{dt:.1,forward,strafe,vertical}));
+ const move=(forward:number,strafe:number,vertical=0)=>setObserver(s=>field?(executeComputeR845(field,{engine:'OBSERVER_MOTION',task:{kind:'STEP_OBSERVER',observer:s,input:{dt:.1,forward,strafe,vertical}}}).result as ObserverR666):stepObserverR666(s,{dt:.1,forward,strafe,vertical}));
  const trace=()=>{if(!field)return;try{const result=dispatch({kind:'TRACE_MODEL_SUCCESSORS',address:i,limit:64});if(result.kind==='TRACE_MODEL_SUCCESSORS'){setRoute(result.route);setRouteCursor(0);setError('')}}catch(e){setError('Trace rejected: '+String(e))}};
  // Export the actual computed traversal with model metrics, not a fabricated proof receipt.
  const exportTrace=()=>{
