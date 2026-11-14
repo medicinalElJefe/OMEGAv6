@@ -42,7 +42,7 @@ export function HistoricalConvergenceWorkbenchR667(){
   if(!field||route.length===0)return;
   const columns=['step','address_0_based','node_id','continuity','plasticity','contradiction','burden','scar','evidence','next_address_0_based'];
   const rows=route.map((n,k)=>[k+1,n,address(n).node_id,field.C[n],field.Phi[n],field.q[n],field.Lambda[n],field.scar[n],field.evidence[n],field.routeNext[n]]);
-  const csv=[columns.join(','),...rows.map(row=>row.join(','))].join('\\r\\n')+'\\r\\n';
+  const csv=[columns.join(','),...rows.map(row=>row.join(','))].join('\r\n')+'\r\n';
   const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
   const link=document.createElement('a');link.href=url;link.download='omega-r829-model-traversal.csv';document.body.appendChild(link);link.click();link.remove();
   window.setTimeout(()=>URL.revokeObjectURL(url),1000);
