@@ -1,6 +1,6 @@
 import type {Mandala20736Field} from '../../src/mandala20736Runtime';
 import {executeModelTaskR842,type OmegaTaskR842,type OmegaTaskResultR842} from './omegaModelTaskRuntimeR842';
-import {defaultObserverR666,stepObserverR666,type ObserverR666} from './historicalObserverR666';
+import {defaultObserverR666,stepObserverR666,nodeIdR666,SCALES_R666,type ObserverR666} from './historicalObserverR666';
 /** R845: explicit two-engine, read-only local computational dispatch.
  * Observer motion is an independent recovered engine; no device, Canon, or host authority.
  */
@@ -16,6 +16,8 @@ export const OMEGA_COMPUTE_ENGINES_R845=Object.freeze([
 ] as const);
 function validObserver(o:ObserverR666){
  if(!o||!o.address||![o.address.d,o.address.p,o.address.r,o.address.l].every(n=>Number.isInteger(n)&&n>=1&&n<=12))throw Error('Invalid observer coordinates');
+ if(o.address.node_id!==nodeIdR666(o.address.d,o.address.p,o.address.r,o.address.l))throw Error('Noncanonical observer address identity');
+ if(typeof o.scale!=='string'||!SCALES_R666.includes(o.scale.toUpperCase() as typeof SCALES_R666[number]))throw Error('Invalid observer scale');
  if(!Array.isArray(o.position)||o.position.length!==3||!o.position.every(Number.isFinite))throw Error('Invalid observer position');
  if(!Array.isArray(o.velocity)||o.velocity.length!==3||!o.velocity.every(Number.isFinite))throw Error('Invalid observer velocity');
  if(!Number.isFinite(o.yaw)||!Number.isFinite(o.pitch)||!Number.isSafeInteger(o.revision)||o.revision<0)throw Error('Invalid observer state');
@@ -30,6 +32,12 @@ export function executeComputeR845(field:Mandala20736Field,request:OmegaComputeR
   if(!input||!Number.isFinite(input.dt)||input.dt<0||input.dt>.1)throw RangeError('Observer dt must be 0..0.1');
   for(const key of ['forward','strafe','vertical','speed','yawDelta','pitchDelta'] as const){
    const n=input[key];if(n!==undefined&&!Number.isFinite(n))throw Error('Non-finite observer input');
+  }
+  if(input.reanchor!==undefined){
+   if(!input.reanchor||typeof input.reanchor!=='object'||Array.isArray(input.reanchor))throw Error('Invalid observer reanchor');
+   for(const key of Object.keys(input.reanchor)){
+    if(!['d','p','r','l'].includes(key)||!Number.isFinite(input.reanchor[key as keyof typeof input.reanchor]))throw Error('Invalid observer reanchor coordinate');
+   }
   }
   const result=stepObserverR666({...o,address:{...o.address},position:[...o.position],velocity:[...o.velocity]},input);
   return {engine:'OBSERVER_MOTION',result,authority:'LOCAL_SIMULATION'};
