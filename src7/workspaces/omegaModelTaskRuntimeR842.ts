@@ -40,14 +40,28 @@ export function executeModelTaskR842(f:Mandala20736Field,task:OmegaTaskR842):Ome
  }
  throw Error('Unknown task kind');
 }
+/** Snapshot mutable route arrays and metric objects at the task boundary.
+ * A caller must not be able to rewrite the session's historical results.
+ */
+function snapshotTaskR842(task:OmegaTaskR842):OmegaTaskR842{
+ return task.kind==='EXPORT_MODEL_TRACE'?{kind:task.kind,route:[...task.route]}:{...task};
+}
+function snapshotResultR842(result:OmegaTaskResultR842):OmegaTaskResultR842{
+ if(result.kind==='TRACE_MODEL_SUCCESSORS')return {...result,route:[...result.route]};
+ if(result.kind==='INSPECT_MODEL_STATE')return {...result,coordinates:{...result.coordinates},metrics:{...result.metrics}};
+ return {...result};
+}
+function snapshotRecordR842(record:OmegaTaskRecordR842):OmegaTaskRecordR842{
+ return {...record,request:snapshotTaskR842(record.request),result:snapshotResultR842(record.result)};
+}
 export function createModelTaskSessionR842(f:Mandala20736Field){
  const records:OmegaTaskRecordR842[]=[];
  return Object.freeze({
   execute(task:OmegaTaskR842){
    const result=executeModelTaskR842(f,task);
-   const record:OmegaTaskRecordR842={schema:'OMEGA_MODEL_TASK_R842',sequence:records.length+1,request:task,result,authority:'MODEL_DERIVED',source:'COMPILED_20736_FIELD'};
-   records.push(record);return record;
+   const record:OmegaTaskRecordR842={schema:'OMEGA_MODEL_TASK_R842',sequence:records.length+1,request:snapshotTaskR842(task),result:snapshotResultR842(result),authority:'MODEL_DERIVED',source:'COMPILED_20736_FIELD'};
+   records.push(record);return snapshotRecordR842(record);
   },
-  history(){return records.map(r=>({...r,request:{...r.request},result:{...r.result}})) as readonly OmegaTaskRecordR842[]}
+  history(){return records.map(snapshotRecordR842) as readonly OmegaTaskRecordR842[]}
  });
 }
