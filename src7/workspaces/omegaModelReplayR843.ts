@@ -6,7 +6,11 @@ export type ReplayR843={schema:typeof R843_SESSION_SCHEMA;tasks:OmegaTaskR842[]}
 export function encodeReplayR843(records:readonly OmegaTaskRecordR842[]):string{
  if(records.length>128)throw RangeError('Replay exceeds 128 tasks');
  const tasks=records.map(r=>r.request.kind==='EXPORT_MODEL_TRACE'?{kind:r.request.kind,route:[...r.request.route]}:{...r.request});
- return JSON.stringify({schema:R843_SESSION_SCHEMA,tasks});
+ const raw=JSON.stringify({schema:R843_SESSION_SCHEMA,tasks});
+ // The writer must honor the same admission limits as the reader.
+ // Reject non-portable histories now rather than exporting a replay that cannot load.
+ decodeReplayR843(raw);
+ return raw;
 }
 export function decodeReplayR843(raw:string):ReplayR843{
  if(raw.length>25000)throw RangeError('Replay exceeds size limit');
