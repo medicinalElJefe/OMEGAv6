@@ -30,3 +30,12 @@ test('replay never trusts stored outputs or grants external authority',()=>{
  assert.equal(result.results[0].kind,'INSPECT_MODEL_STATE');
  if(result.results[0].kind==='INSPECT_MODEL_STATE')assert.notEqual(result.results[0].decision,'FORGED');
 });
+
+test('replay writer refuses non-portable history rather than emitting unloadable bytes',()=>{
+ const f=field(),session=createModelTaskSessionR842(f);
+ session.execute({kind:'EXPORT_MODEL_TRACE',route:Array.from({length:65},(_,i)=>i)});
+ assert.throws(()=>encodeReplayR843(session.history()),/Invalid replay task payload/);
+ const portable=createModelTaskSessionR842(f);
+ portable.execute({kind:'EXPORT_MODEL_TRACE',route:[0,1]});
+ assert.equal(decodeReplayR843(encodeReplayR843(portable.history())).tasks.length,1);
+});
