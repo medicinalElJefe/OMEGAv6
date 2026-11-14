@@ -34,6 +34,12 @@ export function HistoricalConvergenceWorkbenchR667(){
  const [density,setDensity]=useState(24);
  const [showProof,setShowProof]=useState(false);
  const [routeCursor,setRouteCursor]=useState(()=>recovered?.routeCursor??0);
+ // Recovery is advisory until the regenerated field proves the saved route is an actual successor chain.
+ useEffect(()=>{
+  if(!field||route.length===0)return;
+  const valid=route.every((n,k)=>Number.isInteger(n)&&n>=0&&n<field.count&&(k===0||field.routeNext[route[k-1]]===n));
+  if(!valid){setRoute([]);setRouteCursor(0)}
+ },[field,route]);
  useEffect(()=>{try{sessionStorage.setItem(SESSION_KEY_R828,JSON.stringify({observer,route,routeCursor}))}catch{/* Browser storage may be disabled; live execution remains available. */}},[observer,route,routeCursor]);
  const move=(forward:number,strafe:number,vertical=0)=>setObserver(s=>stepObserverR666(s,{dt:.1,forward,strafe,vertical}));
  const trace=()=>{if(!field)return;const seen=new Set<number>(),out:number[]=[];let at=i;for(let k=0;k<64&&!seen.has(at);k++){if(!Number.isInteger(at)||at<0||at>=field.count)break;seen.add(at);out.push(at);at=field.routeNext[at]}setRoute(out);setRouteCursor(0)};
