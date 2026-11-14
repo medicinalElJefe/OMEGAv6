@@ -48,8 +48,12 @@ export function HistoricalConvergenceWorkbenchR667(){
  // Export the actual computed traversal with model metrics, not a fabricated proof receipt.
  const exportTrace=()=>{
   if(!field||route.length===0)return;
-  const columns=['step','address_0_based','node_id','continuity','plasticity','contradiction','burden','scar','evidence','next_address_0_based'];
-  const rows=route.map((n,k)=>[k+1,n,address(n).node_id,field.C[n],field.Phi[n],field.q[n],field.Lambda[n],field.scar[n],field.evidence[n],field.routeNext[n]]);
+  const columns=['step','address_0_based','node_id','continuity','plasticity','contradiction','burden','scar','evidence','next_address_0_based','continuity_gate','forecast_score','motion_drive','motion_decision','decision_ratio','delta_continuity','delta_plasticity','delta_scar'];
+  const rows=route.map((n,k)=>{
+   const next=field.routeNext[n];
+   const d=motionDecisionR666({continuity:field.C[n],future_plasticity:field.Phi[n],contradiction:field.q[n],burden:field.Lambda[n]});
+   return [k+1,n,address(n).node_id,field.C[n],field.Phi[n],field.q[n],field.Lambda[n],field.scar[n],field.evidence[n],next,field.continuityGate[n],field.forecast[n],field.motionDrive[n],d.decision,d.ratio,field.C[next]-field.C[n],field.Phi[next]-field.Phi[n],field.scar[next]-field.scar[n]];
+  });
   const csv=[columns.join(','),...rows.map(row=>row.join(','))].join('\r\n')+'\r\n';
   const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
   const link=document.createElement('a');link.href=url;link.download='omega-r829-model-traversal.csv';document.body.appendChild(link);link.click();link.remove();
