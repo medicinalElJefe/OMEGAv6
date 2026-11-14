@@ -32,6 +32,8 @@ export function HistoricalConvergenceWorkbenchR667(){
  useEffect(()=>{let live=true;getMandala20736Field().then(f=>{if(live)setField(f)}).catch(e=>{if(live)setError(String(e))});return()=>{live=false}},[]);
  const i=index(observer),next=field?.routeNext[i]??i;
  const [density,setDensity]=useState(24);
+ const [jumpAddress,setJumpAddress]=useState('1');
+ const [jumpError,setJumpError]=useState('');
  const [showProof,setShowProof]=useState(false);
  const [routeCursor,setRouteCursor]=useState(()=>recovered?.routeCursor??0);
  // Recovery is advisory until the regenerated field proves the saved route is an actual successor chain.
@@ -54,6 +56,8 @@ export function HistoricalConvergenceWorkbenchR667(){
   window.setTimeout(()=>URL.revokeObjectURL(url),1000);
  };
  const select=(n:number)=>{if(!Number.isInteger(n)||n<0||n>=20736)return;setObserver(s=>({...s,address:address(n),revision:s.revision+1}))};
+ // Direct 1-based address navigation is independent of route playback and cannot mutate CanonState.
+ const jump=()=>{const raw=jumpAddress.trim();const n=Number(raw);if(!/^\d+$/.test(raw)||!Number.isSafeInteger(n)||n<1||n>20736){setJumpError('Enter an integer address from 1 to 20736.');return}setJumpError('');select(n-1);setRoute([]);setRouteCursor(0)};
  // Source-derived route projection: no synthetic geometry, no new authority.
  const routePoints=field?route.filter(n=>Number.isInteger(n)&&n>=0&&n<field.count).map(n=>({x:320+field.x[n]*235,y:150-field.y[n]*115})):[];
  const routePolyline=routePoints.map(p=>`${p.x},${p.y}`).join(' ');
@@ -81,6 +85,7 @@ export function HistoricalConvergenceWorkbenchR667(){
  <label>Scale <select aria-label='Historical scale' value={observer.scale} onChange={e=>setObserver(s=>({...s,scale:e.target.value}))}>{SCALES_R666.map(s=><option key={s}>{s}</option>)}</select></label>
  {(['d','p','r','l'] as const).map(k=><label key={k}>{k.toUpperCase()} <select aria-label={'Address '+k} value={observer.address[k]} onChange={e=>setObserver(s=>({...s,address:normalizeAddressR666({...s.address,[k]:Number(e.target.value)})}))}>{Array.from({length:12},(_,j)=><option key={j+1} value={j+1}>{j+1}</option>)}</select></label>)}
  </div>
+ <form onSubmit={e=>{e.preventDefault();jump()}} style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:8,marginTop:12}}><label htmlFor='r836-jump'>Navigate model address (1–20736)</label><input id='r836-jump' inputMode='numeric' pattern='[0-9]*' value={jumpAddress} onChange={e=>{setJumpAddress(e.target.value);setJumpError('')}} style={{width:100}}/><button type='submit'>Inspect address</button>{jumpError&&<span role='alert'>{jumpError}</span>}</form>
  <p data-r828-recovery='browser-session'>Observer and computed route playback recover within this browser session; no canonical state or server receipt is changed.</p>
  <p><strong>{observer.address.node_id}</strong> · position {observer.position.map(x=>x.toFixed(2)).join(', ')} · next {next+1}</p>
  <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
