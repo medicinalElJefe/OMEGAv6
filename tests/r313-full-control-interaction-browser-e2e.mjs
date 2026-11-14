@@ -1,6 +1,7 @@
 import {chromium} from 'playwright';
 import fs from 'node:fs';
 import {partitionInteractionCasesR355} from '../src/system/r313InteractionWorkloadR355.js';
+import {classifyR313RateLimitR851} from '../src/system/r313ExpectedSourceDegradationR851.js';
 
 const base=(process.env.OMEGA_E2E_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 const source=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
@@ -332,7 +333,9 @@ try{
   page.on('framenavigated',frame=>{if(frame===page.mainFrame())page.__r313MainFrameNavigations++});
   const pageErrors=[];
   const consoleErrors=[];
+  const rateLimitedResponses=[];
   page.on('pageerror',e=>pageErrors.push(String(e)));
+  page.on('response',response=>{if(response.status()===429){const request=response.request();const evidence={status:response.status(),url:response.url(),method:request.method(),resourceType:request.resourceType()};rateLimitedResponses.push({...evidence,classifier:classifyR313RateLimitR851(evidence,base)});}});
   page.on('console',msg=>{if(msg.type()==='error')consoleErrors.push(msg.text())});
   await page.goto(`${base}/?omega6=1&r313=${Date.now()}-${profile}`,{waitUntil:'domcontentloaded',timeout:45000});
   await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
@@ -348,8 +351,18 @@ try{
    if(overflow>24)throw new Error(`${profile}/${surface}: viewport overflow ${overflow}px after interaction sweep`);
   }
   if(pageErrors.length)throw new Error(`${profile}: page errors ${pageErrors.join(' | ').slice(0,2500)}`);
-  const seriousConsole=consoleErrors.filter(x=>!/favicon|Failed to load resource.*404/i.test(x));
-  if(seriousConsole.length)throw new Error(`${profile}: console errors ${seriousConsole.join(' | ').slice(0,2500)}`);
+  // A 429 on a known optional weather source is degraded evidence, not a dead UI control.
+  // Reject unknown/internal 429s and unmatched console errors; never disable page-error,
+  // navigation, control, or overflow assertions.
+  const console429=consoleErrors.filter(x=>/Failed to load resource.*429 \(Too Many Requests\)/i.test(x));
+  const admitted429=rateLimitedResponses.filter(x=>x.classifier!=='BLOCKING');
+  const blocked429=rateLimitedResponses.filter(x=>x.classifier==='BLOCKING');
+  if(console429.length&&(blocked429.length||admitted429.length<console429.length)){
+   throw new Error(`${profile}: unadmitted HTTP 429; responses=${JSON.stringify(rateLimitedResponses).slice(0,2400)}; console=${console429.join(' | ').slice(0,400)}`);
+  }
+  const seriousConsole=consoleErrors.filter(x=>!/favicon|Failed to load resource.*404/i.test(x)&&!(/Failed to load resource.*429 \(Too Many Requests\)/i.test(x)&&console429.length>0&&blocked429.length===0&&admitted429.length>=console429.length));
+  if(seriousConsole.length)throw new Error(`${profile}: console errors ${seriousConsole.join(' | ').slice(0,2500)}; HTTP429=${JSON.stringify(rateLimitedResponses).slice(0,1500)}`);
+  if(admitted429.length)console.log(`R851 ${profile.toUpperCase()} OPTIONAL SOURCE DEGRADED · ${admitted429.map(x=>x.classifier+':'+x.url).join(' | ').slice(0,1600)} · no source pixels fabricated`);
   console.log(`R313 ${profile.toUpperCase()} SHARD ${shardIndex+1}/${shardCount} CONTROL SWEEP PASS · workload ${interactionPartition[shardIndex].weight}ms census · ${assigned.length} deterministic panels · ${total} visible controls exhaustively classified · ${actionable} enabled controls verified · ${nativeActuated} representative/special native controls click-exercised · ${roleActuated} representative role buttons keyboard-exercised · every internal-navigation and transient-toggle control actuated · mutating/network controls held behind declared proof/authorization semantics · no page errors · no material overflow`);
   await context.close();
  }
