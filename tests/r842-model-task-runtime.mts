@@ -38,3 +38,22 @@ test('source-derived trace terminates at limit without synthetic route padding',
  assert.equal(r.kind,'TRACE_MODEL_SUCCESSORS');
  if(r.kind==='TRACE_MODEL_SUCCESSORS'){assert.deepEqual(r.route,[0,1]);assert.equal(r.termination,'LIMIT')}
 });
+
+test('task history snapshots resist request, return-value and history mutation',()=>{
+ const session=createModelTaskSessionR842(field());
+ const route=[0,1,2];
+ const exported=session.execute({kind:'EXPORT_MODEL_TRACE',route});
+ route[0]=19;
+ if(exported.request.kind==='EXPORT_MODEL_TRACE')(exported.request.route as number[])[0]=20;
+ const inspected=session.execute({kind:'INSPECT_MODEL_STATE',address:0});
+ if(inspected.result.kind==='INSPECT_MODEL_STATE')inspected.result.metrics.continuity=-9;
+ const traced=session.execute({kind:'TRACE_MODEL_SUCCESSORS',address:0,limit:4});
+ if(traced.result.kind==='TRACE_MODEL_SUCCESSORS')traced.result.route[0]=15;
+ const history=session.history();
+ if(history[0].request.kind==='EXPORT_MODEL_TRACE')assert.deepEqual(history[0].request.route,[0,1,2]);
+ if(history[1].result.kind==='INSPECT_MODEL_STATE')assert.ok(history[1].result.metrics.continuity>0);
+ if(history[2].result.kind==='TRACE_MODEL_SUCCESSORS')assert.deepEqual(history[2].result.route,[0,1,2]);
+ if(history[2].result.kind==='TRACE_MODEL_SUCCESSORS')history[2].result.route[0]=99;
+ const again=session.history();
+ if(again[2].result.kind==='TRACE_MODEL_SUCCESSORS')assert.deepEqual(again[2].result.route,[0,1,2]);
+});
