@@ -29,5 +29,20 @@ test('R832 source field integrates all 20736 addresses with bounded transitions 
   assert.ok(['STAY','TURN','ESCALATE'].includes(decision.decision));
   assert.ok(Number.isFinite(decision.ratio));
  }
+ // R833: exercise the same bounded successor walk used by the visual trajectory.
+ // A repeated node ends the walk; every edge must originate in the compiled field.
+ for(const start of [0,1,1727,1728,10367,20735]){
+  const seen=new Set<number>(),route:number[]=[];
+  let at=start;
+  for(let k=0;k<64&&!seen.has(at);k++){
+   assert.ok(Number.isInteger(at)&&at>=0&&at<field.count);
+   seen.add(at);route.push(at);at=field.routeNext[at];
+  }
+  assert.ok(route.length>=1&&route.length<=64);
+  assert.equal(route[0],start);
+  assert.equal(new Set(route).size,route.length);
+  for(let k=1;k<route.length;k++)assert.equal(field.routeNext[route[k-1]],route[k]);
+  for(const n of route)assert.ok(Number.isFinite(field.x[n])&&Number.isFinite(field.y[n]),'trajectory projection must have finite XY coordinates');
+ }
  assert.equal(nodeIdR666(12,12,12,12),'node_020736');
 });
