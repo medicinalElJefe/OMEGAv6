@@ -2,7 +2,8 @@ import {useEffect,useState} from 'react';
 import {getMandala20736Field,type Mandala20736Field} from '../../src/mandala20736Runtime';
 import {defaultObserverR666,stepObserverR666,normalizeAddressR666,SCALES_R666,motionDecisionR666,type ObserverR666} from './historicalObserverR666';
 import {B053_RECOVERY_R665,B053_CAPABILITIES_R665,capabilityAdmissionR665} from './historicalConvergenceR665';
-import {executeModelTaskR842} from './omegaModelTaskRuntimeR842';
+import {createModelTaskSessionR842,type OmegaTaskR842,type OmegaTaskRecordR842} from './omegaModelTaskRuntimeR842';
+import {encodeReplayR843,decodeReplayR843,replayModelTasksR843} from './omegaModelReplayR843';
 import {parseModelAddressR841,coordinatesToAddressR841,OMEGA_ADDRESS_KEY_R841,OMEGA_ADDRESS_EVENT_R841} from './historicalAddressBusR841';
 // Browser-local recovery for the actual R666 observer and computed route playback.
 // Never restore an untrusted address as CanonState or as an execution receipt.
@@ -52,6 +53,18 @@ export function HistoricalConvergenceWorkbenchR667(){
  const [jumpAddress,setJumpAddress]=useState('1');
  const [jumpError,setJumpError]=useState('');
  const [showProof,setShowProof]=useState(false);
+ const [taskRecords,setTaskRecords]=useState<OmegaTaskRecordR842[]>([]);
+ const [replayText,setReplayText]=useState('');
+ const [replayStatus,setReplayStatus]=useState('');
+ const dispatch=(task:OmegaTaskR842)=>{
+  if(!field)throw Error('Model field not ready');
+  const session=createModelTaskSessionR842(field);
+  const record=session.execute(task);
+  setTaskRecords(previous=>[...previous.slice(-127),record]);
+  return record.result;
+ };
+ const saveReplay=()=>{try{setReplayText(encodeReplayR843(taskRecords));setReplayStatus('Task requests prepared for portable replay; no external execution receipt.')}catch(e){setReplayStatus('Replay export rejected: '+String(e))}};
+ const runReplay=()=>{if(!field)return;try{const replay=decodeReplayR843(replayText);const outcome=replayModelTasksR843(field,replayText);setReplayStatus(`${outcome.taskCount} tasks recomputed from the current compiled field; model-derived only.`);setTaskRecords([]);if(replay.tasks.length){const last=outcome.results[outcome.results.length-1];if(last.kind==='TRACE_MODEL_SUCCESSORS'){setRoute(last.route);setRouteCursor(0)}}}catch(e){setReplayStatus('Replay rejected: '+String(e))}};
  const [routeCursor,setRouteCursor]=useState(()=>recovered?.routeCursor??0);
  // Recovery is advisory until the regenerated field proves the saved route is an actual successor chain.
  useEffect(()=>{
@@ -61,12 +74,12 @@ export function HistoricalConvergenceWorkbenchR667(){
  },[field,route]);
  useEffect(()=>{try{sessionStorage.setItem(SESSION_KEY_R828,JSON.stringify({observer,route,routeCursor}))}catch{/* Browser storage may be disabled; live execution remains available. */}},[observer,route,routeCursor]);
  const move=(forward:number,strafe:number,vertical=0)=>setObserver(s=>stepObserverR666(s,{dt:.1,forward,strafe,vertical}));
- const trace=()=>{if(!field)return;try{const result=executeModelTaskR842(field,{kind:'TRACE_MODEL_SUCCESSORS',address:i,limit:64});if(result.kind==='TRACE_MODEL_SUCCESSORS'){setRoute(result.route);setRouteCursor(0);setError('')}}catch(e){setError('Trace rejected: '+String(e))}};
+ const trace=()=>{if(!field)return;try{const result=dispatch({kind:'TRACE_MODEL_SUCCESSORS',address:i,limit:64});if(result.kind==='TRACE_MODEL_SUCCESSORS'){setRoute(result.route);setRouteCursor(0);setError('')}}catch(e){setError('Trace rejected: '+String(e))}};
  // Export the actual computed traversal with model metrics, not a fabricated proof receipt.
  const exportTrace=()=>{
   if(!field||route.length===0)return;
   let csv:string;
-  try{const result=executeModelTaskR842(field,{kind:'EXPORT_MODEL_TRACE',route});if(result.kind!=='EXPORT_MODEL_TRACE')throw Error('Unexpected result');csv=result.csv;setError('')}catch(e){setError('Traversal export rejected: '+String(e));return}
+  try{const result=dispatch({kind:'EXPORT_MODEL_TRACE',route});if(result.kind!=='EXPORT_MODEL_TRACE')throw Error('Unexpected result');csv=result.csv;setError('')}catch(e){setError('Traversal export rejected: '+String(e));return}
   const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
   const link=document.createElement('a');link.href=url;link.download='omega-r829-model-traversal.csv';document.body.appendChild(link);link.click();link.remove();
   window.setTimeout(()=>URL.revokeObjectURL(url),1000);
@@ -108,6 +121,7 @@ export function HistoricalConvergenceWorkbenchR667(){
  {(['d','p','r','l'] as const).map(k=><label key={k}>{k.toUpperCase()} <select aria-label={'Address '+k} value={observer.address[k]} onChange={e=>{const a=normalizeAddressR666({...observer.address,[k]:Number(e.target.value)});select(coordinatesToAddressR841(a.d,a.p,a.r,a.l));setRoute([]);setRouteCursor(0)}}>{Array.from({length:12},(_,j)=><option key={j+1} value={j+1}>{j+1}</option>)}</select></label>)}
  </div>
  <form onSubmit={e=>{e.preventDefault();jump()}} style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:8,marginTop:12}}><label htmlFor='r836-jump'>Navigate model address (1–20736)</label><input id='r836-jump' inputMode='numeric' pattern='[0-9]*' value={jumpAddress} onChange={e=>{setJumpAddress(e.target.value);setJumpError('')}} style={{width:100}}/><button type='submit'>Inspect address</button>{jumpError&&<span role='alert'>{jumpError}</span>}</form>
+ <section data-r843-model-replay='true' aria-label='Model task replay' style={{margin:'12px 0',padding:10,border:'1px solid #56718a',borderRadius:8}}><strong>Model task history and recovery</strong><p>{taskRecords.length} recorded requests this session. Export and replay recompute source-derived results; they do not restore host or Canon authority.</p><button type='button' onClick={saveReplay}>Prepare task replay</button><label style={{display:'block',marginTop:8}}>Portable replay JSON<textarea aria-label='Portable model task replay JSON' rows={3} style={{width:'100%'}} value={replayText} onChange={e=>setReplayText(e.target.value)}/></label><button type='button' onClick={runReplay} disabled={!field||!replayText.trim()}>Recompute replay</button>{replayStatus&&<p role='status'>{replayStatus}</p>}</section>
  <p data-r828-recovery='browser-session'>Observer and computed route playback recover within this browser session. Selected address synchronizes with the existing OMEGA6/OMEGA7 local address bus; no CanonState or server receipt is changed.</p>
  <p><strong>{observer.address.node_id}</strong> · position {observer.position.map(x=>x.toFixed(2)).join(', ')} · next {next+1}</p>
  <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
