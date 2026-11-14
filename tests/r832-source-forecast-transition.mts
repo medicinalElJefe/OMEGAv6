@@ -1,13 +1,13 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import {getMandala20736Field} from '../src/mandala20736Runtime.ts';
-import {initCorpusPack,isCorpusReady} from '../src/corpusRuntime.ts';
+import {isCorpusReady} from '../src/corpusRuntime.ts';
 import {motionDecisionR666,nodeIdR666} from '../src7/workspaces/historicalObserverR666.ts';
 
 test('R832 source field integrates all 20736 addresses with bounded transitions and finite developmental derivatives',async()=>{
- await initCorpusPack();
- assert.equal(isCorpusReady(),true,'embedded source corpus must be initialized before field compilation');
+ // The shared field compiler must initialize its own source dependency; callers cannot rely on app bootstrap order.
  const field=await getMandala20736Field();
+ assert.equal(isCorpusReady(),true,'shared field compilation must initialize the embedded corpus');
  assert.equal(field.count,20736);
  for(let i=0;i<field.count;i++){
   const n=field.routeNext[i];
