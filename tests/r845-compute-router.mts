@@ -24,7 +24,7 @@ test('observer dispatch rejects noncanonical address identity and malformed rean
  const run=(o:typeof observer,input:{dt:number;reanchor?:any})=>executeComputeR845(field,{engine:'OBSERVER_MOTION',task:{kind:'STEP_OBSERVER',observer:o,input}});
  assert.throws(()=>run({...observer,address:{...observer.address,node_id:'node_999999'}},{dt:.1}),/Noncanonical/);
  assert.throws(()=>run({...observer,scale:'UNKNOWN'},{dt:.1}),/Invalid observer scale/);
- for(const reanchor of [{d:NaN},{p:Infinity},{r:'2'},{unknown:1},null,[]]){
+ for(const reanchor of [{d:NaN},{p:Infinity},{r:'2'},{unknown:1},{d:0.5},{p:-1.25},{r:13},{l:-13},null,[]]){
   assert.throws(()=>run(observer,{dt:.1,reanchor}),/Invalid observer reanchor/);
  }
  assert.equal(JSON.stringify(observer),original);
