@@ -2,15 +2,34 @@ import {useEffect,useState} from 'react';
 import {getMandala20736Field,type Mandala20736Field} from '../../src/mandala20736Runtime';
 import {defaultObserverR666,stepObserverR666,normalizeAddressR666,SCALES_R666,type ObserverR666} from './historicalObserverR666';
 import {B053_RECOVERY_R665,B053_CAPABILITIES_R665,capabilityAdmissionR665} from './historicalConvergenceR665';
+// Browser-local recovery for the actual R666 observer and computed route playback.
+// Never restore an untrusted address as CanonState or as an execution receipt.
+const SESSION_KEY_R828='omega.r828.historicalObserver';
+type SavedObserverR828={observer:ObserverR666;route:number[];routeCursor:number};
+function recoverObserverR828():SavedObserverR828|null{
+ try{
+  const raw=sessionStorage.getItem(SESSION_KEY_R828);if(!raw||raw.length>16000)return null;
+  const value=JSON.parse(raw) as SavedObserverR828;
+  if(!value||!value.observer||!value.observer.address)return null;
+  const a=value.observer.address;
+  if(![a.d,a.p,a.r,a.l].every(n=>Number.isInteger(n)&&n>=1&&n<=12))return null;
+  if(!Array.isArray(value.observer.position)||value.observer.position.length!==3||!value.observer.position.every(n=>typeof n==='number'&&Number.isFinite(n)))return null;
+  if(!Array.isArray(value.route)||value.route.length>64||!value.route.every(n=>Number.isInteger(n)&&n>=0&&n<20736))return null;
+  if(!Number.isInteger(value.routeCursor)||value.routeCursor<0||value.routeCursor>Math.max(0,value.route.length-1))return null;
+  return value;
+ }catch{return null}
+}
 const index=(o:ObserverR666)=>(((o.address.d-1)*12+o.address.p-1)*12+o.address.r-1)*12+o.address.l-1;
 const address=(i:number)=>normalizeAddressR666({d:Math.floor(i/1728)+1,p:Math.floor(i/144)%12+1,r:Math.floor(i/12)%12+1,l:i%12+1});
 export function HistoricalConvergenceWorkbenchR667(){
- const [field,setField]=useState<Mandala20736Field|null>(null),[error,setError]=useState(''),[observer,setObserver]=useState<ObserverR666>(defaultObserverR666),[route,setRoute]=useState<number[]>([]);
+ const [recovered]=useState<SavedObserverR828|null>(recoverObserverR828);
+ const [field,setField]=useState<Mandala20736Field|null>(null),[error,setError]=useState(''),[observer,setObserver]=useState<ObserverR666>(()=>recovered?.observer??defaultObserverR666()),[route,setRoute]=useState<number[]>(()=>recovered?.route??[]);
  useEffect(()=>{let live=true;getMandala20736Field().then(f=>{if(live)setField(f)}).catch(e=>{if(live)setError(String(e))});return()=>{live=false}},[]);
  const i=index(observer),next=field?.routeNext[i]??i;
  const [density,setDensity]=useState(24);
  const [showProof,setShowProof]=useState(false);
- const [routeCursor,setRouteCursor]=useState(0);
+ const [routeCursor,setRouteCursor]=useState(()=>recovered?.routeCursor??0);
+ useEffect(()=>{try{sessionStorage.setItem(SESSION_KEY_R828,JSON.stringify({observer,route,routeCursor}))}catch{/* Browser storage may be disabled; live execution remains available. */}},[observer,route,routeCursor]);
  const move=(forward:number,strafe:number,vertical=0)=>setObserver(s=>stepObserverR666(s,{dt:.1,forward,strafe,vertical}));
  const trace=()=>{if(!field)return;const seen=new Set<number>(),out:number[]=[];let at=i;for(let k=0;k<64&&!seen.has(at);k++){seen.add(at);out.push(at);at=field.routeNext[at]}setRoute(out);setRouteCursor(0)};
  const select=(n:number)=>setObserver(s=>({...s,address:address(n),revision:s.revision+1}));
@@ -23,11 +42,12 @@ export function HistoricalConvergenceWorkbenchR667(){
  <label>Scale <select aria-label='Historical scale' value={observer.scale} onChange={e=>setObserver(s=>({...s,scale:e.target.value}))}>{SCALES_R666.map(s=><option key={s}>{s}</option>)}</select></label>
  {(['d','p','r','l'] as const).map(k=><label key={k}>{k.toUpperCase()} <select aria-label={'Address '+k} value={observer.address[k]} onChange={e=>setObserver(s=>({...s,address:normalizeAddressR666({...s.address,[k]:Number(e.target.value)})}))}>{Array.from({length:12},(_,j)=><option key={j+1} value={j+1}>{j+1}</option>)}</select></label>)}
  </div>
+ <p data-r828-recovery='browser-session'>Observer and computed route playback recover within this browser session; no canonical state or server receipt is changed.</p>
  <p><strong>{observer.address.node_id}</strong> · position {observer.position.map(x=>x.toFixed(2)).join(', ')} · next {next+1}</p>
  <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
  <button onClick={()=>move(1,0)}>Forward</button><button onClick={()=>move(-1,0)}>Back</button><button onClick={()=>move(0,-1)}>Left</button><button onClick={()=>move(0,1)}>Right</button><button onClick={()=>move(0,0,1)}>Up</button><button onClick={()=>move(0,0,-1)}>Down</button>
  <button onClick={()=>setObserver(s=>stepObserverR666(s,{dt:0,yawDelta:.15}))}>Turn right</button><button onClick={()=>setObserver(s=>stepObserverR666(s,{dt:0,yawDelta:-.15}))}>Turn left</button>
- <button disabled={!field} onClick={()=>select(next)}>Follow computed route</button><button disabled={!field} onClick={trace}>Trace 64 transitions</button><button onClick={()=>{setObserver(defaultObserverR666());setRoute([])}}>Reset</button>
+ <button disabled={!field} onClick={()=>select(next)}>Follow computed route</button><button disabled={!field} onClick={trace}>Trace 64 transitions</button><button onClick={()=>{setObserver(defaultObserverR666());setRoute([]);setRouteCursor(0)}}>Reset</button>
  </div>
  {field&&<svg role='img' aria-label='Canonical model-space XY projection sampled from the 20736-state field' viewBox='0 0 640 300' style={{width:'100%',background:'#07121d',borderRadius:8,marginTop:12}}>
  {Array.from({length:Math.ceil(field.count/density)},(_,k)=>k*density).filter(j=>j<field.count).map(j=><circle key={j} cx={320+field.x[j]*235} cy={150-field.y[j]*115} r={1.1+field.evidence[j]*1.2} fill='#74cdd9' opacity={Math.max(.18,field.C[j])}/>)}
