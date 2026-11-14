@@ -2,7 +2,7 @@ import {useEffect,useState} from 'react';
 import {getMandala20736Field,type Mandala20736Field} from '../../src/mandala20736Runtime';
 import {defaultObserverR666,stepObserverR666,normalizeAddressR666,SCALES_R666,motionDecisionR666,type ObserverR666} from './historicalObserverR666';
 import {B053_RECOVERY_R665,B053_CAPABILITIES_R665,capabilityAdmissionR665} from './historicalConvergenceR665';
-import {exportTraversalCsvR838} from './historicalTraversalExportR838';
+import {executeModelTaskR842} from './omegaModelTaskRuntimeR842';
 import {parseModelAddressR841,coordinatesToAddressR841,OMEGA_ADDRESS_KEY_R841,OMEGA_ADDRESS_EVENT_R841} from './historicalAddressBusR841';
 // Browser-local recovery for the actual R666 observer and computed route playback.
 // Never restore an untrusted address as CanonState or as an execution receipt.
@@ -61,12 +61,12 @@ export function HistoricalConvergenceWorkbenchR667(){
  },[field,route]);
  useEffect(()=>{try{sessionStorage.setItem(SESSION_KEY_R828,JSON.stringify({observer,route,routeCursor}))}catch{/* Browser storage may be disabled; live execution remains available. */}},[observer,route,routeCursor]);
  const move=(forward:number,strafe:number,vertical=0)=>setObserver(s=>stepObserverR666(s,{dt:.1,forward,strafe,vertical}));
- const trace=()=>{if(!field)return;const seen=new Set<number>(),out:number[]=[];let at=i;for(let k=0;k<64&&!seen.has(at);k++){if(!Number.isInteger(at)||at<0||at>=field.count)break;seen.add(at);out.push(at);at=field.routeNext[at]}setRoute(out);setRouteCursor(0)};
+ const trace=()=>{if(!field)return;try{const result=executeModelTaskR842(field,{kind:'TRACE_MODEL_SUCCESSORS',address:i,limit:64});if(result.kind==='TRACE_MODEL_SUCCESSORS'){setRoute(result.route);setRouteCursor(0);setError('')}}catch(e){setError('Trace rejected: '+String(e))}};
  // Export the actual computed traversal with model metrics, not a fabricated proof receipt.
  const exportTrace=()=>{
   if(!field||route.length===0)return;
   let csv:string;
-  try{csv=exportTraversalCsvR838(field,route)}catch(e){setError('Traversal export rejected: '+String(e));return}
+  try{const result=executeModelTaskR842(field,{kind:'EXPORT_MODEL_TRACE',route});if(result.kind!=='EXPORT_MODEL_TRACE')throw Error('Unexpected result');csv=result.csv;setError('')}catch(e){setError('Traversal export rejected: '+String(e));return}
   const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
   const link=document.createElement('a');link.href=url;link.download='omega-r829-model-traversal.csv';document.body.appendChild(link);link.click();link.remove();
   window.setTimeout(()=>URL.revokeObjectURL(url),1000);
