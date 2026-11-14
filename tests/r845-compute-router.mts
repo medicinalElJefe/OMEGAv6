@@ -18,3 +18,20 @@ test('invalid motion is rejected without mutating the observer',()=>{
  assert.throws(()=>executeComputeR845(field,{engine:'OBSERVER_MOTION',task:{kind:'STEP_OBSERVER',observer,input:{dt:.1,forward:Infinity}}}),/Non-finite/);
  assert.equal(JSON.stringify(observer),original);
 });
+
+test('observer dispatch rejects noncanonical address identity and malformed reanchors',()=>{
+ const observer=defaultComputeObserverR845(),original=JSON.stringify(observer);
+ const run=(o:typeof observer,input:{dt:number;reanchor?:any})=>executeComputeR845(field,{engine:'OBSERVER_MOTION',task:{kind:'STEP_OBSERVER',observer:o,input}});
+ assert.throws(()=>run({...observer,address:{...observer.address,node_id:'node_999999'}},{dt:.1}),/Noncanonical/);
+ assert.throws(()=>run({...observer,scale:'UNKNOWN'},{dt:.1}),/Invalid observer scale/);
+ for(const reanchor of [{d:NaN},{p:Infinity},{r:'2'},{unknown:1},null,[]]){
+  assert.throws(()=>run(observer,{dt:.1,reanchor}),/Invalid observer reanchor/);
+ }
+ assert.equal(JSON.stringify(observer),original);
+ const stepped=run(observer,{dt:.1,reanchor:{d:1}});
+ assert.equal(stepped.engine,'OBSERVER_MOTION');
+ if(stepped.engine==='OBSERVER_MOTION'){
+  assert.equal(stepped.result.address.d,2);
+  assert.equal(stepped.result.address.node_id,'node_001728');
+ }
+});
