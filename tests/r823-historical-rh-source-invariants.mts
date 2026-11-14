@@ -64,4 +64,7 @@ assert.match(app,/\{full&&<div data-r827-concept-lookup/,'R827 lookup must not a
 for(const token of ["data-r839-incoming-edges","full.edges.filter(e=>e.toRow-1===address)","onAddress(e.fromRow-1)"])
  assert.ok(app.includes(token),'R839 verified reverse traversal missing '+token);
 assert.match(app,/\{full&&<section data-r839-incoming-edges/,'R839 reverse relationships must remain source-gated');
+// R840: the same typed relationship filter applies to both directions.
+assert.ok(app.includes("e.toRow-1===address&&(kind==='ALL'||e.kind===kind)"),'R840 incoming traversal must respect the selected typed edge filter');
+assert.ok(app.includes('[full,address,kind]'),'R840 incoming results must recompute when the edge filter changes');
 console.log('R823 SOURCE-GATED FULL RH GRAPH PASS · 320 conceptual identities on 25 addresses · 416 typed edge constraints · original 2150619-byte fingerprint refusal · existing route authority conserved');
