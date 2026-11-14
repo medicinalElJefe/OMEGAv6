@@ -36,7 +36,7 @@ export function executeComputeR845(field:Mandala20736Field,request:OmegaComputeR
   if(input.reanchor!==undefined){
    if(!input.reanchor||typeof input.reanchor!=='object'||Array.isArray(input.reanchor))throw Error('Invalid observer reanchor');
    for(const key of Object.keys(input.reanchor)){
-    if(!['d','p','r','l'].includes(key)||!Number.isFinite(input.reanchor[key as keyof typeof input.reanchor]))throw Error('Invalid observer reanchor coordinate');
+    if(!['d','p','r','l'].includes(key)||!Number.isInteger(input.reanchor[key as keyof typeof input.reanchor])||Math.abs(input.reanchor[key as keyof typeof input.reanchor]!)>12)throw Error('Invalid observer reanchor coordinate');
    }
   }
   const result=stepObserverR666({...o,address:{...o.address},position:[...o.position],velocity:[...o.velocity]},input);
