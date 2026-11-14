@@ -12,7 +12,8 @@ export function resolveExecutorR846(engine:string,route:string):ExecutorAdmissio
  const cap=OMEGA7_CAPABILITY_BY_ROUTE.get(route as Omega7Capability['legacyRoute']);
  if(!definition||!definition.routes.some(x=>x===route))return {engine,route,available:false,capabilityId:cap?.id??null,reason:'NO_EXECUTOR_ROUTE_BINDING'};
  if(!cap)return {engine,route,available:false,capabilityId:null,reason:'UNKNOWN_CAPABILITY'};
- if(cap.availability==='OFFLINE'||cap.availability==='FAILED')return {engine,route,available:false,capabilityId:cap.id,reason:'CAPABILITY_NOT_AVAILABLE'};
+ if(cap.availability!=='READY')return {engine,route,available:false,capabilityId:cap.id,reason:'CAPABILITY_NOT_READY_'+cap.availability};
+ if(!['RUNTIME_ACTIVE','SOURCE_ACTIVE','LOCAL_ACTIVE'].includes(cap.reality))return {engine,route,available:false,capabilityId:cap.id,reason:'CAPABILITY_REALITY_NOT_ACTIVE'};
  return {engine,route,available:true,capabilityId:cap.id,reason:'LOCAL_MODEL_EXECUTOR_ONLY'};
 }
 export function dispatchCapabilityComputeR846(field:Mandala20736Field,route:string,request:OmegaComputeRequestR845):{admission:ExecutorAdmissionR846;output:OmegaComputeResultR845}{
