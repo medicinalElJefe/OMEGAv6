@@ -31,6 +31,23 @@ export function HistoricalConvergenceWorkbenchR667(){
  const [recovered]=useState<SavedObserverR828|null>(recoverObserverR828);
  const [field,setField]=useState<Mandala20736Field|null>(null),[error,setError]=useState(''),[observer,setObserver]=useState<ObserverR666>(()=>recovered?.observer??defaultObserverR666()),[route,setRoute]=useState<number[]>(()=>recovered?.route??[]);
  useEffect(()=>{let live=true;getMandala20736Field().then(f=>{if(live)setField(f)}).catch(e=>{if(live)setError(String(e))});return()=>{live=false}},[]);
+ // The historical observer shares the existing OMEGA6/OMEGA7 address bus.
+ // Address navigation is representational and does not admit CanonState.
+ useEffect(()=>{
+  const sync=()=>{
+   try{
+    const raw=localStorage.getItem('omega.v6.address');
+    if(raw===null)return;
+    const n=Number(raw);
+    if(!/^\\d+$/.test(raw)||!Number.isSafeInteger(n)||n<0||n>=20736)return;
+    setObserver(current=>index(current)===n?current:{...current,address:address(n),revision:current.revision+1});
+   }catch{/* Storage unavailable: keep browser-session observer operational. */}
+  };
+  sync();
+  window.addEventListener('storage',sync);
+  window.addEventListener('omega7-address-changed',sync as EventListener);
+  return()=>{window.removeEventListener('storage',sync);window.removeEventListener('omega7-address-changed',sync as EventListener)};
+ },[]);
  const i=index(observer),next=field?.routeNext[i]??i;
  const [density,setDensity]=useState(24);
  const [jumpAddress,setJumpAddress]=useState('1');
@@ -55,7 +72,11 @@ export function HistoricalConvergenceWorkbenchR667(){
   const link=document.createElement('a');link.href=url;link.download='omega-r829-model-traversal.csv';document.body.appendChild(link);link.click();link.remove();
   window.setTimeout(()=>URL.revokeObjectURL(url),1000);
  };
- const select=(n:number)=>{if(!Number.isInteger(n)||n<0||n>=20736)return;setObserver(s=>({...s,address:address(n),revision:s.revision+1}))};
+ const select=(n:number)=>{
+  if(!Number.isInteger(n)||n<0||n>=20736)return;
+  setObserver(s=>index(s)===n?s:{...s,address:address(n),revision:s.revision+1});
+  try{localStorage.setItem('omega.v6.address',String(n));window.dispatchEvent(new CustomEvent('omega7-address-changed',{detail:{address:n}}))}catch{/* Session-local traversal remains usable. */}
+ };
  // Manual navigation invalidates the old route; playback navigation deliberately preserves it.
  const inspect=(n:number)=>{if(!Number.isInteger(n)||n<0||n>=20736)return;select(n);setRoute([]);setRouteCursor(0)};
  // Direct 1-based address navigation is independent of route playback and cannot mutate CanonState.
@@ -88,7 +109,7 @@ export function HistoricalConvergenceWorkbenchR667(){
  {(['d','p','r','l'] as const).map(k=><label key={k}>{k.toUpperCase()} <select aria-label={'Address '+k} value={observer.address[k]} onChange={e=>{setObserver(s=>({...s,address:normalizeAddressR666({...s.address,[k]:Number(e.target.value)}),revision:s.revision+1}));setRoute([]);setRouteCursor(0)}}>{Array.from({length:12},(_,j)=><option key={j+1} value={j+1}>{j+1}</option>)}</select></label>)}
  </div>
  <form onSubmit={e=>{e.preventDefault();jump()}} style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:8,marginTop:12}}><label htmlFor='r836-jump'>Navigate model address (1–20736)</label><input id='r836-jump' inputMode='numeric' pattern='[0-9]*' value={jumpAddress} onChange={e=>{setJumpAddress(e.target.value);setJumpError('')}} style={{width:100}}/><button type='submit'>Inspect address</button>{jumpError&&<span role='alert'>{jumpError}</span>}</form>
- <p data-r828-recovery='browser-session'>Observer and computed route playback recover within this browser session; no canonical state or server receipt is changed.</p>
+ <p data-r828-recovery='browser-session'>Observer and computed route playback recover within this browser session. Selected address synchronizes with the existing OMEGA6/OMEGA7 local address bus; no CanonState or server receipt is changed.</p>
  <p><strong>{observer.address.node_id}</strong> · position {observer.position.map(x=>x.toFixed(2)).join(', ')} · next {next+1}</p>
  <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
  <button onClick={()=>move(1,0)}>Forward</button><button onClick={()=>move(-1,0)}>Back</button><button onClick={()=>move(0,-1)}>Left</button><button onClick={()=>move(0,1)}>Right</button><button onClick={()=>move(0,0,1)}>Up</button><button onClick={()=>move(0,0,-1)}>Down</button>
