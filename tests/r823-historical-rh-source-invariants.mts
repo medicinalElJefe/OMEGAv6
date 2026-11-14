@@ -61,7 +61,7 @@ for(const token of ["data-r827-concept-lookup","data-r827-concept-results","full
 assert.match(app,/if\(!full\|\|!q\)return \[\]/,'R827 must refuse lookup without verified source');
 assert.match(app,/\{full&&<div data-r827-concept-lookup/,'R827 lookup must not appear in preview-only state');
 // R839 reverse traversal is derived exclusively from verified original typed edges.
-for(const token of ["data-r839-incoming-edges","full.edges.filter(e=>e.toRow-1===address)","onAddress(e.fromRow-1)"])
+for(const token of ["data-r839-incoming-edges","full.edges.filter(e=>e.toRow-1===address&&(kind==='ALL'||e.kind===kind))","onAddress(e.fromRow-1)"])
  assert.ok(app.includes(token),'R839 verified reverse traversal missing '+token);
 assert.match(app,/\{full&&<section data-r839-incoming-edges/,'R839 reverse relationships must remain source-gated');
 // R840: the same typed relationship filter applies to both directions.
