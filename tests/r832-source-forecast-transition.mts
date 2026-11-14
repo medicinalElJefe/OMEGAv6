@@ -43,6 +43,17 @@ test('R832 source field integrates all 20736 addresses with bounded transitions 
   assert.equal(new Set(route).size,route.length);
   for(let k=1;k<route.length;k++)assert.equal(field.routeNext[route[k-1]],route[k]);
   for(const n of route)assert.ok(Number.isFinite(field.x[n])&&Number.isFinite(field.y[n]),'trajectory projection must have finite XY coordinates');
+  // R835: verify telescoping cumulative derivatives against endpoint values.
+  let deltaC=0,deltaPhi=0,deltaScar=0,gateSum=0,driveSum=0,forecastSum=0;
+  for(let k=0;k<route.length;k++){
+   const n=route[k];gateSum+=field.continuityGate[n];driveSum+=field.motionDrive[n];forecastSum+=field.forecast[n];
+   if(k>0){const prev=route[k-1];deltaC+=field.C[n]-field.C[prev];deltaPhi+=field.Phi[n]-field.Phi[prev];deltaScar+=field.scar[n]-field.scar[prev]}
+  }
+  const last=route[route.length-1];
+  assert.ok(Math.abs(deltaC-(field.C[last]-field.C[start]))<1e-6);
+  assert.ok(Math.abs(deltaPhi-(field.Phi[last]-field.Phi[start]))<1e-6);
+  assert.ok(Math.abs(deltaScar-(field.scar[last]-field.scar[start]))<1e-6);
+  for(const mean of [gateSum/route.length,driveSum/route.length,forecastSum/route.length])assert.ok(Number.isFinite(mean),'route aggregate must remain finite');
  }
  assert.equal(nodeIdR666(12,12,12,12),'node_020736');
 });
