@@ -357,7 +357,7 @@ try{
   const console429=consoleErrors.filter(x=>/Failed to load resource.*429 \(Too Many Requests\)/i.test(x));
   const admitted429=rateLimitedResponses.filter(x=>x.classifier!=='BLOCKING');
   const blocked429=rateLimitedResponses.filter(x=>x.classifier==='BLOCKING');
-  if(console429.length&&(blocked429.length||admitted429.length<console429.length)){
+  if(blocked429.length||(console429.length&&admitted429.length<console429.length)){
    throw new Error(`${profile}: unadmitted HTTP 429; responses=${JSON.stringify(rateLimitedResponses).slice(0,2400)}; console=${console429.join(' | ').slice(0,400)}`);
   }
   const seriousConsole=consoleErrors.filter(x=>!/favicon|Failed to load resource.*404/i.test(x)&&!(/Failed to load resource.*429 \(Too Many Requests\)/i.test(x)&&console429.length>0&&blocked429.length===0&&admitted429.length>=console429.length));
