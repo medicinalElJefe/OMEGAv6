@@ -57,3 +57,13 @@ test('task history snapshots resist request, return-value and history mutation',
  const again=session.history();
  if(again[2].result.kind==='TRACE_MODEL_SUCCESSORS')assert.deepEqual(again[2].result.route,[0,1,2]);
 });
+
+test('incomplete restored source arrays are rejected for all model task kinds',()=>{
+ for(const key of ['routeNext','C','Phi','q','Lambda','scar','evidence'] as const){
+  const f=field();
+  (f as unknown as Record<string,unknown>)[key]=new Float32Array(1);
+  for(const task of [{kind:'INSPECT_MODEL_STATE',address:0},{kind:'TRACE_MODEL_SUCCESSORS',address:0,limit:2},{kind:'EXPORT_MODEL_TRACE',route:[0]}] as const){
+   assert.throws(()=>executeModelTaskR842(f,task),/Invalid compiled source field/,key);
+  }
+ }
+});
