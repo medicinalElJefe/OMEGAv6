@@ -18,6 +18,9 @@ test('R832 source field integrates all 20736 addresses with bounded transitions 
   const gate=field.C[i]/(1+field.Lambda[i]+field.q[i]);
   assert.ok(Math.abs(field.continuityGate[i]-gate)<1e-6);
   const velocity=.45*(field.C[n]-field.C[i])+.35*(field.Phi[n]-field.Phi[i])-.20*(field.scar[n]-field.scar[i]);
+  assert.ok(Math.abs(field.acceleration[i]-(field.velocity[n]-field.velocity[i]))<1e-6,'acceleration successor mismatch at '+i);
+  const drive=Math.min(1,Math.abs(field.C[n]-field.C[i])+Math.abs(field.Phi[n]-field.Phi[i])+Math.abs(field.scar[n]-field.scar[i]));
+  assert.ok(Math.abs(field.motionDrive[i]-drive)<1e-6,'motion drive mismatch at '+i);
   assert.ok(Math.abs(field.velocity[i]-velocity)<1e-6);
   const decision=motionDecisionR666({continuity:field.C[i],future_plasticity:field.Phi[i],burden:field.Lambda[i],contradiction:field.q[i]});
   assert.ok(['STAY','TURN','ESCALATE'].includes(decision.decision));
