@@ -1,41 +1,131 @@
 import {useEffect,useState} from 'react';
 import {getMandala20736Field,type Mandala20736Field} from '../../src/mandala20736Runtime';
-import {defaultObserverR666,stepObserverR666,normalizeAddressR666,SCALES_R666,type ObserverR666} from './historicalObserverR666';
+import {defaultObserverR666,stepObserverR666,normalizeAddressR666,SCALES_R666,motionDecisionR666,type ObserverR666} from './historicalObserverR666';
 import {B053_RECOVERY_R665,B053_CAPABILITIES_R665,capabilityAdmissionR665} from './historicalConvergenceR665';
+import {executeModelTaskR842} from './omegaModelTaskRuntimeR842';
+import {parseModelAddressR841,coordinatesToAddressR841,OMEGA_ADDRESS_KEY_R841,OMEGA_ADDRESS_EVENT_R841} from './historicalAddressBusR841';
+// Browser-local recovery for the actual R666 observer and computed route playback.
+// Never restore an untrusted address as CanonState or as an execution receipt.
+const SESSION_KEY_R828='omega.r828.historicalObserver';
+type SavedObserverR828={observer:ObserverR666;route:number[];routeCursor:number};
+function recoverObserverR828():SavedObserverR828|null{
+ try{
+  const raw=sessionStorage.getItem(SESSION_KEY_R828);if(!raw||raw.length>16000)return null;
+  const value=JSON.parse(raw) as SavedObserverR828;
+  if(!value||!value.observer||!value.observer.address)return null;
+  const a=value.observer.address;
+  if(![a.d,a.p,a.r,a.l].every(n=>Number.isInteger(n)&&n>=1&&n<=12))return null;
+  if(!Array.isArray(value.observer.position)||value.observer.position.length!==3||!value.observer.position.every(n=>typeof n==='number'&&Number.isFinite(n)))return null;
+  if(!Array.isArray(value.observer.velocity)||value.observer.velocity.length!==3||!value.observer.velocity.every(n=>typeof n==='number'&&Number.isFinite(n)))return null;
+  if(!Number.isFinite(value.observer.yaw)||!Number.isFinite(value.observer.pitch)||Math.abs(value.observer.pitch)>1.5358897418)return null;
+  if(!SCALES_R666.includes(value.observer.scale as typeof SCALES_R666[number]))return null;
+  if(!['FIRST_PERSON','FLY','SHELL_FOLLOW','HOST_FOLLOW','PROOF_FOLLOW','ORBIT'].includes(value.observer.mode))return null;
+  if(!Number.isSafeInteger(value.observer.revision)||value.observer.revision<0)return null;
+  if(!Array.isArray(value.route)||value.route.length>64||!value.route.every(n=>Number.isInteger(n)&&n>=0&&n<20736))return null;
+  if(!Number.isInteger(value.routeCursor)||value.routeCursor<0||value.routeCursor>Math.max(0,value.route.length-1))return null;
+  return value;
+ }catch{return null}
+}
 const index=(o:ObserverR666)=>(((o.address.d-1)*12+o.address.p-1)*12+o.address.r-1)*12+o.address.l-1;
 const address=(i:number)=>normalizeAddressR666({d:Math.floor(i/1728)+1,p:Math.floor(i/144)%12+1,r:Math.floor(i/12)%12+1,l:i%12+1});
 export function HistoricalConvergenceWorkbenchR667(){
- const [field,setField]=useState<Mandala20736Field|null>(null),[error,setError]=useState(''),[observer,setObserver]=useState<ObserverR666>(defaultObserverR666),[route,setRoute]=useState<number[]>([]);
+ const [recovered]=useState<SavedObserverR828|null>(recoverObserverR828);
+ const [field,setField]=useState<Mandala20736Field|null>(null),[error,setError]=useState(''),[observer,setObserver]=useState<ObserverR666>(()=>recovered?.observer??defaultObserverR666()),[route,setRoute]=useState<number[]>(()=>recovered?.route??[]);
  useEffect(()=>{let live=true;getMandala20736Field().then(f=>{if(live)setField(f)}).catch(e=>{if(live)setError(String(e))});return()=>{live=false}},[]);
+ // The historical observer shares the existing OMEGA6/OMEGA7 address bus.
+ // Address navigation is representational and does not admit CanonState.
+ useEffect(()=>{
+  const sync=()=>{
+   try{
+    const n=parseModelAddressR841(localStorage.getItem(OMEGA_ADDRESS_KEY_R841));
+    if(n===null)return;
+    setObserver(current=>index(current)===n?current:{...current,address:address(n),revision:current.revision+1});
+   }catch{/* Storage unavailable: keep browser-session observer operational. */}
+  };
+  sync();
+  window.addEventListener('storage',sync);
+  window.addEventListener(OMEGA_ADDRESS_EVENT_R841,sync as EventListener);
+  return()=>{window.removeEventListener('storage',sync);window.removeEventListener(OMEGA_ADDRESS_EVENT_R841,sync as EventListener)};
+ },[]);
  const i=index(observer),next=field?.routeNext[i]??i;
  const [density,setDensity]=useState(24);
+ const [jumpAddress,setJumpAddress]=useState('1');
+ const [jumpError,setJumpError]=useState('');
  const [showProof,setShowProof]=useState(false);
- const [routeCursor,setRouteCursor]=useState(0);
+ const [routeCursor,setRouteCursor]=useState(()=>recovered?.routeCursor??0);
+ // Recovery is advisory until the regenerated field proves the saved route is an actual successor chain.
+ useEffect(()=>{
+  if(!field||route.length===0)return;
+  const valid=route.every((n,k)=>Number.isInteger(n)&&n>=0&&n<field.count&&(k===0||field.routeNext[route[k-1]]===n));
+  if(!valid){setRoute([]);setRouteCursor(0)}
+ },[field,route]);
+ useEffect(()=>{try{sessionStorage.setItem(SESSION_KEY_R828,JSON.stringify({observer,route,routeCursor}))}catch{/* Browser storage may be disabled; live execution remains available. */}},[observer,route,routeCursor]);
  const move=(forward:number,strafe:number,vertical=0)=>setObserver(s=>stepObserverR666(s,{dt:.1,forward,strafe,vertical}));
- const trace=()=>{if(!field)return;const seen=new Set<number>(),out:number[]=[];let at=i;for(let k=0;k<64&&!seen.has(at);k++){seen.add(at);out.push(at);at=field.routeNext[at]}setRoute(out);setRouteCursor(0)};
- const select=(n:number)=>setObserver(s=>({...s,address:address(n),revision:s.revision+1}));
+ const trace=()=>{if(!field)return;try{const result=executeModelTaskR842(field,{kind:'TRACE_MODEL_SUCCESSORS',address:i,limit:64});if(result.kind==='TRACE_MODEL_SUCCESSORS'){setRoute(result.route);setRouteCursor(0);setError('')}}catch(e){setError('Trace rejected: '+String(e))}};
+ // Export the actual computed traversal with model metrics, not a fabricated proof receipt.
+ const exportTrace=()=>{
+  if(!field||route.length===0)return;
+  let csv:string;
+  try{const result=executeModelTaskR842(field,{kind:'EXPORT_MODEL_TRACE',route});if(result.kind!=='EXPORT_MODEL_TRACE')throw Error('Unexpected result');csv=result.csv;setError('')}catch(e){setError('Traversal export rejected: '+String(e));return}
+  const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  const link=document.createElement('a');link.href=url;link.download='omega-r829-model-traversal.csv';document.body.appendChild(link);link.click();link.remove();
+  window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+ };
+ const select=(n:number)=>{
+  if(!Number.isInteger(n)||n<0||n>=20736)return;
+  setObserver(s=>index(s)===n?s:{...s,address:address(n),revision:s.revision+1});
+  try{localStorage.setItem(OMEGA_ADDRESS_KEY_R841,String(n));window.dispatchEvent(new CustomEvent(OMEGA_ADDRESS_EVENT_R841,{detail:{address:n}}))}catch{/* Session-local traversal remains usable. */}
+ };
+ // Manual navigation invalidates the old route; playback navigation deliberately preserves it.
+ const inspect=(n:number)=>{if(!Number.isInteger(n)||n<0||n>=20736)return;select(n);setRoute([]);setRouteCursor(0)};
+ // Direct 1-based address navigation is independent of route playback and cannot mutate CanonState.
+ const jump=()=>{const raw=jumpAddress.trim();const n=Number(raw);if(!/^\d+$/.test(raw)||!Number.isSafeInteger(n)||n<1||n>20736){setJumpError('Enter an integer address from 1 to 20736.');return}setJumpError('');inspect(n-1)};
+ // Source-derived route projection: no synthetic geometry, no new authority.
+ const routePoints=field?route.filter(n=>Number.isInteger(n)&&n>=0&&n<field.count).map(n=>({x:320+field.x[n]*235,y:150-field.y[n]*115})):[];
+ const routePolyline=routePoints.map(p=>`${p.x},${p.y}`).join(' ');
+ // Aggregate the actual successor walk to expose cumulative development rather than only isolated states.
+ const routeAnalysis=field&&route.length>0?route.reduce((acc,n,k)=>{
+  if(!Number.isInteger(n)||n<0||n>=field.count)return acc;
+  acc.gateSum+=field.continuityGate[n];acc.driveSum+=field.motionDrive[n];acc.forecastSum+=field.forecast[n];
+  if(k>0&&field.routeNext[route[k-1]]===n){acc.deltaC+=field.C[n]-field.C[route[k-1]];acc.deltaPhi+=field.Phi[n]-field.Phi[route[k-1]];acc.deltaScar+=field.scar[n]-field.scar[route[k-1]];acc.edges++}
+  return acc;
+ },{gateSum:0,driveSum:0,forecastSum:0,deltaC:0,deltaPhi:0,deltaScar:0,edges:0}):null;
  const metrics=field?{continuity:field.C[i],plasticity:field.Phi[i],contradiction:field.q[i],burden:field.Lambda[i],scar:field.scar[i],evidence:field.evidence[i],geometry:field.geometry[i],motion:field.motion[i],velocity:field.velocity[i],acceleration:field.acceleration[i]}:null;
+ // Execute the recovered R666 decision calculus against actual selected field metrics.
+ // This is advisory model output; it does not authorize Canon admission or host action.
+ const decision=metrics?motionDecisionR666({continuity:metrics.continuity,burden:metrics.burden,contradiction:metrics.contradiction,future_plasticity:metrics.plasticity}):null;
+ // R832: source-derived forecast gate and transition derivatives for the selected model address.
+ // The gate is a calculated signal, not a prediction of measured external events.
+ const transition=field&&Number.isInteger(next)&&next>=0&&next<field.count?{
+  next,continuityGate:field.continuityGate[i],forecast:field.forecast[i],motionDrive:field.motionDrive[i],velocity:field.velocity[i],acceleration:field.acceleration[i],deltaContinuity:field.C[next]-field.C[i],deltaPlasticity:field.Phi[next]-field.Phi[i],deltaScar:field.scar[next]-field.scar[i]
+ }:null;
  return <section data-r667-historical-workbench='true' style={{margin:'18px 0',padding:18,border:'1px solid #56718a',borderRadius:12}}>
  <h2>Recovered canonical state and observer</h2><p>Historical B053 observer operations bound to the existing 20,736-state model. Computed model-space, not calibrated physical matter.</p>
  {error&&<p role='alert'>{error}</p>}{!field&&<p role='status'>Compiling canonical field…</p>}
  <div style={{display:'flex',flexWrap:'wrap',gap:10,alignItems:'center'}}>
  <label>Sampling <select aria-label='Projection sample stride' value={density} onChange={e=>setDensity(Number(e.target.value))}><option value={96}>216 points</option><option value={24}>864 points</option><option value={6}>3456 points</option><option value={1}>20736 points</option></select></label>
  <label>Scale <select aria-label='Historical scale' value={observer.scale} onChange={e=>setObserver(s=>({...s,scale:e.target.value}))}>{SCALES_R666.map(s=><option key={s}>{s}</option>)}</select></label>
- {(['d','p','r','l'] as const).map(k=><label key={k}>{k.toUpperCase()} <select aria-label={'Address '+k} value={observer.address[k]} onChange={e=>setObserver(s=>({...s,address:normalizeAddressR666({...s.address,[k]:Number(e.target.value)})}))}>{Array.from({length:12},(_,j)=><option key={j+1} value={j+1}>{j+1}</option>)}</select></label>)}
+ {(['d','p','r','l'] as const).map(k=><label key={k}>{k.toUpperCase()} <select aria-label={'Address '+k} value={observer.address[k]} onChange={e=>{const a=normalizeAddressR666({...observer.address,[k]:Number(e.target.value)});select(coordinatesToAddressR841(a.d,a.p,a.r,a.l));setRoute([]);setRouteCursor(0)}}>{Array.from({length:12},(_,j)=><option key={j+1} value={j+1}>{j+1}</option>)}</select></label>)}
  </div>
+ <form onSubmit={e=>{e.preventDefault();jump()}} style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:8,marginTop:12}}><label htmlFor='r836-jump'>Navigate model address (1–20736)</label><input id='r836-jump' inputMode='numeric' pattern='[0-9]*' value={jumpAddress} onChange={e=>{setJumpAddress(e.target.value);setJumpError('')}} style={{width:100}}/><button type='submit'>Inspect address</button>{jumpError&&<span role='alert'>{jumpError}</span>}</form>
+ <p data-r828-recovery='browser-session'>Observer and computed route playback recover within this browser session. Selected address synchronizes with the existing OMEGA6/OMEGA7 local address bus; no CanonState or server receipt is changed.</p>
  <p><strong>{observer.address.node_id}</strong> · position {observer.position.map(x=>x.toFixed(2)).join(', ')} · next {next+1}</p>
  <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
  <button onClick={()=>move(1,0)}>Forward</button><button onClick={()=>move(-1,0)}>Back</button><button onClick={()=>move(0,-1)}>Left</button><button onClick={()=>move(0,1)}>Right</button><button onClick={()=>move(0,0,1)}>Up</button><button onClick={()=>move(0,0,-1)}>Down</button>
  <button onClick={()=>setObserver(s=>stepObserverR666(s,{dt:0,yawDelta:.15}))}>Turn right</button><button onClick={()=>setObserver(s=>stepObserverR666(s,{dt:0,yawDelta:-.15}))}>Turn left</button>
- <button disabled={!field} onClick={()=>select(next)}>Follow computed route</button><button disabled={!field} onClick={trace}>Trace 64 transitions</button><button onClick={()=>{setObserver(defaultObserverR666());setRoute([])}}>Reset</button>
+ <button disabled={!field} onClick={()=>inspect(next)}>Follow computed route</button><button disabled={!field} onClick={trace}>Trace 64 transitions</button><button onClick={()=>{setObserver(defaultObserverR666());setRoute([]);setRouteCursor(0)}}>Reset</button>
  </div>
  {field&&<svg role='img' aria-label='Canonical model-space XY projection sampled from the 20736-state field' viewBox='0 0 640 300' style={{width:'100%',background:'#07121d',borderRadius:8,marginTop:12}}>
  {Array.from({length:Math.ceil(field.count/density)},(_,k)=>k*density).filter(j=>j<field.count).map(j=><circle key={j} cx={320+field.x[j]*235} cy={150-field.y[j]*115} r={1.1+field.evidence[j]*1.2} fill='#74cdd9' opacity={Math.max(.18,field.C[j])}/>)}
+ {routePoints.length>1&&<polyline data-r833-route-projection='source' points={routePolyline} fill='none' stroke='#f5bd68' strokeWidth='1.8' strokeLinejoin='round' opacity='.9'/>}
+ {routePoints.length>0&&<circle cx={routePoints[Math.min(routeCursor,routePoints.length-1)].x} cy={routePoints[Math.min(routeCursor,routePoints.length-1)].y} r='5' fill='#f5bd68' stroke='#07121d' strokeWidth='1.5'/>}
  <circle cx={320+field.x[i]*235} cy={150-field.y[i]*115} r='7' fill='none' stroke='#ffca70' strokeWidth='2'/>
  <text x='12' y='20' fill='#c8d9e8' fontSize='12'>MODEL XY PROJECTION · sampled canonical states · selected address outlined</text>
  </svg>}
+ {decision&&<section data-r830-motion-decision={decision.decision} aria-label='Recovered motion decision' style={{marginTop:12,padding:12,border:'1px solid #47617a',borderRadius:8}}><h3>Recovered R666 motion decision · {decision.decision}</h3><p>Computed ratio {decision.ratio.toFixed(5)} from selected state continuity, plasticity, contradiction and burden. STAY ≥ 0.92; TURN ≥ 0.46; otherwise ESCALATE. Advisory model decision only; no Canon admission or host execution.</p><button type='button' disabled={!field||!Number.isInteger(next)||next<0||next>=20736} onClick={()=>inspect(next)}>Inspect computed successor</button></section>}
+ {transition&&<section data-r832-forecast-gate='model-only' aria-label='Computed forecast and transition derivatives' style={{marginTop:12,padding:12,border:'1px solid #47617a',borderRadius:8}}><h3>Forecast gate and developmental transition</h3><p>Source successor {address(transition.next).node_id} · continuity gate {transition.continuityGate.toFixed(5)} · forecast score {transition.forecast.toFixed(5)} · motion drive {transition.motionDrive.toFixed(5)}</p><p>Δ continuity {transition.deltaContinuity.toFixed(5)} · Δ plasticity {transition.deltaPlasticity.toFixed(5)} · Δ scar {transition.deltaScar.toFixed(5)} · velocity {transition.velocity.toFixed(5)} · acceleration {transition.acceleration.toFixed(5)}</p><small>All values are derived from the existing source-route model. These are computational transitions, not measured physical time, external forecasts, or execution receipts.</small></section>}
  {metrics&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(130px,1fr))',gap:8,marginTop:12}}>{Object.entries(metrics).map(([key,value])=><div key={key} style={{padding:10,border:'1px solid #47617a',borderRadius:8}}><small>{key}</small><div>{value.toFixed(5)}</div></div>)}</div>}
- {route.length>0&&<div><h3>Computed routeNext sequence</h3><p>Route playback position {routeCursor+1} / {route.length} · selected address {i+1}</p><button onClick={()=>{const k=Math.max(0,routeCursor-1);setRouteCursor(k);select(route[k])}}>Previous route state</button><button onClick={()=>{const k=Math.min(route.length-1,routeCursor+1);setRouteCursor(k);select(route[k])}}>Next route state</button><div style={{display:'flex',flexWrap:'wrap',gap:5}}>{route.map((n,k)=><button key={k} onClick={()=>{setRouteCursor(k);select(n)}}>{n+1}</button>)}</div></div>}
+ {route.length>0&&<div><h3>Computed routeNext sequence</h3>{routeAnalysis&&<section data-r835-route-analysis='source' aria-label='Computed route aggregate'><p>Source route · {route.length} states · {routeAnalysis.edges} verified successor edges · mean continuity gate {(routeAnalysis.gateSum/route.length).toFixed(5)} · mean motion drive {(routeAnalysis.driveSum/route.length).toFixed(5)} · mean forecast score {(routeAnalysis.forecastSum/route.length).toFixed(5)}</p><p>Cumulative Δ continuity {routeAnalysis.deltaC.toFixed(5)} · Δ plasticity {routeAnalysis.deltaPhi.toFixed(5)} · Δ scar {routeAnalysis.deltaScar.toFixed(5)}. Model-space only; no external forecast or physical-time claim.</p></section>}<button type='button' onClick={exportTrace}>Export computed traversal CSV</button><small> Model-space values only; no Canon admission or host proof.</small><p>Route playback position {routeCursor+1} / {route.length} · selected address {i+1} · model XY trajectory shown above. Consecutive points are actual computed successors, not physical distance or elapsed time.</p><button disabled={routeCursor===0} onClick={()=>{const k=Math.max(0,routeCursor-1);setRouteCursor(k);select(route[k])}}>Previous route state</button><button disabled={routeCursor>=route.length-1} onClick={()=>{const k=Math.min(route.length-1,routeCursor+1);setRouteCursor(k);select(route[k])}}>Next route state</button><div style={{display:'flex',flexWrap:'wrap',gap:5}}>{route.map((n,k)=><button key={k} onClick={()=>{setRouteCursor(k);select(n)}}>{n+1}</button>)}</div></div>}
  <button type='button' aria-expanded={showProof} onClick={()=>setShowProof(x=>!x)}>{showProof?'Hide':'Show'} verification details</button>
  {showProof&&<p role='status'>Historical archive integrity is verified. CI verifies source checks; live visual fidelity and calibrated physical reconstruction remain unverified.</p>}
  <details><summary>Historical provenance and runtime admission</summary><p>B053: {B053_RECOVERY_R665.parts} verified archive parts; {B053_RECOVERY_R665.verifiedFiles} SHA-256 matches; {B053_RECOVERY_R665.nestedArchives} nested ZIPs.</p>{B053_CAPABILITIES_R665.map(c=><p key={c.id}><b>{c.id}</b> {c.archivePath}: {capabilityAdmissionR665(c.id,'RUNTIME_VERIFIED').admitted?'verified':'runtime not verified'}</p>)}</details>

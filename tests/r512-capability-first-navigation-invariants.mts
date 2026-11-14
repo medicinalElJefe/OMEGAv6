@@ -23,6 +23,20 @@ for(const menu of R512_DOMAIN_MENU){
  if(menu.id!=='HOME')assert.ok(recovered.length>0,menu.id+' must expose resolved historical software where applicable');
 }
 
+// A recovered executor must be discoverable in its owning domain and the full library.
+// Keep this source-level coverage separate from browser execution and production proof.
+const inheritedRoutes=new Set(OMEGA7_CAPABILITIES.map(x=>x.legacyRoute));
+const recoveredIds=new Set<string>();
+for(const entry of R486_VISIBLE_CAPABILITIES){
+ assert.ok(!recoveredIds.has(entry.id),'duplicate recovered identity '+entry.id);
+ recoveredIds.add(entry.id);
+ assert.ok(inheritedRoutes.has(entry.route as any),'recovered capability points to an unregistered route '+entry.id+' -> '+entry.route);
+ const owningDomain=OMEGA7_CAPABILITIES.find(x=>x.legacyRoute===entry.route)?.domain;
+ assert.ok(owningDomain,'recovered capability lacks owning menu '+entry.id);
+ assert.equal(recoveredForDomainR512(owningDomain!).filter(x=>x.id===entry.id).length,1,'recovered capability missing or duplicated in domain menu '+entry.id);
+ assert.equal(recoveredForDomainR512('HOME').filter(x=>x.id===entry.id).length,1,'recovered capability missing or duplicated in full recovered menu '+entry.id);
+}
+
 for(const entry of R486_VISIBLE_CAPABILITIES){
  assert.ok(entry.capabilityId,'recovered entry missing concrete capability executor '+entry.id);
  assert.ok(entry.executionDomain,'recovered entry missing execution domain '+entry.id);
@@ -82,6 +96,13 @@ for(const token of [
  "softwareLaunch={activeRecovered}"
 ])assert.ok(root.includes(token),'R512 UI integration missing '+token);
 
+assert.ok(root.includes("dispatch({type:'DOMAIN',domain:cap.domain});\n  dispatch({type:'SELECT_ROUTE',route:cap.legacyRoute});"),'global and recovered launches must select the owning domain before the target route');
+assert.ok(root.includes('domainRecovered.map(x=><button'),'all recovered capabilities must be reachable from their domain menu');
+assert.ok(root.includes('data-command-recovered={x.id}'),'global command search must expose recovered executor identities');
+assert.ok(root.includes("[x.id,x.name,x.operation,x.contribution,x.route,...x.aliases]"),'global search must include stable recovered identity and source aliases');
+assert.ok(root.includes("split(/\\s+/).every(term=>haystack.includes(term))"),'multiword recovered search must match all terms independently of their order');
+assert.ok(root.includes("onClick={()=>launchRecovered(x)}"),'command results must launch the resolved recovered executor');
+assert.ok(!root.includes('domainRecovered.slice('),'domain navigation must never silently truncate recovered capabilities');
 assert.equal(root.includes("button onClick={()=>open(x.route)}>Open {x.route}</button>"),false,'recovered software must not fall back to a generic route-only button');
 assert.ok(root.includes("launchRecovered(x)"),'recovered software must use the resolved execution launcher');
 assert.ok(root.includes("import('./recoveredSystemSearchR512')"),'100-system ledger must stay deferred from the initial shell bundle');

@@ -4,3 +4,21 @@ test('historical scale hierarchy preserves extremes',()=>{assert.equal(scaleBlen
 test('model decisions have stable finite ratio',()=>{const x=motionDecisionR666({continuity:1,burden:0,contradiction:0,future:1});assert.equal(x.decision,'STAY');assert.equal(Number.isFinite(x.ratio),true)});
 test('first person motion advances and clamps time step',()=>{const s=defaultObserverR666(),a=stepObserverR666(s,{forward:1,dt:1});assert.equal(a.position[2]<s.position[2],true);assert.equal(a.position[2]>=s.position[2]-.28-1e-9,true);assert.equal(s.position[2],5.8)});
 test('reanchoring changes revision without corrupting canonical address',()=>{const s=defaultObserverR666(),a=stepObserverR666(s,{dt:0,reanchor:{p:1}});assert.equal(a.address.p,2);assert.equal(a.revision,1);assert.equal(s.address.p,1)});
+
+test('motion decision thresholds distinguish stay, turn and escalate',()=>{
+ const stay=motionDecisionR666({continuity:1,future:1,burden:.1,contradiction:.1});
+ const turn=motionDecisionR666({continuity:.5,future:.5,burden:.25,contradiction:.25});
+ const escalate=motionDecisionR666({continuity:.1,future:.2,burden:.8,contradiction:.8});
+ assert.equal(stay.decision,'STAY');
+ assert.equal(turn.decision,'TURN');
+ assert.equal(escalate.decision,'ESCALATE');
+ assert.ok(stay.ratio>turn.ratio&&turn.ratio>escalate.ratio);
+ assert.equal(stay.modelDerived,true);
+});
+test('all 20736 address tuples have unique and bounded node identifiers',()=>{
+ const ids=new Set<string>();
+ for(let d=1;d<=12;d++)for(let p=1;p<=12;p++)for(let r=1;r<=12;r++)for(let l=1;l<=12;l++)ids.add(nodeIdR666(d,p,r,l));
+ assert.equal(ids.size,20736);
+ assert.equal(ids.has('node_000001'),true);
+ assert.equal(ids.has('node_020736'),true);
+});

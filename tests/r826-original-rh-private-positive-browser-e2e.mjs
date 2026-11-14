@@ -78,6 +78,18 @@ try{
   await instrument.locator('[data-r823-import-status="VERIFIED_FULL_LOCAL"]').waitFor({state:'visible',timeout:45000});
   assert.match(await status().innerText(),/ORIGINAL-SHA MATCHED.*320 RH concepts.*25 distinct addresses.*416 typed edges/,label+' source admission incomplete');
   assert.equal(networkViolations.length,0,label+' attempted network writes or oversized URL during private import');
+  // R827: execute the verified-original concept lookup, not just source text checks.
+  const lookup=instrument.locator('[data-r827-concept-lookup="true"]');
+  await lookup.waitFor({state:'visible',timeout:12000});
+  await lookup.getByRole('searchbox',{name:'Find verified RH concept'}).fill('RH0001');
+  const result=lookup.locator('[data-r827-concept-results] button');
+  await result.first().waitFor({state:'visible',timeout:12000});
+  assert.match(await result.first().innerText(),/RH0001/,label+' original identity lookup missing');
+  await result.first().click();
+  await page.waitForFunction(()=>document.querySelector('[data-omega7-native="forecast.visual"]')?.getAttribute('data-address')==='5990',null,{timeout:12000});
+  assert.equal(await page.evaluate(()=>localStorage.getItem('omega.v6.address')),'5990',label+' R827 concept navigation not persisted through canonical address authority');
+  await lookup.getByRole('searchbox',{name:'Find verified RH concept'}).fill('NO_SUCH_RH_CONCEPT');
+  assert.equal(await lookup.locator('[data-r827-concept-results] button').count(),0,label+' invented original concept matches');
   const setAddress=async value=>{
    await page.evaluate(n=>{
     localStorage.setItem('omega.v6.address',String(n));
@@ -101,6 +113,7 @@ try{
   await instrument.getByRole('button',{name:'Clear imported graph'}).click();
   assert.equal(await status().getAttribute('data-r823-import-status'),'PREVIEW_ONLY',label+' local graph not cleared');
   assert.equal(await instrument.locator('[data-r823-address-multiplicity]').count(),0,label+' private graph survived explicit clear');
+  assert.equal(await instrument.locator('[data-r827-concept-lookup]').count(),0,label+' R827 full-source lookup survived explicit clear');
   watchImport=true;
   await input().setInputFiles({name:'original-v21-rh.xlsx',mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',buffer:original});
   await instrument.locator('[data-r823-import-status="VERIFIED_FULL_LOCAL"]').waitFor({state:'visible',timeout:45000});
