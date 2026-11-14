@@ -13,6 +13,15 @@ test('first-party failures, mutation requests, untrusted external hosts and othe
  for(const url of [origin+'/api/earth/weather?lat=1',origin+'/api/earth/noaa/catalog',origin+'/api/status','https://evil-rainviewer.com/v2/radar/1','https://example.com/image.png',origin+'/assets/index.js']){
   assert.equal(classify(url),'BLOCKING',url);
  }
+ for(const url of [
+  'http://tile.openstreetmap.org/6/10/20.png',
+  'https://tile.openstreetmap.org/6/10/20.png?unexpected=1',
+  'https://cdn.rainviewer.com/v2/radar/123/256/6/10/20/2/1_1.png?extra=1',
+  'http://cdn.rainviewer.com/v2/radar/123/256/6/10/20/2/1_1.png',
+  'https://cdn.rainviewer.com/v2/radar/123/unrelated',
+  'https://api.rainviewer.com/public/weather-maps.json?unexpected=1',
+  'http://api.rainviewer.com/public/weather-maps.json'
+ ])assert.equal(classify(url,url.includes('weather-maps.json')?'fetch':'image'),'BLOCKING',url);
  assert.equal(classify(origin+'/api/earth/noaa/image?coverage='),'BLOCKING');
  assert.equal(classify(origin+'/api/earth/noaa/image?coverage=G19-FD&mode=privileged'),'BLOCKING');
  assert.equal(classify(origin+'/api/earth/noaa/image?coverage=G19-FD','fetch'),'BLOCKING');
