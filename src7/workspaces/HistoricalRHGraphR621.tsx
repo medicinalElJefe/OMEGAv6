@@ -53,7 +53,7 @@ export default function HistoricalRHGraphR621({address,onAddress}:{address:numbe
    :admittedHistoricalEdgesR621(address);
   return kind==='ALL'?selected:selected.filter(e=>e.kind===kind);
  },[full,address,kind]);
- const incoming=useMemo(()=>full?full.edges.filter(e=>e.toRow-1===address):[],[full,address]);
+ const incoming=useMemo(()=>full?full.edges.filter(e=>e.toRow-1===address&&(kind==='ALL'||e.kind===kind)):[],[full,address,kind]);
  const concepts=useMemo(()=>full?full.concepts.filter(n=>n.row-1===address):[],[full,address]);
  // Search only the verified in-memory original; never promote preview examples
  // to complete conceptual identities or send a query to a server.
@@ -78,8 +78,8 @@ export default function HistoricalRHGraphR621({address,onAddress}:{address:numbe
   {full&&<button type='button' onClick={()=>{importGeneration.current+=1;setFull(null);setStatus('PREVIEW_ONLY');setError('');setKind('ALL');setConceptQuery('')}}>Clear imported graph</button>}
   <p>Current canonical address: <strong>{address}</strong> (workbook row {address+1}). {full?'Verified original workbook rows, session-local execution only.':'Source admission: local sample PASS; production graph execution: not verified.'}</p>
   {full&&<section data-r839-incoming-edges='true' aria-label='Incoming original RH relationships'>
-   <h4>Incoming verified relationships · {incoming.length}</h4>
-   {incoming.length===0?<p>No incoming typed relationship is recorded at this address in the imported original RH graph.</p>:
+   <h4>Incoming verified relationships · {incoming.length} · {kind==='ALL'?'all admitted types':kind}</h4>
+   {incoming.length===0?<p>No incoming relationship of the selected type is recorded at this address in the imported original RH graph.</p>:
     <ol style={{maxHeight:220,overflowY:'auto'}}>{incoming.map(e=><li key={e.id}>
      {e.id} · {e.from} → {e.to} · {e.kind} · weight {e.weight}
      <button type='button' onClick={()=>onAddress(e.fromRow-1)}>Follow source {e.from} · address {e.fromRow-1}</button>
