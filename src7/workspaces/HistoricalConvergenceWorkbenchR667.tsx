@@ -14,6 +14,11 @@ function recoverObserverR828():SavedObserverR828|null{
   const a=value.observer.address;
   if(![a.d,a.p,a.r,a.l].every(n=>Number.isInteger(n)&&n>=1&&n<=12))return null;
   if(!Array.isArray(value.observer.position)||value.observer.position.length!==3||!value.observer.position.every(n=>typeof n==='number'&&Number.isFinite(n)))return null;
+  if(!Array.isArray(value.observer.velocity)||value.observer.velocity.length!==3||!value.observer.velocity.every(n=>typeof n==='number'&&Number.isFinite(n)))return null;
+  if(!Number.isFinite(value.observer.yaw)||!Number.isFinite(value.observer.pitch)||Math.abs(value.observer.pitch)>1.5358897418)return null;
+  if(!SCALES_R666.includes(value.observer.scale as typeof SCALES_R666[number]))return null;
+  if(!['FIRST_PERSON','FLY','SHELL_FOLLOW','HOST_FOLLOW','PROOF_FOLLOW','ORBIT'].includes(value.observer.mode))return null;
+  if(!Number.isSafeInteger(value.observer.revision)||value.observer.revision<0)return null;
   if(!Array.isArray(value.route)||value.route.length>64||!value.route.every(n=>Number.isInteger(n)&&n>=0&&n<20736))return null;
   if(!Number.isInteger(value.routeCursor)||value.routeCursor<0||value.routeCursor>Math.max(0,value.route.length-1))return null;
   return value;
