@@ -60,7 +60,7 @@ export function HistoricalConvergenceWorkbenchR667(){
   if(!field)throw Error('Model field not ready');
   const session=createModelTaskSessionR842(field);
   const record=session.execute(task);
-  setTaskRecords(previous=>[...previous.slice(-127),record]);
+  setTaskRecords(previous=>[...previous.slice(-127),{...record,sequence:(previous[previous.length-1]?.sequence??0)+1}]);
   return record.result;
  };
  const saveReplay=()=>{try{setReplayText(encodeReplayR843(taskRecords));setReplayStatus('Task requests prepared for portable replay; no external execution receipt.')}catch(e){setReplayStatus('Replay export rejected: '+String(e))}};
