@@ -3,6 +3,7 @@ import {getMandala20736Field,type Mandala20736Field} from '../../src/mandala2073
 import {defaultObserverR666,stepObserverR666,normalizeAddressR666,SCALES_R666,motionDecisionR666,type ObserverR666} from './historicalObserverR666';
 import {B053_RECOVERY_R665,B053_CAPABILITIES_R665,capabilityAdmissionR665} from './historicalConvergenceR665';
 import {exportTraversalCsvR838} from './historicalTraversalExportR838';
+import {parseModelAddressR841,coordinatesToAddressR841,OMEGA_ADDRESS_KEY_R841,OMEGA_ADDRESS_EVENT_R841} from './historicalAddressBusR841';
 // Browser-local recovery for the actual R666 observer and computed route playback.
 // Never restore an untrusted address as CanonState or as an execution receipt.
 const SESSION_KEY_R828='omega.r828.historicalObserver';
@@ -36,17 +37,15 @@ export function HistoricalConvergenceWorkbenchR667(){
  useEffect(()=>{
   const sync=()=>{
    try{
-    const raw=localStorage.getItem('omega.v6.address');
-    if(raw===null)return;
-    const n=Number(raw);
-    if(!/^\d+$/.test(raw)||!Number.isSafeInteger(n)||n<0||n>=20736)return;
+    const n=parseModelAddressR841(localStorage.getItem(OMEGA_ADDRESS_KEY_R841));
+    if(n===null)return;
     setObserver(current=>index(current)===n?current:{...current,address:address(n),revision:current.revision+1});
    }catch{/* Storage unavailable: keep browser-session observer operational. */}
   };
   sync();
   window.addEventListener('storage',sync);
-  window.addEventListener('omega7-address-changed',sync as EventListener);
-  return()=>{window.removeEventListener('storage',sync);window.removeEventListener('omega7-address-changed',sync as EventListener)};
+  window.addEventListener(OMEGA_ADDRESS_EVENT_R841,sync as EventListener);
+  return()=>{window.removeEventListener('storage',sync);window.removeEventListener(OMEGA_ADDRESS_EVENT_R841,sync as EventListener)};
  },[]);
  const i=index(observer),next=field?.routeNext[i]??i;
  const [density,setDensity]=useState(24);
@@ -75,7 +74,7 @@ export function HistoricalConvergenceWorkbenchR667(){
  const select=(n:number)=>{
   if(!Number.isInteger(n)||n<0||n>=20736)return;
   setObserver(s=>index(s)===n?s:{...s,address:address(n),revision:s.revision+1});
-  try{localStorage.setItem('omega.v6.address',String(n));window.dispatchEvent(new CustomEvent('omega7-address-changed',{detail:{address:n}}))}catch{/* Session-local traversal remains usable. */}
+  try{localStorage.setItem(OMEGA_ADDRESS_KEY_R841,String(n));window.dispatchEvent(new CustomEvent(OMEGA_ADDRESS_EVENT_R841,{detail:{address:n}}))}catch{/* Session-local traversal remains usable. */}
  };
  // Manual navigation invalidates the old route; playback navigation deliberately preserves it.
  const inspect=(n:number)=>{if(!Number.isInteger(n)||n<0||n>=20736)return;select(n);setRoute([]);setRouteCursor(0)};
@@ -106,7 +105,7 @@ export function HistoricalConvergenceWorkbenchR667(){
  <div style={{display:'flex',flexWrap:'wrap',gap:10,alignItems:'center'}}>
  <label>Sampling <select aria-label='Projection sample stride' value={density} onChange={e=>setDensity(Number(e.target.value))}><option value={96}>216 points</option><option value={24}>864 points</option><option value={6}>3456 points</option><option value={1}>20736 points</option></select></label>
  <label>Scale <select aria-label='Historical scale' value={observer.scale} onChange={e=>setObserver(s=>({...s,scale:e.target.value}))}>{SCALES_R666.map(s=><option key={s}>{s}</option>)}</select></label>
- {(['d','p','r','l'] as const).map(k=><label key={k}>{k.toUpperCase()} <select aria-label={'Address '+k} value={observer.address[k]} onChange={e=>{const a=normalizeAddressR666({...observer.address,[k]:Number(e.target.value)});select((((a.d-1)*12+a.p-1)*12+a.r-1)*12+a.l-1);setRoute([]);setRouteCursor(0)}}>{Array.from({length:12},(_,j)=><option key={j+1} value={j+1}>{j+1}</option>)}</select></label>)}
+ {(['d','p','r','l'] as const).map(k=><label key={k}>{k.toUpperCase()} <select aria-label={'Address '+k} value={observer.address[k]} onChange={e=>{const a=normalizeAddressR666({...observer.address,[k]:Number(e.target.value)});select(coordinatesToAddressR841(a.d,a.p,a.r,a.l));setRoute([]);setRouteCursor(0)}}>{Array.from({length:12},(_,j)=><option key={j+1} value={j+1}>{j+1}</option>)}</select></label>)}
  </div>
  <form onSubmit={e=>{e.preventDefault();jump()}} style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:8,marginTop:12}}><label htmlFor='r836-jump'>Navigate model address (1–20736)</label><input id='r836-jump' inputMode='numeric' pattern='[0-9]*' value={jumpAddress} onChange={e=>{setJumpAddress(e.target.value);setJumpError('')}} style={{width:100}}/><button type='submit'>Inspect address</button>{jumpError&&<span role='alert'>{jumpError}</span>}</form>
  <p data-r828-recovery='browser-session'>Observer and computed route playback recover within this browser session. Selected address synchronizes with the existing OMEGA6/OMEGA7 local address bus; no CanonState or server receipt is changed.</p>
