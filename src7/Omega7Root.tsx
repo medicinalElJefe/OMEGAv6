@@ -35,6 +35,7 @@ const R519_NAV_ICONS={HOME:House,WORK:BriefcaseBusiness,EXPLORE:Orbit,CREATE:Pal
 function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
  const{state,dispatch}=useOmega7AppState();
  const inputRef=useRef<HTMLInputElement|null>(null);
+ const returnDomainRef=useRef<Omega7Domain|null>(null);
  const [development,setDevelopment]=useState<R468Snapshot|null>(null);
  const [recoveredOpen,setRecoveredOpen]=useState(false);
  const [libraryOpen,setLibraryOpen]=useState(false);
@@ -94,24 +95,32 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
  },[dispatch]);
 
  const switchDomain=(domain:Omega7Domain)=>{
+  returnDomainRef.current=null;
   const href=nativeHistoryHrefR779(null,OMEGA7_NATIVE_ROUTES);
   if(new URLSearchParams(window.location.search).has('omega7route'))window.history.pushState({omega7Route:null},'',href);
   dispatch({type:'DOMAIN',domain});
   dispatch({type:'SELECT_ROUTE',route:null});
  };
  const backToDomain=()=>{
+  const destination=returnDomainRef.current||state.domain;
+  returnDomainRef.current=null;
   const href=nativeHistoryHrefR779(null,OMEGA7_NATIVE_ROUTES);
   if(window.location.search!==href)window.history.pushState({omega7Route:null},'',href);
+  dispatch({type:'DOMAIN',domain:destination});
   dispatch({type:'SELECT_ROUTE',route:null});
  };
  const open=(route:string)=>{
   const cap=OMEGA7_CAPABILITIES.find(x=>x.legacyRoute===route);
   if(!cap)return;
+  if(!state.selectedRoute&&returnDomainRef.current===null)returnDomainRef.current=state.domain;
   setLibraryOpen(false);
   if(isOmega7NativeRoute(cap.legacyRoute)){
    const href=nativeHistoryHrefR779(cap.legacyRoute,OMEGA7_NATIVE_ROUTES);
    if(window.location.search!==href)window.history.pushState({omega7Route:cap.legacyRoute},'',href);
   }
+  // A global search or recovered launcher may target a different domain.
+  // Keep the owning menu, back navigation, and selected workspace coherent.
+  dispatch({type:'DOMAIN',domain:cap.domain});
   dispatch({type:'SELECT_ROUTE',route:cap.legacyRoute});
   dispatch({type:'COMMAND',open:false});
   if(!isOmega7NativeRoute(cap.legacyRoute))onOpenLegacyRoute(cap.legacyRoute);
@@ -211,7 +220,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
      </section>}
      {state.domain!=='HOME'&&domainRecovered.length>0&&<section className='o7-domain-recovered' data-r512-domain-recovered={state.domain}>
       <header><div><span>Recovered software</span><b>Previous software, resolved to current executors</b><small>These are historical identities with a specific current operation—not menu aliases.</small></div><strong>{domainRecovered.filter(x=>x.state!=='TRUTH_GATED').length} runnable · {domainRecovered.filter(x=>x.state==='TRUTH_GATED').length} gated</strong></header>
-      <div>{domainRecovered.slice(0,8).map(x=><button key={x.id} onClick={()=>launchRecovered(x)} data-state={x.state.toLowerCase()} data-r512-recovered-launch={x.id} data-r512-recovered-route={x.route}><span><b>{x.name}</b><small>{x.operation}</small></span><em>{x.state==='TRUTH_GATED'?'Evidence gate':x.state==='EXECUTES_AS_ADAPTER'?'Adapter':'Run now'}</em></button>)}</div>
+      <div>{domainRecovered.map(x=><button key={x.id} onClick={()=>launchRecovered(x)} data-state={x.state.toLowerCase()} data-r512-recovered-launch={x.id} data-r512-recovered-route={x.route}><span><b>{x.name}</b><small>{x.operation}</small></span><em>{x.state==='TRUTH_GATED'?'Evidence gate':x.state==='EXECUTES_AS_ADAPTER'?'Adapter':'Run now'}</em></button>)}</div>
      </section>}
 
      <section className='o7-capability-section'>
@@ -240,6 +249,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
     <input ref={inputRef} value={state.query} onChange={e=>dispatch({type:'QUERY',query:e.target.value})} placeholder='Search capabilities or type what you want to do…'/>
     <div>
      {(state.query?searchOmega7Capabilities(state.query):OMEGA7_CAPABILITIES.slice(0,12)).slice(0,16).map(cap=><button key={cap.id} data-command-route={cap.legacyRoute} onClick={()=>open(cap.legacyRoute)}><span><b>{cap.label}</b><small>{cap.description}</small></span><em>{cap.availability}</em></button>)}
+     {state.query.trim()&&R486_VISIBLE_CAPABILITIES.filter(x=>{const haystack=[x.id,x.name,x.operation,x.contribution,x.route,...x.aliases].join(' ').toLowerCase();return state.query.trim().toLowerCase().split(/\s+/).every(term=>haystack.includes(term))}).slice(0,16).map(x=><button key={'recovered-'+x.id} data-command-recovered={x.id} onClick={()=>launchRecovered(x)}><span><b>{x.name}</b><small>{x.operation} · {x.route}</small></span><em>{x.state==='TRUTH_GATED'?'GATED':x.state==='EXECUTES_AS_ADAPTER'?'ADAPTER':'EXECUTOR'}</em></button>)}
      {state.query&&commandPreviousSoftware.length>0&&<div className='o7-command-divider'>Previous software → current successor</div>}
      {state.query&&commandPreviousSoftware.map(row=><button key={'system-'+row.systemId} data-command-system={row.systemId} onClick={()=>launchRecoveredSystem(row)}><span><b>{row.artifact}</b><small>{row.family} · {row.route}</small></span><em>{row.state==='WORKING_SUCCESSOR'?'LIVE':row.state==='GATED_SUCCESSOR'?'GATED':row.state==='ARCHIVE_ONLY'?'ARCHIVE':'RESTORE'}</em></button>)}
     </div>
