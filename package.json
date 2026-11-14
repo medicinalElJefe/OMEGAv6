@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "test:r832": "npx --yes tsx tests/r832-source-forecast-transition.mts",
     "test:r823": "npx --yes tsx tests/r823-historical-rh-source-invariants.mts",
     "test:r826": "node --check tests/r826-original-rh-private-positive-browser-e2e.mjs && node tests/r826-private-browser-harness-invariants.mjs",
     "test:r826:private": "node tests/r826-original-rh-private-positive-browser-e2e.mjs",
