@@ -13,6 +13,8 @@ test('first-party failures, mutation requests, untrusted external hosts and othe
  for(const url of [origin+'/api/earth/weather?lat=1',origin+'/api/earth/noaa/catalog',origin+'/api/status','https://evil-rainviewer.com/v2/radar/1','https://example.com/image.png',origin+'/assets/index.js']){
   assert.equal(classify(url),'BLOCKING',url);
  }
+ assert.equal(classify(origin+'/api/earth/noaa/image?coverage='),'BLOCKING');
+ assert.equal(classify(origin+'/api/earth/noaa/image?coverage=G19-FD&mode=privileged'),'BLOCKING');
  assert.equal(classify(origin+'/api/earth/noaa/image?coverage=G19-FD','fetch'),'BLOCKING');
  assert.equal(classify(origin+'/api/earth/noaa/image?coverage=G19-FD','image','POST'),'BLOCKING');
  assert.equal(classify(origin+'/api/earth/noaa/image?coverage=G19-FD','image','GET',500),'BLOCKING');
