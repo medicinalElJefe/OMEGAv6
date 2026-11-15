@@ -1,0 +1,20 @@
+import {useEffect,useState} from 'react';
+import {OMEGA_ARTIFACT_STORAGE_R862,decodeArtifactsR862,exportArtifactBundleR863,importArtifactBundleR863,type OmegaArtifactR862} from './omegaArtifactSpineR862';
+/** R864: one browser-local artifact collection consumed by Atlas, Projects and Assets. */
+export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string)=>void}){
+ const [items,setItems]=useState<OmegaArtifactR862[]>([]);
+ const [error,setError]=useState('');
+ const refresh=()=>{try{setItems(decodeArtifactsR862(localStorage.getItem(OMEGA_ARTIFACT_STORAGE_R862)))}catch{setItems([])}};
+ useEffect(()=>{refresh();window.addEventListener('storage',refresh);window.addEventListener('focus',refresh);return()=>{window.removeEventListener('storage',refresh);window.removeEventListener('focus',refresh)}},[]);
+ const exportAll=()=>{try{const json=exportArtifactBundleR863(items);const url=URL.createObjectURL(new Blob([json],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='omega-artifacts-r864.json';a.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000);setError('')}catch(e){setError(String(e))}};
+ const importAll=async(file:File|null)=>{if(!file)return;try{if(file.size>2200000)throw Error('Bundle too large');const next=importArtifactBundleR863(await file.text(),items);localStorage.setItem(OMEGA_ARTIFACT_STORAGE_R862,JSON.stringify(next));setItems(next);setError('')}catch(e){setError('Import rejected: '+String(e))}};
+ return <section data-r864-shared-artifacts='local' className='o7-native-surface' aria-label='Shared computed artifact library' style={{marginTop:12,padding:12,border:'1px solid #56718a',borderRadius:8}}>
+  <h2>Shared computed artifacts · {items.length}</h2><p>Validated local Atlas SVG results available to Projects and Assets. Browser-local only; no cloud sync, host receipt, Canon promotion or provider generation.</p>
+  <button type='button' onClick={()=>onNavigate('Atlas')}>Open Atlas to compute an artifact</button>{' '}
+  <button type='button' onClick={refresh}>Refresh artifacts</button>{' '}
+  <button type='button' onClick={exportAll}>Export portable bundle</button>{' '}
+  <label>Import portable bundle <input type='file' accept='.json,application/json' onChange={e=>{const file=e.currentTarget.files?.[0]??null;void importAll(file);e.currentTarget.value=''}}/></label>
+  {error&&<p role='alert'>{error}</p>}
+  {items.map(a=><article key={a.id} style={{padding:'12px 0',borderTop:'1px solid #56718a'}}><strong>Atlas · {a.provenance.stateCount} states</strong> <small>{a.createdAt} · addresses {a.provenance.addressStart}–{a.provenance.addressEnd} · MODEL_DERIVED</small><div><img alt={'Saved model traversal '+a.id} src={'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(a.payload)} style={{width:'100%',maxWidth:420}}/></div><button type='button' onClick={()=>{const url=URL.createObjectURL(new Blob([a.payload],{type:a.mediaType}));const link=document.createElement('a');link.href=url;link.download=a.id+'.svg';link.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000)}}>Download SVG</button></article>)}
+ </section>;
+}
