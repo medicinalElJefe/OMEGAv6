@@ -35,3 +35,8 @@ test('R868 removing one saved artifact persists the filtered library and synchro
  assert.match(lib,/setItems\(next\);notifyArtifactChangeR867\(\)/);
  assert.match(lib,/onClick=\{\(\)=>removeSaved\(a\.id\)\}/);
 });
+
+test('R869 async import reads the current persisted library after file decoding, not a stale render snapshot',()=>{
+ assert.match(lib,/const raw=await file\.text\(\);const latest=decodeArtifactsR862\(localStorage\.getItem\(OMEGA_ARTIFACT_STORAGE_R862\)\);const next=importArtifactBundleR863\(raw,latest\)/);
+ assert.doesNotMatch(lib,/importArtifactBundleR863\(await file\.text\(\),items\)/);
+});
