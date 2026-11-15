@@ -67,3 +67,14 @@ test('incomplete restored source arrays are rejected for all model task kinds',(
   }
  }
 });
+
+test('restored source fields reject structurally valid-length counterfeit arrays',()=>{
+ for(const key of ['routeNext','C','Phi','q','Lambda','scar','evidence','continuityGate','forecast','motionDrive'] as const){
+  const f=field();
+  (f as unknown as Record<string,unknown>)[key]=new Array(20736).fill(0);
+  assert.throws(()=>executeModelTaskR842(f,{kind:'INSPECT_MODEL_STATE',address:0}),/Invalid compiled source field/,key);
+ }
+ const f=field();
+ (f as unknown as Record<string,unknown>).routeNext=new Float32Array(20736);
+ assert.throws(()=>executeModelTaskR842(f,{kind:'TRACE_MODEL_SUCCESSORS',address:0,limit:2}),/Invalid compiled source field/);
+});
