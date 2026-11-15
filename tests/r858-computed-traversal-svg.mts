@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {test} from 'node:test';
 import type {Mandala20736Field} from '../src/mandala20736Runtime.ts';
 import {renderTraversalSvgR858} from '../src7/workspaces/omegaTraversalSvgR858.ts';
@@ -18,4 +19,12 @@ test('rejects fabricated successor chain, invalid projection and unbounded route
  assert.throws(()=>renderTraversalSvgR858(field,[0]),/2–64/);
  const bad={...field,x:new Float32Array(2)} as Mandala20736Field;
  assert.throws(()=>renderTraversalSvgR858(bad,[0,1]),/Complete model projection/);
+});
+
+test('R860 workbench exposes computed SVG preview and download without an external service',()=>{
+ const ui=readFileSync(new URL('../src7/workspaces/HistoricalConvergenceWorkbenchR667.tsx',import.meta.url),'utf8');
+ assert.match(ui,/onClick=\\{previewSvgR860\\}[^>]*>Preview computed SVG/);
+ assert.match(ui,/data-r860-svg-preview='model-derived'/);
+ assert.match(ui,/renderTraversalSvgR858\\(field,route\\)/);
+ assert.match(ui,/onClick=\\{exportSvgR858\\}[^>]*>Download computed SVG/);
 });
