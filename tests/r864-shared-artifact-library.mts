@@ -27,3 +27,11 @@ test('R867 same-tab artifact writes notify all active workspaces',()=>{
  assert.match(library,/window\.removeEventListener\(OMEGA_ARTIFACT_CHANGED_R867,refresh\)/);
  assert.match(library,/setItems\(next\);notifyArtifactChangeR867\(\)/);
 });
+
+test('R868 removing one saved artifact persists the filtered library and synchronizes workspaces',()=>{
+ assert.match(lib,/const removeSaved=\(id:string\)=>/);
+ assert.match(lib,/latest\.filter\(item=>item\.id!==id\)/);
+ assert.match(lib,/localStorage\.setItem\(OMEGA_ARTIFACT_STORAGE_R862,JSON\.stringify\(next\)\)/);
+ assert.match(lib,/setItems\(next\);notifyArtifactChangeR867\(\)/);
+ assert.match(lib,/onClick=\{\(\)=>removeSaved\(a\.id\)\}/);
+});
