@@ -19,4 +19,8 @@ test('R865 rejects invalid model addresses and wires execution into Projects and
  assert.match(ui,/executeAtlasArtifactR865/);
  assert.match(ui,/Compute and save Atlas SVG here/);
  assert.match(ui,/appendArtifactR862/);
+ assert.match(ui,/id='r865-atlas-address'/);
+ assert.match(ui,/value=\{atlasAddress\}/);
+ assert.match(ui,/Number\(atlasAddress\.trim\(\)\)/);
+ assert.match(ui,/address>=20736/);
 });
