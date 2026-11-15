@@ -21,3 +21,20 @@ export function appendArtifactR862(existing:readonly OmegaArtifactR862[],artifac
  if(!validateArtifactR862(artifact))throw Error('Invalid artifact');
  return [artifact,...existing.filter(x=>validateArtifactR862(x)&&x.id!==artifact.id)].slice(0,MAX_ARTIFACTS);
 }
+
+/** R863: portable, explicitly untrusted transfer between local browsers/workspaces. */
+export type OmegaArtifactBundleR863={schema:'OMEGA_ARTIFACT_BUNDLE_R863';exportedAt:string;artifacts:OmegaArtifactR862[]};
+export function exportArtifactBundleR863(artifacts:readonly OmegaArtifactR862[],now=new Date()):string{
+ if(artifacts.length>MAX_ARTIFACTS||!artifacts.every(validateArtifactR862))throw Error('Invalid artifact bundle');
+ return JSON.stringify({schema:'OMEGA_ARTIFACT_BUNDLE_R863',exportedAt:now.toISOString(),artifacts});
+}
+export function importArtifactBundleR863(raw:string,existing:readonly OmegaArtifactR862[]):OmegaArtifactR862[]{
+ if(typeof raw!=='string'||raw.length>MAX_BYTES*MAX_ARTIFACTS+10000)throw Error('Artifact bundle exceeds bounded import size');
+ let bundle:unknown;try{bundle=JSON.parse(raw)}catch{throw Error('Malformed artifact bundle')}
+ if(!bundle||typeof bundle!=='object')throw Error('Invalid artifact bundle');
+ const b=bundle as Partial<OmegaArtifactBundleR863>;
+ if(b.schema!=='OMEGA_ARTIFACT_BUNDLE_R863'||!Array.isArray(b.artifacts)||b.artifacts.length>MAX_ARTIFACTS||!b.artifacts.every(validateArtifactR862))throw Error('Artifact bundle rejected: invalid schema or provenance');
+ let next=existing.filter(validateArtifactR862);
+ for(const artifact of [...b.artifacts].reverse())next=appendArtifactR862(next,artifact);
+ return next;
+}
