@@ -9,15 +9,15 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
  const [error,setError]=useState('');
  const [running,setRunning]=useState(false);
  const [executionStatus,setExecutionStatus]=useState('');
+ const [atlasAddress,setAtlasAddress]=useState(()=>{try{const stored=localStorage.getItem('omega.v6.address');return stored===null?'11498':stored}catch{return '11498'}});
  const refresh=()=>{try{setItems(decodeArtifactsR862(localStorage.getItem(OMEGA_ARTIFACT_STORAGE_R862)))}catch{setItems([])}};
  useEffect(()=>{refresh();window.addEventListener('storage',refresh);window.addEventListener('focus',refresh);return()=>{window.removeEventListener('storage',refresh);window.removeEventListener('focus',refresh)}},[]);
  const computeAndSave=async()=>{
   if(running)return;
   setRunning(true);setError('');setExecutionStatus('');
   try{
-   const raw=localStorage.getItem('omega.v6.address');
-   const address=raw===null?11498:Number(raw);
-   if(!Number.isInteger(address)||address<0||address>=20736)throw Error('Invalid shared Atlas address');
+   const address=Number(atlasAddress.trim());
+   if(atlasAddress.trim()===''||!Number.isInteger(address)||address<0||address>=20736)throw Error('Atlas address must be an integer from 0 to 20735');
    const field=await getMandala20736Field();
    const result=executeAtlasArtifactR865(field,address,32);
    const latest=decodeArtifactsR862(localStorage.getItem(OMEGA_ARTIFACT_STORAGE_R862));
@@ -31,6 +31,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
  const importAll=async(file:File|null)=>{if(!file)return;try{if(file.size>2200000)throw Error('Bundle too large');const next=importArtifactBundleR863(await file.text(),items);localStorage.setItem(OMEGA_ARTIFACT_STORAGE_R862,JSON.stringify(next));setItems(next);setError('')}catch(e){setError('Import rejected: '+String(e))}};
  return <section data-r864-shared-artifacts='local' className='o7-native-surface' aria-label='Shared computed artifact library' style={{marginTop:12,padding:12,border:'1px solid #56718a',borderRadius:8}}>
   <h2>Shared computed artifacts · {items.length}</h2><p>Validated local Atlas SVG results available to Projects and Assets. Browser-local only; no cloud sync, host receipt, Canon promotion or provider generation.</p>
+  <label htmlFor='r865-atlas-address'>Atlas source address (0–20735)</label>{' '}<input id='r865-atlas-address' type='number' min={0} max={20735} step={1} value={atlasAddress} disabled={running} onChange={e=>setAtlasAddress(e.currentTarget.value)} style={{width:110}}/>{' '}
   <button type='button' disabled={running} onClick={()=>void computeAndSave()}>{running?'Computing Atlas artifact…':'Compute and save Atlas SVG here'}</button>{' '}<button type='button' onClick={()=>onNavigate('Atlas')}>Open Atlas workbench</button>{' '}
   <button type='button' onClick={refresh}>Refresh artifacts</button>{' '}
   <button type='button' onClick={exportAll}>Export portable bundle</button>{' '}
