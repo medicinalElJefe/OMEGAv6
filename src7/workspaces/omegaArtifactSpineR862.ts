@@ -38,3 +38,9 @@ export function importArtifactBundleR863(raw:string,existing:readonly OmegaArtif
  for(const artifact of [...b.artifacts].reverse())next=appendArtifactR862(next,artifact);
  return next;
 }
+
+/** R867: same-tab workspace synchronization. Native storage events only reach other tabs. */
+export const OMEGA_ARTIFACT_CHANGED_R867='omega:r867:artifact-changed';
+export function notifyArtifactChangeR867(){
+ if(typeof window!=='undefined')window.dispatchEvent(new Event(OMEGA_ARTIFACT_CHANGED_R867));
+}
