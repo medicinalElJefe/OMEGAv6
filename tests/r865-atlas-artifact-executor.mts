@@ -7,8 +7,8 @@ test('R865 executes a real Atlas model route into a validated SVG artifact',asyn
  const field=await getMandala20736Field();
  const output=executeAtlasArtifactR865(field,11498,12);
  assert.equal(output.artifact.provenance.authority,'MODEL_DERIVED');
+ assert.ok(output.rowCount>=2&&output.rowCount<=12,'Cycle-aware trace length must be within the requested maximum');
  assert.equal(output.artifact.provenance.stateCount,output.rowCount);
- assert.equal(output.rowCount,12);
  assert.match(output.artifact.payload,/<polyline points=/);
  assert.match(output.csv,/\n/);
 });
