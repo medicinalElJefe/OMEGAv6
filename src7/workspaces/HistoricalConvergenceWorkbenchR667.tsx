@@ -61,6 +61,9 @@ export function HistoricalConvergenceWorkbenchR667(){
  const [replayText,setReplayText]=useState('');
  const [replayStatus,setReplayStatus]=useState('');
  const [svgPreviewR860,setSvgPreviewR860]=useState('');
+ // Any recomputed, restored, reset or manually selected route invalidates the prior SVG image.
+ // A preview must never remain visible as if it represented a different successor chain.
+ useEffect(()=>{setSvgPreviewR860('')},[route]);
  const dispatch=(task:OmegaTaskR842)=>{
   if(!field)throw Error('Model field not ready');
   const session=createModelTaskSessionR842(field);
