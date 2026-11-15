@@ -7,7 +7,7 @@ import {encodeReplayR843,decodeReplayR843,replayModelTasksR843,recoverModelTaskS
 import {dispatchCapabilityComputeR846} from './omegaExecutorRegistryR846';
 import {executeModelPipelineR847} from './omegaModelPipelineR847';
 import {renderTraversalSvgR858} from './omegaTraversalSvgR858';
-import {OMEGA_ARTIFACT_STORAGE_R862,createModelArtifactR862,decodeArtifactsR862,appendArtifactR862,type OmegaArtifactR862,exportArtifactBundleR863,importArtifactBundleR863} from './omegaArtifactSpineR862';
+import {OMEGA_ARTIFACT_STORAGE_R862,createModelArtifactR862,decodeArtifactsR862,appendArtifactR862,type OmegaArtifactR862,exportArtifactBundleR863,importArtifactBundleR863,notifyArtifactChangeR867} from './omegaArtifactSpineR862';
 import {saveModelTasksR848,loadModelTasksR848} from './omegaModelStorageR848';
 import {parseModelAddressR841,coordinatesToAddressR841,OMEGA_ADDRESS_KEY_R841,OMEGA_ADDRESS_EVENT_R841} from './historicalAddressBusR841';
 // Browser-local recovery for the actual R666 observer and computed route playback.
@@ -111,7 +111,7 @@ export function HistoricalConvergenceWorkbenchR667(){
    const artifact=createModelArtifactR862(renderTraversalSvgR858(field,route),route);
    const next=appendArtifactR862(savedArtifactsR862,artifact);
    localStorage.setItem(OMEGA_ARTIFACT_STORAGE_R862,JSON.stringify(next));
-   setSavedArtifactsR862(next);setError('');
+   setSavedArtifactsR862(next);notifyArtifactChangeR867();setError('');
    setReplayStatus('Model-derived SVG artifact saved locally with route and provenance. This is not cloud synchronization or host proof.');
   }catch(e){setError('Artifact save rejected: '+String(e))}
  };
@@ -123,7 +123,7 @@ export function HistoricalConvergenceWorkbenchR667(){
   try{
    if(file.size>2200000)throw Error('Bundle exceeds size limit');
    const next=importArtifactBundleR863(await file.text(),savedArtifactsR862);
-   localStorage.setItem(OMEGA_ARTIFACT_STORAGE_R862,JSON.stringify(next));setSavedArtifactsR862(next);setError('');
+   localStorage.setItem(OMEGA_ARTIFACT_STORAGE_R862,JSON.stringify(next));setSavedArtifactsR862(next);notifyArtifactChangeR867();setError('');
    setReplayStatus('Portable artifact bundle imported locally; source/model provenance retained, no host or Canon promotion.');
   }catch(e){setError('Bundle import rejected: '+String(e))}
  };
