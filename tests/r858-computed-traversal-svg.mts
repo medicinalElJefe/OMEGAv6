@@ -13,7 +13,7 @@ test('exports actual computed coordinates to inspectable SVG',()=>{
  assert.match(svg,/addresses 1 to 2/);
 });
 test('rejects fabricated successor chain, invalid projection and unbounded routes',()=>{
- assert.throws(()=>renderTraversalSvgR858(field,[1,0]),/successor chain/);
+ assert.throws(()=>renderTraversalSvgR858(field,[1,2]),/successor chain/);
  assert.throws(()=>renderTraversalSvgR858(field,[0,20736]),/Invalid model route/);
  assert.throws(()=>renderTraversalSvgR858(field,[0]),/2–64/);
  const bad={...field,x:new Float32Array(2)} as Mandala20736Field;
