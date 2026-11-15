@@ -1,7 +1,7 @@
 import {useEffect,useState} from 'react';
 import {getMandala20736Field} from '../../src/mandala20736Runtime';
 import {executeAtlasArtifactR865} from './omegaAtlasArtifactExecutorR865';
-import {appendArtifactR862} from './omegaArtifactSpineR862';
+import {appendArtifactR862,notifyArtifactChangeR867,OMEGA_ARTIFACT_CHANGED_R867} from './omegaArtifactSpineR862';
 import {OMEGA_ARTIFACT_STORAGE_R862,decodeArtifactsR862,exportArtifactBundleR863,importArtifactBundleR863,type OmegaArtifactR862} from './omegaArtifactSpineR862';
 /** R864: one browser-local artifact collection consumed by Atlas, Projects and Assets. */
 export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string)=>void}){
@@ -11,7 +11,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
  const [executionStatus,setExecutionStatus]=useState('');
  const [atlasAddress,setAtlasAddress]=useState(()=>{try{const stored=localStorage.getItem('omega.v6.address');return stored===null?'11498':stored}catch{return '11498'}});
  const refresh=()=>{try{setItems(decodeArtifactsR862(localStorage.getItem(OMEGA_ARTIFACT_STORAGE_R862)))}catch{setItems([])}};
- useEffect(()=>{refresh();window.addEventListener('storage',refresh);window.addEventListener('focus',refresh);return()=>{window.removeEventListener('storage',refresh);window.removeEventListener('focus',refresh)}},[]);
+ useEffect(()=>{refresh();window.addEventListener('storage',refresh);window.addEventListener('focus',refresh);window.addEventListener(OMEGA_ARTIFACT_CHANGED_R867,refresh);return()=>{window.removeEventListener('storage',refresh);window.removeEventListener('focus',refresh);window.removeEventListener(OMEGA_ARTIFACT_CHANGED_R867,refresh)}},[]);
  const computeAndSave=async()=>{
   if(running)return;
   setRunning(true);setError('');setExecutionStatus('');
@@ -23,12 +23,12 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
    const latest=decodeArtifactsR862(localStorage.getItem(OMEGA_ARTIFACT_STORAGE_R862));
    const next=appendArtifactR862(latest,result.artifact);
    localStorage.setItem(OMEGA_ARTIFACT_STORAGE_R862,JSON.stringify(next));
-   setItems(next);
+   setItems(next);notifyArtifactChangeR867();
    setExecutionStatus('Computed '+result.rowCount+' source-model states; SVG saved locally. No external, device or Canon proof.');
   }catch(e){setError('Atlas execution rejected: '+String(e))}finally{setRunning(false)}
  };
  const exportAll=()=>{try{const json=exportArtifactBundleR863(items);const url=URL.createObjectURL(new Blob([json],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='omega-artifacts-r864.json';a.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000);setError('')}catch(e){setError(String(e))}};
- const importAll=async(file:File|null)=>{if(!file)return;try{if(file.size>2200000)throw Error('Bundle too large');const next=importArtifactBundleR863(await file.text(),items);localStorage.setItem(OMEGA_ARTIFACT_STORAGE_R862,JSON.stringify(next));setItems(next);setError('')}catch(e){setError('Import rejected: '+String(e))}};
+ const importAll=async(file:File|null)=>{if(!file)return;try{if(file.size>2200000)throw Error('Bundle too large');const next=importArtifactBundleR863(await file.text(),items);localStorage.setItem(OMEGA_ARTIFACT_STORAGE_R862,JSON.stringify(next));setItems(next);notifyArtifactChangeR867();setError('')}catch(e){setError('Import rejected: '+String(e))}};
  return <section data-r864-shared-artifacts='local' className='o7-native-surface' aria-label='Shared computed artifact library' style={{marginTop:12,padding:12,border:'1px solid #56718a',borderRadius:8}}>
   <h2>Shared computed artifacts · {items.length}</h2><p>Validated local Atlas SVG results available to Projects and Assets. Browser-local only; no cloud sync, host receipt, Canon promotion or provider generation.</p>
   <label htmlFor='r865-atlas-address'>Atlas source address (0–20735)</label>{' '}<input id='r865-atlas-address' type='number' min={0} max={20735} step={1} value={atlasAddress} disabled={running} onChange={e=>setAtlasAddress(e.currentTarget.value)} style={{width:110}}/>{' '}
