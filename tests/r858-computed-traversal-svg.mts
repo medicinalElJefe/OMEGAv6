@@ -23,8 +23,8 @@ test('rejects fabricated successor chain, invalid projection and unbounded route
 
 test('R860 workbench exposes computed SVG preview and download without an external service',()=>{
  const ui=readFileSync(new URL('../src7/workspaces/HistoricalConvergenceWorkbenchR667.tsx',import.meta.url),'utf8');
- assert.match(ui,/onClick=\\{previewSvgR860\\}[^>]*>Preview computed SVG/);
+ assert.ok(ui.includes('onClick={previewSvgR860} disabled={!field||route.length<2}>Preview computed SVG'));
  assert.match(ui,/data-r860-svg-preview='model-derived'/);
- assert.match(ui,/renderTraversalSvgR858\\(field,route\\)/);
- assert.match(ui,/onClick=\\{exportSvgR858\\}[^>]*>Download computed SVG/);
+ assert.ok(ui.includes('renderTraversalSvgR858(field,route)'));
+ assert.ok(ui.includes('onClick={exportSvgR858} disabled={!field||route.length<2}>Download computed SVG'));
 });
