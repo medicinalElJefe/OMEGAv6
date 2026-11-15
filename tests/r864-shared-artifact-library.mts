@@ -16,3 +16,14 @@ test('R864 portable results remain model-derived after transfer',()=>{
  const a=createModelArtifactR862('<svg xmlns="http://www.w3.org/2000/svg"></svg>',[0,1],new Date('2026-11-15T00:00:00.000Z'),'atlas-shared-01');
  assert.equal(importArtifactBundleR863(exportArtifactBundleR863([a]),[])[0].provenance.authority,'MODEL_DERIVED');
 });
+
+test('R867 same-tab artifact writes notify all active workspaces',()=>{
+ const atlas=fs.readFileSync('src7/workspaces/HistoricalConvergenceWorkbenchR667.tsx','utf8');
+ const library=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
+ const spine=fs.readFileSync('src7/workspaces/omegaArtifactSpineR862.ts','utf8');
+ assert.match(spine,/window\.dispatchEvent\(new Event\(OMEGA_ARTIFACT_CHANGED_R867\)\)/);
+ assert.match(atlas,/setSavedArtifactsR862\(next\);notifyArtifactChangeR867\(\)/);
+ assert.match(library,/window\.addEventListener\(OMEGA_ARTIFACT_CHANGED_R867,refresh\)/);
+ assert.match(library,/window\.removeEventListener\(OMEGA_ARTIFACT_CHANGED_R867,refresh\)/);
+ assert.match(library,/setItems\(next\);notifyArtifactChangeR867\(\)/);
+});
