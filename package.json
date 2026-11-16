@@ -288,7 +288,7 @@
     "test:r857": "npx --yes tsx tests/r857-route-execution-ledger.mts",
     "test:r858": "npx --yes tsx tests/r858-computed-traversal-svg.mts",
     "test:r862": "npx --yes tsx tests/r862-artifact-spine.mts",
-    "test:r864": "npx --yes tsx tests/r864-shared-artifact-library.mts",
+    "test:r864": "npx --yes tsx tests/r864-shared-artifact-library.mts && node tests/r874-saved-trace-deletion.mjs",
     "test:r865": "npx --yes tsx tests/r865-atlas-artifact-executor.mts"
   },
   "dependencies": {
