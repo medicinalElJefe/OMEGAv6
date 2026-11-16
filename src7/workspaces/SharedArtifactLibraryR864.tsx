@@ -32,10 +32,12 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
   if(running)return;
   setRunning(true);setError('');setExecutionStatus('');setLatestCsv(null);
   try{
+   const current=decodeArtifactsR862(localStorage.getItem(OMEGA_ARTIFACT_STORAGE_R862)).find(item=>item.id===saved.id);
+   if(!current||JSON.stringify(current)!==JSON.stringify(saved))throw Error('Saved artifact was removed or changed; refresh the library before recovery');
    const field=await getMandala20736Field();
    const address=saved.provenance.addressStart-1;
    const result=executeAtlasArtifactR865(field,address,saved.provenance.stateCount);
-   if(result.artifact.payload!==saved.payload||result.rowCount!==saved.provenance.stateCount||result.artifact.provenance.addressEnd!==saved.provenance.addressEnd)throw Error('Saved SVG does not match current model traversal; trace recovery refused');
+   if(result.artifact.payload!==saved.payload||result.rowCount!==saved.provenance.stateCount||result.artifact.provenance.addressStart!==saved.provenance.addressStart||result.artifact.provenance.addressEnd!==saved.provenance.addressEnd||result.artifact.provenance.engine!==saved.provenance.engine||result.artifact.provenance.source!==saved.provenance.source)throw Error('Saved SVG does not match current model traversal; trace recovery refused');
    setLatestCsv({csv:result.csv,address,rows:result.rowCount});
    setExecutionStatus('Recovered and verified '+result.rowCount+' model states against saved SVG. This is model replay, not external or device proof.');
   }catch(e){setError('Saved trace recovery rejected: '+String(e))}finally{setRunning(false)}
