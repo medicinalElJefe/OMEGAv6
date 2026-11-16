@@ -40,3 +40,8 @@ test('R869 async import reads the current persisted library after file decoding,
  assert.match(lib,/const raw=await file\.text\(\);const latest=decodeArtifactsR862\(localStorage\.getItem\(OMEGA_ARTIFACT_STORAGE_R862\)\);const next=importArtifactBundleR863\(raw,latest\)/);
  assert.doesNotMatch(lib,/importArtifactBundleR863\(await file\.text\(\),items\)/);
 });
+
+test('R870 export reads persisted artifacts at click time, not a stale component snapshot',()=>{
+ assert.match(lib,/const exportAll=\(\)=>\{try\{const latest=decodeArtifactsR862\(localStorage\.getItem\(OMEGA_ARTIFACT_STORAGE_R862\)\);const json=exportArtifactBundleR863\(latest\)/);
+ assert.doesNotMatch(lib,/exportArtifactBundleR863\(items\)/);
+});
