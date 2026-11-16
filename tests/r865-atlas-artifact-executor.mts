@@ -11,6 +11,7 @@ test('R865 executes a real Atlas model route into a validated SVG artifact',asyn
  assert.equal(output.artifact.provenance.stateCount,output.rowCount);
  assert.match(output.artifact.payload,/<polyline points=/);
  assert.match(output.csv,/\n/);
+ assert.equal(output.csv.trim().split('\n').length,output.rowCount+1);
 });
 test('R865 rejects invalid model addresses and wires execution into Projects and Assets',async()=>{
  const field=await getMandala20736Field();
@@ -19,6 +20,9 @@ test('R865 rejects invalid model addresses and wires execution into Projects and
  assert.match(ui,/executeAtlasArtifactR865/);
  assert.match(ui,/Compute and save Atlas SVG here/);
  assert.match(ui,/appendArtifactR862/);
+ assert.match(ui,/setLatestCsv\(\{csv:result\.csv,address,rows:result\.rowCount\}\)/);
+ assert.match(ui,/Download computed trace CSV/);
+ assert.match(ui,/new Blob\(\[latestCsv\.csv\]/);
  assert.match(ui,/id='r865-atlas-address'/);
  assert.match(ui,/value=\{atlasAddress\}/);
  assert.match(ui,/Number\(atlasAddress\.trim\(\)\)/);
