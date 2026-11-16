@@ -38,6 +38,8 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
    const address=saved.provenance.addressStart-1;
    const result=executeAtlasArtifactR865(field,address,saved.provenance.stateCount);
    if(result.artifact.payload!==saved.payload||result.rowCount!==saved.provenance.stateCount||result.artifact.provenance.addressStart!==saved.provenance.addressStart||result.artifact.provenance.addressEnd!==saved.provenance.addressEnd||result.artifact.provenance.engine!==saved.provenance.engine||result.artifact.provenance.source!==saved.provenance.source)throw Error('Saved SVG does not match current model traversal; trace recovery refused');
+   const stillSaved=decodeArtifactsR862(localStorage.getItem(OMEGA_ARTIFACT_STORAGE_R862)).find(item=>item.id===saved.id);
+   if(!stillSaved||JSON.stringify(stillSaved)!==JSON.stringify(saved))throw Error('Saved artifact changed during model replay; trace recovery refused');
    setLatestCsv({csv:result.csv,address,rows:result.rowCount});
    setExecutionStatus('Recovered and verified '+result.rowCount+' model states against saved SVG. This is model replay, not external or device proof.');
   }catch(e){setError('Saved trace recovery rejected: '+String(e))}finally{setRunning(false)}
