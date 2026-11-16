@@ -203,7 +203,7 @@
     "test:r408": "node tests/r408-proof-runtime-convergence-invariants.mjs",
     "test:r435": "npx --yes tsx tests/r435-runtime-derived-representation.mts && node tests/r435-representation-surface-invariants.mjs",
     "test:r436": "npx --yes tsx tests/r436-canonical-domain-resolution-invariants.mts",
-    "test:omega7": "npx --yes tsx tests/omega7-r439-foundation-invariants.mts && npx --yes tsx tests/omega7-r440-foundation-invariants.mts && npx --yes tsx tests/omega7-r441-foundation-invariants.mts && npx --yes tsx tests/omega7-r442-foundation-invariants.mts && npx --yes tsx tests/omega7-r443-foundation-invariants.mts && npx --yes tsx tests/omega7-r444-foundation-invariants.mts && npx --yes tsx tests/omega7-r445-foundation-invariants.mts && npx --yes tsx tests/omega7-r446-parity-invariants.mjs && node tests/omega7-r447-parity-invariants.mjs && node tests/omega7-r449-rollback-invariants.mjs && npx --yes tsx tests/omega7-r451-parity-ledger-invariants.mts && npx --yes tsx tests/omega7-r452-family-parity-invariants.mts && npx --yes tsx tests/omega7-r453-parity-acceptance-invariants.mts",
+    "test:omega7": "npm run test:r865 && npm run test:r864 && npm run test:r862 && npm run test:r858 && npm run test:r857 && npx --yes tsx tests/omega7-r439-foundation-invariants.mts && npx --yes tsx tests/omega7-r440-foundation-invariants.mts && npx --yes tsx tests/omega7-r441-foundation-invariants.mts && npx --yes tsx tests/omega7-r442-foundation-invariants.mts && npx --yes tsx tests/omega7-r443-foundation-invariants.mts && npx --yes tsx tests/omega7-r444-foundation-invariants.mts && npx --yes tsx tests/omega7-r445-foundation-invariants.mts && npx --yes tsx tests/omega7-r446-parity-invariants.mjs && node tests/omega7-r447-parity-invariants.mjs && node tests/omega7-r449-rollback-invariants.mjs && npx --yes tsx tests/omega7-r451-parity-ledger-invariants.mts && npx --yes tsx tests/omega7-r452-family-parity-invariants.mts && npx --yes tsx tests/omega7-r453-parity-acceptance-invariants.mts",
     "test:r455": "node tests/r455-control-panel-object-child-invariants.mjs",
     "test:omega7:r457": "npx --yes tsx tests/omega7-r457-heightened-mode-invariants.mts",
     "test:r459": "node tests/r459-r372-ground-render-receipt-invariants.mjs",
@@ -284,7 +284,12 @@
     "test:r775": "node tests/r775-canon-paired-transition-invariants.mjs",
     "test:integration-audit": "node scripts/validate_integration_evidence_baseline.mjs",
     "test:r793": "node tests/r793-source-scene-replay-invariants.mjs",
-    "test:r795": "node tests/r795-source-workspace-recovery.mjs"
+    "test:r795": "node tests/r795-source-workspace-recovery.mjs",
+    "test:r857": "npx --yes tsx tests/r857-route-execution-ledger.mts",
+    "test:r858": "npx --yes tsx tests/r858-computed-traversal-svg.mts",
+    "test:r862": "npx --yes tsx tests/r862-artifact-spine.mts",
+    "test:r864": "npx --yes tsx tests/r864-shared-artifact-library.mts && node tests/r874-saved-trace-deletion.mjs",
+    "test:r865": "npx --yes tsx tests/r865-atlas-artifact-executor.mts"
   },
   "dependencies": {
     "fflate": "^0.8.2",

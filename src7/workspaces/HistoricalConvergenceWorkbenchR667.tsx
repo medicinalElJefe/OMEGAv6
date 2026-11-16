@@ -6,6 +6,8 @@ import {createModelTaskSessionR842,type OmegaTaskR842,type OmegaTaskRecordR842} 
 import {encodeReplayR843,decodeReplayR843,replayModelTasksR843,recoverModelTaskSessionR849} from './omegaModelReplayR843';
 import {dispatchCapabilityComputeR846} from './omegaExecutorRegistryR846';
 import {executeModelPipelineR847} from './omegaModelPipelineR847';
+import {renderTraversalSvgR858} from './omegaTraversalSvgR858';
+import {OMEGA_ARTIFACT_STORAGE_R862,createModelArtifactR862,decodeArtifactsR862,appendArtifactR862,type OmegaArtifactR862,exportArtifactBundleR863,importArtifactBundleR863,notifyArtifactChangeR867} from './omegaArtifactSpineR862';
 import {saveModelTasksR848,loadModelTasksR848} from './omegaModelStorageR848';
 import {parseModelAddressR841,coordinatesToAddressR841,OMEGA_ADDRESS_KEY_R841,OMEGA_ADDRESS_EVENT_R841} from './historicalAddressBusR841';
 // Browser-local recovery for the actual R666 observer and computed route playback.
@@ -34,6 +36,7 @@ const index=(o:ObserverR666)=>(((o.address.d-1)*12+o.address.p-1)*12+o.address.r
 const address=(i:number)=>normalizeAddressR666({d:Math.floor(i/1728)+1,p:Math.floor(i/144)%12+1,r:Math.floor(i/12)%12+1,l:i%12+1});
 export function HistoricalConvergenceWorkbenchR667(){
  const [recovered]=useState<SavedObserverR828|null>(recoverObserverR828);
+ const [savedArtifactsR862,setSavedArtifactsR862]=useState<OmegaArtifactR862[]>(()=>{try{return decodeArtifactsR862(localStorage.getItem(OMEGA_ARTIFACT_STORAGE_R862))}catch{return []}});
  const [field,setField]=useState<Mandala20736Field|null>(null),[error,setError]=useState(''),[observer,setObserver]=useState<ObserverR666>(()=>recovered?.observer??defaultObserverR666()),[route,setRoute]=useState<number[]>(()=>recovered?.route??[]);
  useEffect(()=>{let live=true;getMandala20736Field().then(f=>{if(live)setField(f)}).catch(e=>{if(live)setError(String(e))});return()=>{live=false}},[]);
  // The historical observer shares the existing OMEGA6/OMEGA7 address bus.
@@ -59,6 +62,10 @@ export function HistoricalConvergenceWorkbenchR667(){
  const [taskRecords,setTaskRecords]=useState<OmegaTaskRecordR842[]>([]);
  const [replayText,setReplayText]=useState('');
  const [replayStatus,setReplayStatus]=useState('');
+ const [svgPreviewR860,setSvgPreviewR860]=useState('');
+ // Any recomputed, restored, reset or manually selected route invalidates the prior SVG image.
+ // A preview must never remain visible as if it represented a different successor chain.
+ useEffect(()=>{setSvgPreviewR860('')},[route]);
  const dispatch=(task:OmegaTaskR842)=>{
   if(!field)throw Error('Model field not ready');
   const session=createModelTaskSessionR842(field);
@@ -90,13 +97,56 @@ export function HistoricalConvergenceWorkbenchR667(){
   const link=document.createElement('a');link.href=url;link.download='omega-r829-model-traversal.csv';document.body.appendChild(link);link.click();link.remove();
   window.setTimeout(()=>URL.revokeObjectURL(url),1000);
  };
+ const previewSvgR860=()=>{
+  if(!field||route.length<2){setError('Trace at least two computed states before previewing SVG.');return}
+  try{
+   const svg=renderTraversalSvgR858(field,route);
+   setSvgPreviewR860('data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg));
+   setError('');setReplayStatus('Computed SVG preview generated from the verified successor route; model-space only.');
+  }catch(e){setSvgPreviewR860('');setError('SVG preview rejected: '+String(e))}
+ };
+ const saveSvgR862=()=>{
+  if(!field||route.length<2){setError('Trace a computed route before saving an artifact.');return}
+  try{
+   const artifact=createModelArtifactR862(renderTraversalSvgR858(field,route),route);
+   const next=appendArtifactR862(savedArtifactsR862,artifact);
+   localStorage.setItem(OMEGA_ARTIFACT_STORAGE_R862,JSON.stringify(next));
+   setSavedArtifactsR862(next);notifyArtifactChangeR867();setError('');
+   setReplayStatus('Model-derived SVG artifact saved locally with route and provenance. This is not cloud synchronization or host proof.');
+  }catch(e){setError('Artifact save rejected: '+String(e))}
+ };
+ const exportBundleR863=()=>{
+  try{const data=exportArtifactBundleR863(savedArtifactsR862);const url=URL.createObjectURL(new Blob([data],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='omega-atlas-artifacts-r863.json';a.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000);setError('')}catch(e){setError('Bundle export rejected: '+String(e))}
+ };
+ const importBundleR863=async(file:File|null)=>{
+  if(!file)return;
+  try{
+   if(file.size>2200000)throw Error('Bundle exceeds size limit');
+   const next=importArtifactBundleR863(await file.text(),savedArtifactsR862);
+   localStorage.setItem(OMEGA_ARTIFACT_STORAGE_R862,JSON.stringify(next));setSavedArtifactsR862(next);notifyArtifactChangeR867();setError('');
+   setReplayStatus('Portable artifact bundle imported locally; source/model provenance retained, no host or Canon promotion.');
+  }catch(e){setError('Bundle import rejected: '+String(e))}
+ };
+ const removeArtifactR862=(id:string)=>{
+  try{const next=savedArtifactsR862.filter(x=>x.id!==id);localStorage.setItem(OMEGA_ARTIFACT_STORAGE_R862,JSON.stringify(next));setSavedArtifactsR862(next)}catch(e){setError('Artifact removal failed: '+String(e))}
+ };
+ const exportSvgR858=()=>{
+  if(!field||route.length<2){setError('Trace at least two computed states before exporting SVG.');return}
+  try{
+   const svg=renderTraversalSvgR858(field,route);
+   const url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml;charset=utf-8'}));
+   const link=document.createElement('a');link.href=url;link.download='omega-r858-computed-traversal.svg';document.body.appendChild(link);link.click();link.remove();
+   window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+   setError('');setReplayStatus('Computed model traversal exported as an inspectable SVG image; no host, Canon or physical calibration proof.');
+  }catch(e){setError('SVG export rejected: '+String(e))}
+ };
  const select=(n:number)=>{
   if(!Number.isInteger(n)||n<0||n>=20736)return;
   setObserver(s=>index(s)===n?s:{...s,address:address(n),revision:s.revision+1});
   try{localStorage.setItem(OMEGA_ADDRESS_KEY_R841,String(n));window.dispatchEvent(new CustomEvent(OMEGA_ADDRESS_EVENT_R841,{detail:{address:n}}))}catch{/* Session-local traversal remains usable. */}
  };
  // Manual navigation invalidates the old route; playback navigation deliberately preserves it.
- const inspect=(n:number)=>{if(!Number.isInteger(n)||n<0||n>=20736)return;select(n);setRoute([]);setRouteCursor(0)};
+ const inspect=(n:number)=>{if(!Number.isInteger(n)||n<0||n>=20736)return;select(n);setRoute([]);setSvgPreviewR860('');setRouteCursor(0)};
  // Direct 1-based address navigation is independent of route playback and cannot mutate CanonState.
  const jump=()=>{const raw=jumpAddress.trim();const n=Number(raw);if(!/^\d+$/.test(raw)||!Number.isSafeInteger(n)||n<1||n>20736){setJumpError('Enter an integer address from 1 to 20736.');return}setJumpError('');inspect(n-1)};
  // Source-derived route projection: no synthetic geometry, no new authority.
@@ -142,10 +192,12 @@ export function HistoricalConvergenceWorkbenchR667(){
  <circle cx={320+field.x[i]*235} cy={150-field.y[i]*115} r='7' fill='none' stroke='#ffca70' strokeWidth='2'/>
  <text x='12' y='20' fill='#c8d9e8' fontSize='12'>MODEL XY PROJECTION · sampled canonical states · selected address outlined</text>
  </svg>}
+ {svgPreviewR860&&<section data-r860-svg-preview='model-derived' aria-label='Computed traversal SVG preview'><h3>Computed traversal image</h3><img src={svgPreviewR860} alt='Model-derived successor traversal SVG with address labels and projected points' style={{display:'block',width:'100%',maxWidth:640,borderRadius:8}}/><small>Source-model coordinates only; no physical calibration or host execution.</small></section>}
  {decision&&<section data-r830-motion-decision={decision.decision} aria-label='Recovered motion decision' style={{marginTop:12,padding:12,border:'1px solid #47617a',borderRadius:8}}><h3>Recovered R666 motion decision · {decision.decision}</h3><p>Computed ratio {decision.ratio.toFixed(5)} from selected state continuity, plasticity, contradiction and burden. STAY ≥ 0.92; TURN ≥ 0.46; otherwise ESCALATE. Advisory model decision only; no Canon admission or host execution.</p><button type='button' disabled={!field||!Number.isInteger(next)||next<0||next>=20736} onClick={()=>inspect(next)}>Inspect computed successor</button></section>}
  {transition&&<section data-r832-forecast-gate='model-only' aria-label='Computed forecast and transition derivatives' style={{marginTop:12,padding:12,border:'1px solid #47617a',borderRadius:8}}><h3>Forecast gate and developmental transition</h3><p>Source successor {address(transition.next).node_id} · continuity gate {transition.continuityGate.toFixed(5)} · forecast score {transition.forecast.toFixed(5)} · motion drive {transition.motionDrive.toFixed(5)}</p><p>Δ continuity {transition.deltaContinuity.toFixed(5)} · Δ plasticity {transition.deltaPlasticity.toFixed(5)} · Δ scar {transition.deltaScar.toFixed(5)} · velocity {transition.velocity.toFixed(5)} · acceleration {transition.acceleration.toFixed(5)}</p><small>All values are derived from the existing source-route model. These are computational transitions, not measured physical time, external forecasts, or execution receipts.</small></section>}
  {metrics&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(130px,1fr))',gap:8,marginTop:12}}>{Object.entries(metrics).map(([key,value])=><div key={key} style={{padding:10,border:'1px solid #47617a',borderRadius:8}}><small>{key}</small><div>{value.toFixed(5)}</div></div>)}</div>}
- {route.length>0&&<div><h3>Computed routeNext sequence</h3>{routeAnalysis&&<section data-r835-route-analysis='source' aria-label='Computed route aggregate'><p>Source route · {route.length} states · {routeAnalysis.edges} verified successor edges · mean continuity gate {(routeAnalysis.gateSum/route.length).toFixed(5)} · mean motion drive {(routeAnalysis.driveSum/route.length).toFixed(5)} · mean forecast score {(routeAnalysis.forecastSum/route.length).toFixed(5)}</p><p>Cumulative Δ continuity {routeAnalysis.deltaC.toFixed(5)} · Δ plasticity {routeAnalysis.deltaPhi.toFixed(5)} · Δ scar {routeAnalysis.deltaScar.toFixed(5)}. Model-space only; no external forecast or physical-time claim.</p></section>}<button type='button' onClick={exportTrace}>Export computed traversal CSV</button><small> Model-space values only; no Canon admission or host proof.</small><p>Route playback position {routeCursor+1} / {route.length} · selected address {i+1} · model XY trajectory shown above. Consecutive points are actual computed successors, not physical distance or elapsed time.</p><button disabled={routeCursor===0} onClick={()=>{const k=Math.max(0,routeCursor-1);setRouteCursor(k);select(route[k])}}>Previous route state</button><button disabled={routeCursor>=route.length-1} onClick={()=>{const k=Math.min(route.length-1,routeCursor+1);setRouteCursor(k);select(route[k])}}>Next route state</button><div style={{display:'flex',flexWrap:'wrap',gap:5}}>{route.map((n,k)=><button key={k} onClick={()=>{setRouteCursor(k);select(n)}}>{n+1}</button>)}</div></div>}
+ {route.length>0&&<div><h3>Computed routeNext sequence</h3>{routeAnalysis&&<section data-r835-route-analysis='source' aria-label='Computed route aggregate'><p>Source route · {route.length} states · {routeAnalysis.edges} verified successor edges · mean continuity gate {(routeAnalysis.gateSum/route.length).toFixed(5)} · mean motion drive {(routeAnalysis.driveSum/route.length).toFixed(5)} · mean forecast score {(routeAnalysis.forecastSum/route.length).toFixed(5)}</p><p>Cumulative Δ continuity {routeAnalysis.deltaC.toFixed(5)} · Δ plasticity {routeAnalysis.deltaPhi.toFixed(5)} · Δ scar {routeAnalysis.deltaScar.toFixed(5)}. Model-space only; no external forecast or physical-time claim.</p></section>}<button type='button' onClick={exportTrace}>Export computed traversal CSV</button> <button type='button' onClick={previewSvgR860} disabled={!field||route.length<2}>Preview computed SVG</button> <button type='button' onClick={exportSvgR858} disabled={!field||route.length<2}>Download computed SVG</button> <button type='button' onClick={saveSvgR862} disabled={!field||route.length<2}>Save SVG to local artifacts</button><small> Model-space values only; no Canon admission or host proof.</small><p>Route playback position {routeCursor+1} / {route.length} · selected address {i+1} · model XY trajectory shown above. Consecutive points are actual computed successors, not physical distance or elapsed time.</p><button disabled={routeCursor===0} onClick={()=>{const k=Math.max(0,routeCursor-1);setRouteCursor(k);select(route[k])}}>Previous route state</button><button disabled={routeCursor>=route.length-1} onClick={()=>{const k=Math.min(route.length-1,routeCursor+1);setRouteCursor(k);select(route[k])}}>Next route state</button><div style={{display:'flex',flexWrap:'wrap',gap:5}}>{route.map((n,k)=><button key={k} onClick={()=>{setRouteCursor(k);select(n)}}>{n+1}</button>)}</div></div>}
+ <section data-r862-artifacts='browser-local' aria-label='Saved computed artifacts' style={{marginTop:12,padding:12,border:'1px solid #56718a',borderRadius:8}}><h3>Saved computed artifacts ({savedArtifactsR862.length})</h3><button type='button' onClick={exportBundleR863}>Export artifact bundle</button> <label>Import artifact bundle <input type='file' accept='application/json,.json' onChange={e=>{const file=e.currentTarget.files?.[0]??null;void importBundleR863(file);e.currentTarget.value=''}}/></label><p>Local browser persistence, not cloud synchronization or Canon admission. Saved SVGs remain available after reload in this browser.</p>{savedArtifactsR862.map(artifact=><div key={artifact.id} style={{borderTop:'1px solid #56718a',padding:'8px 0'}}><strong>{artifact.provenance.stateCount} computed states</strong> · {artifact.createdAt} · addresses {artifact.provenance.addressStart}–{artifact.provenance.addressEnd}<div><img alt={'Saved Atlas model traversal '+artifact.id} src={'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(artifact.payload)} style={{width:'100%',maxWidth:440}}/></div><button type='button' onClick={()=>{const url=URL.createObjectURL(new Blob([artifact.payload],{type:'image/svg+xml'}));const a=document.createElement('a');a.href=url;a.download=artifact.id+'.svg';a.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000)}}>Download saved artifact</button> <button type='button' onClick={()=>removeArtifactR862(artifact.id)}>Remove saved artifact</button></div>)}</section>
  <button type='button' aria-expanded={showProof} onClick={()=>setShowProof(x=>!x)}>{showProof?'Hide':'Show'} verification details</button>
  {showProof&&<p role='status'>Historical archive integrity is verified. CI verifies source checks; live visual fidelity and calibrated physical reconstruction remain unverified.</p>}
  <details><summary>Historical provenance and runtime admission</summary><p>B053: {B053_RECOVERY_R665.parts} verified archive parts; {B053_RECOVERY_R665.verifiedFiles} SHA-256 matches; {B053_RECOVERY_R665.nestedArchives} nested ZIPs.</p>{B053_CAPABILITIES_R665.map(c=><p key={c.id}><b>{c.id}</b> {c.archivePath}: {capabilityAdmissionR665(c.id,'RUNTIME_VERIFIED').admitted?'verified':'runtime not verified'}</p>)}</details>

@@ -9,6 +9,17 @@ test('only enumerated rate-limited Earth observation resources can degrade R313'
  assert.equal(classify('https://cdn.rainviewer.com/v2/radar/123/256/6/10/20/2/1_1.png'),'RAINVIEWER_RADAR_TILE_DEGRADED');
  assert.equal(classify('https://api.rainviewer.com/public/weather-maps.json','fetch'),'RAINVIEWER_CATALOG_DEGRADED');
 });
+const lats=[-75,-55,-35,-15,5,25,45,65].flatMap(v=>Array(12).fill(v)).join(',');
+const lons=Array.from({length:8},()=>[-165,-135,-105,-75,-45,-15,15,45,75,105,135,165]).flat().join(',');
+const gridUrl='https://api.open-meteo.com/v1/forecast?'+new URLSearchParams({latitude:lats,longitude:lons,current:'temperature_2m,cloud_cover,surface_pressure,wind_speed_10m,wind_direction_10m',timezone:'UTC',forecast_days:'1'});
+test('only exact optional R278 global-grid 429 is degraded, never an arbitrary forecast failure',()=>{
+ assert.equal(classify(gridUrl,'fetch'),'OPEN_METEO_GLOBAL_GRID_DEGRADED');
+ assert.equal(classify(gridUrl+'&unexpected=1','fetch'),'BLOCKING');
+ assert.equal(classify(gridUrl.replace('forecast_days=1','forecast_days=7'),'fetch'),'BLOCKING');
+ assert.equal(classify(gridUrl,'fetch','POST'),'BLOCKING');
+ assert.equal(classify(gridUrl,'fetch','GET',500),'BLOCKING');
+ assert.equal(classify(gridUrl,'image'),'BLOCKING');
+});
 test('first-party failures, mutation requests, untrusted external hosts and other codes remain blocking',()=>{
  for(const url of [origin+'/api/earth/weather?lat=1',origin+'/api/earth/noaa/catalog',origin+'/api/status','https://evil-rainviewer.com/v2/radar/1','https://example.com/image.png',origin+'/assets/index.js']){
   assert.equal(classify(url),'BLOCKING',url);

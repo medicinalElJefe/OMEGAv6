@@ -18,7 +18,7 @@ export type OmegaTaskRecordR842={schema:'OMEGA_MODEL_TASK_R842';sequence:number;
 function validField(f:Mandala20736Field){
  // A partially restored field must fail before any task can emit a plausible model result.
  // Typed-array out-of-bounds reads otherwise return undefined and can contaminate CSV or metrics.
- if(!f||f.count!==20736||!([f.routeNext,f.C,f.Phi,f.q,f.Lambda,f.scar,f.evidence].every(a=>a!=null&&a.length===20736)))throw Error('Invalid compiled source field');
+ if(!f||f.count!==20736||!(f.routeNext instanceof Uint32Array)||f.routeNext.length!==20736||!([f.C,f.Phi,f.q,f.Lambda,f.scar,f.evidence,f.continuityGate,f.forecast,f.motionDrive].every(a=>a instanceof Float32Array&&a.length===20736)))throw Error('Invalid compiled source field');
 }
 function validAddress(n:number){addressToCoordinatesR841(n);return n}
 export function executeModelTaskR842(f:Mandala20736Field,task:OmegaTaskR842):OmegaTaskResultR842{

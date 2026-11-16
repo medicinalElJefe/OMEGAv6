@@ -2,6 +2,7 @@ import {lazy,Suspense,useEffect,useMemo,useState} from 'react';
 import OmegaWorkspaceCockpitR18 from '../../src/OmegaWorkspaceCockpitR18';
 import OmegaSpecialistSuite from '../../src/OmegaSpecialistSuite';
 import {MemoryRecoveryR722} from './MemoryRecoveryR722';
+import {SharedArtifactLibraryR864} from './SharedArtifactLibraryR864';
 import {MemoryRecallR723} from './MemoryRecallR723';
 import MemoryAnalysisR771 from './MemoryAnalysisR771';
 import OmegaIntentWorkbenchR85 from '../../src/OmegaIntentWorkbenchR85';
@@ -63,6 +64,8 @@ export default function WorkCreateWorkspaceR443({route,onNavigate,depth,autoOpen
    </div>
    <button className='o7-open-instrument' onClick={()=>setInstrumentOpen(true)}>Open full {route} workspace</button>
   </section>}
+
+  {(route==='Projects'||route==='Assets')&&<SharedArtifactLibraryR864 onNavigate={onNavigate}/>}
 
   {route==='Create'&&<section data-r805-create-sound-temple='true' aria-label='Sound Temple' className='o7-native-surface'>
    <h2>Sound Temple · SOMA</h2>

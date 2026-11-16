@@ -103,7 +103,8 @@
         "../capabilityRegistry",
         "./MemoryAnalysisR771",
         "./MemoryRecallR723",
-        "./MemoryRecoveryR722"
+        "./MemoryRecoveryR722",
+        "./SharedArtifactLibraryR864"
       ],
       "classification": "STATIC_FIRST_HOP_IMPORTS_ONLY",
       "transitiveClosure": "NOT_AUDITED",
