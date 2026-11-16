@@ -15,3 +15,13 @@ assert.match(download,/latestCsv\.savedId/,'download must identify replay-backed
 assert.match(download,/JSON\.stringify\(current\)!==latestCsv\.savedSnapshot/,'download must reject altered persisted artifact');
 assert.match(download,/setLatestCsv\(null\)/,'stale recovered CSV must be invalidated');
 assert.ok(download.indexOf('JSON.stringify(current)')<download.indexOf('URL.createObjectURL'),'persistence check must precede download');
+
+// R876: external tab/storage changes must invalidate stale recovered previews before download.
+const refresh=src.slice(src.indexOf('const refresh='),src.indexOf('useEffect(()=>'));
+assert.match(refresh,/setLatestCsv\(previous=>/,'refresh must inspect the active recovered trace');
+assert.match(refresh,/current\.find\(item=>item\.id===previous\.savedId\)/,'refresh must locate the latest saved artifact');
+assert.match(refresh,/JSON\.stringify\(saved\)===previous\.savedSnapshot/,'refresh must preserve only exact saved snapshots');
+assert.match(refresh,/previous\?\.savedId\?null:previous/,'storage failures must invalidate recovered but not fresh traces');
+assert.ok(src.includes('window.addEventListener(OMEGA_ARTIFACT_CHANGED_R867,refresh)'),'same-tab notifications must trigger invalidation');
+assert.ok(src.includes("window.addEventListener('storage',refresh)"),'cross-tab storage events must trigger invalidation');
+console.log('R876 external deletion/change trace invalidation: PASS (source-level regression)');
