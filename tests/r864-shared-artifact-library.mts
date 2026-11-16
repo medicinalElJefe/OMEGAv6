@@ -45,3 +45,10 @@ test('R870 export reads persisted artifacts at click time, not a stale component
  assert.match(lib,/const exportAll=\(\)=>\{try\{const latest=decodeArtifactsR862\(localStorage\.getItem\(OMEGA_ARTIFACT_STORAGE_R862\)\);const json=exportArtifactBundleR863\(latest\)/);
  assert.doesNotMatch(lib,/exportArtifactBundleR863\(items\)/);
 });
+
+test('R871 computed trace has visible bounded on-screen preview and retains full CSV download',()=>{
+ assert.match(lib,/aria-label='Computed Atlas trace preview'/);
+ assert.match(lib,/latestCsv\.csv\.split\(\/\\r\?\\n\/\)\.slice\(0,6\)\.join\('\\n'\)/);
+ assert.match(lib,/Download computed trace CSV/);
+ assert.match(lib,/new Blob\(\[latestCsv\.csv\]/);
+});
