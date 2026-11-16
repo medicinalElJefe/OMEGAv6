@@ -9,12 +9,13 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
  const [error,setError]=useState('');
  const [running,setRunning]=useState(false);
  const [executionStatus,setExecutionStatus]=useState('');
+ const [latestCsv,setLatestCsv]=useState<{csv:string;address:number;rows:number}|null>(null);
  const [atlasAddress,setAtlasAddress]=useState(()=>{try{const stored=localStorage.getItem('omega.v6.address');return stored===null?'11498':stored}catch{return '11498'}});
  const refresh=()=>{try{setItems(decodeArtifactsR862(localStorage.getItem(OMEGA_ARTIFACT_STORAGE_R862)))}catch{setItems([])}};
  useEffect(()=>{refresh();window.addEventListener('storage',refresh);window.addEventListener('focus',refresh);window.addEventListener(OMEGA_ARTIFACT_CHANGED_R867,refresh);return()=>{window.removeEventListener('storage',refresh);window.removeEventListener('focus',refresh);window.removeEventListener(OMEGA_ARTIFACT_CHANGED_R867,refresh)}},[]);
  const computeAndSave=async()=>{
   if(running)return;
-  setRunning(true);setError('');setExecutionStatus('');
+  setRunning(true);setError('');setExecutionStatus('');setLatestCsv(null);
   try{
    const address=Number(atlasAddress.trim());
    if(atlasAddress.trim()===''||!Number.isInteger(address)||address<0||address>=20736)throw Error('Atlas address must be an integer from 0 to 20735');
@@ -23,10 +24,11 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
    const latest=decodeArtifactsR862(localStorage.getItem(OMEGA_ARTIFACT_STORAGE_R862));
    const next=appendArtifactR862(latest,result.artifact);
    localStorage.setItem(OMEGA_ARTIFACT_STORAGE_R862,JSON.stringify(next));
-   setItems(next);notifyArtifactChangeR867();
+   setItems(next);notifyArtifactChangeR867();setLatestCsv({csv:result.csv,address,rows:result.rowCount});
    setExecutionStatus('Computed '+result.rowCount+' source-model states; SVG saved locally. No external, device or Canon proof.');
   }catch(e){setError('Atlas execution rejected: '+String(e))}finally{setRunning(false)}
  };
+ const downloadCsv=()=>{if(!latestCsv)return;const url=URL.createObjectURL(new Blob([latestCsv.csv],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='omega-atlas-'+latestCsv.address+'-'+latestCsv.rows+'-states.csv';a.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000)};
  const removeSaved=(id:string)=>{try{const latest=decodeArtifactsR862(localStorage.getItem(OMEGA_ARTIFACT_STORAGE_R862));const next=latest.filter(item=>item.id!==id);if(next.length===latest.length){refresh();return}localStorage.setItem(OMEGA_ARTIFACT_STORAGE_R862,JSON.stringify(next));setItems(next);notifyArtifactChangeR867();setError('')}catch(e){setError('Unable to remove saved artifact: '+String(e))}};
  const exportAll=()=>{try{const latest=decodeArtifactsR862(localStorage.getItem(OMEGA_ARTIFACT_STORAGE_R862));const json=exportArtifactBundleR863(latest);const url=URL.createObjectURL(new Blob([json],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='omega-artifacts-r864.json';a.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000);setError('')}catch(e){setError(String(e))}};
  const importAll=async(file:File|null)=>{if(!file)return;try{if(file.size>2200000)throw Error('Bundle too large');const raw=await file.text();const latest=decodeArtifactsR862(localStorage.getItem(OMEGA_ARTIFACT_STORAGE_R862));const next=importArtifactBundleR863(raw,latest);localStorage.setItem(OMEGA_ARTIFACT_STORAGE_R862,JSON.stringify(next));setItems(next);notifyArtifactChangeR867();setError('')}catch(e){setError('Import rejected: '+String(e))}};
@@ -38,6 +40,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
   <button type='button' onClick={exportAll}>Export portable bundle</button>{' '}
   <label>Import portable bundle <input type='file' accept='.json,application/json' onChange={e=>{const file=e.currentTarget.files?.[0]??null;void importAll(file);e.currentTarget.value=''}}/></label>
   {executionStatus&&<p role='status'>{executionStatus}</p>}
+  {latestCsv&&<button type='button' onClick={downloadCsv}>Download computed trace CSV · {latestCsv.rows} states</button>}
   {error&&<p role='alert'>{error}</p>}
   {items.map(a=><article key={a.id} style={{padding:'12px 0',borderTop:'1px solid #56718a'}}><strong>Atlas · {a.provenance.stateCount} states</strong> <small>{a.createdAt} · addresses {a.provenance.addressStart}–{a.provenance.addressEnd} · MODEL_DERIVED</small><div><img alt={'Saved model traversal '+a.id} src={'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(a.payload)} style={{width:'100%',maxWidth:420}}/></div><button type='button' onClick={()=>{const url=URL.createObjectURL(new Blob([a.payload],{type:a.mediaType}));const link=document.createElement('a');link.href=url;link.download=a.id+'.svg';link.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000)}}>Download SVG</button>{' '}<button type='button' aria-label={'Remove saved artifact '+a.id} onClick={()=>removeSaved(a.id)}>Remove saved artifact</button></article>)}
  </section>;
