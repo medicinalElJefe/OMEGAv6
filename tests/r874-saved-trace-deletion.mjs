@@ -9,3 +9,9 @@ assert.match(removal,/setLatestCsv\(previous=>previous\?\.savedId===id\?null:pre
 assert.ok(removal.indexOf('setLatestCsv(previous')>removal.indexOf('localStorage.setItem('),'do not invalidate CSV before successful deletion persistence');
 assert.match(src,/setLatestCsv\(\{csv:result\.csv,address,rows:result\.rowCount\}\)/,'fresh computation must not be tied to deleted artifact');
 console.log('R874 saved trace deletion invalidation: PASS (source-level regression)');
+
+const download=src.slice(src.indexOf('const downloadCsv='),src.indexOf('const removeSaved='));
+assert.match(download,/latestCsv\.savedId/,'download must identify replay-backed CSV');
+assert.match(download,/JSON\.stringify\(current\)!==latestCsv\.savedSnapshot/,'download must reject altered persisted artifact');
+assert.match(download,/setLatestCsv\(null\)/,'stale recovered CSV must be invalidated');
+assert.ok(download.indexOf('JSON.stringify(current)')<download.indexOf('URL.createObjectURL'),'persistence check must precede download');
