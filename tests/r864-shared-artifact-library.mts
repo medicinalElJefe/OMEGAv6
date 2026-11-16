@@ -52,3 +52,11 @@ test('R871 computed trace has visible bounded on-screen preview and retains full
  assert.match(lib,/Download computed trace CSV/);
  assert.match(lib,/new Blob\(\[latestCsv\.csv\]/);
 });
+
+test('R877 user-selected traversal length is bounded before execution and controls the real model executor',()=>{
+ assert.match(lib,/id='r877-atlas-length' type='number' min=\{2\} max=\{64\}/);
+ assert.match(lib,/setAtlasLength\(e\.currentTarget\.value\)/);
+ assert.match(lib,/atlasLength\.trim\(\)===''\|\|!Number\.isInteger\(length\)\|\|length<2\|\|length>64/);
+ assert.match(lib,/executeAtlasArtifactR865\(field,address,length\)/);
+ assert.doesNotMatch(lib,/executeAtlasArtifactR865\(field,address,32\)/);
+});
