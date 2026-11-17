@@ -33,7 +33,7 @@ function render(){
  $('identityState').textContent=state.missionId?`MISSION ${state.missionId}`:(state.armed?'ARMED':'NONE');
  $('identityDetail').textContent=state.jobId?`Current durable job ${state.jobId}`:state.armed?'AT09 + AT10 are armed in this browser. No command is queued until a current authenticated non-revoked R205-capable host appears.':'No R205 mission/job identity has been admitted in this browser session.';
 
- const rawHealth=rawStepResult('DESKTOP_HEALTH'),rawLedger=rawStepResult('FORENSIC_HASH_LEDGER'),health=closureStepResult('DESKTOP_HEALTH')||rawHealth,ledger=closureStepResult('FORENSIC_HASH_LEDGER')||rawLedger;
+ const rawHealth=rawStepResult('DESKTOP_HEALTH'),rawLedger=rawStepResult('FORENSIC_HASH_LEDGER'),health=verified?closureStepResult('DESKTOP_HEALTH'):rawHealth,ledger=verified?closureStepResult('FORENSIC_HASH_LEDGER'):rawLedger;
  const healthPass=verified&&health?.schema==='OMEGA_DESKTOP_HEALTH_R205'&&health?.state==='PASS'&&hex64(health?.healthSha256);
  const ledgerPass=verified&&ledger?.schema==='OMEGA_FORENSIC_HASH_LEDGER_RECEIPT_R205'&&ledger?.state==='PASS'&&ledger?.complete===true&&hex64(ledger?.ledgerSha256)&&hex64(ledger?.treeSha256)&&String(ledger?.ledgerPath||'').startsWith('.omega_hybrid/forensics/');
  if(healthPass)setResidual('at09','PASS · R141 VERIFIED','pass',`healthSha256 ${health.healthSha256}\nR141 fingerprint ${state.closure.fingerprint.supplied}\nfinal head ${state.closure.finalHeadSha256}\ncanonical health ${health.checks?.canonicalHealthReachable}\nWindows host ${health.checks?.windowsHost}\nnon-system root ${health.checks?.nonSystemRoot}\nwrite smoke ${health.checks?.approvedRootWriteSmoke}\nroot ${health.rootLabel} · free ${health.disk?.freeBytes??'unknown'} bytes`);

@@ -50,6 +50,8 @@ jobs:
         run: node tests/r2001-deployed-total-experience-proof-invariants.mjs
       - name: Prove R202 operational source-authority convergence
         run: node tests/r202-operational-source-authority-invariants.mjs
+      - name: Prove R878 closure-only AT09/AT10 acceptance and raw-return refusal
+        run: node tests/r878-at09-at10-closure-only.mjs
       - name: Prove R237 authenticated Hybrid command authority
         run: node tests/r237-hybrid-command-authority-invariants.mjs
       - name: Prove R238 Hybrid host intelligence
