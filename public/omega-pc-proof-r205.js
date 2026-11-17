@@ -5,7 +5,7 @@ const MISSION_KEY='omega.r205.pcProofMission';
 const ARM_KEY='omega.r300.pcProofArmed';
 
 const $=id=>document.getElementById(id);
-const state={live:null,device:null,missionId:null,jobId:null,job:null,closure:null,busy:false,armed:readArmed(),autoAttemptedDeviceId:null,autoError:''};
+const state={live:null,device:null,missionId:null,jobId:null,job:null,closure:null,busy:false,statusError:null,armed:readArmed(),autoAttemptedDeviceId:null,autoError:''};
 function readArmed(){try{return localStorage.getItem(ARM_KEY)==='1'}catch{return false}}
 function writeArmed(value){try{value?localStorage.setItem(ARM_KEY,'1'):localStorage.removeItem(ARM_KEY)}catch{}}
 function session(){let x='';try{x=localStorage.getItem(SESSION_KEY)||''}catch{}if(!/^[A-Za-z0-9._:-]{8,128}$/.test(x)){x=`session_${crypto.randomUUID?.()||Date.now().toString(36)}`;try{localStorage.setItem(SESSION_KEY,x)}catch{}}return x}
@@ -26,8 +26,8 @@ function setResidual(id,label,kind,proof){const card=$(id),stateEl=$(id+'State')
 function render(){
  const live=state.live||{},devices=currentDevices(live),device=devices.find(r205Capable)||devices[0]||null,capable=device&&r205Capable(device),verified=closureVerified();
  state.device=capable?device:null;
- $('hostState').textContent=devices.length?'PC ONLINE':live.state==='DEVICE_PROOF_REQUIRED'?'DEVICE PROOF REQUIRED':live.state||'PAIRING REQUIRED';
- $('hostDetail').textContent=devices.length?`${devices.length} current authenticated non-revoked heartbeat${devices.length===1?'':'s'} · ${device?.name||device?.id||'host'} · ${device?.platform||'platform unknown'}`:'No current authenticated host heartbeat is available to execute R205.';
+ $('hostState').textContent=state.statusError?'STATUS UNKNOWN':devices.length?'PC ONLINE':live.state==='DEVICE_PROOF_REQUIRED'?'DEVICE PROOF REQUIRED':live.state||'PAIRING REQUIRED';
+ $('hostDetail').textContent=state.statusError?`Hybrid status unavailable: ${state.statusError}. No online/offline inference or mission dispatch is permitted.`:devices.length?`${devices.length} current authenticated non-revoked heartbeat${devices.length===1?'':'s'} · ${device?.name||device?.id||'host'} · ${device?.platform||'platform unknown'}`:'No current authenticated host heartbeat is available to execute R205.';
  $('extensionState').textContent=capable?'R205 READY':devices.length?'AGENT UPDATE REQUIRED':'HELD';
  $('extensionDetail').textContent=capable?`${device.version||'R34.1'} / ${device.capabilityRevision||'R132'} · DESKTOP_HEALTH + FORENSIC_HASH_LEDGER advertised`:(devices.length?'The current host is online but does not advertise the R205 proof extension. Download/run the current canonical connector.':'R205 capability is never inferred without a current registered device.');
  $('identityState').textContent=state.missionId?`MISSION ${state.missionId}`:(state.armed?'ARMED':'NONE');
@@ -58,7 +58,7 @@ function render(){
 
 async function refresh(){
  try{
-  const live=await get('/api/hybrid/status');state.live=live;
+  const live=await get('/api/hybrid/status');state.live=live;state.statusError=null;
   const savedJob=(()=>{try{return localStorage.getItem(JOB_KEY)}catch{return null}})(),savedMission=(()=>{try{return localStorage.getItem(MISSION_KEY)}catch{return null}})();
   if(savedMission)state.missionId=savedMission;if(savedJob)state.jobId=savedJob;
   const jobs=Array.isArray(live?.jobs)?live.jobs:[];
@@ -71,7 +71,7 @@ async function refresh(){
    state.autoAttemptedDeviceId=state.device.id;
    queueMicrotask(()=>runProof({automatic:true}));
   }
- }catch(e){state.live=null;state.device=null;state.closure=null;$('hostState').textContent='STATUS ERROR';$('hostDetail').textContent=e.message;render()}
+ }catch(e){state.live=null;state.device=null;state.closure=null;state.statusError=String(e?.message||e);render()}
 }
 
 async function runProof({automatic=false}={}){
