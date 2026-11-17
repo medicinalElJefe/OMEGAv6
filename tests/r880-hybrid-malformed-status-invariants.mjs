@@ -60,7 +60,7 @@ async function browserCase(name, payload, expectedLabel, expectedError, armed=fa
   assert.equal(store.get('omega.r300.pcProofArmed'),'1',name+' preserves explicit arming without executing');
   assert.equal(typeof element('run').onclick,'function',name+' cancellation handler exists');
   element('run').onclick();
-  assert.equal(store.get('omega.r300.pcProofArmed'),'0',name+' cancellation clears persisted arming');
+  assert.equal(store.has('omega.r300.pcProofArmed'),false,name+' cancellation removes persisted arming');
   assert.equal(element('run').textContent,'Arm AT09 + AT10 proof',name+' disarmed control');
   assert.equal(element('identityState').textContent,'NONE',name+' disarmed identity');
   assert.equal(requests.filter(r=>r.method==='POST').length,0,name+' cancellation never dispatches');
