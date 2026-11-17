@@ -58,6 +58,16 @@ async function browserCase(name, payload, expectedLabel, expectedError, armed=fa
   assert.equal(element('run').textContent,'Cancel armed proof',name+' remains cancellable without host');
   assert.equal(element('run').disabled,false,name+' allows cancellation');
   assert.equal(store.get('omega.r300.pcProofArmed'),'1',name+' preserves explicit arming without executing');
+  assert.equal(typeof element('run').onclick,'function',name+' cancellation handler exists');
+  element('run').onclick();
+  assert.equal(store.get('omega.r300.pcProofArmed'),'0',name+' cancellation clears persisted arming');
+  assert.equal(element('run').textContent,'Arm AT09 + AT10 proof',name+' disarmed control');
+  assert.equal(element('identityState').textContent,'NONE',name+' disarmed identity');
+  assert.equal(requests.filter(r=>r.method==='POST').length,0,name+' cancellation never dispatches');
+  element('run').onclick();
+  assert.equal(store.get('omega.r300.pcProofArmed'),'1',name+' rearming persists intent');
+  assert.equal(element('run').textContent,'Cancel armed proof',name+' cancellation restored');
+  assert.equal(requests.filter(r=>r.method==='POST').length,0,name+' rearming without host never dispatches');
  }
  assert.equal(element('at09State').textContent.startsWith('PASS'),false,name+' AT09 refusal');
  assert.equal(element('at10State').textContent.startsWith('PASS'),false,name+' AT10 refusal');
