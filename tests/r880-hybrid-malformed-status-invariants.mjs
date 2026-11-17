@@ -27,7 +27,7 @@ console.log('R880 PASS: malformed status never clears UNKNOWN or admits a host; 
 
 // Execute the actual browser controller with a stubbed DOM and HTTP transport.
 // Unlike the predicate-only checks above, this exercises refresh -> catch -> render.
-async function browserCase(name, payload, expectedLabel, expectedError) {
+async function browserCase(name, payload, expectedLabel, expectedError, armed=false) {
  const elements=new Map(), requests=[];
  const element=id=>{
   if(!elements.has(id))elements.set(id,{
@@ -37,6 +37,7 @@ async function browserCase(name, payload, expectedLabel, expectedError) {
   return elements.get(id);
  };
  const store=new Map();
+ if(armed)store.set('omega.r300.pcProofArmed','1');
  const context={
   document:{getElementById:element},
   localStorage:{getItem:key=>store.get(key)??null,setItem:(key,value)=>store.set(key,String(value)),removeItem:key=>store.delete(key)},
@@ -53,13 +54,18 @@ async function browserCase(name, payload, expectedLabel, expectedError) {
  assert.equal(element('hostState').textContent,expectedLabel,name+' host state');
  assert.equal(element('hostDetail').textContent.includes('Hybrid status unavailable:'),expectedError,name+' error visibility');
  assert.equal(requests.filter(r=>r.method==='POST').length,0,name+' must not dispatch');
+ if(armed){
+  assert.equal(element('run').textContent,'Cancel armed proof',name+' remains cancellable without host');
+  assert.equal(element('run').disabled,false,name+' allows cancellation');
+  assert.equal(store.get('omega.r300.pcProofArmed'),'1',name+' preserves explicit arming without executing');
+ }
  assert.equal(element('at09State').textContent.startsWith('PASS'),false,name+' AT09 refusal');
  assert.equal(element('at10State').textContent.startsWith('PASS'),false,name+' AT10 refusal');
 }
 for(const [name,payload] of [
  ['null',null],['array',[]],['scalar','offline'],['missing devices',{state:'DEVICE_PROOF_REQUIRED'}],
  ['missing state',{devices:[]}],['wrong devices',{state:'DEVICE_PROOF_REQUIRED',devices:{}}]
-])await browserCase(name,payload,'STATUS UNKNOWN',true);
+])await browserCase(name,payload,'STATUS UNKNOWN',true,true);
 await browserCase('valid no-host',{state:'DEVICE_PROOF_REQUIRED',devices:[]},'DEVICE PROOF REQUIRED',false);
 await browserCase('valid heartbeat',{state:'VERIFIED_DEVICE_ONLINE',devices:[{id:'host',online:true}]},'PC ONLINE',false);
 console.log('R880 browser controller PASS: malformed responses visibly UNKNOWN, no dispatch or false AT09/AT10 proof');
