@@ -58,7 +58,9 @@ function render(){
 
 async function refresh(){
  try{
-  const live=await get('/api/hybrid/status');state.live=live;state.statusError=null;
+  const live=await get('/api/hybrid/status');
+  if(!live||typeof live!=='object'||Array.isArray(live)||!Array.isArray(live.devices)||typeof live.state!=='string')throw new Error('Malformed Hybrid status: expected object with devices array and state string');
+  state.live=live;state.statusError=null;
   const savedJob=(()=>{try{return localStorage.getItem(JOB_KEY)}catch{return null}})(),savedMission=(()=>{try{return localStorage.getItem(MISSION_KEY)}catch{return null}})();
   if(savedMission)state.missionId=savedMission;if(savedJob)state.jobId=savedJob;
   const jobs=Array.isArray(live?.jobs)?live.jobs:[];
