@@ -52,6 +52,8 @@ jobs:
         run: node tests/r202-operational-source-authority-invariants.mjs
       - name: Prove R878 closure-only AT09/AT10 acceptance and raw-return refusal
         run: node tests/r878-at09-at10-closure-only.mjs
+      - name: Prove R879 Hybrid status UNKNOWN fail-closed semantics
+        run: node tests/r879-hybrid-status-unknown-invariants.mjs
       - name: Prove R237 authenticated Hybrid command authority
         run: node tests/r237-hybrid-command-authority-invariants.mjs
       - name: Prove R238 Hybrid host intelligence
