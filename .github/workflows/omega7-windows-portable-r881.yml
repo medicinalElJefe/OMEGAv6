@@ -1,0 +1,43 @@
+name: OMEGA7 Windows Portable R881
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  portable-first-launch:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Verify local HTTP security and failure behavior
+        run: node --test tests/r881-desktop-server.test.mjs
+      - name: Build actual OMEGA7 Vite assets
+        run: npm run build
+      - name: Package Windows portable runtime
+        shell: pwsh
+        run: ./scripts/pack-omega-desktop-r881.ps1 -SourceSha '${{ github.sha }}'
+      - name: Clean-extract and execute bundled launcher
+        shell: pwsh
+        run: ./scripts/smoke-omega-desktop-r881.ps1 -SourceSha '${{ github.sha }}'
+      - name: Record ZIP SHA256
+        shell: pwsh
+        run: |
+          $zip='artifacts/OMEGA7-portable-win-x64.zip'
+          (Get-FileHash -Algorithm SHA256 $zip).Hash.ToLowerInvariant() + '  OMEGA7-portable-win-x64.zip' | Set-Content artifacts/OMEGA7-portable-win-x64.sha256
+      - name: Preserve Windows package and receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: omega7-r881-windows-portable-${{ github.sha }}
+          path: |
+            artifacts/OMEGA7-portable-win-x64.zip
+            artifacts/OMEGA7-portable-win-x64.sha256
+          retention-days: 14
