@@ -28,6 +28,8 @@ jobs:
         env:
           GITHUB_SHA: ${{ env.OMEGA_DESKTOP_SOURCE_SHA }}
         run: npm run build
+      - name: Install Microsoft Edge browser test driver
+        run: npm install --no-save playwright@1.63.0
       - name: Package Windows portable runtime
         shell: pwsh
         run: ./scripts/pack-omega-desktop-r881.ps1 -SourceSha '${{ env.OMEGA_DESKTOP_SOURCE_SHA }}'
@@ -46,4 +48,5 @@ jobs:
           path: |
             artifacts/OMEGA7-portable-win-x64.zip
             artifacts/OMEGA7-portable-win-x64.sha256
+            artifacts/omega7-r882-first-launch.png
           retention-days: 14
