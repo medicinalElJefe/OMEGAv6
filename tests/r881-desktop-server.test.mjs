@@ -15,6 +15,14 @@ test('R881 loopback actual HTTP, assets, offline backend refusal, and traversal 
   assert.match(started.url,/^http:\/\/127\.0\.0\.1:\d+\/$/);
   const health=await fetch(started.url+'__omega_local_health').then(r=>r.json());
   assert.equal(health.state,'LOCAL_HTTP_READY');assert.equal(health.sourceSha,'test-sha');assert.equal(health.remoteDeviceProven,false);
+  // A hostile website can resolve to loopback (DNS rebinding); the
+  // server must refuse its Host header even though the TCP bind is local.
+  const rebound=await fetch(started.url+'__omega_local_health',{headers:{Host:'attacker.example'}});
+  assert.equal(rebound.status,403);
+  const foreignOrigin=await fetch(started.url+'__omega_local_health',{headers:{Origin:'https://attacker.example'}});
+  assert.equal(foreignOrigin.status,403);
+  const localOrigin=await fetch(started.url+'__omega_local_health',{headers:{Origin:new URL(started.url).origin}});
+  assert.equal(localOrigin.status,200);
   const html=await fetch(started.url+'some/client/route');assert.equal(html.status,200);assert.match(await html.text(),/OMEGA7 test/);
   const asset=await fetch(started.url+'assets/entry.js');assert.equal(asset.status,200);assert.match(asset.headers.get('content-type'),/javascript/);
   assert.equal((await fetch(started.url+'assets/missing.js')).status,404);
