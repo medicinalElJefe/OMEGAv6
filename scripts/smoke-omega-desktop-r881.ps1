@@ -24,6 +24,8 @@ try {
     $apiStatus=$null
     try { Invoke-WebRequest -UseBasicParsing -Uri ($session.url+'api/hybrid/status') -TimeoutSec 10 | Out-Null } catch { $apiStatus=[int]$_.Exception.Response.StatusCode }
     if ($apiStatus -ne 503) { throw 'Offline package must not impersonate real Hybrid device status' }
+    node tests/r882-windows-browser-smoke.mjs $session.url
+    if ($LASTEXITCODE -ne 0) { throw 'R882 actual Edge first-render failed' }
     Write-Host "R881 CLEAN-EXTRACT FIRST-LAUNCH PASS source=$SourceSha assetCount=$($assets.Count)"
   } finally { Stop-Process -Id ([int]$session.pid) -ErrorAction SilentlyContinue }
 } finally { Remove-Item Env:OMEGA_PORTABLE_NO_BROWSER -ErrorAction SilentlyContinue }
