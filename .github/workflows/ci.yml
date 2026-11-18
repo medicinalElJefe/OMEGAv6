@@ -26,6 +26,8 @@ jobs:
       - name: R606 archive capability intake focused invariants
         run: node --test tests/archive-capability-intake.test.mjs
       - run: npm install
+      - name: Census R881 vulnerable dependency exposure without waiver
+        run: node tests/r881-picomatch-exposure-census.mjs
       - name: Audit locked application dependency tree
         run: npm audit --audit-level=high
       - name: Prove R812/R813 governed successor refusal and independent production verifier
