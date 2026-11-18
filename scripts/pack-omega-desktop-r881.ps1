@@ -5,6 +5,14 @@ $target=Join-Path $root 'artifacts\omega7-portable-windows'
 $output=Join-Path $root 'artifacts\OMEGA7-portable-win-x64.zip'
 if ($SourceSha -notmatch '^[0-9a-f]{40}$') { throw 'Expected exact 40-character Git SHA' }
 if (!(Test-Path (Join-Path $root 'dist\index.html'))) { throw 'Missing dist/index.html. Build first.' }
+# The packaged front-end and bridge must describe the SAME source head as
+# the Windows executable bundle. A synthetic PR merge SHA is not admitted.
+$buildReceipt=Get-Content -LiteralPath (Join-Path $root 'dist\omega-build-receipt.json') -Raw | ConvertFrom-Json
+$bridgeReceipt=Get-Content -LiteralPath (Join-Path $root 'dist\omega-bridge-continuity-r499.json') -Raw | ConvertFrom-Json
+if ($buildReceipt.source.sha -ne $SourceSha -or $bridgeReceipt.sourceSha -ne $SourceSha) {
+ throw "R882 source identity mismatch: expected=$SourceSha build=$($buildReceipt.source.sha) bridge=$($bridgeReceipt.sourceSha)"
+}
+
 $node=(Get-Command node).Source
 if ($node -notmatch '\.exe$') { throw 'Packaging requires Windows node.exe' }
 $nodeHome=Split-Path -Parent $node
