@@ -18,6 +18,12 @@ export async function startDesktopServer({root,port=0,host='127.0.0.1'}={}){
  const server=createServer(async(req,res)=>{
   res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Cache-Control','no-store');res.setHeader('Referrer-Policy','no-referrer');
   if(!['GET','HEAD'].includes(req.method)){res.writeHead(405,{'Allow':'GET, HEAD'}).end();return;}
+  // Loopback binding alone does not prevent DNS-rebinding browser requests.
+  // Admit only the exact loopback authority assigned to this listener.
+  const expectedHost='127.0.0.1:'+server.address().port;
+  if(req.headers.host!==expectedHost){res.writeHead(403).end('Invalid local authority');return;}
+  const origin=req.headers.origin;
+  if(origin&&origin!=='http://'+expectedHost){res.writeHead(403).end('Invalid local origin');return;}
   const pathname=decodePath(req.url);if(!pathname){res.writeHead(400).end('Invalid path');return;}
   if(pathname==='/__omega_local_health'){const body=Buffer.from(JSON.stringify({state:'LOCAL_HTTP_READY',host:'127.0.0.1',...manifest,remoteDeviceProven:false,cloudBackendProven:false}));res.writeHead(200,{'Content-Type':'application/json; charset=utf-8','Content-Length':body.length});if(req.method==='HEAD')res.end();else res.end(body);return;}
   if(pathname.startsWith('/api/')){res.writeHead(503,{'Content-Type':'application/json; charset=utf-8'}).end(JSON.stringify({state:'REMOTE_BACKEND_UNAVAILABLE',detail:'Offline local shell: no native or cloud execution authority'}));return;}
