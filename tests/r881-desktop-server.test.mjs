@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {mkdtemp,writeFile,rm,mkdir} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
+import {request} from 'node:http';
 import {startDesktopServer} from '../scripts/omega-desktop-server.mjs';
 test('R881 loopback actual HTTP, assets, offline backend refusal, and traversal defense',async()=>{
  const dir=await mkdtemp(join(tmpdir(),'omega-r881-'));await mkdir(join(dir,'assets'));
@@ -17,8 +18,13 @@ test('R881 loopback actual HTTP, assets, offline backend refusal, and traversal 
   assert.equal(health.state,'LOCAL_HTTP_READY');assert.equal(health.sourceSha,'test-sha');assert.equal(health.remoteDeviceProven,false);
   // A hostile website can resolve to loopback (DNS rebinding); the
   // server must refuse its Host header even though the TCP bind is local.
-  const rebound=await fetch(started.url+'__omega_local_health',{headers:{Host:'attacker.example'}});
-  assert.equal(rebound.status,403);
+  // Node fetch/undici can silently replace Host on Windows. Use raw HTTP
+  // to prove the authority actually reaches the server unchanged.
+  const reboundStatus=await new Promise((resolve,reject)=>{
+   const req=request(started.url+'__omega_local_health',{headers:{Host:'attacker.example'}},res=>{res.resume();res.on('end',()=>resolve(res.statusCode));});
+   req.on('error',reject);req.end();
+  });
+  assert.equal(reboundStatus,403);
   const foreignOrigin=await fetch(started.url+'__omega_local_health',{headers:{Origin:'https://attacker.example'}});
   assert.equal(foreignOrigin.status,403);
   const localOrigin=await fetch(started.url+'__omega_local_health',{headers:{Origin:new URL(started.url).origin}});
