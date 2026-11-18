@@ -30,6 +30,12 @@ Copy-Item -LiteralPath (Join-Path $root 'dist') -Destination $target -Recurse
 Get-ChildItem -Path (Join-Path $target 'dist') -Filter '*.map' -Recurse -File | Remove-Item -Force
 $manifest=[ordered]@{schema='OMEGA_DESKTOP_PORTABLE_R881';sourceSha=$SourceSha;kind='LOCAL_WEB_SHELL_NOT_NATIVE_HOST';build='Vite';generatedUtc=(Get-Date).ToUniversalTime().ToString('o');cloudBackendIncluded=$false;nativeDeviceProof=$false}
 $manifest | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $target 'dist\omega-desktop-package.json') -Encoding UTF8
+# Integrity manifest is outside the served dist and binds every packaged file.
+$entries=@(Get-ChildItem -LiteralPath $target -File -Recurse | ForEach-Object {
+ $relative=$_.FullName.Substring($target.Length+1).Replace('\\','/')
+ [ordered]@{path=$relative;sha256=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant();bytes=$_.Length}
+} | Sort-Object path)
+[ordered]@{schema='OMEGA_PORTABLE_INTEGRITY_R883';sourceSha=$SourceSha;entries=$entries} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $target 'package-integrity.json') -Encoding UTF8
 if (Test-Path $output) { Remove-Item -LiteralPath $output -Force }
 Compress-Archive -Path (Join-Path $target '*') -DestinationPath $output -CompressionLevel Optimal
 $bytes=(Get-Item $output).Length
