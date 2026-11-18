@@ -35,5 +35,8 @@ try {
     $diagnostic=Get-Content -LiteralPath (Join-Path $env:LOCALAPPDATA 'OMEGA7\Portable\logs\startup.txt') -Raw
     if ($diagnostic -notmatch 'Package integrity mismatch: dist/index.html') { throw 'R883 did not identify tampered asset' }
     Write-Host 'R883 TAMPER REJECTION PASS: modified dist/index.html refused before execution.'
+    # The nonzero code above is the REQUIRED negative-test result, not a failing
+    # workflow. Keep refusal assertions above; clear only after they all pass.
+    $global:LASTEXITCODE=0
   } finally { Stop-Process -Id ([int]$session.pid) -ErrorAction SilentlyContinue }
 } finally { Remove-Item Env:OMEGA_PORTABLE_NO_BROWSER -ErrorAction SilentlyContinue }
