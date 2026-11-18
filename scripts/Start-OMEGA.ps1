@@ -66,6 +66,6 @@ try {
 } catch {
   Say "STARTUP FAILED: $($_.Exception.Message)"
   Write-Host "Review startup diagnostics: $log"
-  Read-Host 'Press Enter to close'
+  if ($env:OMEGA_PORTABLE_NO_BROWSER -ne '1') { Read-Host 'Press Enter to close' }
   exit 1
 }
