@@ -10,6 +10,28 @@ function Say([string]$message) { $line="$(Get-Date -Format o) $message"; Add-Con
 try {
   if (!(Test-Path -LiteralPath $node)) { throw 'Bundled runtime\node.exe not found. Re-extract the complete ZIP.' }
   if (!(Test-Path -LiteralPath $server) -or !(Test-Path -LiteralPath (Join-Path $dist 'index.html'))) { throw 'Missing server or built application files. Re-extract the complete ZIP.' }
+  $integrityPath=Join-Path $base 'package-integrity.json'
+  if (!(Test-Path -LiteralPath $integrityPath)) { throw 'Portable package integrity manifest missing.' }
+  $integrity=Get-Content -LiteralPath $integrityPath -Raw | ConvertFrom-Json
+  if ($integrity.schema -ne 'OMEGA_PORTABLE_INTEGRITY_R883' -or $integrity.sourceSha -notmatch '^[0-9a-f]{40}$') { throw 'Invalid integrity identity.' }
+  $expected=@{}
+  foreach ($entry in $integrity.entries) {
+    $relative=[string]$entry.path
+    if ($relative -notmatch '^(runtime|server|dist)/' -and $relative -notin @('Launch-OMEGA.cmd','Start-OMEGA.ps1','README.md')) { throw 'Unexpected manifest path.' }
+    if ($relative.Contains('..') -or $relative.Contains('\\') -or $expected.ContainsKey($relative)) { throw 'Unsafe or duplicate manifest path.' }
+    $file=Join-Path $base ($relative.Replace('/','\\'))
+    if (!(Test-Path -LiteralPath $file -PathType Leaf)) { throw "Missing packaged file: $relative" }
+    $hash=(Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($hash -ne [string]$entry.sha256 -or (Get-Item -LiteralPath $file).Length -ne [long]$entry.bytes) { throw "Package integrity mismatch: $relative" }
+    $expected[$relative]=$true
+  }
+  foreach ($required in @('runtime/node.exe','server/omega-desktop-server.mjs','dist/index.html','Start-OMEGA.ps1','Launch-OMEGA.cmd')) {
+    if (!$expected.ContainsKey($required)) { throw "Required integrity entry missing: $required" }
+  }
+  $actual=@(Get-ChildItem -LiteralPath $base -File -Recurse | Where-Object { $_.FullName -ne $integrityPath } | ForEach-Object { $_.FullName.Substring($base.Length+1).Replace('\\','/') })
+  if ($actual.Count -ne $expected.Count) { throw 'Unexpected or missing package files.' }
+  foreach ($relative in $actual) { if (!$expected.ContainsKey($relative)) { throw "Unlisted package file: $relative" } }
+  Say "Package integrity verified: $($expected.Count) files, source=$($integrity.sourceSha)."
   $nodeVersion = (& $node --version)
   if ($LASTEXITCODE -ne 0) { throw 'Bundled Node runtime did not start.' }
   Say "Starting OMEGA7 portable ($nodeVersion)."
