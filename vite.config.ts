@@ -4,6 +4,17 @@ import { createHash } from 'node:crypto';
 import { writeFile } from 'node:fs/promises';
 import { readdirSync } from 'node:fs';
 import { dirname, basename, resolve as pathResolve } from 'node:path';
+ 
+// The Windows portable job checks out the candidate SHA directly instead of
+// GitHub's synthetic PR merge. Normalize GITHUB_SHA to that checked-out source
+// before emitting the existing canonical receipt; outside portable builds,
+// the original GITHUB_SHA contract remains unchanged.
+if(process.env.OMEGA_DESKTOP_SOURCE_SHA){
+  const exact=process.env.OMEGA_DESKTOP_SOURCE_SHA;
+  if(!/^[a-f0-9]{40}$/.test(exact)||process.env.GITHUB_ACTIONS!=='true')throw new Error('R882 portable source must be a GitHub Actions exact SHA');
+  process.env.GITHUB_SHA=exact;
+}
+
 
 // R882: Windows is case-insensitive, but canonical source distinguishes case.
 // Resolve local extensionless module imports by their *exact declared casing*
