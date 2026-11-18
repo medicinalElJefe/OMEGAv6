@@ -1,5 +1,15 @@
 param([Parameter(Mandatory=$true)][string]$SourceSha)
 $ErrorActionPreference='Stop'
+# Windows PowerShell 5.1 may run without cmdlet auto-loading.
+# Use framework SHA-256 on the boot path.
+function Get-OmegaSha256([string]$path) {
+  $stream=[System.IO.File]::OpenRead($path)
+  try {
+    $sha=[System.Security.Cryptography.SHA256]::Create()
+    try { return [System.BitConverter]::ToString($sha.ComputeHash($stream)).Replace('-','').ToLowerInvariant() }
+    finally { $sha.Dispose() }
+  } finally { $stream.Dispose() }
+}
 $root=(Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $target=Join-Path $root 'artifacts\omega7-portable-windows'
 $output=Join-Path $root 'artifacts\OMEGA7-portable-win-x64.zip'
@@ -32,13 +42,13 @@ $manifest=[ordered]@{schema='OMEGA_DESKTOP_PORTABLE_R881';sourceSha=$SourceSha;k
 $manifest | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $target 'dist\omega-desktop-package.json') -Encoding UTF8
 # Integrity manifest is outside the served dist and binds every packaged file.
 $entries=@(Get-ChildItem -LiteralPath $target -File -Recurse | ForEach-Object {
- $relative=$_.FullName.Substring($target.Length+1).Replace('\\','/')
- [ordered]@{path=$relative;sha256=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant();bytes=$_.Length}
+ $relative=$_.FullName.Substring($target.Length+1).Replace('\','/')
+ [ordered]@{path=$relative;sha256=(Get-OmegaSha256 $_.FullName);bytes=$_.Length}
 } | Sort-Object path)
 [ordered]@{schema='OMEGA_PORTABLE_INTEGRITY_R883';sourceSha=$SourceSha;entries=$entries} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $target 'package-integrity.json') -Encoding UTF8
 if (Test-Path $output) { Remove-Item -LiteralPath $output -Force }
 Compress-Archive -Path (Join-Path $target '*') -DestinationPath $output -CompressionLevel Optimal
 $bytes=(Get-Item $output).Length
 if ($bytes -gt 160MB) { throw "Portable ZIP exceeds 160MiB limit ($bytes bytes); split packaging required." }
-$hash=(Get-FileHash -Algorithm SHA256 $output).Hash.ToLowerInvariant()
+$hash=(Get-OmegaSha256 $output)
 Write-Host "R881 packaged $output ($bytes bytes) SHA256=$hash source=$SourceSha"
