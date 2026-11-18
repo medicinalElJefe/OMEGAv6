@@ -2,6 +2,35 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { createHash } from 'node:crypto';
 import { writeFile } from 'node:fs/promises';
+import { readdirSync } from 'node:fs';
+import { dirname, basename, resolve as pathResolve } from 'node:path';
+
+// R882: Windows is case-insensitive, but canonical source distinguishes case.
+// Resolve local extensionless module imports by their *exact declared casing*
+// before Vite's default .ts/.tsx extension probe. This prevents the Windows
+// build from selecting the lowercase engine module for the uppercase UI.
+function caseExactLocalImportsR882() {
+  const extensions=['.ts','.tsx','.js','.jsx','.mjs'];
+  return {
+    name:'r882-case-exact-local-imports',
+    enforce:'pre' as const,
+    resolveId(source:string, importer:string|undefined) {
+      if(!importer||!source.startsWith('.'))return null;
+      const request=source.split('?')[0];
+      if(/\.[a-z\d]+$/i.test(request))return null;
+      const path=pathResolve(dirname(importer.split('?')[0]),request);
+      const directory=dirname(path),name=basename(path);
+      let entries:string[];
+      try{entries=readdirSync(directory)}catch{return null}
+      const exact=extensions.map(x=>name+x).find(x=>entries.includes(x));
+      if(exact)return pathResolve(directory,exact);
+      const ambiguous=entries.filter(x=>extensions.some(ext=>x.toLowerCase()===(name+ext).toLowerCase()));
+      if(ambiguous.length)throw new Error('R882 case-exact import mismatch: '+source+' from '+importer+'; actual files: '+ambiguous.join(', '));
+      return null;
+    }
+  };
+}
+
 
 function governedBuildReceipt(){
   return {
@@ -57,7 +86,7 @@ function vendorChunkR109(id:string){
 }
 
 export default defineConfig({
-  plugins: [react(),governedBuildReceipt(),initialEntryBudgetR1991()],
+  plugins: [caseExactLocalImportsR882(),react(),governedBuildReceipt(),initialEntryBudgetR1991()],
   build: {
     outDir: 'dist',
     sourcemap: true,
