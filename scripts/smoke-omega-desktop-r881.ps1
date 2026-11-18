@@ -27,5 +27,13 @@ try {
     node tests/r882-windows-browser-smoke.mjs $session.url
     if ($LASTEXITCODE -ne 0) { throw 'R882 actual Edge first-render failed' }
     Write-Host "R881 CLEAN-EXTRACT FIRST-LAUNCH PASS source=$SourceSha assetCount=$($assets.Count)"
+    # Negative acceptance: one altered built asset must prevent any new launch.
+    $indexPath=Join-Path $install 'dist\\index.html'
+    Add-Content -LiteralPath $indexPath -Value '<!-- R883 deliberate corruption -->'
+    & (Join-Path $install 'Launch-OMEGA.cmd')
+    if ($LASTEXITCODE -eq 0) { throw 'R883 integrity gate accepted tampered HTML' }
+    $diagnostic=Get-Content -LiteralPath (Join-Path $env:LOCALAPPDATA 'OMEGA7\\Portable\\logs\\startup.txt') -Raw
+    if ($diagnostic -notmatch 'Package integrity mismatch: dist/index.html') { throw 'R883 did not identify tampered asset' }
+    Write-Host 'R883 TAMPER REJECTION PASS: modified dist/index.html refused before execution.'
   } finally { Stop-Process -Id ([int]$session.pid) -ErrorAction SilentlyContinue }
 } finally { Remove-Item Env:OMEGA_PORTABLE_NO_BROWSER -ErrorAction SilentlyContinue }
