@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {getMandala20736Field} from '../src/mandala20736Runtime';
-import {exportFullAtlasCsvR896,inspectAtlasAddressR897} from '../src7/workspaces/omegaFullAtlasExportR896';
+import {exportFullAtlasCsvR896,inspectAtlasAddressR897,traceAtlasRouteR899} from '../src7/workspaces/omegaFullAtlasExportR896';
 
 const field=await getMandala20736Field();
 const csv=exportFullAtlasCsvR896(field);
@@ -33,3 +33,18 @@ assert.throws(()=>inspectAtlasAddressR897(field,1.5),/0–20735/);
 assert.throws(()=>inspectAtlasAddressR897({...field,C:new Float32Array(1)},0),/Incomplete Atlas/);
 assert.throws(()=>inspectAtlasAddressR897({...field,routeNext:corrupted},12),/Invalid route target/);
 console.log('R897: compiled Atlas address inspection and route navigation validated');
+
+const trace=traceAtlasRouteR899(field,11498,128);
+assert.ok(trace.addresses.length>=1&&trace.addresses.length<=128);
+assert.equal(trace.addresses[0],11498);
+for(let i=1;i<trace.addresses.length;i++)assert.equal(trace.addresses[i],field.routeNext[trace.addresses[i-1]]);
+assert.equal(new Set(trace.addresses).size,trace.addresses.length);
+assert.equal(trace.truncated,trace.cycleAt===null);
+if(trace.cycleAt!==null)assert.equal(field.routeNext[trace.addresses.at(-1)!],trace.addresses[trace.cycleAt]);
+assert.throws(()=>traceAtlasRouteR899(field,0,0),/1–256/);
+assert.throws(()=>traceAtlasRouteR899(field,0,257),/1–256/);
+assert.throws(()=>traceAtlasRouteR899(field,-1,2),/0–20735/);
+const selfRoute=new Uint32Array(field.routeNext);selfRoute[12]=12;
+assert.deepEqual(traceAtlasRouteR899({...field,routeNext:selfRoute},12,4),{addresses:[12],cycleAt:0,truncated:false});
+assert.throws(()=>traceAtlasRouteR899({...field,routeNext:corrupted},12,4),/Invalid route target/);
+console.log('R899: bounded route execution, cycle detection and invalid targets validated');
