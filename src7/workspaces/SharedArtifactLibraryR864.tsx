@@ -1,7 +1,7 @@
 import {useEffect,useRef,useState} from 'react';
 import {getMandala20736Field} from '../../src/mandala20736Runtime';
 import {executeAtlasArtifactR865} from './omegaAtlasArtifactExecutorR865';
-import {exportFullAtlasCsvR896} from './omegaFullAtlasExportR896';
+import {exportFullAtlasCsvR896,inspectAtlasAddressR897} from './omegaFullAtlasExportR896';
 import {appendArtifactR862,notifyArtifactChangeR867,OMEGA_ARTIFACT_CHANGED_R867} from './omegaArtifactSpineR862';
 import {OMEGA_ARTIFACT_STORAGE_R862,decodeArtifactsR862,exportArtifactBundleR863,importArtifactBundleR863,type OmegaArtifactR862} from './omegaArtifactSpineR862';
 /** R864: one browser-local artifact collection consumed by Atlas, Projects and Assets. */
@@ -33,6 +33,20 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
    setItems(next);notifyArtifactChangeR867();setTraceRow(1);setLatestCsv({csv:result.csv,address,rows:result.rowCount});
    setExecutionStatus('Computed '+result.rowCount+' source-model states; SVG saved locally. No external, device or Canon proof.');
   }catch(e){setError('Atlas execution rejected: '+String(e))}finally{executionLease.current=false;setRunning(false)}
+ };
+ const [inspectedAddress,setInspectedAddress]=useState<number|null>(null);
+ const [inspectedValues,setInspectedValues]=useState<Array<{name:string;value:number}>>([]);
+ const inspectAtlas=async(target?:number)=>{
+  if(executionLease.current)return;
+  executionLease.current=true;setRunning(true);setError('');setExecutionStatus('');
+  try{
+   const address=target??Number(atlasAddress.trim());
+   if(target===undefined&&atlasAddress.trim()==='')throw Error('Enter an Atlas address');
+   const field=await getMandala20736Field();
+   const values=inspectAtlasAddressR897(field,address);
+   setInspectedAddress(address);setInspectedValues(values);
+   setExecutionStatus('Inspected compiled Atlas model address '+address+'. Values are model-derived, not physical measurements.');
+  }catch(e){setError('Atlas inspection rejected: '+String(e))}finally{executionLease.current=false;setRunning(false)}
  };
  const exportCompleteAtlas=async()=>{
   if(executionLease.current)return;
