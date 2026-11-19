@@ -105,5 +105,5 @@ export function compareAtlasRoutesR902(field:Mandala20736Field,first:{addresses:
  const shared=first.addresses.filter(address=>right.has(address));
  let prefix=0;
  while(prefix<Math.min(first.addresses.length,second.addresses.length)&&first.addresses[prefix]===second.addresses[prefix])prefix++;
- return {sharedAddresses:shared.length,firstOnly:left.size-shared.length,secondOnly:right.size-shared.length,firstSharedStep:shared.length?first.addresses.indexOf(shared[0])+1:null,secondSharedStep:shared.length?second.addresses.indexOf(shared[0])+1:null,commonPrefix:prefix,firstCycleLength:first.cycleAt===null?null:first.addresses.length-first.cycleAt,secondCycleLength:second.cycleAt===null?null:second.addresses.length-second.cycleAt};
+ return {sharedAddresses:shared.length,firstOnly:left.size-shared.length,secondOnly:right.size-shared.length,firstSharedStep:shared.length?first.addresses.indexOf(shared[0])+1:null,secondSharedStep:shared.length?second.addresses.findIndex(address=>left.has(address))+1:null,commonPrefix:prefix,firstCycleLength:first.cycleAt===null?null:first.addresses.length-first.cycleAt,secondCycleLength:second.cycleAt===null?null:second.addresses.length-second.cycleAt};
 }
