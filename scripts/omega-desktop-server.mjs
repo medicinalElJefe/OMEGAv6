@@ -26,7 +26,7 @@ export async function startDesktopServer({root,port=0,host='127.0.0.1'}={}){
   if(origin&&origin!=='http://'+expectedHost){res.writeHead(403).end('Invalid local origin');return;}
   const pathname=decodePath(req.url);if(!pathname){res.writeHead(400).end('Invalid path');return;}
   if(pathname==='/__omega_local_health'){const body=Buffer.from(JSON.stringify({state:'LOCAL_HTTP_READY',host:'127.0.0.1',...manifest,remoteDeviceProven:false,cloudBackendProven:false}));res.writeHead(200,{'Content-Type':'application/json; charset=utf-8','Content-Length':body.length});if(req.method==='HEAD')res.end();else res.end(body);return;}
-  if(pathname.startsWith('/api/')){res.writeHead(503,{'Content-Type':'application/json; charset=utf-8'}).end(JSON.stringify({state:'REMOTE_BACKEND_UNAVAILABLE',detail:'Offline local shell: no native or cloud execution authority'}));return;}
+  if(pathname==='/api'||pathname.startsWith('/api/')){res.writeHead(503,{'Content-Type':'application/json; charset=utf-8'}).end(JSON.stringify({state:'REMOTE_BACKEND_UNAVAILABLE',detail:'Offline local shell: no native or cloud execution authority'}));return;}
   if(pathname.split('/').some(x=>x.startsWith('.')&&x!=='')||pathname.endsWith('.map')){res.writeHead(404).end();return;}
   const rel=pathname.replace(/^\/+/, '')||'index.html';let target=resolve(dist,rel);
   if(!within(dist,target)){res.writeHead(403).end();return;}
