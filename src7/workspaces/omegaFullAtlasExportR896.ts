@@ -69,5 +69,5 @@ export function exportAtlasRouteCsvR900(field:Mandala20736Field,trace:{addresses
  if(trace.cycleAt!==null&&next!==trace.addresses[trace.cycleAt])throw Error('Cycle return does not match compiled route');
  if(trace.cycleAt===null&&seen.has(next))throw Error('Unreported route cycle');
  if(trace.truncated!==(trace.cycleAt===null))throw Error('Inconsistent route termination');
- return lines.join('\\n')+'\\n';
+ return lines.join('\n')+'\n';
 }
