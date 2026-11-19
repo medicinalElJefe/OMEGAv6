@@ -86,3 +86,14 @@ export function summarizeAtlasRouteR901(field:Mandala20736Field,trace:{addresses
  }
  return {visited:trace.addresses.length,cycleLength:trace.cycleAt===null?null:trace.addresses.length-trace.cycleAt,transientLength:trace.cycleAt,meanStepDistance:edges?sum/edges:0,maxStepDistance:max};
 }
+
+/** R902: compare two independently executed route paths in the same compiled field. */
+export function compareAtlasRoutesR902(field:Mandala20736Field,first:{addresses:number[];cycleAt:number|null;truncated:boolean},second:{addresses:number[];cycleAt:number|null;truncated:boolean}):{sharedAddresses:number;firstOnly:number;secondOnly:number;firstSharedStep:number|null;secondSharedStep:number|null;commonPrefix:number;firstCycleLength:number|null;secondCycleLength:number|null}{
+ exportAtlasRouteCsvR900(field,first);
+ exportAtlasRouteCsvR900(field,second);
+ const left=new Set(first.addresses),right=new Set(second.addresses);
+ const shared=first.addresses.filter(address=>right.has(address));
+ let prefix=0;
+ while(prefix<Math.min(first.addresses.length,second.addresses.length)&&first.addresses[prefix]===second.addresses[prefix])prefix++;
+ return {sharedAddresses:shared.length,firstOnly:left.size-shared.length,secondOnly:right.size-shared.length,firstSharedStep:shared.length?first.addresses.indexOf(shared[0])+1:null,secondSharedStep:shared.length?second.addresses.indexOf(shared[0])+1:null,commonPrefix:prefix,firstCycleLength:first.cycleAt===null?null:first.addresses.length-first.cycleAt,secondCycleLength:second.cycleAt===null?null:second.addresses.length-second.cycleAt};
+}
