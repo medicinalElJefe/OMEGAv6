@@ -30,3 +30,20 @@ export function inspectAtlasAddressR897(field:Mandala20736Field,address:number):
   return {name,value};
  });
 }
+
+/** R899: execute the compiled route graph, stopping at the first repeated address. */
+export function traceAtlasRouteR899(field:Mandala20736Field,start:number,maxSteps:number):{addresses:number[];cycleAt:number|null;truncated:boolean}{
+ if(!Number.isInteger(maxSteps)||maxSteps<1||maxSteps>256)throw Error('Route steps must be 1–256');
+ if(!Number.isInteger(start)||start<0||start>=20736)throw Error('Atlas address must be 0–20735');
+ const visited=new Map<number,number>(),addresses:number[]=[];
+ let current=start;
+ for(let step=0;step<maxSteps;step++){
+  const cycle=visited.get(current);
+  if(cycle!==undefined)return {addresses,cycleAt:cycle,truncated:false};
+  visited.set(current,addresses.length);
+  const values=inspectAtlasAddressR897(field,current);
+  addresses.push(current);
+  current=values.find(item=>item.name==='routeNext')!.value;
+ }
+ return {addresses,cycleAt:visited.get(current)??null,truncated:!visited.has(current)};
+}
