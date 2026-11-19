@@ -35,6 +35,13 @@ test('R881 loopback actual HTTP, assets, offline backend refusal, and traversal 
   assert.equal((await fetch(started.url+'secret.map')).status,404);
   assert.equal((await fetch(started.url+'%2e%2e%2fserver.mjs')).status,400);
   const api=await fetch(started.url+'api/hybrid/status');assert.equal(api.status,503);assert.equal((await api.json()).state,'REMOTE_BACKEND_UNAVAILABLE');
+  // Backend namespace must never fall through to the SPA, even at its root
+  // or under unknown capability paths.
+  for(const path of ['api','api/','api/native/gpu','api/models/generate','api/hybrid/execute']){
+   const refused=await fetch(started.url+path);
+   assert.equal(refused.status,503,path);
+   assert.equal((await refused.json()).state,'REMOTE_BACKEND_UNAVAILABLE',path);
+  }
   assert.equal((await fetch(started.url,{method:'POST'})).status,405);
   const head=await fetch(started.url,{method:'HEAD'});assert.equal(head.status,200);assert.equal(await head.text(),'');
  }finally{if(server)await new Promise(ok=>server.close(ok));await rm(dir,{recursive:true,force:true});}
