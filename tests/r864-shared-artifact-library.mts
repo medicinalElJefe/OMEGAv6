@@ -98,7 +98,7 @@ test('R888 Atlas SVG persistence uses bounded local-host POST and verified readb
 });
 
 test('R889 saved host SVG can be recovered by receipt UUID with independent SHA-256 validation and bounded preview',()=>{
- assert.match(lib,/const recoverHostArtifact=async\(\)=>/);
+ assert.match(lib,/const recoverHostArtifact=async\(selectedId\?:string\)=>/);
  assert.match(lib,/fetch\('\/__omega_local\/artifacts\/'\+encodeURIComponent\(id\)\)/);
  assert.match(lib,/record\.id!==id\|\|record\.kind!=='atlas_svg'/);
  assert.match(lib,/crypto\.subtle\.digest\('SHA-256',new TextEncoder\(\)\.encode\(record\.content\)\)/);
@@ -112,4 +112,13 @@ test('R889 saved host SVG can be recovered by receipt UUID with independent SHA-
 test('R890 persistence receipt must independently match SHA-256 of the actual submitted SVG',()=>{
  assert.match(lib,/const localSha256=Array\.from\(new Uint8Array\(await crypto\.subtle\.digest\('SHA-256',new TextEncoder\(\)\.encode\(saved\.payload\)\)\)\)/);
  assert.match(lib,/if\(localSha256!==receipt\.contentSha256\)throw Error\('Host persistence receipt does not match independently hashed SVG'\)/);
+});
+
+test('R892 saved host SVGs are recoverable in one click and persistence refreshes the discoverable index',()=>{
+ assert.match(lib,/const discoverHostArtifacts=async\(\)=>/);
+ assert.match(lib,/fetch\('\/__omega_local\/artifacts'\)/);
+ assert.match(lib,/setHostIndex\(items\)/);
+ assert.match(lib,/void discoverHostArtifacts\(\);setHostPersistence/);
+ assert.match(lib,/onClick=\{\(\)=>\{setHostArtifactId\(item\.id\);void recoverHostArtifact\(item\.id\)\}\}/);
+ assert.match(lib,/const id=\(selectedId\?\?hostArtifactId\)\.trim\(\)\.toLowerCase\(\)/);
 });
