@@ -25,7 +25,7 @@ for(const address of [0,11498,20735]){
  const inspected=inspectAtlasAddressR897(field,address);
  assert.equal(inspected.length,22);
  assert.equal(inspected.find(item=>item.name==='routeNext')?.value,field.routeNext[address]);
- for(const item of inspected)assert.equal(item.value,field[item.name as keyof typeof field][address]);
+ for(const item of inspected)assert.equal(item.value,(field as unknown as Record<string,ArrayLike<number>>)[item.name][address]);
 }
 assert.throws(()=>inspectAtlasAddressR897(field,-1),/0–20735/);
 assert.throws(()=>inspectAtlasAddressR897(field,20736),/0–20735/);
