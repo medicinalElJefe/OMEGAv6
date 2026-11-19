@@ -84,6 +84,16 @@ export function summarizeAtlasRouteR901(field:Mandala20736Field,trace:{addresses
   if(!Number.isFinite(distance))throw Error('Invalid Atlas coordinate displacement');
   sum+=distance;max=Math.max(max,distance);edges++;
  }
+ // A detected cycle includes its closing edge. Omitting it underreports
+ // displacement, especially for a one-address self-loop versus longer cycles.
+ if(trace.cycleAt!==null){
+  const last=inspectAtlasAddressR897(field,trace.addresses[trace.addresses.length-1]);
+  const first=inspectAtlasAddressR897(field,trace.addresses[trace.cycleAt]);
+  const coordinate=(values:typeof last,name:string)=>values.find(item=>item.name===name)!.value;
+  const closing=Math.hypot(...(['x','y','z'] as const).map(name=>coordinate(first,name)-coordinate(last,name)));
+  if(!Number.isFinite(closing))throw Error('Invalid Atlas cycle closing displacement');
+  sum+=closing;max=Math.max(max,closing);edges++;
+ }
  return {visited:trace.addresses.length,cycleLength:trace.cycleAt===null?null:trace.addresses.length-trace.cycleAt,transientLength:trace.cycleAt,meanStepDistance:edges?sum/edges:0,maxStepDistance:max};
 }
 
