@@ -46,7 +46,7 @@ export async function startDesktopServer({root,port=0,host='127.0.0.1',stateRoot
   // R891: bounded local artifact discovery, with no content disclosure in the index.
   if(pathname==='/__omega_local/artifacts'&&['GET','HEAD'].includes(req.method)){
    let names=[];try{names=await readdir(artifactRoot);}catch(e){if(e?.code!=='ENOENT'){sendJson(res,507,{error:'LOCAL_INDEX_UNAVAILABLE'});return;}}
-   const ids=names.filter(name=>/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.json$/.test(name)).sort().reverse();
+   const ids=names.filter(name=>/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.json$/.test(name)).sort().reverse();
    const records=[];
    for(const name of ids.slice(0,256)){
     try{
