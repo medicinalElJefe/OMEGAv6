@@ -125,6 +125,21 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
    setExecutionStatus('Exported all 20,736 computed source-model addresses as CSV. This is a representational address space, not physical dimensions or external validation.');
   }catch(e){setError('Full Atlas export rejected: '+String(e))}finally{executionLease.current=false;setRunning(false)}
  };
+ const exportRouteProvenance=async()=>{
+  if(!routeTrace||executionLease.current)return;
+  executionLease.current=true;setRunning(true);setError('');
+  try{
+   const field=await getMandala20736Field();
+   const csv=exportAtlasRouteCsvR900(field,routeTrace);
+   const bytes=new TextEncoder().encode(csv);
+   const sha256=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))).map(n=>n.toString(16).padStart(2,'0')).join('');
+   const manifest={schema:'omega.atlas.route.provenance.v1',artifact:'omega-atlas-route-'+routeTrace.addresses[0]+'.csv',sha256,byteLength:bytes.length,route:{start:routeTrace.addresses[0],addresses:routeTrace.addresses,cycleAt:routeTrace.cycleAt,truncated:routeTrace.truncated},provenance:{tier:'DER',execution:'BROWSER_LOCAL_COMPUTED',source:'compiled_20736_address_model',physicalDimensions:false,physicalMeasurement:false,nativeDeviceAcceptance:false,externalValidation:false},admission:{status:'SCOPED_MODEL_OUTPUT',canonPromotion:false,orionGate:'HOLD_RULE_SOURCE_NEEDED',tit:'OPEN_CANDIDATE'}};
+   const url=URL.createObjectURL(new Blob([JSON.stringify(manifest,null,2)+'\\n'],{type:'application/json'}));
+   const link=document.createElement('a');link.href=url;link.download='omega-atlas-route-'+routeTrace.addresses[0]+'.provenance.json';link.click();
+   window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+   setExecutionStatus('Exported route provenance with SHA-256 CSV digest and explicit model-only admission boundaries.');
+  }catch(e){setError('Route provenance export rejected: '+String(e))}finally{executionLease.current=false;setRunning(false)}
+ };
  const recoverSavedTrace=async(saved:OmegaArtifactR862)=>{
   if(executionLease.current)return;
   executionLease.current=true;setRunning(true);setError('');setExecutionStatus('');setLatestCsv(null);
@@ -242,7 +257,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
   <button type='button' disabled={running} onClick={()=>void inspectAtlas()}>Inspect Atlas address</button>{' '}
   <label htmlFor='r899-route-steps'>Route steps (1–256)</label>{' '}<input id='r899-route-steps' type='number' min={1} max={256} value={routeSteps} onChange={e=>setRouteSteps(e.currentTarget.value)} style={{width:70}}/>{' '}
   <button type='button' disabled={running} onClick={()=>void executeRouteTrace()}>Trace computed route</button>{' '}
-  <button type='button' disabled={running} onClick={()=>void exportCompleteAtlas()}>Export complete 20,736-address Atlas CSV</button>{' '}
+  <button type='button' disabled={running} onClick={()=>void exportCompleteAtlas()}>Export complete 20,736-address Atlas CSV</button>{' '}<button type='button' disabled={running||!routeTrace} onClick={()=>void exportRouteProvenance()}>Export route provenance JSON (SHA-256)</button>{' '}
   <button type='button' onClick={refresh}>Refresh artifacts</button>{' '}
   <button type='button' onClick={exportAll}>Export portable bundle</button>{' '}
   <label>Import portable bundle <input type='file' accept='.json,application/json' onChange={e=>{const file=e.currentTarget.files?.[0]??null;void importAll(file);e.currentTarget.value=''}}/></label>
