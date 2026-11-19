@@ -1,4 +1,4 @@
-import {useEffect,useState} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import {getMandala20736Field} from '../../src/mandala20736Runtime';
 import {executeAtlasArtifactR865} from './omegaAtlasArtifactExecutorR865';
 import {appendArtifactR862,notifyArtifactChangeR867,OMEGA_ARTIFACT_CHANGED_R867} from './omegaArtifactSpineR862';
@@ -8,6 +8,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
  const [items,setItems]=useState<OmegaArtifactR862[]>([]);
  const [error,setError]=useState('');
  const [running,setRunning]=useState(false);
+ const executionLease=useRef(false);
  const [executionStatus,setExecutionStatus]=useState('');
  const [latestCsv,setLatestCsv]=useState<{csv:string;address:number;rows:number;savedId?:string;savedSnapshot?:string}|null>(null);
  const [atlasLength,setAtlasLength]=useState('32');
@@ -15,8 +16,8 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
  const refresh=()=>{try{const current=decodeArtifactsR862(localStorage.getItem(OMEGA_ARTIFACT_STORAGE_R862));setItems(current);setLatestCsv(previous=>{if(!previous?.savedId)return previous;const saved=current.find(item=>item.id===previous.savedId);return saved&&JSON.stringify(saved)===previous.savedSnapshot?previous:null})}catch{setItems([]);setLatestCsv(previous=>previous?.savedId?null:previous)}};
  useEffect(()=>{refresh();window.addEventListener('storage',refresh);window.addEventListener('focus',refresh);window.addEventListener(OMEGA_ARTIFACT_CHANGED_R867,refresh);return()=>{window.removeEventListener('storage',refresh);window.removeEventListener('focus',refresh);window.removeEventListener(OMEGA_ARTIFACT_CHANGED_R867,refresh)}},[]);
  const computeAndSave=async()=>{
-  if(running)return;
-  setRunning(true);setError('');setExecutionStatus('');setLatestCsv(null);
+  if(executionLease.current)return;
+  executionLease.current=true;setRunning(true);setError('');setExecutionStatus('');setLatestCsv(null);
   try{
    const address=Number(atlasAddress.trim());
    if(atlasAddress.trim()===''||!Number.isInteger(address)||address<0||address>=20736)throw Error('Atlas address must be an integer from 0 to 20735');
@@ -29,11 +30,11 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
    localStorage.setItem(OMEGA_ARTIFACT_STORAGE_R862,JSON.stringify(next));
    setItems(next);notifyArtifactChangeR867();setLatestCsv({csv:result.csv,address,rows:result.rowCount});
    setExecutionStatus('Computed '+result.rowCount+' source-model states; SVG saved locally. No external, device or Canon proof.');
-  }catch(e){setError('Atlas execution rejected: '+String(e))}finally{setRunning(false)}
+  }catch(e){setError('Atlas execution rejected: '+String(e))}finally{executionLease.current=false;setRunning(false)}
  };
  const recoverSavedTrace=async(saved:OmegaArtifactR862)=>{
-  if(running)return;
-  setRunning(true);setError('');setExecutionStatus('');setLatestCsv(null);
+  if(executionLease.current)return;
+  executionLease.current=true;setRunning(true);setError('');setExecutionStatus('');setLatestCsv(null);
   try{
    const current=decodeArtifactsR862(localStorage.getItem(OMEGA_ARTIFACT_STORAGE_R862)).find(item=>item.id===saved.id);
    if(!current||JSON.stringify(current)!==JSON.stringify(saved))throw Error('Saved artifact was removed or changed; refresh the library before recovery');
@@ -45,7 +46,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
    if(!stillSaved||JSON.stringify(stillSaved)!==JSON.stringify(saved))throw Error('Saved artifact changed during model replay; trace recovery refused');
    setLatestCsv({csv:result.csv,address,rows:result.rowCount,savedId:saved.id,savedSnapshot:JSON.stringify(saved)});
    setExecutionStatus('Recovered and verified '+result.rowCount+' model states against saved SVG. This is model replay, not external or device proof.');
-  }catch(e){setError('Saved trace recovery rejected: '+String(e))}finally{setRunning(false)}
+  }catch(e){setError('Saved trace recovery rejected: '+String(e))}finally{executionLease.current=false;setRunning(false)}
  };
  const downloadCsv=()=>{if(!latestCsv)return;if(latestCsv.savedId){const current=decodeArtifactsR862(localStorage.getItem(OMEGA_ARTIFACT_STORAGE_R862)).find(item=>item.id===latestCsv.savedId);if(!current||JSON.stringify(current)!==latestCsv.savedSnapshot){setLatestCsv(null);setError('Saved artifact was removed or modified in another workspace; recovered CSV download refused');return}}const url=URL.createObjectURL(new Blob([latestCsv.csv],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='omega-atlas-'+latestCsv.address+'-'+latestCsv.rows+'-states.csv';a.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000)};
  const removeSaved=(id:string)=>{try{const latest=decodeArtifactsR862(localStorage.getItem(OMEGA_ARTIFACT_STORAGE_R862));const next=latest.filter(item=>item.id!==id);if(next.length===latest.length){refresh();return}localStorage.setItem(OMEGA_ARTIFACT_STORAGE_R862,JSON.stringify(next));setItems(next);setLatestCsv(previous=>previous?.savedId===id?null:previous);notifyArtifactChangeR867();setError('')}catch(e){setError('Unable to remove saved artifact: '+String(e))}};
