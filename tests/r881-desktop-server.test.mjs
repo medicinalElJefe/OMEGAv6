@@ -75,6 +75,13 @@ test('R887 local artifact survives host restart with exact content and rejects i
   assert.equal(loaded.canonicalMutation,false);
   assert.equal((await fetch(started.url+'__omega_local/artifacts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:'../../bad',content:'x'})})).status,422);
   assert.equal((await fetch(started.url+'__omega_local/artifacts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:'trace',content:'x'.repeat(70000)})})).status,413);
+  const csv='address,continuity\\n0,0.5\\n1,0.7';
+  const csvCreate=await fetch(started.url+'__omega_local/artifacts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:'atlas_csv',content:csv})});
+  assert.equal(csvCreate.status,201);
+  const csvReceipt=await csvCreate.json();
+  const csvLoaded=await fetch(started.url+'__omega_local/artifacts/'+csvReceipt.id).then(r=>r.json());
+  assert.equal(csvLoaded.kind,'atlas_csv');assert.equal(csvLoaded.content,csv);
+  assert.equal(csvLoaded.contentSha256,csvReceipt.contentSha256);
   assert.equal((await fetch(started.url+'__omega_local/artifacts/not-an-id')).status,400);
   await new Promise(ok=>server.close(ok));server=null;
   started=await startDesktopServer({root:dist,stateRoot});server=started.server;
