@@ -84,6 +84,8 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
    if(!verified.ok)throw Error('Host persistence readback failed: HTTP '+verified.status);
    const record=await verified.json() as {content?:string;contentSha256?:string;kind?:string};
    if(record.content!==saved.payload||record.contentSha256!==receipt.contentSha256||record.kind!=='atlas_svg')throw Error('Host persistence readback differs from the saved SVG');
+   const localSha256=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(saved.payload)))).map(x=>x.toString(16).padStart(2,'0')).join('');
+   if(localSha256!==receipt.contentSha256)throw Error('Host persistence receipt does not match independently hashed SVG');
    setHostArtifactId(receipt.id);setHostPersistence('Verified local host SVG persistence · '+receipt.id+' · SHA-256 '+receipt.contentSha256+'. Browser artifact remains independently available.');
   }catch(e){setError('Local host persistence unavailable: '+String(e)+'. Browser artifact remains available; no cloud or native execution claim.')}finally{executionLease.current=false;setRunning(false)}
  };
