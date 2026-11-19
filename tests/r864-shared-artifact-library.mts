@@ -119,6 +119,17 @@ test('R892 saved host SVGs are recoverable in one click and persistence refreshe
  assert.match(lib,/fetch\('\/__omega_local\/artifacts'\)/);
  assert.match(lib,/setHostIndex\(items\)/);
  assert.match(lib,/void discoverHostArtifacts\(\);setHostPersistence/);
- assert.match(lib,/onClick=\{\(\)=>\{setHostArtifactId\(item\.id\);void recoverHostArtifact\(item\.id\)\}\}/);
+ assert.match(lib,/item\.kind==='atlas_csv'/);
+ assert.match(lib,/void recoverHostTrace\(item\.id\)/);
+ assert.match(lib,/void recoverHostArtifact\(item\.id\)/);
  assert.match(lib,/const id=\(selectedId\?\?hostArtifactId\)\.trim\(\)\.toLowerCase\(\)/);
+});
+
+
+test('R894 local host artifact discovery restores both CSV and SVG with kind-specific verified recovery',()=>{
+ assert.match(lib,/item\.kind==='atlas_svg'\|\|item\.kind==='atlas_csv'/);
+ assert.match(lib,/setHostTraceId\(item\.id\);void recoverHostTrace\(item\.id\)/);
+ assert.match(lib,/setHostArtifactId\(item\.id\);void recoverHostArtifact\(item\.id\)/);
+ assert.match(lib,/void discoverHostArtifacts\(\);setHostTraceStatus/);
+ assert.match(lib,/hash!==record\.contentSha256/);
 });
