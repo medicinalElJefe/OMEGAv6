@@ -1,5 +1,5 @@
 import {createServer} from 'node:http';
-import {readFile,realpath,stat,mkdir,writeFile,rename} from 'node:fs/promises';
+import {readFile,realpath,stat,mkdir,writeFile,rename,readdir} from 'node:fs/promises';
 import {randomUUID,createHash} from 'node:crypto';
 import {resolve,sep,extname,join,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -42,6 +42,23 @@ export async function startDesktopServer({root,port=0,host='127.0.0.1',stateRoot
    const record={schema:'OMEGA_LOCAL_ARTIFACT_R887_V1',id,kind:payload.kind,content:payload.content,contentSha256,createdAt:new Date().toISOString(),canonicalMutation:false};
    try{await mkdir(artifactRoot,{recursive:true});const path=join(artifactRoot,id+'.json'),tmp=join(artifactRoot,'.'+id+'.tmp');await writeFile(tmp,JSON.stringify(record),{flag:'wx',mode:0o600});await rename(tmp,path);sendJson(res,201,{id,kind:record.kind,contentSha256,createdAt:record.createdAt});}
    catch{sendJson(res,507,{error:'LOCAL_PERSISTENCE_UNAVAILABLE'});}return;
+  }
+  // R891: bounded local artifact discovery, with no content disclosure in the index.
+  if(pathname==='/__omega_local/artifacts'&&['GET','HEAD'].includes(req.method)){
+   let names=[];try{names=await readdir(artifactRoot);}catch(e){if(e?.code!=='ENOENT'){sendJson(res,507,{error:'LOCAL_INDEX_UNAVAILABLE'});return;}}
+   const ids=names.filter(name=>/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.json$/.test(name)).sort().reverse();
+   const records=[];
+   for(const name of ids.slice(0,256)){
+    try{
+     const item=JSON.parse(await readFile(join(artifactRoot,name),'utf8'));
+     if(item.id+'.json'!==name||typeof item.content!=='string'||typeof item.contentSha256!=='string'||createHash('sha256').update(item.content).digest('hex')!==item.contentSha256)continue;
+     records.push({id:item.id,kind:item.kind,contentSha256:item.contentSha256,createdAt:item.createdAt});
+     if(records.length===50)break;
+    }catch{}
+   }
+   const payload={schema:'OMEGA_LOCAL_ARTIFACT_INDEX_R891',items:records,limited:ids.length>256||records.length===50};
+   if(req.method==='HEAD'){res.writeHead(200,{'Content-Type':'application/json; charset=utf-8'}).end();}else sendJson(res,200,payload);
+   return;
   }
   if(pathname.startsWith('/__omega_local/artifacts/')&&['GET','HEAD'].includes(req.method)){
    const id=pathname.slice('/__omega_local/artifacts/'.length);
