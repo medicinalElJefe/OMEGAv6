@@ -229,7 +229,7 @@ jobs:
   omega7-user-parity:
     if: github.event_name == 'pull_request'
     needs: verify
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # The 25-minute budget cancelled exact-head #40411937799 after R705 passed,
     # during R520, leaving later browser gates unexecuted. Keep the full gate.
     timeout-minutes: 45
