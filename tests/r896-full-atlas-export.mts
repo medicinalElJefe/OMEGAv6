@@ -74,6 +74,19 @@ assert.ok(Number.isFinite(topology.maxStepDistance)&&topology.maxStepDistance>=t
 const oneState=summarizeAtlasRouteR901({...field,routeNext:selfRoute},cycle);
 assert.deepEqual(oneState,{visited:1,cycleLength:1,transientLength:0,meanStepDistance:0,maxStepDistance:0});
 assert.throws(()=>summarizeAtlasRouteR901(field,{...trace,addresses:[12,12]}),/repeats|Discontinuous/);
+// R903: a two-node cycle has two traversed edges, including its return edge.
+const twoCycleRoutes=new Uint32Array(field.routeNext);
+twoCycleRoutes[12]=13;twoCycleRoutes[13]=12;
+const twoCycleField={...field,routeNext:twoCycleRoutes};
+const twoCycle=traceAtlasRouteR899(twoCycleField,12,4);
+assert.deepEqual(twoCycle,{addresses:[12,13],cycleAt:0,truncated:false});
+const twoCycleSummary=summarizeAtlasRouteR901(twoCycleField,twoCycle);
+const expectedCycleEdge=Math.hypot(field.x[13]-field.x[12],field.y[13]-field.y[12],field.z[13]-field.z[12]);
+assert.ok(Math.abs(twoCycleSummary.meanStepDistance-expectedCycleEdge)<1e-9);
+assert.ok(Math.abs(twoCycleSummary.maxStepDistance-expectedCycleEdge)<1e-9);
+const limited=traceAtlasRouteR899(twoCycleField,12,1);
+assert.deepEqual(limited,{addresses:[12],cycleAt:null,truncated:true});
+assert.equal(summarizeAtlasRouteR901(twoCycleField,limited).meanStepDistance,0);
 console.log('R901: validated cycle topology and model-coordinate displacement summary');
 
 const overlap=compareAtlasRoutesR902({...field,routeNext:selfRoute},cycle,cycle);
