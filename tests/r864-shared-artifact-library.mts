@@ -60,3 +60,16 @@ test('R877 user-selected traversal length is bounded before execution and contro
  assert.match(lib,/executeAtlasArtifactR865\(field,address,length\)/);
  assert.doesNotMatch(lib,/executeAtlasArtifactR865\(field,address,32\)/);
 });
+
+
+test('R885 overlapping Atlas compute/replay are refused synchronously before React state updates',()=>{
+ const source=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
+ assert.match(source,/const executionLease=useRef\(false\)/);
+ for(const handler of ['computeAndSave','recoverSavedTrace']){
+  const start=source.indexOf('const '+handler+'=async');
+  assert.ok(start>=0,handler+' exists');
+  const body=source.slice(start,source.indexOf('};',start)+2);
+  assert.match(body,/if\(executionLease\.current\)return;\s*executionLease\.current=true;setRunning\(true\)/);
+  assert.match(body,/finally\{executionLease\.current=false;setRunning\(false\)\}/);
+ }
+});
