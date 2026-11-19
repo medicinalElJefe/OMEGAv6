@@ -97,4 +97,17 @@ assert.equal(disjoint.sharedAddresses,0);
 assert.equal(disjoint.firstSharedStep,null);
 assert.equal(disjoint.commonPrefix,0);
 assert.throws(()=>compareAtlasRoutesR902(field,{...trace,addresses:[12,12]},trace),/repeats|Discontinuous/);
+// R904: each route's first shared position is independent of the other route's order.
+const shiftedCycleRoutes=new Uint32Array(field.routeNext);
+shiftedCycleRoutes[12]=13;shiftedCycleRoutes[13]=12;
+const shiftedCycleField={...field,routeNext:shiftedCycleRoutes};
+const leftCycle=traceAtlasRouteR899(shiftedCycleField,12,4);
+const rightCycle=traceAtlasRouteR899(shiftedCycleField,13,4);
+assert.deepEqual(leftCycle.addresses,[12,13]);
+assert.deepEqual(rightCycle.addresses,[13,12]);
+const shiftedOverlap=compareAtlasRoutesR902(shiftedCycleField,leftCycle,rightCycle);
+assert.equal(shiftedOverlap.sharedAddresses,2);
+assert.equal(shiftedOverlap.firstSharedStep,1);
+assert.equal(shiftedOverlap.secondSharedStep,1);
+assert.equal(shiftedOverlap.commonPrefix,0);
 console.log('R902: independent route overlap, disjoint sets and malformed-route rejection');
