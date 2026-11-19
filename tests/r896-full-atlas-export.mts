@@ -78,8 +78,8 @@ console.log('R901: validated cycle topology and model-coordinate displacement su
 
 const overlap=compareAtlasRoutesR902({...field,routeNext:selfRoute},cycle,cycle);
 assert.deepEqual(overlap,{sharedAddresses:1,firstOnly:0,secondOnly:0,firstSharedStep:1,secondSharedStep:1,commonPrefix:1,firstCycleLength:1,secondCycleLength:1});
-const otherRoute=new Uint32Array(field.routeNext);otherRoute[13]=13;
-const disjoint=compareAtlasRoutesR902({...field,routeNext:otherRoute}, {addresses:[12],cycleAt:null,truncated:true},{addresses:[13],cycleAt:0,truncated:false});
+const otherRoute=new Uint32Array(field.routeNext);otherRoute[12]=12;otherRoute[13]=13;
+const disjoint=compareAtlasRoutesR902({...field,routeNext:otherRoute}, {addresses:[12],cycleAt:0,truncated:false},{addresses:[13],cycleAt:0,truncated:false});
 assert.equal(disjoint.sharedAddresses,0);
 assert.equal(disjoint.firstSharedStep,null);
 assert.equal(disjoint.commonPrefix,0);
