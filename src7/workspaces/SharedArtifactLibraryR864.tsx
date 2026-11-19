@@ -66,11 +66,11 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
  };
 
  const [recoveredHostSvg,setRecoveredHostSvg]=useState<{id:string;content:string}|null>(null);
- const recoverHostArtifact=async()=>{
+ const recoverHostArtifact=async(selectedId?:string)=>{
   if(executionLease.current)return;
   executionLease.current=true;setRunning(true);setError('');setRecoveredHostSvg(null);
   try{
-   const id=hostArtifactId.trim().toLowerCase();
+   const id=(selectedId??hostArtifactId).trim().toLowerCase();
    if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(id))throw Error('Enter a valid local artifact UUID');
    const response=await fetch('/__omega_local/artifacts/'+encodeURIComponent(id));
    if(!response.ok)throw Error('Local host readback failed: HTTP '+response.status);
@@ -100,7 +100,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
    if(record.content!==saved.payload||record.contentSha256!==receipt.contentSha256||record.kind!=='atlas_svg')throw Error('Host persistence readback differs from the saved SVG');
    const localSha256=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(saved.payload)))).map(x=>x.toString(16).padStart(2,'0')).join('');
    if(localSha256!==receipt.contentSha256)throw Error('Host persistence receipt does not match independently hashed SVG');
-   setHostArtifactId(receipt.id);setHostPersistence('Verified local host SVG persistence · '+receipt.id+' · SHA-256 '+receipt.contentSha256+'. Browser artifact remains independently available.');
+   setHostArtifactId(receipt.id);void discoverHostArtifacts();setHostPersistence('Verified local host SVG persistence · '+receipt.id+' · SHA-256 '+receipt.contentSha256+'. Browser artifact remains independently available.');
   }catch(e){setError('Local host persistence unavailable: '+String(e)+'. Browser artifact remains available; no cloud or native execution claim.')}finally{executionLease.current=false;setRunning(false)}
  };
  const downloadCsv=()=>{if(!latestCsv)return;if(latestCsv.savedId){const current=decodeArtifactsR862(localStorage.getItem(OMEGA_ARTIFACT_STORAGE_R862)).find(item=>item.id===latestCsv.savedId);if(!current||JSON.stringify(current)!==latestCsv.savedSnapshot){setLatestCsv(null);setError('Saved artifact was removed or modified in another workspace; recovered CSV download refused');return}}const url=URL.createObjectURL(new Blob([latestCsv.csv],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='omega-atlas-'+latestCsv.address+'-'+latestCsv.rows+'-states.csv';a.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000)};
@@ -115,7 +115,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
   <button type='button' onClick={refresh}>Refresh artifacts</button>{' '}
   <button type='button' onClick={exportAll}>Export portable bundle</button>{' '}
   <label>Import portable bundle <input type='file' accept='.json,application/json' onChange={e=>{const file=e.currentTarget.files?.[0]??null;void importAll(file);e.currentTarget.value=''}}/></label>
-  <div><button type='button' disabled={running} onClick={()=>void discoverHostArtifacts()}>Find saved local-host SVGs</button>{' '}<span role='status'>{hostIndexStatus}</span>{hostIndex.length>0&&<ul aria-label='Saved host Atlas SVG receipts'>{hostIndex.map(item=><li key={item.id}><button type='button' onClick={()=>setHostArtifactId(item.id)}>Select {item.createdAt} · {item.id}</button></li>)}</ul>}</div>
+  <div><button type='button' disabled={running} onClick={()=>void discoverHostArtifacts()}>Find saved local-host SVGs</button>{' '}<span role='status'>{hostIndexStatus}</span>{hostIndex.length>0&&<ul aria-label='Saved host Atlas SVG receipts'>{hostIndex.map(item=><li key={item.id}><button type='button' disabled={running} onClick={()=>{setHostArtifactId(item.id);void recoverHostArtifact(item.id)}}>Recover {item.createdAt} · {item.id}</button></li>)}</ul>}</div>
   <div><label htmlFor='r889-host-artifact-id'>Recover local-host SVG by receipt ID</label>{' '}<input id='r889-host-artifact-id' value={hostArtifactId} onChange={e=>setHostArtifactId(e.currentTarget.value)} placeholder='Local artifact UUID' style={{width:320,maxWidth:'100%'}}/>{' '}<button type='button' disabled={running} onClick={()=>void recoverHostArtifact()}>Recover host SVG</button></div>
   {recoveredHostSvg&&<div aria-label='Recovered verified host SVG'><p>Verified local-host artifact {recoveredHostSvg.id}</p><img alt='Recovered Atlas SVG from local host' src={'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(recoveredHostSvg.content)} style={{width:'100%',maxWidth:420}}/><button type='button' onClick={()=>{const url=URL.createObjectURL(new Blob([recoveredHostSvg.content],{type:'image/svg+xml'}));const a=document.createElement('a');a.href=url;a.download=recoveredHostSvg.id+'.svg';a.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000)}}>Download recovered host SVG</button></div>}
   {executionStatus&&<p role='status'>{executionStatus}</p>}{hostPersistence&&<p role='status'>{hostPersistence}</p>}
