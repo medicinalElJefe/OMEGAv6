@@ -96,3 +96,15 @@ test('R888 Atlas SVG persistence uses bounded local-host POST and verified readb
  assert.match(lib,/finally\{executionLease\.current=false;setRunning\(false\)\}/);
  assert.match(lib,/Persist SVG to local host/);
 });
+
+test('R889 saved host SVG can be recovered by receipt UUID with independent SHA-256 validation and bounded preview',()=>{
+ assert.match(lib,/const recoverHostArtifact=async\(\)=>/);
+ assert.match(lib,/fetch\('\/__omega_local\/artifacts\/'\+encodeURIComponent\(id\)\)/);
+ assert.match(lib,/record\.id!==id\|\|record\.kind!=='atlas_svg'/);
+ assert.match(lib,/crypto\.subtle\.digest\('SHA-256',new TextEncoder\(\)\.encode\(record\.content\)\)/);
+ assert.match(lib,/hash!==record\.contentSha256/);
+ assert.match(lib,/setRecoveredHostSvg\(\{id,content:record\.content\}\)/);
+ assert.match(lib,/aria-label='Recovered verified host SVG'/);
+ assert.match(lib,/Download recovered host SVG/);
+ assert.match(lib,/finally\{executionLease\.current=false;setRunning\(false\)\}/);
+});
