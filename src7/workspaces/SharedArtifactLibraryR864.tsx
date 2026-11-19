@@ -11,6 +11,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
  const executionLease=useRef(false);
  const [executionStatus,setExecutionStatus]=useState('');
  const [latestCsv,setLatestCsv]=useState<{csv:string;address:number;rows:number;savedId?:string;savedSnapshot?:string}|null>(null);
+ const [traceRow,setTraceRow]=useState(1);
  const [atlasLength,setAtlasLength]=useState('32');
  const [atlasAddress,setAtlasAddress]=useState(()=>{try{const stored=localStorage.getItem('omega.v6.address');return stored===null?'11498':stored}catch{return '11498'}});
  const refresh=()=>{try{const current=decodeArtifactsR862(localStorage.getItem(OMEGA_ARTIFACT_STORAGE_R862));setItems(current);setLatestCsv(previous=>{if(!previous?.savedId)return previous;const saved=current.find(item=>item.id===previous.savedId);return saved&&JSON.stringify(saved)===previous.savedSnapshot?previous:null})}catch{setItems([]);setLatestCsv(previous=>previous?.savedId?null:previous)}};
@@ -28,7 +29,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
    const latest=decodeArtifactsR862(localStorage.getItem(OMEGA_ARTIFACT_STORAGE_R862));
    const next=appendArtifactR862(latest,result.artifact);
    localStorage.setItem(OMEGA_ARTIFACT_STORAGE_R862,JSON.stringify(next));
-   setItems(next);notifyArtifactChangeR867();setLatestCsv({csv:result.csv,address,rows:result.rowCount});
+   setItems(next);notifyArtifactChangeR867();setTraceRow(1);setLatestCsv({csv:result.csv,address,rows:result.rowCount});
    setExecutionStatus('Computed '+result.rowCount+' source-model states; SVG saved locally. No external, device or Canon proof.');
   }catch(e){setError('Atlas execution rejected: '+String(e))}finally{executionLease.current=false;setRunning(false)}
  };
@@ -44,7 +45,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
    if(result.artifact.payload!==saved.payload||result.rowCount!==saved.provenance.stateCount||result.artifact.provenance.addressStart!==saved.provenance.addressStart||result.artifact.provenance.addressEnd!==saved.provenance.addressEnd||result.artifact.provenance.engine!==saved.provenance.engine||result.artifact.provenance.source!==saved.provenance.source)throw Error('Saved SVG does not match current model traversal; trace recovery refused');
    const stillSaved=decodeArtifactsR862(localStorage.getItem(OMEGA_ARTIFACT_STORAGE_R862)).find(item=>item.id===saved.id);
    if(!stillSaved||JSON.stringify(stillSaved)!==JSON.stringify(saved))throw Error('Saved artifact changed during model replay; trace recovery refused');
-   setLatestCsv({csv:result.csv,address,rows:result.rowCount,savedId:saved.id,savedSnapshot:JSON.stringify(saved)});
+   setTraceRow(1);setLatestCsv({csv:result.csv,address,rows:result.rowCount,savedId:saved.id,savedSnapshot:JSON.stringify(saved)});
    setExecutionStatus('Recovered and verified '+result.rowCount+' model states against saved SVG. This is model replay, not external or device proof.');
   }catch(e){setError('Saved trace recovery rejected: '+String(e))}finally{executionLease.current=false;setRunning(false)}
  };
@@ -61,7 +62,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
   <button type='button' onClick={exportAll}>Export portable bundle</button>{' '}
   <label>Import portable bundle <input type='file' accept='.json,application/json' onChange={e=>{const file=e.currentTarget.files?.[0]??null;void importAll(file);e.currentTarget.value=''}}/></label>
   {executionStatus&&<p role='status'>{executionStatus}</p>}
-  {latestCsv&&<div aria-label='Computed Atlas trace preview'><p>Computed trace · address {latestCsv.address} · {latestCsv.rows} states. First five data rows shown below; download for the complete trace.</p><pre style={{maxHeight:180,overflow:'auto',whiteSpace:'pre',fontSize:12}}>{latestCsv.csv.split(/\r?\n/).slice(0,6).join('\n')}</pre><button type='button' onClick={downloadCsv}>Download computed trace CSV · {latestCsv.rows} states</button></div>}
+  {latestCsv&&<div aria-label='Computed Atlas trace preview'><p>Computed trace · address {latestCsv.address} · {latestCsv.rows} states. Inspect any computed row below; download for the complete trace.</p><label htmlFor='r886-trace-row'>Trace row (1–{latestCsv.rows})</label>{' '}<input id='r886-trace-row' type='number' min={1} max={latestCsv.rows} step={1} value={traceRow} onChange={e=>{const value=Number(e.currentTarget.value);if(Number.isInteger(value)&&value>=1&&value<=latestCsv.rows)setTraceRow(value)}} style={{width:85}}/><pre aria-label='Selected computed Atlas trace row' style={{maxHeight:180,overflow:'auto',whiteSpace:'pre',fontSize:12}}>{[latestCsv.csv.split(/\r?\n/)[0],latestCsv.csv.split(/\r?\n/)[traceRow]].join('\n')}</pre><button type='button' onClick={downloadCsv}>Download computed trace CSV · {latestCsv.rows} states</button></div>}
   {error&&<p role='alert'>{error}</p>}
   {items.map(a=><article key={a.id} style={{padding:'12px 0',borderTop:'1px solid #56718a'}}><strong>Atlas · {a.provenance.stateCount} states</strong> <small>{a.createdAt} · addresses {a.provenance.addressStart}–{a.provenance.addressEnd} · MODEL_DERIVED</small><div><img alt={'Saved model traversal '+a.id} src={'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(a.payload)} style={{width:'100%',maxWidth:420}}/></div><button type='button' onClick={()=>{const url=URL.createObjectURL(new Blob([a.payload],{type:a.mediaType}));const link=document.createElement('a');link.href=url;link.download=a.id+'.svg';link.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000)}}>Download SVG</button>{' '}<button type='button' disabled={running} aria-label={'Recover verified CSV trace '+a.id} onClick={()=>void recoverSavedTrace(a)}>Recover verified CSV trace</button>{' '}<button type='button' aria-label={'Remove saved artifact '+a.id} onClick={()=>removeSaved(a.id)}>Remove saved artifact</button></article>)}
  </section>;
