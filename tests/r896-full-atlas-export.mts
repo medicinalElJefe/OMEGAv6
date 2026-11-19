@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {getMandala20736Field} from '../src/mandala20736Runtime';
-import {exportFullAtlasCsvR896,inspectAtlasAddressR897,traceAtlasRouteR899,exportAtlasRouteCsvR900,summarizeAtlasRouteR901} from '../src7/workspaces/omegaFullAtlasExportR896';
+import {exportFullAtlasCsvR896,inspectAtlasAddressR897,traceAtlasRouteR899,exportAtlasRouteCsvR900,summarizeAtlasRouteR901,compareAtlasRoutesR902} from '../src7/workspaces/omegaFullAtlasExportR896';
 
 const field=await getMandala20736Field();
 const csv=exportFullAtlasCsvR896(field);
@@ -75,3 +75,13 @@ const oneState=summarizeAtlasRouteR901({...field,routeNext:selfRoute},cycle);
 assert.deepEqual(oneState,{visited:1,cycleLength:1,transientLength:0,meanStepDistance:0,maxStepDistance:0});
 assert.throws(()=>summarizeAtlasRouteR901(field,{...trace,addresses:[12,12]}),/repeats|Discontinuous/);
 console.log('R901: validated cycle topology and model-coordinate displacement summary');
+
+const overlap=compareAtlasRoutesR902({...field,routeNext:selfRoute},cycle,cycle);
+assert.deepEqual(overlap,{sharedAddresses:1,firstOnly:0,secondOnly:0,firstSharedStep:1,secondSharedStep:1,commonPrefix:1,firstCycleLength:1,secondCycleLength:1});
+const otherRoute=new Uint32Array(field.routeNext);otherRoute[13]=13;
+const disjoint=compareAtlasRoutesR902({...field,routeNext:otherRoute}, {addresses:[12],cycleAt:null,truncated:true},{addresses:[13],cycleAt:0,truncated:false});
+assert.equal(disjoint.sharedAddresses,0);
+assert.equal(disjoint.firstSharedStep,null);
+assert.equal(disjoint.commonPrefix,0);
+assert.throws(()=>compareAtlasRoutesR902(field,{...trace,addresses:[12,12]},trace),/repeats|Discontinuous/);
+console.log('R902: independent route overlap, disjoint sets and malformed-route rejection');
