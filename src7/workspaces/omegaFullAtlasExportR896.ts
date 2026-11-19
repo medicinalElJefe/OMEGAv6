@@ -47,3 +47,27 @@ export function traceAtlasRouteR899(field:Mandala20736Field,start:number,maxStep
  }
  return {addresses,cycleAt:visited.get(current)??null,truncated:!visited.has(current)};
 }
+
+/** R900: export exactly the executed route with full computed fields and cycle evidence. */
+export function exportAtlasRouteCsvR900(field:Mandala20736Field,trace:{addresses:number[];cycleAt:number|null;truncated:boolean}):string{
+ if(!Array.isArray(trace.addresses)||trace.addresses.length<1||trace.addresses.length>256)throw Error('Invalid route trace length');
+ if(trace.cycleAt!==null&&(!Number.isInteger(trace.cycleAt)||trace.cycleAt<0||trace.cycleAt>=trace.addresses.length))throw Error('Invalid cycle index');
+ const names=inspectAtlasAddressR897(field,trace.addresses[0]).map(item=>item.name);
+ const lines=['step,address,'+names.join(',')+',cycle_return_step,truncated'];
+ const seen=new Set<number>();
+ for(let index=0;index<trace.addresses.length;index++){
+  const address=trace.addresses[index];
+  if(seen.has(address))throw Error('Route repeats before cycle boundary');
+  seen.add(address);
+  const values=inspectAtlasAddressR897(field,address);
+  if(index>0&&values.length!==names.length)throw Error('Route field mismatch');
+  lines.push([index+1,address,...values.map(item=>item.value),trace.cycleAt===null?'':trace.cycleAt+1,trace.truncated?'true':'false'].join(','));
+  if(index+1<trace.addresses.length&&values.find(item=>item.name==='routeNext')?.value!==trace.addresses[index+1])throw Error('Discontinuous route trace');
+ }
+ const last=inspectAtlasAddressR897(field,trace.addresses[trace.addresses.length-1]);
+ const next=last.find(item=>item.name==='routeNext')!.value;
+ if(trace.cycleAt!==null&&next!==trace.addresses[trace.cycleAt])throw Error('Cycle return does not match compiled route');
+ if(trace.cycleAt===null&&seen.has(next))throw Error('Unreported route cycle');
+ if(trace.truncated!==(trace.cycleAt===null))throw Error('Inconsistent route termination');
+ return lines.join('\\n')+'\\n';
+}
