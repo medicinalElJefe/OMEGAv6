@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {getMandala20736Field} from '../src/mandala20736Runtime';
-import {exportFullAtlasCsvR896,inspectAtlasAddressR897,traceAtlasRouteR899} from '../src7/workspaces/omegaFullAtlasExportR896';
+import {exportFullAtlasCsvR896,inspectAtlasAddressR897,traceAtlasRouteR899,exportAtlasRouteCsvR900} from '../src7/workspaces/omegaFullAtlasExportR896';
 
 const field=await getMandala20736Field();
 const csv=exportFullAtlasCsvR896(field);
@@ -48,3 +48,19 @@ const selfRoute=new Uint32Array(field.routeNext);selfRoute[12]=12;
 assert.deepEqual(traceAtlasRouteR899({...field,routeNext:selfRoute},12,4),{addresses:[12],cycleAt:0,truncated:false});
 assert.throws(()=>traceAtlasRouteR899({...field,routeNext:corrupted},12,4),/Invalid route target/);
 console.log('R899: bounded route execution, cycle detection and invalid targets validated');
+
+const routeCsv=exportAtlasRouteCsvR900(field,trace);
+const routeRows=routeCsv.trimEnd().split('\n');
+assert.equal(routeRows.length,trace.addresses.length+1);
+assert.equal(routeRows[0].split(',').length,26);
+for(let i=0;i<trace.addresses.length;i++){
+ const values=routeRows[i+1].split(',');
+ assert.equal(Number(values[0]),i+1);
+ assert.equal(Number(values[1]),trace.addresses[i]);
+ assert.equal(Number(values[routeRows[0].split(',').indexOf('routeNext')]),field.routeNext[trace.addresses[i]]);
+}
+const cycle=traceAtlasRouteR899({...field,routeNext:selfRoute},12,4);
+assert.equal(exportAtlasRouteCsvR900({...field,routeNext:selfRoute},cycle).split('\n')[1].split(',').at(-2),'1');
+assert.throws(()=>exportAtlasRouteCsvR900(field,{...trace,addresses:[12,12]}),/repeats|Discontinuous/);
+assert.throws(()=>exportAtlasRouteCsvR900(field,{...trace,cycleAt:256}),/Invalid cycle index/);
+console.log('R900: full-field route CSV and cycle metadata validated');
