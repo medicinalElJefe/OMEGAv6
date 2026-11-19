@@ -1,6 +1,7 @@
 import {useEffect,useRef,useState} from 'react';
 import {getMandala20736Field} from '../../src/mandala20736Runtime';
 import {executeAtlasArtifactR865} from './omegaAtlasArtifactExecutorR865';
+import {exportFullAtlasCsvR896} from './omegaFullAtlasExportR896';
 import {appendArtifactR862,notifyArtifactChangeR867,OMEGA_ARTIFACT_CHANGED_R867} from './omegaArtifactSpineR862';
 import {OMEGA_ARTIFACT_STORAGE_R862,decodeArtifactsR862,exportArtifactBundleR863,importArtifactBundleR863,type OmegaArtifactR862} from './omegaArtifactSpineR862';
 /** R864: one browser-local artifact collection consumed by Atlas, Projects and Assets. */
@@ -32,6 +33,18 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
    setItems(next);notifyArtifactChangeR867();setTraceRow(1);setLatestCsv({csv:result.csv,address,rows:result.rowCount});
    setExecutionStatus('Computed '+result.rowCount+' source-model states; SVG saved locally. No external, device or Canon proof.');
   }catch(e){setError('Atlas execution rejected: '+String(e))}finally{executionLease.current=false;setRunning(false)}
+ };
+ const exportCompleteAtlas=async()=>{
+  if(executionLease.current)return;
+  executionLease.current=true;setRunning(true);setError('');setExecutionStatus('');
+  try{
+   const field=await getMandala20736Field();
+   const csv=exportFullAtlasCsvR896(field);
+   const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+   const link=document.createElement('a');link.href=url;link.download='omega-atlas-all-20736-addresses.csv';link.click();
+   window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+   setExecutionStatus('Exported all 20,736 computed source-model addresses as CSV. This is a representational address space, not physical dimensions or external validation.');
+  }catch(e){setError('Full Atlas export rejected: '+String(e))}finally{executionLease.current=false;setRunning(false)}
  };
  const recoverSavedTrace=async(saved:OmegaArtifactR862)=>{
   if(executionLease.current)return;
@@ -147,6 +160,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
   <label htmlFor='r865-atlas-address'>Atlas source address (0–20735)</label>{' '}<input id='r865-atlas-address' type='number' min={0} max={20735} step={1} value={atlasAddress} disabled={running} onChange={e=>setAtlasAddress(e.currentTarget.value)} style={{width:110}}/>{' '}
   <label htmlFor='r877-atlas-length'>Traversal states (2–64)</label>{' '}<input id='r877-atlas-length' type='number' min={2} max={64} step={1} value={atlasLength} disabled={running} onChange={e=>setAtlasLength(e.currentTarget.value)} style={{width:72}}/>{' '}
   <button type='button' disabled={running} onClick={()=>void computeAndSave()}>{running?'Computing Atlas artifact…':'Compute and save Atlas SVG here'}</button>{' '}<button type='button' onClick={()=>onNavigate('Atlas')}>Open Atlas workbench</button>{' '}
+  <button type='button' disabled={running} onClick={()=>void exportCompleteAtlas()}>Export complete 20,736-address Atlas CSV</button>{' '}
   <button type='button' onClick={refresh}>Refresh artifacts</button>{' '}
   <button type='button' onClick={exportAll}>Export portable bundle</button>{' '}
   <label>Import portable bundle <input type='file' accept='.json,application/json' onChange={e=>{const file=e.currentTarget.files?.[0]??null;void importAll(file);e.currentTarget.value=''}}/></label>
