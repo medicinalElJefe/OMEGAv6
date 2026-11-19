@@ -49,6 +49,41 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
    setExecutionStatus('Recovered and verified '+result.rowCount+' model states against saved SVG. This is model replay, not external or device proof.');
   }catch(e){setError('Saved trace recovery rejected: '+String(e))}finally{executionLease.current=false;setRunning(false)}
  };
+ const [hostTraceId,setHostTraceId]=useState('');
+ const [hostTraceCsv,setHostTraceCsv]=useState('');
+ const [hostTraceStatus,setHostTraceStatus]=useState('');
+ const persistTraceToHost=async()=>{
+  if(executionLease.current||!latestCsv)return;
+  executionLease.current=true;setRunning(true);setError('');setHostTraceStatus('');
+  try{
+   const csv=latestCsv.csv;
+   if(new TextEncoder().encode(csv).length>32768)throw Error('CSV exceeds bounded local host storage');
+   const digest=async(text:string)=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text)))).map(x=>x.toString(16).padStart(2,'0')).join('');
+   const created=await fetch('/__omega_local/artifacts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:'atlas_csv',content:csv})});
+   if(!created.ok)throw Error('Host rejected CSV: HTTP '+created.status);
+   const receipt=await created.json() as {id:string;contentSha256:string};
+   const response=await fetch('/__omega_local/artifacts/'+encodeURIComponent(receipt.id));
+   if(!response.ok)throw Error('Host readback failed: HTTP '+response.status);
+   const record=await response.json() as {id:string;kind:string;content:string;contentSha256:string};
+   if(record.id!==receipt.id||record.kind!=='atlas_csv'||record.content!==csv||record.contentSha256!==receipt.contentSha256||await digest(csv)!==receipt.contentSha256)throw Error('CSV host receipt integrity mismatch');
+   setHostTraceId(receipt.id);setHostTraceStatus('Verified CSV stored on local host: '+receipt.id);
+  }catch(e){setError('CSV host persistence unavailable: '+String(e))}finally{executionLease.current=false;setRunning(false)}
+ };
+ const recoverHostTrace=async(id:string)=>{
+  if(executionLease.current)return;
+  executionLease.current=true;setRunning(true);setError('');setHostTraceCsv('');setHostTraceStatus('');
+  try{
+   const normalized=id.trim().toLowerCase();
+   if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(normalized))throw Error('Invalid CSV artifact ID');
+   const response=await fetch('/__omega_local/artifacts/'+encodeURIComponent(normalized));
+   if(!response.ok)throw Error('Host CSV readback HTTP '+response.status);
+   const record=await response.json() as {id:string;kind:string;content:string;contentSha256:string};
+   if(record.id!==normalized||record.kind!=='atlas_csv'||typeof record.content!=='string'||new TextEncoder().encode(record.content).length>32768)throw Error('Invalid host CSV artifact');
+   const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(record.content)))).map(x=>x.toString(16).padStart(2,'0')).join('');
+   if(hash!==record.contentSha256)throw Error('CSV SHA-256 mismatch');
+   setHostTraceCsv(record.content);setHostTraceId(normalized);setHostTraceStatus('Recovered SHA-256 verified CSV from local host.');
+  }catch(e){setError('Host CSV recovery unavailable: '+String(e))}finally{executionLease.current=false;setRunning(false)}
+ };
  const [hostPersistence,setHostPersistence]=useState('');
  const [hostArtifactId,setHostArtifactId]=useState('');
  const [hostIndex,setHostIndex]=useState<{id:string;kind:string;createdAt:string}[]>([]);
@@ -117,9 +152,11 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
   <label>Import portable bundle <input type='file' accept='.json,application/json' onChange={e=>{const file=e.currentTarget.files?.[0]??null;void importAll(file);e.currentTarget.value=''}}/></label>
   <div><button type='button' disabled={running} onClick={()=>void discoverHostArtifacts()}>Find saved local-host SVGs</button>{' '}<span role='status'>{hostIndexStatus}</span>{hostIndex.length>0&&<ul aria-label='Saved host Atlas SVG receipts'>{hostIndex.map(item=><li key={item.id}><button type='button' disabled={running} onClick={()=>{setHostArtifactId(item.id);void recoverHostArtifact(item.id)}}>Recover {item.createdAt} · {item.id}</button></li>)}</ul>}</div>
   <div><label htmlFor='r889-host-artifact-id'>Recover local-host SVG by receipt ID</label>{' '}<input id='r889-host-artifact-id' value={hostArtifactId} onChange={e=>setHostArtifactId(e.currentTarget.value)} placeholder='Local artifact UUID' style={{width:320,maxWidth:'100%'}}/>{' '}<button type='button' disabled={running} onClick={()=>void recoverHostArtifact()}>Recover host SVG</button></div>
+  <div><label htmlFor='r893-host-csv-id'>Recover saved Atlas CSV</label>{' '}<input id='r893-host-csv-id' value={hostTraceId} onChange={e=>setHostTraceId(e.currentTarget.value)} placeholder='Local CSV UUID' style={{width:320,maxWidth:'100%'}}/>{' '}<button type='button' disabled={running} onClick={()=>void recoverHostTrace(hostTraceId)}>Recover CSV</button>{' '}<span role='status'>{hostTraceStatus}</span></div>
+  {hostTraceCsv&&<div aria-label='Recovered verified host CSV'><pre style={{maxHeight:180,overflow:'auto'}}>{hostTraceCsv.split(/\\r?\\n/).slice(0,6).join('\\n')}</pre><button type='button' onClick={()=>{const url=URL.createObjectURL(new Blob([hostTraceCsv],{type:'text/csv'}));const a=document.createElement('a');a.href=url;a.download='omega-recovered-atlas.csv';a.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000)}}>Download recovered CSV</button></div>}
   {recoveredHostSvg&&<div aria-label='Recovered verified host SVG'><p>Verified local-host artifact {recoveredHostSvg.id}</p><img alt='Recovered Atlas SVG from local host' src={'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(recoveredHostSvg.content)} style={{width:'100%',maxWidth:420}}/><button type='button' onClick={()=>{const url=URL.createObjectURL(new Blob([recoveredHostSvg.content],{type:'image/svg+xml'}));const a=document.createElement('a');a.href=url;a.download=recoveredHostSvg.id+'.svg';a.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000)}}>Download recovered host SVG</button></div>}
   {executionStatus&&<p role='status'>{executionStatus}</p>}{hostPersistence&&<p role='status'>{hostPersistence}</p>}
-  {latestCsv&&<div aria-label='Computed Atlas trace preview'><p>Computed trace · address {latestCsv.address} · {latestCsv.rows} states. Inspect any computed row below; download for the complete trace.</p><label htmlFor='r886-trace-row'>Trace row (1–{latestCsv.rows})</label>{' '}<input id='r886-trace-row' type='number' min={1} max={latestCsv.rows} step={1} value={traceRow} onChange={e=>{const value=Number(e.currentTarget.value);if(Number.isInteger(value)&&value>=1&&value<=latestCsv.rows)setTraceRow(value)}} style={{width:85}}/><pre aria-label='Selected computed Atlas trace row' style={{maxHeight:180,overflow:'auto',whiteSpace:'pre',fontSize:12}}>{[latestCsv.csv.split(/\r?\n/)[0],latestCsv.csv.split(/\r?\n/)[traceRow]].join('\n')}</pre><button type='button' onClick={downloadCsv}>Download computed trace CSV · {latestCsv.rows} states</button></div>}
+  {latestCsv&&<div aria-label='Computed Atlas trace preview'><p>Computed trace · address {latestCsv.address} · {latestCsv.rows} states. Inspect any computed row below; download for the complete trace.</p><label htmlFor='r886-trace-row'>Trace row (1–{latestCsv.rows})</label>{' '}<input id='r886-trace-row' type='number' min={1} max={latestCsv.rows} step={1} value={traceRow} onChange={e=>{const value=Number(e.currentTarget.value);if(Number.isInteger(value)&&value>=1&&value<=latestCsv.rows)setTraceRow(value)}} style={{width:85}}/><pre aria-label='Selected computed Atlas trace row' style={{maxHeight:180,overflow:'auto',whiteSpace:'pre',fontSize:12}}>{[latestCsv.csv.split(/\r?\n/)[0],latestCsv.csv.split(/\r?\n/)[traceRow]].join('\n')}</pre><button type='button' onClick={downloadCsv}>Download computed trace CSV · {latestCsv.rows} states</button>{' '}<button type='button' disabled={running} onClick={()=>void persistTraceToHost()}>Save full trace CSV to local host</button></div>}
   {error&&<p role='alert'>{error}</p>}
   {items.map(a=><article key={a.id} style={{padding:'12px 0',borderTop:'1px solid #56718a'}}><strong>Atlas · {a.provenance.stateCount} states</strong> <small>{a.createdAt} · addresses {a.provenance.addressStart}–{a.provenance.addressEnd} · MODEL_DERIVED</small><div><img alt={'Saved model traversal '+a.id} src={'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(a.payload)} style={{width:'100%',maxWidth:420}}/></div><button type='button' onClick={()=>{const url=URL.createObjectURL(new Blob([a.payload],{type:a.mediaType}));const link=document.createElement('a');link.href=url;link.download=a.id+'.svg';link.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000)}}>Download SVG</button>{' '}<button type='button' disabled={running} aria-label={'Persist Atlas SVG to local host '+a.id} onClick={()=>void persistToLocalHost(a)}>Persist SVG to local host</button>{' '}<button type='button' disabled={running} aria-label={'Recover verified CSV trace '+a.id} onClick={()=>void recoverSavedTrace(a)}>Recover verified CSV trace</button>{' '}<button type='button' aria-label={'Remove saved artifact '+a.id} onClick={()=>removeSaved(a.id)}>Remove saved artifact</button></article>)}
  </section>;
