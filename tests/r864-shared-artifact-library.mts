@@ -147,3 +147,16 @@ test('R905 executed route CSV is bounded, persisted to local host, read back and
  assert.match(lib,/setSavedRouteReceipt\(receipt\.id\)/);
  assert.match(lib,/finally\{executionLease\.current=false;setRunning\(false\)\}/);
 });
+
+test('R908 computed route projection exports a standalone bounded DER SVG from executed route addresses',()=>{
+ assert.match(lib,/const downloadRouteProjectionSvg=\(\)=>/);
+ assert.match(lib,/addresses\.length<1\|\|addresses\.length>256/);
+ assert.match(lib,/addresses\.some\(a=>!Number\.isInteger\(a\)\|\|a<0\|\|a>=20736\)/);
+ assert.match(lib,/const points=addresses\.map/);
+ assert.match(lib,/const dots=addresses\.map/);
+ assert.match(lib,/xmlns="http:\/\/www\.w3\.org\/2000\/svg"/);
+ assert.match(lib,/DER model-derived address-phase projection/);
+ assert.match(lib,/new Blob\(\[svg\],\{type:'image\/svg\+xml;charset=utf-8'\}\)/);
+ assert.match(lib,/onClick=\{downloadRouteProjectionSvg\}/);
+ assert.match(lib,/Download deterministic route projection SVG/);
+});
