@@ -50,3 +50,27 @@ test('R881 missing build rejects startup',async()=>{
  const dir=await mkdtemp(join(tmpdir(),'omega-r881-'));
  try{await assert.rejects(startDesktopServer({root:dir}),/index\.html/);}finally{await rm(dir,{recursive:true,force:true});}
 });
+
+test('R887 local artifact survives host restart with exact content and rejects invalid input',async()=>{
+ const dir=await mkdtemp(join(tmpdir(),'omega-r887-'));
+ const dist=join(dir,'dist'),stateRoot=join(dir,'private-state');
+ await mkdir(dist);await writeFile(join(dist,'index.html'),'<html>OMEGA</html>');
+ let server;
+ try{
+  let started=await startDesktopServer({root:dist,stateRoot});server=started.server;
+  const created=await fetch(started.url+'__omega_local/artifacts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:'atlas_trace',content:'source-derived trace 20736'})});
+  assert.equal(created.status,201);const receipt=await created.json();
+  assert.match(receipt.contentSha256,/^[a-f0-9]{64}$/);
+  const loaded=await fetch(started.url+'__omega_local/artifacts/'+receipt.id).then(r=>r.json());
+  assert.equal(loaded.content,'source-derived trace 20736');
+  assert.equal(loaded.canonicalMutation,false);
+  assert.equal((await fetch(started.url+'__omega_local/artifacts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:'../../bad',content:'x'})})).status,422);
+  assert.equal((await fetch(started.url+'__omega_local/artifacts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:'trace',content:'x'.repeat(70000)})})).status,413);
+  assert.equal((await fetch(started.url+'__omega_local/artifacts/not-an-id')).status,400);
+  await new Promise(ok=>server.close(ok));server=null;
+  started=await startDesktopServer({root:dist,stateRoot});server=started.server;
+  const recovered=await fetch(started.url+'__omega_local/artifacts/'+receipt.id);
+  assert.equal(recovered.status,200);
+  assert.equal((await recovered.json()).contentSha256,receipt.contentSha256);
+ }finally{if(server)await new Promise(ok=>server.close(ok));await rm(dir,{recursive:true,force:true});}
+});
