@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {getMandala20736Field} from '../src/mandala20736Runtime';
-import {exportFullAtlasCsvR896,inspectAtlasAddressR897,traceAtlasRouteR899,exportAtlasRouteCsvR900} from '../src7/workspaces/omegaFullAtlasExportR896';
+import {exportFullAtlasCsvR896,inspectAtlasAddressR897,traceAtlasRouteR899,exportAtlasRouteCsvR900,summarizeAtlasRouteR901} from '../src7/workspaces/omegaFullAtlasExportR896';
 
 const field=await getMandala20736Field();
 const csv=exportFullAtlasCsvR896(field);
@@ -64,3 +64,14 @@ assert.equal(exportAtlasRouteCsvR900({...field,routeNext:selfRoute},cycle).split
 assert.throws(()=>exportAtlasRouteCsvR900(field,{...trace,addresses:[12,12]}),/repeats|Discontinuous/);
 assert.throws(()=>exportAtlasRouteCsvR900(field,{...trace,cycleAt:256}),/Invalid cycle index/);
 console.log('R900: full-field route CSV and cycle metadata validated');
+
+const topology=summarizeAtlasRouteR901(field,trace);
+assert.equal(topology.visited,trace.addresses.length);
+assert.equal(topology.cycleLength,trace.cycleAt===null?null:trace.addresses.length-trace.cycleAt);
+assert.equal(topology.transientLength,trace.cycleAt);
+assert.ok(Number.isFinite(topology.meanStepDistance)&&topology.meanStepDistance>=0);
+assert.ok(Number.isFinite(topology.maxStepDistance)&&topology.maxStepDistance>=topology.meanStepDistance);
+const oneState=summarizeAtlasRouteR901({...field,routeNext:selfRoute},cycle);
+assert.deepEqual(oneState,{visited:1,cycleLength:1,transientLength:0,meanStepDistance:0,maxStepDistance:0});
+assert.throws(()=>summarizeAtlasRouteR901(field,{...trace,addresses:[12,12]}),/repeats|Discontinuous/);
+console.log('R901: validated cycle topology and model-coordinate displacement summary');
