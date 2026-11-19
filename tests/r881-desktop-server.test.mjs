@@ -61,6 +61,15 @@ test('R887 local artifact survives host restart with exact content and rejects i
   const created=await fetch(started.url+'__omega_local/artifacts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:'atlas_trace',content:'source-derived trace 20736'})});
   assert.equal(created.status,201);const receipt=await created.json();
   assert.match(receipt.contentSha256,/^[a-f0-9]{64}$/);
+  const indexResponse=await fetch(started.url+'__omega_local/artifacts');
+  assert.equal(indexResponse.status,200);
+  const index=await indexResponse.json();
+  assert.equal(index.schema,'OMEGA_LOCAL_ARTIFACT_INDEX_R891');
+  assert.equal(index.items.length,1);
+  assert.equal(index.items[0].id,receipt.id);
+  assert.equal(index.items[0].contentSha256,receipt.contentSha256);
+  assert.equal(Object.hasOwn(index.items[0],'content'),false);
+  assert.equal((await fetch(started.url+'__omega_local/artifacts',{method:'HEAD'})).status,200);
   const loaded=await fetch(started.url+'__omega_local/artifacts/'+receipt.id).then(r=>r.json());
   assert.equal(loaded.content,'source-derived trace 20736');
   assert.equal(loaded.canonicalMutation,false);
@@ -69,6 +78,8 @@ test('R887 local artifact survives host restart with exact content and rejects i
   assert.equal((await fetch(started.url+'__omega_local/artifacts/not-an-id')).status,400);
   await new Promise(ok=>server.close(ok));server=null;
   started=await startDesktopServer({root:dist,stateRoot});server=started.server;
+  const restartedIndex=await fetch(started.url+'__omega_local/artifacts').then(r=>r.json());
+  assert.equal(restartedIndex.items[0].id,receipt.id);
   const recovered=await fetch(started.url+'__omega_local/artifacts/'+receipt.id);
   assert.equal(recovered.status,200);
   assert.equal((await recovered.json()).contentSha256,receipt.contentSha256);
