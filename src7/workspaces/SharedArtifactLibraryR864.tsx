@@ -134,7 +134,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
    const bytes=new TextEncoder().encode(csv);
    const sha256=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))).map(n=>n.toString(16).padStart(2,'0')).join('');
    const manifest={schema:'omega.atlas.route.provenance.v1',artifact:'omega-atlas-route-'+routeTrace.addresses[0]+'.csv',sha256,byteLength:bytes.length,route:{start:routeTrace.addresses[0],addresses:routeTrace.addresses,cycleAt:routeTrace.cycleAt,truncated:routeTrace.truncated},provenance:{tier:'DER',execution:'BROWSER_LOCAL_COMPUTED',source:'compiled_20736_address_model',physicalDimensions:false,physicalMeasurement:false,nativeDeviceAcceptance:false,externalValidation:false},admission:{status:'SCOPED_MODEL_OUTPUT',canonPromotion:false,orionGate:'HOLD_RULE_SOURCE_NEEDED',tit:'OPEN_CANDIDATE'}};
-   const url=URL.createObjectURL(new Blob([JSON.stringify(manifest,null,2)+'\\n'],{type:'application/json'}));
+   const url=URL.createObjectURL(new Blob([JSON.stringify(manifest,null,2)],{type:'application/json'}));
    const link=document.createElement('a');link.href=url;link.download='omega-atlas-route-'+routeTrace.addresses[0]+'.provenance.json';link.click();
    window.setTimeout(()=>URL.revokeObjectURL(url),1000);
    setExecutionStatus('Exported route provenance with SHA-256 CSV digest and explicit model-only admission boundaries.');
