@@ -1,7 +1,7 @@
 import {useEffect,useRef,useState} from 'react';
 import {getMandala20736Field} from '../../src/mandala20736Runtime';
 import {executeAtlasArtifactR865} from './omegaAtlasArtifactExecutorR865';
-import {exportFullAtlasCsvR896,inspectAtlasAddressR897,traceAtlasRouteR899} from './omegaFullAtlasExportR896';
+import {exportFullAtlasCsvR896,inspectAtlasAddressR897,traceAtlasRouteR899,exportAtlasRouteCsvR900} from './omegaFullAtlasExportR896';
 import {appendArtifactR862,notifyArtifactChangeR867,OMEGA_ARTIFACT_CHANGED_R867} from './omegaArtifactSpineR862';
 import {OMEGA_ARTIFACT_STORAGE_R862,decodeArtifactsR862,exportArtifactBundleR863,importArtifactBundleR863,type OmegaArtifactR862} from './omegaArtifactSpineR862';
 /** R864: one browser-local artifact collection consumed by Atlas, Projects and Assets. */
@@ -36,6 +36,19 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
  };
  const [routeTrace,setRouteTrace]=useState<{addresses:number[];cycleAt:number|null;truncated:boolean}|null>(null);
  const [routeSteps,setRouteSteps]=useState('32');
+ const downloadRouteCsv=async()=>{
+  if(!routeTrace||executionLease.current)return;
+  executionLease.current=true;setRunning(true);setError('');
+  try{
+   const field=await getMandala20736Field();
+   const csv=exportAtlasRouteCsvR900(field,routeTrace);
+   const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+   const link=document.createElement('a');link.href=url;link.download='omega-atlas-route-'+routeTrace.addresses[0]+'.csv';link.click();
+   window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+   setExecutionStatus('Exported '+routeTrace.addresses.length+' validated route states and computed field values.');
+  }catch(e){setError('Route CSV export rejected: '+String(e))}finally{executionLease.current=false;setRunning(false)}
+ };
+
  const executeRouteTrace=async()=>{
   if(executionLease.current)return;
   executionLease.current=true;setRunning(true);setError('');setRouteTrace(null);
@@ -199,7 +212,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
   <div><label htmlFor='r893-host-csv-id'>Recover saved Atlas CSV</label>{' '}<input id='r893-host-csv-id' value={hostTraceId} onChange={e=>setHostTraceId(e.currentTarget.value)} placeholder='Local CSV UUID' style={{width:320,maxWidth:'100%'}}/>{' '}<button type='button' disabled={running} onClick={()=>void recoverHostTrace(hostTraceId)}>Recover CSV</button>{' '}<span role='status'>{hostTraceStatus}</span></div>
   {hostTraceCsv&&<div aria-label='Recovered verified host CSV'><pre style={{maxHeight:180,overflow:'auto'}}>{hostTraceCsv.split(/\r?\n/).slice(0,6).join('\n')}</pre><button type='button' onClick={()=>{const url=URL.createObjectURL(new Blob([hostTraceCsv],{type:'text/csv'}));const a=document.createElement('a');a.href=url;a.download='omega-recovered-atlas.csv';a.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000)}}>Download recovered CSV</button></div>}
   {recoveredHostSvg&&<div aria-label='Recovered verified host SVG'><p>Verified local-host artifact {recoveredHostSvg.id}</p><img alt='Recovered Atlas SVG from local host' src={'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(recoveredHostSvg.content)} style={{width:'100%',maxWidth:420}}/><button type='button' onClick={()=>{const url=URL.createObjectURL(new Blob([recoveredHostSvg.content],{type:'image/svg+xml'}));const a=document.createElement('a');a.href=url;a.download=recoveredHostSvg.id+'.svg';a.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000)}}>Download recovered host SVG</button></div>}
-  {routeTrace&&<div aria-label='Computed Atlas route trace'><h3>Compiled route · {routeTrace.addresses.length} visited states</h3><p>{routeTrace.cycleAt!==null?'Cycle returns to visited step '+(routeTrace.cycleAt+1):routeTrace.truncated?'Step limit reached':'Route ended'}. Select any address to inspect its 22 computed fields.</p><div style={{maxHeight:220,overflow:'auto'}}>{routeTrace.addresses.map((address,index)=><button key={index} type='button' disabled={running} onClick={()=>void inspectAtlas(address)} style={{margin:3}}>{index+1}: {address}</button>)}</div></div>}
+  {routeTrace&&<div aria-label='Computed Atlas route trace'><h3>Compiled route · {routeTrace.addresses.length} visited states</h3><p>{routeTrace.cycleAt!==null?'Cycle returns to visited step '+(routeTrace.cycleAt+1):routeTrace.truncated?'Step limit reached':'Route ended'}. Select any address to inspect its 22 computed fields.</p><button type='button' disabled={running} onClick={()=>void downloadRouteCsv()}>Download route trace CSV · all computed fields</button><div style={{maxHeight:220,overflow:'auto'}}>{routeTrace.addresses.map((address,index)=><button key={index} type='button' disabled={running} onClick={()=>void inspectAtlas(address)} style={{margin:3}}>{index+1}: {address}</button>)}</div></div>}
   {inspectedAddress!==null&&<div aria-label='Compiled Atlas address inspection'><h3>Atlas address {inspectedAddress} · 22 computed fields</h3><table><thead><tr><th scope='col'>Field</th><th scope='col'>Computed value</th></tr></thead><tbody>{inspectedValues.map(item=><tr key={item.name}><th scope='row'>{item.name}</th><td>{item.value}</td></tr>)}</tbody></table><button type='button' disabled={running||inspectedAddress===0} onClick={()=>void inspectAtlas(inspectedAddress-1)}>Previous address</button>{' '}<button type='button' disabled={running||inspectedAddress===20735} onClick={()=>void inspectAtlas(inspectedAddress+1)}>Next address</button>{' '}<button type='button' disabled={running} onClick={()=>{const next=inspectedValues.find(x=>x.name==='routeNext')?.value;if(next!==undefined)void inspectAtlas(next)}}>Follow computed route</button></div>}
   {executionStatus&&<p role='status'>{executionStatus}</p>}{hostPersistence&&<p role='status'>{hostPersistence}</p>}
   {latestCsv&&<div aria-label='Computed Atlas trace preview'><p>Computed trace · address {latestCsv.address} · {latestCsv.rows} states. Inspect any computed row below; download for the complete trace.</p><label htmlFor='r886-trace-row'>Trace row (1–{latestCsv.rows})</label>{' '}<input id='r886-trace-row' type='number' min={1} max={latestCsv.rows} step={1} value={traceRow} onChange={e=>{const value=Number(e.currentTarget.value);if(Number.isInteger(value)&&value>=1&&value<=latestCsv.rows)setTraceRow(value)}} style={{width:85}}/><pre aria-label='Selected computed Atlas trace row' style={{maxHeight:180,overflow:'auto',whiteSpace:'pre',fontSize:12}}>{[latestCsv.csv.split(/\r?\n/)[0],latestCsv.csv.split(/\r?\n/)[traceRow]].join('\n')}</pre><button type='button' onClick={downloadCsv}>Download computed trace CSV · {latestCsv.rows} states</button>{' '}<button type='button' disabled={running} onClick={()=>void persistTraceToHost()}>Save full trace CSV to local host</button></div>}
