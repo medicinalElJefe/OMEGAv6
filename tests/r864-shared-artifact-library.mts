@@ -48,7 +48,8 @@ test('R870 export reads persisted artifacts at click time, not a stale component
 
 test('R871 computed trace has visible bounded on-screen preview and retains full CSV download',()=>{
  assert.match(lib,/aria-label='Computed Atlas trace preview'/);
- assert.match(lib,/latestCsv\.csv\.split\(\/\\r\?\\n\/\)\.slice\(0,6\)\.join\('\\n'\)/);
+ assert.match(lib,/aria-label='Selected computed Atlas trace row'/);
+ assert.match(lib,/latestCsv\.csv\.split\(\/\\r\?\\n\/\)\[traceRow\]/);
  assert.match(lib,/Download computed trace CSV/);
  assert.match(lib,/new Blob\(\[latestCsv\.csv\]/);
 });
@@ -72,4 +73,14 @@ test('R885 overlapping Atlas compute/replay are refused synchronously before Rea
   assert.match(body,/if\(executionLease\.current\)return;\s*executionLease\.current=true;setRunning\(true\)/);
   assert.match(body,/finally\{executionLease\.current=false;setRunning\(false\)\}/);
  }
+});
+
+
+test('R886 computed Atlas CSV supports bounded interactive row inspection across the full trace',()=>{
+ assert.match(lib,/const \[traceRow,setTraceRow\]=useState\(1\)/);
+ assert.match(lib,/id='r886-trace-row' type='number' min=\{1\} max=\{latestCsv\.rows\}/);
+ assert.match(lib,/Number\.isInteger\(value\)&&value>=1&&value<=latestCsv\.rows/);
+ assert.match(lib,/setTraceRow\(1\);setLatestCsv\(/);
+ assert.match(lib,/aria-label='Selected computed Atlas trace row'/);
+ assert.match(lib,/Download computed trace CSV/);
 });
