@@ -133,3 +133,17 @@ test('R894 local host artifact discovery restores both CSV and SVG with kind-spe
  assert.match(lib,/void discoverHostArtifacts\(\);setHostTraceStatus/);
  assert.match(lib,/hash!==record\.contentSha256/);
 });
+
+
+test('R905 executed route CSV is bounded, persisted to local host, read back and independently hashed',()=>{
+ assert.match(lib,/const persistRouteCsv=async\(\)=>/);
+ assert.match(lib,/exportAtlasRouteCsvR900\(field,routeTrace\)/);
+ assert.match(lib,/bytes\.length>32768/);
+ assert.match(lib,/kind:'atlas_csv',content:csv/);
+ assert.match(lib,/fetch\('\/__omega_local\/artifacts\/'\+encodeURIComponent\(receipt\.id\)\)/);
+ assert.match(lib,/crypto\.subtle\.digest\('SHA-256',bytes\)/);
+ assert.match(lib,/record\.id!==receipt\.id\|\|record\.kind!=='atlas_csv'\|\|record\.content!==csv\|\|record\.contentSha256!==digest\|\|receipt\.contentSha256!==digest/);
+ assert.match(lib,/Save route CSV to local host and verify/);
+ assert.match(lib,/setSavedRouteReceipt\(receipt\.id\)/);
+ assert.match(lib,/finally\{executionLease\.current=false;setRunning\(false\)\}/);
+});
