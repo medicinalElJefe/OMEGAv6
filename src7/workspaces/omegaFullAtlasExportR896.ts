@@ -71,3 +71,18 @@ export function exportAtlasRouteCsvR900(field:Mandala20736Field,trace:{addresses
  if(trace.truncated!==(trace.cycleAt===null))throw Error('Inconsistent route termination');
  return lines.join('\n')+'\n';
 }
+
+/** R901: summarize the actual executed route, preserving cycle versus step-limit semantics. */
+export function summarizeAtlasRouteR901(field:Mandala20736Field,trace:{addresses:number[];cycleAt:number|null;truncated:boolean}):{visited:number;cycleLength:number|null;transientLength:number|null;meanStepDistance:number;maxStepDistance:number}{
+ // Reuse the strict R900 continuity and termination checks before deriving metrics.
+ exportAtlasRouteCsvR900(field,trace);
+ let sum=0,max=0,edges=0;
+ for(let i=1;i<trace.addresses.length;i++){
+  const a=inspectAtlasAddressR897(field,trace.addresses[i-1]),b=inspectAtlasAddressR897(field,trace.addresses[i]);
+  const coordinate=(values:typeof a,name:string)=>values.find(item=>item.name===name)!.value;
+  const distance=Math.hypot(...(['x','y','z'] as const).map(name=>coordinate(b,name)-coordinate(a,name)));
+  if(!Number.isFinite(distance))throw Error('Invalid Atlas coordinate displacement');
+  sum+=distance;max=Math.max(max,distance);edges++;
+ }
+ return {visited:trace.addresses.length,cycleLength:trace.cycleAt===null?null:trace.addresses.length-trace.cycleAt,transientLength:trace.cycleAt,meanStepDistance:edges?sum/edges:0,maxStepDistance:max};
+}
