@@ -84,3 +84,15 @@ test('R886 computed Atlas CSV supports bounded interactive row inspection across
  assert.match(lib,/aria-label='Selected computed Atlas trace row'/);
  assert.match(lib,/Download computed trace CSV/);
 });
+
+test('R888 Atlas SVG persistence uses bounded local-host POST and verified readback, retaining browser artifacts on failure',()=>{
+ assert.match(lib,/const persistToLocalHost=async\(saved:OmegaArtifactR862\)/);
+ assert.match(lib,/if\(executionLease\.current\)return/);
+ assert.match(lib,/new TextEncoder\(\)\.encode\(saved\.payload\)\.length>32768/);
+ assert.match(lib,/fetch\('\/__omega_local\/artifacts',\{method:'POST'/);
+ assert.match(lib,/fetch\('\/__omega_local\/artifacts\/'\+encodeURIComponent\(receipt\.id\)\)/);
+ assert.match(lib,/record\.content!==saved\.payload\|\|record\.contentSha256!==receipt\.contentSha256/);
+ assert.match(lib,/Browser artifact remains available/);
+ assert.match(lib,/finally\{executionLease\.current=false;setRunning\(false\)\}/);
+ assert.match(lib,/Persist SVG to local host/);
+});
