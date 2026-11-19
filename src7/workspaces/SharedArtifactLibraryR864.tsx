@@ -1,7 +1,7 @@
 import {useEffect,useRef,useState} from 'react';
 import {getMandala20736Field} from '../../src/mandala20736Runtime';
 import {executeAtlasArtifactR865} from './omegaAtlasArtifactExecutorR865';
-import {exportFullAtlasCsvR896,inspectAtlasAddressR897,traceAtlasRouteR899,exportAtlasRouteCsvR900,summarizeAtlasRouteR901} from './omegaFullAtlasExportR896';
+import {exportFullAtlasCsvR896,inspectAtlasAddressR897,traceAtlasRouteR899,exportAtlasRouteCsvR900,summarizeAtlasRouteR901,compareAtlasRoutesR902} from './omegaFullAtlasExportR896';
 import {appendArtifactR862,notifyArtifactChangeR867,OMEGA_ARTIFACT_CHANGED_R867} from './omegaArtifactSpineR862';
 import {OMEGA_ARTIFACT_STORAGE_R862,decodeArtifactsR862,exportArtifactBundleR863,importArtifactBundleR863,type OmegaArtifactR862} from './omegaArtifactSpineR862';
 /** R864: one browser-local artifact collection consumed by Atlas, Projects and Assets. */
@@ -36,6 +36,8 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
  };
  const [routeTrace,setRouteTrace]=useState<{addresses:number[];cycleAt:number|null;truncated:boolean}|null>(null);
  const [routeSteps,setRouteSteps]=useState('32');
+ const [compareAddress,setCompareAddress]=useState('0');
+ const [routeComparison,setRouteComparison]=useState<ReturnType<typeof compareAtlasRoutesR902>|null>(null);
  const [routeSummary,setRouteSummary]=useState<ReturnType<typeof summarizeAtlasRouteR901>|null>(null);
  const downloadRouteCsv=async()=>{
   if(!routeTrace||executionLease.current)return;
@@ -60,6 +62,18 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
    setRouteSummary(summarizeAtlasRouteR901(field,trace));setRouteTrace(trace);
    setExecutionStatus('Executed '+trace.addresses.length+' compiled route states. Model-derived route, not geographic navigation.');
   }catch(e){setError('Atlas route execution rejected: '+String(e))}finally{executionLease.current=false;setRunning(false)}
+ };
+ const compareRoutes=async()=>{
+  if(executionLease.current||!routeTrace)return;
+  executionLease.current=true;setRunning(true);setError('');setRouteComparison(null);
+  try{
+   if(compareAddress.trim()==='')throw Error('Enter a comparison address');
+   const field=await getMandala20736Field();
+   const other=traceAtlasRouteR899(field,Number(compareAddress),Number(routeSteps));
+   const comparison=compareAtlasRoutesR902(field,routeTrace,other);
+   setRouteComparison(comparison);
+   setExecutionStatus('Compared two validated compiled Atlas routes. Overlap is model graph topology, not physical proximity.');
+  }catch(e){setError('Route comparison rejected: '+String(e))}finally{executionLease.current=false;setRunning(false)}
  };
  const [inspectedAddress,setInspectedAddress]=useState<number|null>(null);
  const [inspectedValues,setInspectedValues]=useState<Array<{name:string;value:number}>>([]);
@@ -214,6 +228,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
   {hostTraceCsv&&<div aria-label='Recovered verified host CSV'><pre style={{maxHeight:180,overflow:'auto'}}>{hostTraceCsv.split(/\r?\n/).slice(0,6).join('\n')}</pre><button type='button' onClick={()=>{const url=URL.createObjectURL(new Blob([hostTraceCsv],{type:'text/csv'}));const a=document.createElement('a');a.href=url;a.download='omega-recovered-atlas.csv';a.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000)}}>Download recovered CSV</button></div>}
   {recoveredHostSvg&&<div aria-label='Recovered verified host SVG'><p>Verified local-host artifact {recoveredHostSvg.id}</p><img alt='Recovered Atlas SVG from local host' src={'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(recoveredHostSvg.content)} style={{width:'100%',maxWidth:420}}/><button type='button' onClick={()=>{const url=URL.createObjectURL(new Blob([recoveredHostSvg.content],{type:'image/svg+xml'}));const a=document.createElement('a');a.href=url;a.download=recoveredHostSvg.id+'.svg';a.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000)}}>Download recovered host SVG</button></div>}
   {routeTrace&&<div aria-label='Computed Atlas route trace'><h3>Compiled route · {routeTrace.addresses.length} visited states</h3><p>{routeTrace.cycleAt!==null?'Cycle returns to visited step '+(routeTrace.cycleAt+1):routeTrace.truncated?'Step limit reached':'Route ended'}. Select any address to inspect its 22 computed fields.</p>{routeSummary&&<p aria-label='Atlas route topology summary'>Unique visited addresses: {routeSummary.visited}. {routeSummary.cycleLength===null?'No cycle observed within step limit.':'Cycle length: '+routeSummary.cycleLength+'; pre-cycle steps: '+routeSummary.transientLength+'.'} Mean consecutive model-coordinate displacement: {routeSummary.meanStepDistance.toFixed(6)}; maximum: {routeSummary.maxStepDistance.toFixed(6)}. These are compiled coordinate differences, not measured physical distances.</p>}<button type='button' disabled={running} onClick={()=>void downloadRouteCsv()}>Download route trace CSV · all computed fields</button><div style={{maxHeight:220,overflow:'auto'}}>{routeTrace.addresses.map((address,index)=><button key={index} type='button' disabled={running} onClick={()=>void inspectAtlas(address)} style={{margin:3}}>{index+1}: {address}</button>)}</div></div>}
+  {routeTrace&&<div aria-label='Compare compiled Atlas routes'><label htmlFor='r902-compare-address'>Second route start address</label>{' '}<input id='r902-compare-address' type='number' min={0} max={20735} step={1} value={compareAddress} disabled={running} onChange={e=>setCompareAddress(e.currentTarget.value)} style={{width:110}}/>{' '}<button type='button' disabled={running} onClick={()=>void compareRoutes()}>Compare route overlap</button>{routeComparison&&<p role='status'>Shared addresses: {routeComparison.sharedAddresses}; first-only: {routeComparison.firstOnly}; second-only: {routeComparison.secondOnly}; common initial steps: {routeComparison.commonPrefix}; first shared step: {routeComparison.firstSharedStep??'none'}; second shared step: {routeComparison.secondSharedStep??'none'}. First cycle length: {routeComparison.firstCycleLength??'not observed'}; second: {routeComparison.secondCycleLength??'not observed'}. Model-derived topology only.</p>}</div>}
   {inspectedAddress!==null&&<div aria-label='Compiled Atlas address inspection'><h3>Atlas address {inspectedAddress} · 22 computed fields</h3><table><thead><tr><th scope='col'>Field</th><th scope='col'>Computed value</th></tr></thead><tbody>{inspectedValues.map(item=><tr key={item.name}><th scope='row'>{item.name}</th><td>{item.value}</td></tr>)}</tbody></table><button type='button' disabled={running||inspectedAddress===0} onClick={()=>void inspectAtlas(inspectedAddress-1)}>Previous address</button>{' '}<button type='button' disabled={running||inspectedAddress===20735} onClick={()=>void inspectAtlas(inspectedAddress+1)}>Next address</button>{' '}<button type='button' disabled={running} onClick={()=>{const next=inspectedValues.find(x=>x.name==='routeNext')?.value;if(next!==undefined)void inspectAtlas(next)}}>Follow computed route</button></div>}
   {executionStatus&&<p role='status'>{executionStatus}</p>}{hostPersistence&&<p role='status'>{hostPersistence}</p>}
   {latestCsv&&<div aria-label='Computed Atlas trace preview'><p>Computed trace · address {latestCsv.address} · {latestCsv.rows} states. Inspect any computed row below; download for the complete trace.</p><label htmlFor='r886-trace-row'>Trace row (1–{latestCsv.rows})</label>{' '}<input id='r886-trace-row' type='number' min={1} max={latestCsv.rows} step={1} value={traceRow} onChange={e=>{const value=Number(e.currentTarget.value);if(Number.isInteger(value)&&value>=1&&value<=latestCsv.rows)setTraceRow(value)}} style={{width:85}}/><pre aria-label='Selected computed Atlas trace row' style={{maxHeight:180,overflow:'auto',whiteSpace:'pre',fontSize:12}}>{[latestCsv.csv.split(/\r?\n/)[0],latestCsv.csv.split(/\r?\n/)[traceRow]].join('\n')}</pre><button type='button' onClick={downloadCsv}>Download computed trace CSV · {latestCsv.rows} states</button>{' '}<button type='button' disabled={running} onClick={()=>void persistTraceToHost()}>Save full trace CSV to local host</button></div>}
