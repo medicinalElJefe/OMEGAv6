@@ -17,3 +17,16 @@ export function exportFullAtlasCsvR896(field:Mandala20736Field):string{
  }
  return lines.join('\n')+'\n';
 }
+
+/** R897: inspect one real compiled Atlas address without exporting a 20,736-row file. */
+export function inspectAtlasAddressR897(field:Mandala20736Field,address:number):Array<{name:string;value:number}>{
+ if(field.count!==20736||!Number.isInteger(address)||address<0||address>=field.count)throw Error('Atlas address must be 0–20735');
+ const keys=['x','y','z','phase','C','Phi','q','Lambda','scar','evidence','rsc','geometry','motion','symmetry','forecast','route','continuityGate','motionDrive','velocity','acceleration','routeNext','domain'] as const;
+ return keys.map(name=>{
+  if(field[name].length!==field.count)throw Error('Incomplete Atlas field: '+name);
+  const value=field[name][address];
+  if(!Number.isFinite(value))throw Error('Nonfinite Atlas field '+name+' at address '+address);
+  if(name==='routeNext'&&(!Number.isInteger(value)||value<0||value>=field.count))throw Error('Invalid route target at '+address);
+  return {name,value};
+ });
+}
