@@ -86,7 +86,8 @@ test('R887 local artifact survives host restart with exact content and rejects i
   await new Promise(ok=>server.close(ok));server=null;
   started=await startDesktopServer({root:dist,stateRoot});server=started.server;
   const restartedIndex=await fetch(started.url+'__omega_local/artifacts').then(r=>r.json());
-  assert.equal(restartedIndex.items[0].id,receipt.id);
+  assert.deepEqual(new Set(restartedIndex.items.map(item=>item.id)),new Set([receipt.id,csvReceipt.id]));
+  assert.equal(restartedIndex.items.find(item=>item.id===csvReceipt.id)?.kind,'atlas_csv');
   const recovered=await fetch(started.url+'__omega_local/artifacts/'+receipt.id);
   assert.equal(recovered.status,200);
   assert.equal((await recovered.json()).contentSha256,receipt.contentSha256);
