@@ -108,3 +108,8 @@ test('R889 saved host SVG can be recovered by receipt UUID with independent SHA-
  assert.match(lib,/Download recovered host SVG/);
  assert.match(lib,/finally\{executionLease\.current=false;setRunning\(false\)\}/);
 });
+
+test('R890 persistence receipt must independently match SHA-256 of the actual submitted SVG',()=>{
+ assert.match(lib,/const localSha256=Array\.from\(new Uint8Array\(await crypto\.subtle\.digest\('SHA-256',new TextEncoder\(\)\.encode\(saved\.payload\)\)\)\)/);
+ assert.match(lib,/if\(localSha256!==receipt\.contentSha256\)throw Error\('Host persistence receipt does not match independently hashed SVG'\)/);
+});
