@@ -14,7 +14,8 @@ import math
 from pathlib import Path
 
 SCHEMA = "OMEGA_FALSIFICATION_HARNESS_R884"
-QCD_GATES = tuple(f"OMEGAJ-{n:04d}" for n in range(91,101))
+QCD_GATES = tuple(f"ΩJ-{n:04d}" for n in range(91,101))
+QCD_ALIASES = {**{f"OMEGAJ-{n:04d}":f"ΩJ-{n:04d}" for n in range(91,101)}, **{f"T{n:02d}":f"ΩJ-{n+90:04d}" for n in range(1,11)}}
 EMPIRICAL_INTERFACES = tuple(f"O{n:03d}" for n in range(1,15))
 EXTERNAL_EQUATIONS = tuple(f"E{n:03d}" for n in range(28,54))
 HYPOTHESES_INCLUSIVE = tuple(f"R{n:04d}" for n in range(209,224))
@@ -46,8 +47,9 @@ def held(gate,state,reason,extra=None):
 def run_gate(root,registration):
     root=Path(root).resolve()
     if not isinstance(registration,dict):return held("UNKNOWN","REGISTRATION_REQUIRED","Must supply an explicit registration object.")
-    gate=registration.get("gate")
-    if gate not in ALL_GATES:return held(str(gate),"UNKNOWN_GATE_HELD","Only enumerated QCD/empirical gates are accepted; no invented test IDs.")
+    submitted_gate=registration.get("gate")
+    gate=QCD_ALIASES.get(submitted_gate,submitted_gate)
+    if gate not in ALL_GATES:return held(str(submitted_gate),"UNKNOWN_GATE_HELD","Only enumerated QCD/empirical gates are accepted; no invented test IDs.")
     required=["source_rule_ref","dataset_path","dataset_sha256","dataset_version","commit_sha","preregistered_at",
               "target_column","prediction_column","split_column","train_label","test_label","null_model","minimum_test_n",
               "improvement_margin","falsification_excess_margin"]
@@ -101,7 +103,7 @@ def run_gate(root,registration):
     except (OSError,ValueError,UnicodeError,csv.Error) as e:
         return held(gate,"SOURCE_READ_FAILED",str(e))
 def registry():
-    return {"schema":SCHEMA,"gates":ALL_GATES,"qcdCoherence":QCD_GATES,"empiricalInterfaces":EMPIRICAL_INTERFACES,
+    return {"schema":SCHEMA,"gates":ALL_GATES,"qcdCoherence":QCD_GATES,"gateAliases":QCD_ALIASES,"empiricalInterfaces":EMPIRICAL_INTERFACES,
         "externalEquations":EXTERNAL_EQUATIONS,"hypothesisNames":HYPOTHESES_INCLUSIVE,
         "hypothesisCountDeclared":14,"hypothesisCountInclusiveActually":len(HYPOTHESES_INCLUSIVE),
         "hypothesisMismatch":"R0209..R0223 inclusive defines 15 identifiers, not 14; source must disambiguate.",
