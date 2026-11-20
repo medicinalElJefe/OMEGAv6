@@ -35,7 +35,7 @@ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'omega-r885-'));
 try {
  for(const [scenario,code,expectedCalls] of [
   ['immediate',0,1],['delayed',0,2],['persistent',1,30],
-  ['unknown_error',1,1],['superseded',75,1]
+  ['unknown_error',1,1],['api_envelope',1,1],['malformed',1,1],['superseded',75,1]
  ]){
   const counter=path.join(dir,scenario);
   fs.writeFileSync(counter,'0');
@@ -55,6 +55,8 @@ try {
    '  n=$((n+1))',
    '  printf "%s" "$n" > "$COUNTER_FILE"',
    '  if [[ "$TEST_SCENARIO" == "unknown_error" ]]; then echo "AUTHORIZATION_REVOKED [code: 10000]" >&2; return 1; fi',
+   '  if [[ "$TEST_SCENARIO" == "api_envelope" ]]; then printf "%s\\n" \'{"success":false,"result":[{"id":"7704df6f-543f-4d45-b91d-64ba7429fa8d"}]}\'; return 0; fi',
+   '  if [[ "$TEST_SCENARIO" == "malformed" ]]; then printf "%s\\n" \'not-json\'; return 0; fi',
    '  if [[ "$TEST_SCENARIO" == "persistent" ]] || [[ "$TEST_SCENARIO" == "delayed" && "$n" == "1" ]] || [[ "$TEST_SCENARIO" == "superseded" ]]; then',
    '    printf "%s\\n" \'[{"id":"8b9e349e-6ce5-460d-8bd1-329dc782f77e"}]\'',
    '  else',
@@ -72,6 +74,7 @@ try {
   assert.equal(Number(fs.readFileSync(counter,'utf8')),expectedCalls,'unexpected probe count '+scenario);
   if(scenario==='persistent')assert.ok(output.stdout.includes('R885 VERSION NOT REGISTERED'));
   if(scenario==='unknown_error')assert.ok(output.stdout.includes('VERSION LIST HARD ERROR'));
+  if(['api_envelope','malformed'].includes(scenario))assert.ok(output.stdout.includes('VERSION LIST INVALID'));
  }
 } finally {
  fs.rmSync(dir,{recursive:true,force:true});
