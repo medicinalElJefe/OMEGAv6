@@ -220,10 +220,18 @@ def serve(hub,token,port):
                 self.send_header("Access-Control-Allow-Origin",origin);self.send_header("Vary","Origin")
                 self.send_header("Access-Control-Allow-Headers","Content-Type,X-Omega-Local-Token")
                 self.send_header("Access-Control-Allow-Methods","GET,POST,OPTIONS")
+                self.send_header("Access-Control-Allow-Private-Network","true")
             self.send_header("Content-Length",str(len(data)));self.end_headers();self.wfile.write(data)
-        def _authorized(self): return hmac.compare_digest(self.headers.get("X-Omega-Local-Token",""),token)
+        def _valid_host(self):
+            port=self.server.server_address[1]
+            return self.headers.get("Host","").lower() in (f"127.0.0.1:{port}",f"localhost:{port}")
+        def _valid_origin(self):
+            origin=self.headers.get("Origin","")
+            return not origin or origin in ALLOWED_ORIGINS
+        def _authorized(self):
+            return self._valid_host() and self._valid_origin() and hmac.compare_digest(self.headers.get("X-Omega-Local-Token",""),token)
         def do_OPTIONS(self):
-            if self.headers.get("Origin","") not in ALLOWED_ORIGINS:self._send({"ok":False,"state":"ORIGIN_HELD"},403)
+            if not self._valid_host() or self.headers.get("Origin","") not in ALLOWED_ORIGINS:self._send({"ok":False,"state":"ORIGIN_OR_HOST_HELD"},403)
             else:self._send({"ok":True,"state":"PREFLIGHT_ONLY"})
         def do_GET(self):
             if not self._authorized():return self._send({"ok":False,"state":"AUTH_REQUIRED"},401)
