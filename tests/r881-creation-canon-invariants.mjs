@@ -1,0 +1,38 @@
+import assert from 'node:assert/strict';
+import {rowIdR881,coordinatesR881,antipodeR881,turnR881,cycleR881,gateR881,statePacketR881,scopedScoreR881,verifyLedgerSplitR881,atlasR881,byteReceiptR881,disclosureR881} from '../src/system/creationCanonR881.mjs';
+import {creationStudioApiR881} from '../src/system/creationStudioApiR881.mjs';
+for(let n=0;n<20736;n++){
+ const c=coordinatesR881(n);
+ assert.equal(rowIdR881(c),n,'reversible address');
+ assert.equal(antipodeR881(antipodeR881(n)),n,'antipode involution');
+ assert.equal(turnR881(n,12),n,'T12 closure');
+ assert.equal(turnR881(turnR881(n,5),7),n,'T12 composition');
+}
+assert.deepEqual(cycleR881(27,24),{step:27,active_steps:24,skipped:3,phase:'Declare',phaseIndex:0,microLoop188:24});
+assert.equal(gateR881({id:'ORION_GATE',verified:true,proofReceipt:'forged'}).state,'HOLD_RULE_SOURCE_NEEDED');
+assert.equal(gateR881({id:'R170'}).state,'POLICY_BLOCKED_BRANCH_HELD');
+assert.equal(gateR881({id:'CF-N0001'}).state,'OPEN_CANDIDATE');
+assert.equal(gateR881({id:'unknown'}).state,'HOLD_EVIDENCE_REQUIRED');
+assert.equal(scopedScoreR881({variant:'S_dec',version:'v1',value:2}).scopeLocked,true);
+assert.equal(scopedScoreR881({variant:'universal',version:'v1',value:2}).ok,false);
+assert.equal(scopedScoreR881({variant:'S_orion',version:'',value:2}).ok,false);
+assert.equal(verifyLedgerSplitR881(null).state,'SOURCE_LEDGER_BYTES_REQUIRED');
+assert.equal(verifyLedgerSplitR881([{id:'x',tier:'DERIVED_OR_SCOPED'},{id:'x',tier:'DERIVED_OR_SCOPED'}]).ok,false);
+assert.equal(verifyLedgerSplitR881([{id:'x',tier:'DERIVED_OR_SCOPED'}]).ok,false);
+const packet={time:'2026-11-19T01:00:00Z',units:'m',frame_id:'WGS84_LOCAL_ENU',O_observer:'declared',sigma_orientation:-1,theta_bearing:0,version:'R881',provenance:'DER',step:25,active_steps:23,address:20735};
+assert.equal(statePacketR881(packet).ok,true);assert.equal(statePacketR881({...packet,active_steps:26}).ok,false);
+assert.equal(statePacketR881({...packet,provenance:'MAGIC'}).ok,false);
+const disc=disclosureR881();assert.equal(disc.sourceReported.total,7655);assert.equal(disc.nativePcAccepted,false);
+assert.equal(atlasR881(0).dimension_20736_is_physical_claim,false);
+const receipt=await byteReceiptR881('hello');
+assert.equal(receipt.byteSize,5);assert.equal(receipt.sha256,'2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824');
+let response=await creationStudioApiR881(new Request('https://test.invalid/api/creation-studio/atlas?row=20735'));
+assert.equal(response.status,200);assert.equal((await response.json()).record.rowId,20735);
+response=await creationStudioApiR881(new Request('https://test.invalid/api/creation-studio/atlas?row=20736'));
+assert.equal(response.status,400);
+response=await creationStudioApiR881(new Request('https://test.invalid/api/creation-studio/disclosure',{method:'POST'}));
+assert.equal(response.status,405);
+response=await creationStudioApiR881(new Request('https://test.invalid/api/creation-studio/gate?id=ORION_GATE'));
+assert.equal((await response.json()).result.state,'HOLD_RULE_SOURCE_NEEDED');
+assert.equal(await creationStudioApiR881(new Request('https://test.invalid/api/other')),null);
+console.log('R881 PASS: all 20736 reversible addresses and antipodes, turn composition, clocks, 7 score scopes, R237/R170/Orion/TIT holds, source split refusal, SHA-256 receipts, Worker API');
