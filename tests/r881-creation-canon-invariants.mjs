@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {rowIdR881,coordinatesR881,antipodeR881,turnR881,cycleR881,gateR881,statePacketR881,scopedScoreR881,verifyLedgerSplitR881,atlasR881,byteReceiptR881,disclosureR881,decisionBandR884,typedScarR884,compareFormulasR884,canonicalStateR884,domainShiftR884,PHASES,REGULATION_NAMES,LENS_NAMES,MOTIFS} from '../src/system/creationCanonR881.mjs';
+import {rowIdR881,coordinatesR881,antipodeR881,turnR881,cycleR881,gateR881,statePacketR881,scopedScoreR881,verifyLedgerSplitR881,atlasR881,byteReceiptR881,disclosureR881,decisionBandR884,typedScarR884,compareFormulasR884,canonicalStateR884,domainShiftR884,PHASES,REGULATION_NAMES,LENS_NAMES,MOTIFS,adjacencyR884,coordinateRouteR884,spanningParentR884} from '../src/system/creationCanonR881.mjs';
 import {creationStudioApiR881} from '../src/system/creationStudioApiR881.mjs';
 for(let n=0;n<20736;n++){
  const c=coordinatesR881(n);
@@ -8,6 +8,19 @@ for(let n=0;n<20736;n++){
  assert.equal(turnR881(n,12),n,'T12 closure');
  assert.equal(turnR881(turnR881(n,5),7),n,'T12 composition');
 }
+let edgeCount=0;
+for(let id=1;id<20736;id++){
+ const parent=spanningParentR884(id);
+ assert.ok(Number.isInteger(parent)&&parent>=0&&parent<id);
+ assert.ok(adjacencyR884(id).some(n=>n.rowId===parent));
+ edgeCount++;
+}
+assert.equal(spanningParentR884(0),null);assert.equal(edgeCount,20735);
+assert.equal(adjacencyR884(0).length,4);
+assert.equal(adjacencyR884(rowIdR881({d:6,p:6,r:6,l:6})).length,8);
+const route=coordinateRouteR884(0,20735);
+assert.equal(route.rowIds[0],0);assert.equal(route.rowIds.at(-1),20735);assert.equal(route.edgeCount,44);
+for(let i=1;i<route.rowIds.length;i++)assert.ok(adjacencyR884(route.rowIds[i-1]).some(n=>n.rowId===route.rowIds[i]));
 assert.deepEqual(PHASES,['Declare','Drive','Explore','Sustain','Measure','Boundary','Release','Shift','Refine','Hold','Reframe','Seal']);
 assert.deepEqual(MOTIFS,['Observe','Define','Couple','Prune','Close']);
 assert.equal(REGULATION_NAMES[0],'Collapse');
