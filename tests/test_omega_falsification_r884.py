@@ -14,7 +14,7 @@ class FalsificationTests(unittest.TestCase):
         self.tmp=tempfile.TemporaryDirectory();self.root=Path(self.tmp.name)
         self.path=self.root/"dataset.csv"
         self.path.write_text("y,pred,split\n1,1,train\n2,2,train\n3,3,train\n4,4,train\n5,5,test\n6,6,test\n7,7,test\n8,8,test\n",encoding="utf-8")
-        self.reg={"gate":"OMEGAJ-0091","source_rule_ref":"SOURCE_FIXTURE_ONLY",
+        self.reg={"gate":"ΩJ-0091","source_rule_ref":"SOURCE_FIXTURE_ONLY",
                   "dataset_path":"dataset.csv","dataset_sha256":mod.sha256(self.path),
                   "dataset_version":"fixture-v1","commit_sha":"1234abc","preregistered_at":"2026-11-19",
                   "target_column":"y","prediction_column":"pred","split_column":"split",
@@ -27,6 +27,12 @@ class FalsificationTests(unittest.TestCase):
         self.assertEqual(len(r["externalEquations"]),26)
         self.assertEqual(r["hypothesisCountInclusiveActually"],15)
         self.assertFalse(r["physicalProof"])
+    def test_canonical_qcd_aliases(self):
+        for requested in ("ΩJ-0091","T01","OMEGAJ-0091"):
+            actual=mod.run_gate(self.root,{**self.reg,"gate":requested})
+            self.assertEqual(actual["gate"],"ΩJ-0091")
+            self.assertEqual(actual["outcome"],"SUPPORTED_AGAINST_BASELINE")
+        self.assertEqual(mod.registry()["gateAliases"]["T10"],"ΩJ-0100")
     def test_support_scoped_not_physics(self):
         r=mod.run_gate(self.root,self.reg)
         self.assertEqual(r["outcome"],"SUPPORTED_AGAINST_BASELINE")
