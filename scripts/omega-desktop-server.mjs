@@ -21,7 +21,7 @@ export async function startDesktopServer({root,port=0,host='127.0.0.1',stateRoot
  const sendJson=(res,status,payload)=>{const body=Buffer.from(JSON.stringify(payload));res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Content-Length':body.length});res.end(body);};
  const server=createServer(async(req,res)=>{
   res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Cache-Control','no-store');res.setHeader('Referrer-Policy','no-referrer');
-  if(!['GET','HEAD'].includes(req.method)&&!(req.method==='POST'&&req.url==='/__omega_local/artifacts')){res.writeHead(405,{'Allow':'GET, HEAD, POST'}).end();return;}
+  if(!['GET','HEAD'].includes(req.method)&&!(req.method==='POST'&&['/__omega_local/artifacts','/__omega_local/execute/atlas'].includes(req.url))){res.writeHead(405,{'Allow':'GET, HEAD, POST'}).end();return;}
   // Loopback binding alone does not prevent DNS-rebinding browser requests.
   // Admit only the exact loopback authority assigned to this listener.
   const expectedHost='127.0.0.1:'+server.address().port;
@@ -29,6 +29,30 @@ export async function startDesktopServer({root,port=0,host='127.0.0.1',stateRoot
   const origin=req.headers.origin;
   if(origin&&origin!=='http://'+expectedHost){res.writeHead(403).end('Invalid local origin');return;}
   const pathname=decodePath(req.url);if(!pathname){res.writeHead(400).end('Invalid path');return;}
+  // R910: real bounded offline address executor. This is a mathematical address
+  // transform, not physical simulation, AI inference, or Canon promotion.
+  if(pathname==='/__omega_local/execute/atlas'&&req.method==='POST'){
+   if(req.headers['content-type']?.split(';')[0].trim()!=='application/json'){sendJson(res,415,{error:'JSON_REQUIRED'});return;}
+   if(Number(req.headers['content-length'])>4096){sendJson(res,413,{error:'INPUT_TOO_LARGE'});return;}
+   let bytes=0,chunks=[],oversized=false;
+   for await(const chunk of req){bytes+=chunk.length;if(bytes>4096){oversized=true;break;}chunks.push(chunk);}
+   if(oversized){sendJson(res,413,{error:'INPUT_TOO_LARGE'});return;}
+   let input;try{input=JSON.parse(Buffer.concat(chunks).toString('utf8'));}catch{sendJson(res,400,{error:'INVALID_JSON'});return;}
+   const axes=['D','P','R','L'];
+   if(!input||typeof input!=='object'||Array.isArray(input)||Object.keys(input).some(k=>![...axes,'turns'].includes(k))||axes.some(k=>!Number.isInteger(input[k])||input[k]<1||input[k]>12)||!Number.isInteger(input.turns)||input.turns<0||input.turns>256){sendJson(res,422,{error:'INVALID_ATLAS_INPUT'});return;}
+   const address=([D,P,R,L])=>1728*(D-1)+144*(P-1)+12*(R-1)+(L-1);
+   const start=axes.map(k=>input[k]);
+   const trace=[];
+   for(let step=0;step<=input.turns;step++){
+    const coordinates=[start[0],start[1],start[2],(start[3]-1+step)%12+1];
+    trace.push({step,address:address(coordinates),coordinates});
+   }
+   const result={schema:'OMEGA_LOCAL_ATLAS_EXECUTION_R910_V1',executor:'LOCAL_DEFINITIONAL_ADDRESS_TURN',proofTier:'DER',physicalClaim:false,deviceAcceptance:false,source:'R910 12x12x12x12 closed-form address indexing; layer-turn only',input:{...input},trace};
+   const content=JSON.stringify(result),id=randomUUID(),contentSha256=createHash('sha256').update(content).digest('hex');
+   const record={schema:'OMEGA_LOCAL_ARTIFACT_R887_V1',id,kind:'atlas_execution',content,contentSha256,createdAt:new Date().toISOString(),canonicalMutation:false};
+   try{await mkdir(artifactRoot,{recursive:true});const path=join(artifactRoot,id+'.json'),tmp=join(artifactRoot,'.'+id+'.tmp');await writeFile(tmp,JSON.stringify(record),{flag:'wx',mode:0o600});await rename(tmp,path);sendJson(res,201,{...result,artifact:{id,kind:record.kind,contentSha256,createdAt:record.createdAt}});}
+   catch{sendJson(res,507,{error:'LOCAL_EXECUTION_PERSISTENCE_UNAVAILABLE'});}return;
+  }
   // R887: persistent, bounded, local-only artifact bytes. Not AI or Canon execution.
   if(pathname==='/__omega_local/artifacts'&&req.method==='POST'){
    if(req.headers['content-type']?.split(';')[0].trim()!=='application/json'){sendJson(res,415,{error:'JSON_REQUIRED'});return;}
