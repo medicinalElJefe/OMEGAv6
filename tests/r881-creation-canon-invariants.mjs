@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {rowIdR881,coordinatesR881,antipodeR881,turnR881,cycleR881,gateR881,statePacketR881,scopedScoreR881,verifyLedgerSplitR881,atlasR881,byteReceiptR881,disclosureR881} from '../src/system/creationCanonR881.mjs';
+import {rowIdR881,coordinatesR881,antipodeR881,turnR881,cycleR881,gateR881,statePacketR881,scopedScoreR881,verifyLedgerSplitR881,atlasR881,byteReceiptR881,disclosureR881,decisionBandR884,typedScarR884,compareFormulasR884} from '../src/system/creationCanonR881.mjs';
 import {creationStudioApiR881} from '../src/system/creationStudioApiR881.mjs';
 for(let n=0;n<20736;n++){
  const c=coordinatesR881(n);
@@ -35,4 +35,24 @@ assert.equal(response.status,405);
 response=await creationStudioApiR881(new Request('https://test.invalid/api/creation-studio/gate?id=ORION_GATE'));
 assert.equal((await response.json()).result.state,'HOLD_RULE_SOURCE_NEEDED');
 assert.equal(await creationStudioApiR881(new Request('https://test.invalid/api/other')),null);
+
+const sd=scopedScoreR881({variant:'S_dec',version:'R0054_TEST',value:1.2});
+const band={variant:'S_dec',version:'R0054_TEST',low:.8,high:2};
+assert.equal(decisionBandR884(sd,band).decision,'TURN');
+assert.equal(decisionBandR884({...sd,value:.8},band).decision,'ESCALATE');
+assert.equal(decisionBandR884({...sd,value:2},band).decision,'STAY');
+assert.equal(decisionBandR884(sd,{...band,version:'DIFFERENT'}).state,'SCORE_OR_RULE_SCOPE_MISMATCH_HELD');
+assert.equal(decisionBandR884(sd,{...band,low:2,high:2}).state,'INVALID_TURN_BAND');
+let turnCount=0;for(let i=0;i<=2000;i++){
+ const v=i/1000;const decision=decisionBandR884({...sd,value:v},band);
+ if(decision.decision==='TURN')turnCount++;
+}
+assert.equal(turnCount,1199,'R0054 2001-point interval contains 1.199 model units (exclusive endpoints)');
+const scar=typedScarR884({harm_scar:.4,learn_scar:.2,units:'relative',version:'R0061_TEST',source:'DECLARED_FIXTURE'});
+assert.equal(scar.ok,true);assert.equal(scar.netScore,'NOT_DEFINED_WITHOUT_VERSIONED_RULE');
+assert.equal(typedScarR884({harm_scar:-1,learn_scar:1,units:'relative',version:'v',source:'s'}).ok,false);
+const eq=compareFormulasR884([1,2,3],[1+1e-8,2,3],{versionLeft:'a',versionRight:'b'});
+assert.equal(eq.allEquivalent,true);assert.equal(eq.passCount,3);
+assert.equal(compareFormulasR884([1,2],[1,2.1],{versionLeft:'a',versionRight:'b'}).allEquivalent,false);
+assert.equal(compareFormulasR884([1],[NaN],{versionLeft:'a',versionRight:'b'}).state,'NONFINITE_FORMULA_VALUE');
 console.log('R881 PASS: all 20736 reversible addresses and antipodes, turn composition, clocks, 7 score scopes, R237/R170/Orion/TIT holds, source split refusal, SHA-256 receipts, Worker API');
