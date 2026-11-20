@@ -93,3 +93,30 @@ test('R887 local artifact survives host restart with exact content and rejects i
   assert.equal((await recovered.json()).contentSha256,receipt.contentSha256);
  }finally{if(server)await new Promise(ok=>server.close(ok));await rm(dir,{recursive:true,force:true});}
 });
+
+test('R910 actual offline Atlas address execution persists and recovers exact trace',async()=>{
+ const dir=await mkdtemp(join(tmpdir(),'omega-r910-')),dist=join(dir,'dist'),stateRoot=join(dir,'state');
+ await mkdir(dist);await writeFile(join(dist,'index.html'),'<html>OMEGA</html>');
+ let server;
+ try{
+  let started=await startDesktopServer({root:dist,stateRoot});server=started.server;
+  const endpoint=started.url+'__omega_local/execute/atlas';
+  const run=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({D:1,P:1,R:1,L:12,turns:2})});
+  assert.equal(run.status,201);const result=await run.json();
+  assert.equal(result.executor,'LOCAL_DEFINITIONAL_ADDRESS_TURN');
+  assert.equal(result.proofTier,'DER');assert.equal(result.physicalClaim,false);
+  assert.deepEqual(result.trace.map(x=>x.address),[11,0,1]);
+  assert.deepEqual(result.trace.map(x=>x.coordinates[3]),[12,1,2]);
+  assert.match(result.artifact.contentSha256,/^[a-f0-9]{64}$/);
+  assert.equal((await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({D:13,P:1,R:1,L:1,turns:1})})).status,422);
+  assert.equal((await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({D:1,P:1,R:1,L:1,turns:257})})).status,422);
+  assert.equal((await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({D:1,P:1,R:1,L:1,turns:1,authority:'native'})})).status,422);
+  const recovered=await fetch(started.url+'__omega_local/artifacts/'+result.artifact.id).then(x=>x.json());
+  assert.deepEqual(JSON.parse(recovered.content).trace,result.trace);
+  assert.equal(recovered.contentSha256,result.artifact.contentSha256);
+  await new Promise(ok=>server.close(ok));server=null;
+  started=await startDesktopServer({root:dist,stateRoot});server=started.server;
+  const again=await fetch(started.url+'__omega_local/artifacts/'+result.artifact.id).then(x=>x.json());
+  assert.equal(again.contentSha256,result.artifact.contentSha256);
+ }finally{if(server)await new Promise(ok=>server.close(ok));await rm(dir,{recursive:true,force:true});}
+});
