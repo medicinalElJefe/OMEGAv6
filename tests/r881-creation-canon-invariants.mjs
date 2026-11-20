@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {rowIdR881,coordinatesR881,antipodeR881,turnR881,cycleR881,gateR881,statePacketR881,scopedScoreR881,verifyLedgerSplitR881,atlasR881,byteReceiptR881,disclosureR881,decisionBandR884,typedScarR884,compareFormulasR884} from '../src/system/creationCanonR881.mjs';
+import {rowIdR881,coordinatesR881,antipodeR881,turnR881,cycleR881,gateR881,statePacketR881,scopedScoreR881,verifyLedgerSplitR881,atlasR881,byteReceiptR881,disclosureR881,decisionBandR884,typedScarR884,compareFormulasR884,canonicalStateR884,domainShiftR884,PHASES,REGULATION_NAMES,LENS_NAMES,MOTIFS} from '../src/system/creationCanonR881.mjs';
 import {creationStudioApiR881} from '../src/system/creationStudioApiR881.mjs';
 for(let n=0;n<20736;n++){
  const c=coordinatesR881(n);
@@ -8,6 +8,18 @@ for(let n=0;n<20736;n++){
  assert.equal(turnR881(n,12),n,'T12 closure');
  assert.equal(turnR881(turnR881(n,5),7),n,'T12 composition');
 }
+assert.deepEqual(PHASES,['Declare','Drive','Explore','Sustain','Measure','Boundary','Release','Shift','Refine','Hold','Reframe','Seal']);
+assert.deepEqual(MOTIFS,['Observe','Define','Couple','Prune','Close']);
+assert.equal(REGULATION_NAMES[0],'Collapse');
+assert.equal(REGULATION_NAMES[11],'Regenerative');
+assert.equal(LENS_NAMES[11],'Observability');
+assert.equal(canonicalStateR884(0).sourceExcelRowID,1);
+assert.equal(canonicalStateR884(0).domain,'Sense');
+assert.equal(canonicalStateR884(0).nextAction,'Declare');
+assert.equal(canonicalStateR884(rowIdR881({d:12,p:12,r:12,l:12})).nextAction,'Seal');
+assert.equal(turnR881(0,1),144,'T12 acts on source Phase coordinate');
+assert.equal(domainShiftR884(0,1),1728,'Domain shift is distinct from phase turn');
+assert.equal(canonicalStateR884(rowIdR881({d:1,p:8,r:1,l:1})).dialConstraint,'REDISTRIBUTE_FIRST');
 assert.deepEqual(cycleR881(27,24),{step:27,active_steps:24,skipped:3,phase:'Declare',phaseIndex:0,microLoop188:24});
 assert.equal(gateR881({id:'ORION_GATE',verified:true,proofReceipt:'forged'}).state,'HOLD_RULE_SOURCE_NEEDED');
 assert.equal(gateR881({id:'R170'}).state,'POLICY_BLOCKED_BRANCH_HELD');
