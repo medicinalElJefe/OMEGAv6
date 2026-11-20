@@ -66,6 +66,43 @@ export function verifyLedgerSplitR881(rows){
  const ok=rows.length===REPORTED.total&&counts.VERIFIED_OR_INTERNALLY_TESTED===REPORTED.verified&&counts.DERIVED_OR_SCOPED===REPORTED.scoped&&counts.EXTERNAL_OR_OPEN_FRONTIER===REPORTED.frontier;
  return Object.freeze({ok,state:ok?'LEDGER_COUNT_REPLAYED_SCOPED':'LEDGER_SPLIT_MISMATCH_HELD',total:rows.length,counts,physicalProof:false});
 }
+
+/** R0054: versioned interval, not equality-only TURN. Score remains scope-locked. */
+export function decisionBandR884(score,band){
+ if(!score?.ok||score.scopeLocked!==true||!band||band.variant!==score.variant||band.version!==score.version)
+  return Object.freeze({ok:false,state:'SCORE_OR_RULE_SCOPE_MISMATCH_HELD'});
+ if(!Number.isFinite(band.low)||!Number.isFinite(band.high)||band.low>=band.high)
+  return Object.freeze({ok:false,state:'INVALID_TURN_BAND'});
+ const decision=score.value<=band.low?'ESCALATE':score.value>=band.high?'STAY':'TURN';
+ return Object.freeze({ok:true,decision,variant:score.variant,version:score.version,thresholds:{low:band.low,high:band.high},proofTier:score.proofTier,source:'R0054_VERSIONED_BAND',physicalProof:false});
+}
+/** R0061: history and penalty must never alias or silently substitute for each other. */
+export function typedScarR884({harm_scar,learn_scar,units,version,source}={}){
+ if(!Number.isFinite(harm_scar)||harm_scar<0||!Number.isFinite(learn_scar)||learn_scar<0)
+  return Object.freeze({ok:false,state:'SCAR_POLARITY_VALUES_REQUIRED'});
+ if(typeof units!=='string'||!units.trim()||typeof version!=='string'||!version.trim()||typeof source!=='string'||!source.trim())
+  return Object.freeze({ok:false,state:'SCAR_SOURCE_UNITS_VERSION_REQUIRED'});
+ return Object.freeze({ok:true,harm_scar,learn_scar,units,version,source,
+  channelRoles:{harm_scar:'NONNEGATIVE_HARM_PENALTY',learn_scar:'NONNEGATIVE_RETAINED_LEARNING'},
+  netScore:'NOT_DEFINED_WITHOUT_VERSIONED_RULE',historicalEquivalence:'NOT_REPLAYED',physicalProof:false});
+}
+/** R0066: strict per-cell tolerance with explicit lineage, not a proof from reported counts. */
+export function compareFormulasR884(left,right,{versionLeft,versionRight,tolerance=1e-6}={}){
+ if(!Array.isArray(left)||!Array.isArray(right)||left.length!==right.length||!left.length)
+  return Object.freeze({ok:false,state:'INPUT_PAIRS_REQUIRED'});
+ if(typeof versionLeft!=='string'||!versionLeft||typeof versionRight!=='string'||!versionRight)
+  return Object.freeze({ok:false,state:'FORMULA_VERSIONS_REQUIRED'});
+ if(!Number.isFinite(tolerance)||tolerance<0)return Object.freeze({ok:false,state:'TOLERANCE_INVALID'});
+ let passCount=0,maxResidual=0;
+ for(let i=0;i<left.length;i++){
+  const x=left[i],y=right[i];if(!Number.isFinite(x)||!Number.isFinite(y))return Object.freeze({ok:false,state:'NONFINITE_FORMULA_VALUE',row:i});
+  const residual=Math.abs(x-y);maxResidual=Math.max(maxResidual,residual);
+  if(residual<=tolerance)passCount++;
+ }
+ return Object.freeze({ok:true,versionLeft,versionRight,tolerance,passCount,total:left.length,maxResidual,
+  allEquivalent:passCount===left.length,proofTier:'DER',source:'R0066_NUMERICAL_WITHIN_TOLERANCE',physicalProof:false});
+}
+
 export function atlasR881(rowId){
  const coords=coordinatesR881(rowId);
  return Object.freeze({...coords,schema:R881_SCHEMA,antipodeRowId:antipodeR881(rowId),turn1RowId:turnR881(rowId,1),provenance:'DER',proofTier:'DER',state:'DEFINITIONAL_INDEX',dimension_20736_is_physical_claim:false,junction_is_new_physical_primitive:false,authority:'CF-D0001/2/3'});
