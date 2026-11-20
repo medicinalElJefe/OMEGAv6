@@ -87,10 +87,33 @@ export function verifyLedgerSplitR881(rows){
  return Object.freeze({ok,state:ok?'LEDGER_COUNT_REPLAYED_SCOPED':'LEDGER_SPLIT_MISMATCH_HELD',total:rows.length,counts,physicalProof:false});
 }
 
+/** REC-002: exact source symbols are not invented; a 41-symbol/11-namespace
+ * registry is admitted only after caller supplies canonical source evidence. */
+export function validateSymbolRegistryR884(rows,sourceReceipt){
+ if(!Array.isArray(rows)||!sourceReceipt||typeof sourceReceipt.sha256!=='string'||!/^[a-f0-9]{64}$/i.test(sourceReceipt.sha256))
+  return Object.freeze({ok:false,state:'SOURCE_SYMBOL_REGISTRY_REQUIRED'});
+ const seen=new Set(),namespaces=new Set(),aliases=new Map();
+ for(const row of rows){
+  if(!row||typeof row.namespace!=='string'||typeof row.symbol!=='string'||!row.namespace||!row.symbol||
+     !/^[A-Za-z][A-Za-z0-9_.-]*$/.test(row.namespace)||!/^[A-Za-z][A-Za-z0-9_.-]*$/.test(row.symbol))
+   return Object.freeze({ok:false,state:'INVALID_MACHINE_SYMBOL'});
+  const key=row.namespace+':'+row.symbol;
+  if(seen.has(key))return Object.freeze({ok:false,state:'SYMBOL_COLLISION_HELD',key});
+  seen.add(key);namespaces.add(row.namespace);
+  if(row.alias!==undefined&&typeof row.alias!=='string')return Object.freeze({ok:false,state:'DISPLAY_ALIAS_INVALID'});
+  if(row.alias)aliases.set(key,row.alias);
+ }
+ if(rows.length!==41||namespaces.size!==11)return Object.freeze({ok:false,state:'REGISTRY_CARDINALITY_MISMATCH_HELD',symbols:rows.length,namespaces:namespaces.size});
+ return Object.freeze({ok:true,state:'SOURCE_STRUCTURALLY_VALIDATED',symbols:41,namespaces:11,
+  displayAliasCount:aliases.size,sourceReceipt:sourceReceipt.sha256,physicalProof:false,
+  note:'Source SHA attached; structural uniqueness does not prove source authenticity or historical semantic agreement.'});
+}
+
 /** R0054: versioned interval, not equality-only TURN. Score remains scope-locked. */
 export function decisionBandR884(score,band){
  if(!score?.ok||score.scopeLocked!==true||!band||band.variant!==score.variant||band.version!==score.version)
   return Object.freeze({ok:false,state:'SCORE_OR_RULE_SCOPE_MISMATCH_HELD'});
+ if(score.variant==='S_orion')return Object.freeze({ok:false,state:'HOLD_RULE_SOURCE_NEEDED',authority:'REC-011',reason:'Orion gating must not derive from score-only threshold bands.'});
  if(!Number.isFinite(band.low)||!Number.isFinite(band.high)||band.low>=band.high)
   return Object.freeze({ok:false,state:'INVALID_TURN_BAND'});
  const decision=score.value<=band.low?'ESCALATE':score.value>=band.high?'STAY':'TURN';
