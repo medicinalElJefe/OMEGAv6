@@ -20,9 +20,6 @@ try{
   const route=routes[i];
   await page.locator('.o7-search-trigger').click();
   await page.locator('.o7-command input').fill(route);
-  const button=page.locator('.o7-command button[data-command-route]').filter({
-   has:page.locator('b')
-  });
   const exact=page.locator('.o7-command button[data-command-route="'+route+'"]');
   await exact.first().waitFor({state:'visible',timeout:15000});
   await exact.first().click();
@@ -65,7 +62,7 @@ try{
  await page.locator('.o7-search-trigger').click();
  await page.locator('.o7-command input').fill('Hybrid Link');
  await page.locator('.o7-command button[data-command-route="Hybrid Link"]').first().click();
- await page.waitForFunction(()=>document.querySelector('.o7-main')?.getAttribute('data-native-route')==='Hybrid Link',{timeout:15000});
+ await page.waitForFunction(()=>document.querySelector('.o7-main')?.getAttribute('data-native-route')==='Hybrid Link',null,{timeout:15000});
  const hub=page.locator('[data-r884-local-hub="LOOPBACK_INTEGRATION_ONLY"]');
  await hub.waitFor({state:'visible',timeout:30000});
  const state=await hub.locator('[data-r884-loopback-state]').getAttribute('data-r884-loopback-state');
