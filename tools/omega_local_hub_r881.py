@@ -45,6 +45,7 @@ def safe_under(root: Path, relative: str, existing: bool = False) -> Path:
     if ".." in part.parts or part.is_absolute(): raise ValueError("PARENT_TRAVERSAL_HELD")
     dest = (root / str(part)).resolve()
     if not dest.is_relative_to(root): raise ValueError("OUTSIDE_APPROVED_ROOT_HELD")
+    if dest.is_relative_to(root / '.omega'): raise ValueError("HUB_INTERNAL_STATE_HELD")
     if existing and not dest.is_file(): raise ValueError("SOURCE_FILE_REQUIRED")
     return dest
 def receipt(path: Path, root: Path):
@@ -56,6 +57,7 @@ class Hub:
         self.root = root.resolve()
         if not self.root.is_dir(): raise ValueError("APPROVED_ROOT_MUST_EXIST")
         self.db = db.resolve()
+        if not self.db.is_relative_to(self.root / ".omega"): raise ValueError("DB_MUST_RESIDE_IN_PRIVATE_HUB_DIR")
         self.db.parent.mkdir(parents=True, exist_ok=True)
         self._stop = threading.Event()
         with self.connection() as c:
@@ -261,6 +263,7 @@ def main():
     root=Path(args.root).expanduser().resolve()
     db=Path(args.db).expanduser() if args.db else root/".omega"/"hub-r881.sqlite"
     token_file=Path(args.token_file).expanduser() if args.token_file else root/".omega"/"hub-r881.token"
+    if not token_file.resolve().is_relative_to(root / ".omega"): raise ValueError("TOKEN_MUST_RESIDE_IN_PRIVATE_HUB_DIR")
     token_file.parent.mkdir(parents=True,exist_ok=True)
     if token_file.exists():token=token_file.read_text(encoding="utf-8").strip()
     else:
