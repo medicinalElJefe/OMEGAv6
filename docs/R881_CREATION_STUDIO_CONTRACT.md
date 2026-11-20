@@ -44,3 +44,10 @@ The daemon creates a private token file at the approved root under .omega/hub-r8
     node tests/r237-hybrid-command-authority-invariants.mjs
 
 A green CI run supports only these bounded implementation claims. Merge, deployment, native host verification, and product-wide acceptance require separate receipts.
+
+
+## R884 ten-ledger source replay
+
+Use `python tools/omega_absolute_truth_verifier_r884.py --root PATH --manifest PATH_TO_PINNED_INPUT.json --output omega_master_truth_run_manifest.json`. The manifest must declare exactly ten source files, each with path, true SHA-256 byte hash, ID/tier column metadata and (for XLSX) a selected sheet. CSV, JSON and XLSX files are supported. The verifier validates all 7,655 records and the exact 6,872/699/84 tier split, refuses duplicate record IDs and changed bytes, and preserves actual file receipts. `VERIFY_LEDGER_SET` is also executable in the authenticated local job queue, and the OMEGA7 Hybrid Link panel exposes it. Full historical semantic proof is separate from count verification; input manifests used by unit tests are synthetic and must never be treated as the ten historical source ledgers.
+
+The local Hub UI does not store its token. It binds to `http://127.0.0.1:8765` and requires `X-Omega-Local-Token`. Browser private-network permissions may require user approval, and successful loopback requests never become host/GPU acceptance.
