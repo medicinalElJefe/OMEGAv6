@@ -12,6 +12,7 @@ import secrets
 import sqlite3
 import threading
 import time
+from contextlib import contextmanager
 import uuid
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlsplit
@@ -68,10 +69,13 @@ class Hub:
                     id INTEGER PRIMARY KEY AUTOINCREMENT, job_id TEXT NOT NULL,
                     at_ms INTEGER NOT NULL, event TEXT NOT NULL, details TEXT);
             """)
+    @contextmanager
     def connection(self):
         c = sqlite3.connect(str(self.db), timeout=15)
         c.row_factory = sqlite3.Row
-        return c
+        try:
+            with c: yield c
+        finally: c.close()
     def _record(self, c, job_id, event, details=""):
         c.execute("INSERT INTO history(job_id,at_ms,event,details) VALUES(?,?,?,?)",(job_id,utc_ms(),event,details))
     def enqueue(self, operation, args=None, scheduled_ms=None, event_name=None):
@@ -125,6 +129,7 @@ class Hub:
             if not base.is_dir(): raise ValueError("DIRECTORY_REQUIRED")
             out=[]
             for p in sorted(base.rglob("*")):
+                if p == self.db or p.is_relative_to(self.root / '.omega'): continue
                 if p.is_symlink(): continue
                 if not p.is_file(): continue
                 if len(out)>=MAX_FILES: raise ValueError("FILE_COUNT_LIMIT")
