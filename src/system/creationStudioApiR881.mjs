@@ -1,4 +1,4 @@
-import {atlasR881,disclosureR881,gateR881,byteReceiptR881} from './creationCanonR881.mjs';
+import {atlasR881,disclosureR881,gateR881,byteReceiptR881,adjacencyR884,coordinateRouteR884,spanningParentR884} from './creationCanonR881.mjs';
 import {epqsPointR884} from './geoEvidenceR884.mjs';
 const JSON_HEADERS={'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-omega-studio-revision':'R881','x-omega-proof-authority':'R237'};
 const json=(data,status=200,additional={})=>new Response(JSON.stringify(data),{status,headers:{...JSON_HEADERS,...additional}});
@@ -18,6 +18,18 @@ export async function creationStudioApiR881(request,env={}){
   return json(result,result.ok?200:result.state==='NAD83_INPUT_SOURCE_REQUIRED'?422:503);
  }
 
+
+ if(path==='/api/creation-studio/neighbors'){
+  const raw=url.searchParams.get('row');
+  if(!/^(0|[1-9][0-9]*)$/.test(raw||'')||Number(raw)>20735)return json({ok:false,code:'ROW_ID_0_20735_REQUIRED'},400);
+  const row=Number(raw);
+  return json({ok:true,rowId:row,parentRowId:spanningParentR884(row),neighbors:adjacencyR884(row),physicalGraphProof:false,source:'CF-D0001_PRODUCT_GRAPH_DEFINITION'});
+ }
+ if(path==='/api/creation-studio/route'){
+  const from=url.searchParams.get('from'),to=url.searchParams.get('to');
+  if(![from,to].every(v=>/^(0|[1-9][0-9]*)$/.test(v||'')&&Number(v)<=20735))return json({ok:false,code:'SOURCE_TARGET_ROW_IDS_REQUIRED'},400);
+  return json({ok:true,route:coordinateRouteR884(Number(from),Number(to))});
+ }
  if(path==='/api/creation-studio/atlas'||path==='/api/creation-studio/receipt'){
   const raw=url.searchParams.get('row');
   if(!/^(0|[1-9][0-9]*)$/.test(raw||'')||Number(raw)>20735)return json({ok:false,code:'ROW_ID_0_20735_REQUIRED'},400);
