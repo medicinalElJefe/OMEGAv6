@@ -13,6 +13,11 @@ assert.equal(visibleCandidateR885({versions:[{id:previous}]},candidate).state,'E
 assert.equal(visibleCandidateR885({versions:[{id:previous,message:'contains '+candidate}]},candidate).ok,false);
 assert.equal(visibleCandidateR885({versions:[]},'not-a-uuid').state,'INVALID_UPLOADED_VERSION_ID_HELD');
 assert.equal(visibleCandidateR885('bad',candidate).state,'CLOUDFLARE_VERSION_LIST_SCHEMA_HELD');
+for(const envelope of [
+ {success:false,result:[{id:candidate}]},
+ {errors:[{code:100146,message:'version missing'}],result:[{id:candidate}]},
+ {error:{code:10000,message:'unauthorized'},versions:[{id:candidate}]}
+]) assert.equal(visibleCandidateR885(envelope,candidate).state,'CLOUDFLARE_VERSION_LIST_ERROR_HELD');
 
 const shell=fs.readFileSync('scripts/staged-cloudflare-release.sh','utf8');
 const syntax=spawnSync('bash',['-n','scripts/staged-cloudflare-release.sh'],{encoding:'utf8'});
