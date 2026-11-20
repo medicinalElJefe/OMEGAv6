@@ -22,18 +22,47 @@ function pointFromAddress(rowId:number):Pos{
  return{rowId,d,p,r,l,x:dir[0]*radius,y:dir[1]*radius,z:dir[2]*radius};
 }
 const svgEsc=(x:unknown)=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]||c));
+function visualPositionR884(p:Pos,mode:Mode):Pos{
+ if(mode==='mandala'){
+  const a=2*Math.PI*((p.d-1)/12+(p.r-1)/144),rad=.12+.78*(p.p-.5)/12;
+  return{...p,x:Math.cos(a)*rad,y:Math.sin(a)*rad,z:.12*Math.sin(2*Math.PI*(p.l-1)/12)};
+ }
+ if(mode==='pointillism'){
+  const phase=2*Math.PI*((p.r*37+p.l*73+p.p*11)%188)/188;
+  return{...p,x:p.x+.007*Math.cos(phase),y:p.y+.007*Math.sin(phase),z:p.z};
+ }
+ return p;
+}
+function sourceEdgesR884(points:readonly Pos[]):number[]{
+ const edges:number[]=[];
+ for(const p of points){
+  if(p.l<12){edges.push(p.rowId,p.rowId+1)}
+  if(p.r<12){edges.push(p.rowId,p.rowId+12)}
+  if(p.p<12){edges.push(p.rowId,p.rowId+144)}
+ }
+ return edges;
+}
 function project(p:Pos,rotation:number):[number,number]{
  const a=rotation*Math.PI/180,c=Math.cos(a),s=Math.sin(a),x=p.x*c+p.z*s,z=-p.x*s+p.z*c;
  const scale=250/(2.1-z*.4);
  return[500+x*scale,330-p.y*scale];
 }
 function svgSource(points:readonly Pos[],mode:Mode,rotation:number,color:string,title:string){
- const circles=points.map(p=>{
-  const [x,y]=project(p,rotation),radius=mode==='pointillism'?.62:mode==='atlas3d'?1.25:.85;
-  return '<circle cx="'+x.toFixed(3)+'" cy="'+y.toFixed(3)+'" r="'+radius+'" fill="'+color+'" fill-opacity="'+(mode==='tessellation'?.50:.75)+'" data-row="'+p.rowId+'"/>';
- }).join('');
- const metadata={schema:'OMEGA_STUDIO_SVG_R881',title,mode,rotation,source:'CF-D0001/2/3',proofTier:'DER',provenance:'DER',nodeCount:20736,physicalMeasurement:false,fontAuthority:'BROWSER_SYSTEM_UI',renderer:'SVG'};
- return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 660"><metadata>'+svgEsc(JSON.stringify(metadata))+'</metadata><rect width="1000" height="660" fill="#07111e"/><g data-proof-tier="DER" data-source="CF-D0001/2/3" data-no-physical-measurement="true">'+circles+'</g></svg>';
+ let contents='';
+ if(mode==='tessellation'){
+  const edges=sourceEdgesR884(points);
+  for(let i=0;i<edges.length;i+=2){
+   const [ax,ay]=project(points[edges[i]],rotation),[bx,by]=project(points[edges[i+1]],rotation);
+   contents+='<path d="M'+ax.toFixed(3)+' '+ay.toFixed(3)+' L'+bx.toFixed(3)+' '+by.toFixed(3)+'" fill="none" stroke="'+color+'" stroke-opacity=".4" stroke-width=".45" data-src="'+edges[i]+'" data-dst="'+edges[i+1]+'"/>';
+  }
+ }else{
+  contents=points.map(p=>{
+   const [x,y]=project(visualPositionR884(p,mode),rotation),radius=mode==='pointillism'?.58:mode==='atlas3d'?1.25:.95;
+   return '<circle cx="'+x.toFixed(3)+'" cy="'+y.toFixed(3)+'" r="'+radius+'" fill="'+color+'" fill-opacity=".75" data-row="'+p.rowId+'"/>';
+  }).join('');
+ }
+ const metadata={schema:'OMEGA_STUDIO_SVG_R884',title,mode,rotation,source:'CF-D0001/2/3',proofTier:'DER',provenance:'DER',nodeCount:20736,physicalMeasurement:false,fontAuthority:'BROWSER_SYSTEM_UI',renderer:'SVG',topology:'SOURCE_DEFINITIONAL_PRESENTATION'};
+ return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 660"><metadata>'+svgEsc(JSON.stringify(metadata))+'</metadata><rect width="1000" height="660" fill="#07111e"/><g data-proof-tier="DER" data-source="CF-D0001/2/3" data-no-physical-measurement="true">'+contents+'</g></svg>';
 }
 const saveBlob=(name:string,blob:Blob)=>{const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
 const xmlEsc=svgEsc;
@@ -55,17 +84,21 @@ function renderWebGL(canvas:HTMLCanvasElement,points:readonly Pos[],rotation:num
  const gl=canvas.getContext('webgl2',{preserveDrawingBuffer:true,antialias:false});
  if(!gl)return false;
  const vert='#version 300 es\nin vec3 position;uniform float angle;uniform float size;void main(){float c=cos(angle),s=sin(angle);vec3 p=vec3(position.x*c+position.z*s,position.y,-position.x*s+position.z*c);float scale=1.0/(1.7-p.z*.35);gl_Position=vec4(p.x*scale,p.y*scale,.0,1.0);gl_PointSize=size;}';
- const frag='#version 300 es\nprecision mediump float;uniform vec3 tint;out vec4 outColor;void main(){vec2 xy=gl_PointCoord-vec2(.5);if(dot(xy,xy)>.25)discard;outColor=vec4(tint,.8);}';
+ const frag='#version 300 es\nprecision mediump float;uniform vec3 tint;uniform float isLine;out vec4 outColor;void main(){if(isLine<.5){vec2 xy=gl_PointCoord-vec2(.5);if(dot(xy,xy)>.25)discard;}outColor=vec4(tint,.8);}';
  const shader=(type:number,source:string)=>{const s=gl.createShader(type);if(!s)return null;gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))return null;return s};
  const vs=shader(gl.VERTEX_SHADER,vert),fs=shader(gl.FRAGMENT_SHADER,frag);if(!vs||!fs)return false;
  const program=gl.createProgram();if(!program)return false;gl.attachShader(program,vs);gl.attachShader(program,fs);gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))return false;
  gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(.025,.066,.116,1);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(program);
- const positions=new Float32Array(points.length*3);points.forEach((p,i)=>{positions[i*3]=p.x;positions[i*3+1]=p.y;positions[i*3+2]=p.z});
+ const isLine=mode==='tessellation',edges=isLine?sourceEdgesR884(points):null;
+ const positions=new Float32Array((isLine?(edges?.length||0):points.length)*3);
+ if(isLine&&edges){edges.forEach((sourceId,i)=>{const p=points[sourceId];positions[i*3]=p.x;positions[i*3+1]=p.y;positions[i*3+2]=p.z})}
+ else points.forEach((p,i)=>{const pos=visualPositionR884(p,mode);positions[i*3]=pos.x;positions[i*3+1]=pos.y;positions[i*3+2]=pos.z});
  const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,positions,gl.STATIC_DRAW);
  const loc=gl.getAttribLocation(program,'position');gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,3,gl.FLOAT,false,0,0);
  gl.uniform1f(gl.getUniformLocation(program,'angle'),rotation*Math.PI/180);gl.uniform1f(gl.getUniformLocation(program,'size'),mode==='pointillism'?2:mode==='mandala'?4:3);
  const rgb=[1,3,5].map(i=>parseInt(color.slice(i,i+2),16)/255);gl.uniform3f(gl.getUniformLocation(program,'tint'),rgb[0],rgb[1],rgb[2]);
- gl.drawArrays(gl.POINTS,0,points.length);
+ gl.uniform1f(gl.getUniformLocation(program,'isLine'),isLine?1:0);
+ gl.drawArrays(isLine?gl.LINES:gl.POINTS,0,positions.length/3);
  gl.deleteBuffer(buffer);gl.deleteProgram(program);gl.deleteShader(vs);gl.deleteShader(fs);
  return true;
 }
