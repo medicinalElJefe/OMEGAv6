@@ -26,6 +26,7 @@ jobs:
       - name: Prove R884 scoped Canon and bounded local automation hub
         run: |
           node tests/r881-creation-canon-invariants.mjs
+          node tests/r884-geodetic-epqs-proof.mjs
           python3 -m unittest discover -s tests -p test_omega_local_hub_r881.py -v
           python3 -m unittest discover -s tests -p test_omega_falsification_r884.py -v
       - name: Prove R237 command authority and R238 shared snapshot
