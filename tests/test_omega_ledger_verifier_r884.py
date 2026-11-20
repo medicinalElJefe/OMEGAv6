@@ -64,6 +64,21 @@ class TenLedgerTests(unittest.TestCase):
         self.assertEqual(len(result["sourceReceipts"]),10)
         self.assertFalse(result["canonPromotion"])
         self.assertFalse(result["historicalSemanticsVerified"])
+    def test_persistent_hub_runs_pinned_ten_ledger_audit(self):
+        local_path=MODULE.with_name("omega_local_hub_r881.py")
+        local_spec=importlib.util.spec_from_file_location("_omega_local_hub_r881",local_path)
+        local=importlib.util.module_from_spec(local_spec)
+        local_spec.loader.exec_module(local)
+        source=self.root/"ten_ledger_manifest.json"
+        source.write_text(json.dumps(self.manifest),encoding="utf-8")
+        hub=local.Hub(self.root,self.root/".omega"/"hub.sqlite")
+        job=hub.enqueue("VERIFY_LEDGER_SET",{"source":"ten_ledger_manifest.json"})
+        result=hub.run_one()
+        self.assertEqual(result["id"],job["id"])
+        self.assertEqual(result["state"],"COMPLETED",result)
+        self.assertEqual(result["result"]["countReceipt"]["total"],7655)
+        self.assertFalse(result["result"]["countReceipt"]["canonPromotion"])
+        self.assertEqual(hub.replay(job["id"])["state"],"REPLAY_NOT_ADMISSIBLE")
     def test_hash_tampering_held(self):
         path=self.root/"ledger-00.csv"
         path.write_bytes(path.read_bytes()+b"\n")
