@@ -23,6 +23,19 @@ class LocalHubTests(unittest.TestCase):
         with self.assertRaises(ValueError): hubmod.safe_under(self.root, "/etc/passwd")
         with self.assertRaises(ValueError): hubmod.safe_under(self.root, "C:/Windows/system.ini")
         with self.assertRaises(ValueError): hubmod.safe_under(self.root, r"J:\private")
+    def test_private_daemon_state_unreachable_by_jobs(self):
+        (self.root / ".omega" / "hub-r881.token").write_text("secret-test", encoding="utf-8")
+        with self.assertRaisesRegex(ValueError,"HUB_INTERNAL_STATE_HELD"):
+            hubmod.safe_under(self.root,".omega/hub-r881.token", True)
+        with self.assertRaisesRegex(ValueError,"HUB_INTERNAL_STATE_HELD"):
+            hubmod.safe_under(self.root,".omega/jobs.sqlite", True)
+        copy=self.hub.enqueue("COPY_ARTIFACT",{"source":"data/one.csv","destination":".omega/overwrite.bin"})
+        self.assertEqual(self.hub.run_one()["state"],"HELD")
+        self.assertIsNone((self.root/".omega"/"overwrite.bin").exists() or None)
+        self.assertEqual(self.hub.get(copy["id"])["state"],"HELD")
+    def test_hub_db_location_must_be_private(self):
+        with self.assertRaisesRegex(ValueError,"DB_MUST_RESIDE_IN_PRIVATE_HUB_DIR"):
+            hubmod.Hub(self.root,self.root/"data"/"database.sqlite")
     def test_hash_and_replay(self):
         job = self.hub.enqueue("HASH_TREE", {"path":"data"})
         done = self.hub.run_one()
