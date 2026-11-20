@@ -69,6 +69,10 @@ class Hub:
                     id INTEGER PRIMARY KEY AUTOINCREMENT, job_id TEXT NOT NULL,
                     at_ms INTEGER NOT NULL, event TEXT NOT NULL, details TEXT);
             """)
+            stranded=[row["id"] for row in c.execute("SELECT id FROM jobs WHERE state='RUNNING'")]
+            for job_id in stranded:
+                c.execute("UPDATE jobs SET state='HELD',error='CRASH_RECOVERY_REQUIRES_OPERATOR_REVIEW',updated_ms=? WHERE id=?",(utc_ms(),job_id))
+                self._record(c,job_id,"CRASH_RECOVERY_HELD","Previous process ended without durable execution result")
     @contextmanager
     def connection(self):
         c = sqlite3.connect(str(self.db), timeout=15)
