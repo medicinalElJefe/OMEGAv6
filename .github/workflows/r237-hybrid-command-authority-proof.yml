@@ -29,6 +29,7 @@ jobs:
           node tests/r884-geodetic-epqs-proof.mjs
           python3 -m unittest discover -s tests -p test_omega_local_hub_r881.py -v
           python3 -m unittest discover -s tests -p test_omega_falsification_r884.py -v
+          python3 -m unittest discover -s tests -p test_omega_ledger_verifier_r884.py -v
       - name: Prove R237 command authority and R238 shared snapshot
         run: |
           node tests/r237-hybrid-command-authority-invariants.mjs
