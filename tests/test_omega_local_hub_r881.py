@@ -73,6 +73,16 @@ class LocalHubTests(unittest.TestCase):
         job=self.hub.enqueue("HASH_TREE",{"path":"."})
         self.assertEqual(self.hub.run_one()["state"],"COMPLETED")
         self.assertEqual(self.hub.replay(job["id"])["state"],"MATCH")
+    def test_restart_holds_interrupted_running_job(self):
+        job=self.hub.enqueue("CSV_STATS", {"source":"data/one.csv"})
+        with self.hub.connection() as c:
+            c.execute("UPDATE jobs SET state='RUNNING' WHERE id=?",(job["id"],))
+        restarted=hubmod.Hub(self.root,self.root / ".omega" / "jobs.sqlite")
+        recovered=restarted.get(job["id"])
+        self.assertEqual(recovered["state"],"HELD")
+        self.assertEqual(recovered["error"],"CRASH_RECOVERY_REQUIRES_OPERATOR_REVIEW")
+        self.assertIn("CRASH_RECOVERY_HELD",[x["event"] for x in recovered["history"]])
+        self.assertIsNone(restarted.run_one())
     def test_cancel_refusal(self):
         job=self.hub.enqueue("CSV_STATS",{"source":"data/one.csv"},scheduled_ms=hubmod.utc_ms()+100000)
         self.assertEqual(self.hub.cancel(job["id"])["state"],"CANCELLED")
