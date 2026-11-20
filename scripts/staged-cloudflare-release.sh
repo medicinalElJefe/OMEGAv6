@@ -227,33 +227,63 @@ echo "Candidate uploaded without production traffic: $CANDIDATE_VERSION_ID"
 STAGING_MODE="ZERO_PERCENT_OVERRIDE"
 SPLIT_LOG="$TMP_DIR/split-deployment.log"
 echo "Admitting exact candidate to the current deployment at 0% traffic while $PREVIOUS_VERSION_ID remains at 100%."
-# R695: Wrangler upload acknowledgement can precede Cloudflare version lookup
-# propagation. Retry *only* the exact documented not-yet-visible version code
-# 100146, with bounded attempts. All other errors remain immediate failures;
-# R322 export-set recovery remains separate and unchanged.
+# R885: The upload receipt may precede the Cloudflare Versions API.
+# R884 main failed after four ~25-second 100146 retries. Require an exact
+# provider version view before authorizing 100/0 staging of this identity.
+SPLIT_PROVIDER_VIEW="$TMP_DIR/r885-version-view.json"
+SPLIT_PROVIDER_ERROR="$TMP_DIR/r885-version-view.err"
+is_exact_visibility_pending(){
+  local file="$1"
+  grep -Fq '[code: 100146]' "$file" &&
+    grep -Fq 'The requested Worker version could not be found' "$file"
+}
 stage_candidate_with_visibility_retry(){
-  local attempt rc
-  for attempt in 1 2 3 4; do
+  local attempt rc delay
+  for attempt in $(seq 1 18); do
     assert_current_main_owner || return $?
-    : > "$SPLIT_LOG"
-    if npx wrangler versions deploy "${PREVIOUS_VERSION_ID}@100%" "${CANDIDATE_VERSION_ID}@0%" --name "$WORKER_NAME" --message "OMEGA off-traffic staged candidate $GITHUB_SHA" -y > "$SPLIT_LOG" 2>&1; then
+    : > "$SPLIT_PROVIDER_VIEW"
+    : > "$SPLIT_PROVIDER_ERROR"
+    if npx wrangler versions view "$CANDIDATE_VERSION_ID" --name "$WORKER_NAME" \
+      --config "$ARCHIVE_RUNTIME_CONFIG" --json > "$SPLIT_PROVIDER_VIEW" 2> "$SPLIT_PROVIDER_ERROR"; then
+      if ! node scripts/r885-version-proof.mjs "$CANDIDATE_VERSION_ID" "$SPLIT_PROVIDER_VIEW"; then
+        echo "::error title=R885 VERSION ID MISMATCH::Provider view did not prove the exact uploaded candidate ID."
+        return 1
+      fi
+      : > "$SPLIT_LOG"
+      if npx wrangler versions deploy "${PREVIOUS_VERSION_ID}@100%" "${CANDIDATE_VERSION_ID}@0%" \
+        --name "$WORKER_NAME" --config "$ARCHIVE_RUNTIME_CONFIG" \
+        --message "OMEGA off-traffic staged candidate $GITHUB_SHA" -y > "$SPLIT_LOG" 2>&1; then
+        cat "$SPLIT_LOG"
+        echo "R885 provider version identity proved before 0%-traffic staging."
+        return 0
+      else
+        rc=$?
+      fi
       cat "$SPLIT_LOG"
-      return 0
+      if ! is_exact_visibility_pending "$SPLIT_LOG"; then
+        return "$rc"
+      fi
     else
       rc=$?
+      if ! is_exact_visibility_pending "$SPLIT_PROVIDER_ERROR"; then
+        cat "$SPLIT_PROVIDER_ERROR" >&2
+        return "$rc"
+      fi
+      : > "$SPLIT_LOG"
+      cat "$SPLIT_PROVIDER_ERROR"
+      cat "$SPLIT_PROVIDER_ERROR" >> "$SPLIT_LOG"
     fi
-    cat "$SPLIT_LOG"
-    if ! grep -Fq '[code: 100146]' "$SPLIT_LOG" || ! grep -Fq 'The requested Worker version could not be found' "$SPLIT_LOG"; then
-      return "$rc"
+    if [[ "$attempt" == "18" ]]; then
+      echo "::error title=R885 VERSION VISIBILITY EXHAUSTED::Uploaded version was not provable under the same Worker config after bounded retries. Previous traffic remains at 100%."
+      return 1
     fi
-    if [[ "$attempt" == "4" ]]; then
-      echo "::error title=VERSION VISIBILITY EXHAUSTED::Exact uploaded Worker $CANDIDATE_VERSION_ID was not visible to Cloudflare staging after four attempts."
-      return "$rc"
-    fi
-    echo "::warning title=VERSION VISIBILITY PENDING::Uploaded Worker $CANDIDATE_VERSION_ID not yet queryable (100146); bounded retry $attempt/3. Previous traffic remains at 100%."
-    sleep $((attempt * 3))
+    delay=4
+    if ((attempt>6)); then delay=8; fi
+    echo "::warning title=R885 VERSION VISIBILITY PENDING::Exact 100146 on attempt $attempt/18, retrying in ${delay}s; previous 100%."
+    sleep "$delay"
   done
 }
+
 if stage_candidate_with_visibility_retry; then
   STAGED_DEPLOYMENT_READY=0
   for attempt in $(seq 1 12); do
