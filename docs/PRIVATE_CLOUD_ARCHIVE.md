@@ -51,3 +51,12 @@ The first complete native file listing for this task contained **6,647 files tot
 ## R683.1 activation prerequisite
 
 The actual R683 production attempt returned Cloudflare HTTP 403 / provider code 10042 before candidate upload. The previous proven runtime remained serving. This is account-level R2 activation, not missing application code or proof of a completed migration. Enabling the R2 subscription requires the account owner to complete Cloudflare dashboard setup; no credential or payment flow is embedded in OMEGA. After activation, a new governed deployment provisions and privately verifies both buckets before exposing storage as READY. The unchanged transfer/readback client then imports available originals. Native generated-image records whose provider returns no bytes remain unresolved, not silently reconstructed.
+
+
+## R886 provider outage boundary (November 20, 2026)
+
+Main deployment [44806489489](https://github.com/medicinalElJefe/OMEGAv6/actions/runs/44806489489) passed the source/build checks and the packaged desktop/mobile browser proof, then failed before Worker upload when the Cloudflare R2 private-archive bucket request returned HTTP 500 with provider code 10001. This is not evidence that the candidate Worker failed, nor does it prove an R2 bucket is private or even exists. The deployment correctly kept the prior production Worker.
+
+R886 retries only exact HTTP 5xx / code 10001 provider failures on **idempotent GET** checks, at most three attempts. It never blindly retries bucket-creation POST operations. If the same provider outage persists (including an ambiguous POST result), the optional archive enters PROVIDER_UNAVAILABLE_HELD with 0 verified private buckets. Its two R2 bindings are omitted from the candidate config, all unrelated bindings and OMEGA source identity remain unchanged, and the application receives OMEGA_ARCHIVE_STATE=PROVIDER_UNAVAILABLE_HELD. It does not mark storage READY or request archive upload. Other authorization errors, unknown provider codes, and non-private/public-domain access remain hard blocking failures. The core release may proceed only under the unchanged canonical R170/R210/R237 staged deployment, exact-traffic proof and post-deployment checks.
+
+A later successful R2 status and verified private-domain check are required before turning archive storage back on. A successful core release under this hold is **not** an archive upload, backup, readback, or account recovery proof.
