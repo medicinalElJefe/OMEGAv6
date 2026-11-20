@@ -58,7 +58,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
  const downloadLocalTurnCsv=()=>{
   if(!localTurnResult)return;
   const rows=['step,address,d,p,r,l',...localTurnResult.trace.map(x=>[x.step,x.address,...x.coordinates].join(','))];
-  const csv=rows.join('\\r\\n')+'\\r\\n';
+  const csv=rows.join('\r\n')+'\r\n';
   const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
   const link=document.createElement('a');link.href=url;link.download='omega-atlas-execution-'+localTurnResult.artifact.id+'.csv';
   document.body.appendChild(link);link.click();link.remove();window.setTimeout(()=>URL.revokeObjectURL(url),1000);
