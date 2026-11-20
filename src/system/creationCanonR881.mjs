@@ -3,8 +3,12 @@ export const R881_SCHEMA = 'OMEGA_CREATION_CANON_R881';
 export const EVIDENCE = Object.freeze(['OBS','DER','INF','GAP','BND','SEAM','EQUIV','LOCKED']);
 export const PROOF = Object.freeze(['OBS','DER','INF','HYP','FALSIFIABLE']);
 export const SCORES = Object.freeze(['S_dec','S_water','S_ref_v3','S_orion','S_woven','W_omega','W_carry']);
-export const PHASES = Object.freeze(['Declare','Identify','Measure','Orient','Relate','Construct','Translate','Test','Compare','Prune','Recover','Seal']);
-export const MOTIFS = Object.freeze(['Observe','Bind','Transform','Verify','Close']);
+export const PHASES = Object.freeze(['Declare','Drive','Explore','Sustain','Measure','Boundary','Release','Shift','Refine','Hold','Reframe','Seal']);
+export const PHASE_NAMES = Object.freeze(['Initiation','Acceleration','Expansion','Momentum','Saturation','Constraint Engagement','Deceleration','Redistribution','Compression','Tie-Zone (Pre-Turn Tension)','Turn / Reorientation','Integration']);
+export const DOMAIN_NAMES = Object.freeze(['Sense','Symbolic','Strategy','Systems','Energy','Biology','Society','Economy','Language','Art','Spirit','Technology']);
+export const REGULATION_NAMES = Object.freeze(['Collapse','Fracture','Volatile','Reactive','Unsteady','Noisy-Stable','Stable','Elastic','Coherent','Locked (Healthy)','Integrated','Regenerative']);
+export const LENS_NAMES = Object.freeze(['Quantity','Phase','Structure','Time','Interaction','Constraint','Information','Scale','Variability','Stability','Adaptability','Observability']);
+export const MOTIFS = Object.freeze(['Observe','Define','Couple','Prune','Close']);
 export const REPORTED = Object.freeze({total:7655,verified:6872,scoped:699,frontier:84,ledgers:10,canonicalRecords:96,coveredAddresses:7399,frontierItems:75,hypothesisGates:24,sourceStatus:'REPORTED_NOT_INDEPENDENTLY_REPLAYED'});
 const numberIn=(n,low,high,k)=>{if(!Number.isInteger(n)||n<low||n>high)throw new RangeError(k+'_OUT_OF_RANGE');return n};
 export function rowIdR881({d,p,r,l}){
@@ -24,8 +28,24 @@ export function antipodeR881(rowId){
 export function turnR881(rowId,k=0){
  numberIn(k,0,Number.MAX_SAFE_INTEGER,'TURN');
  const {d,p,r,l}=coordinatesR881(rowId);
+ return rowIdR881({d,p:(p-1+k)%12+1,r,l});
+}
+/** Explicit Domain shift is separate from the phase turn group T12. */
+export function domainShiftR884(rowId,k=0){
+ numberIn(k,0,Number.MAX_SAFE_INTEGER,'DOMAIN_SHIFT');
+ const {d,p,r,l}=coordinatesR881(rowId);
  return rowIdR881({d:(d-1+k)%12+1,p,r,l});
 }
+/** Handbook action/constraint lookup, never an automatic physical or clinical control. */
+export function canonicalStateR884(rowId){
+ const state=coordinatesR881(rowId),index=state.p-1;
+ return Object.freeze({...state,sourceExcelRowID:rowId+1,
+  domain:DOMAIN_NAMES[state.d-1],phaseName:PHASE_NAMES[index],nextAction:PHASES[index],
+  regulation:REGULATION_NAMES[state.r-1],lens:LENS_NAMES[state.l-1],
+  dialConstraint:state.r<=5?'REDISTRIBUTE_FIRST':state.r>=8?'SCOPED_EXPAND_OR_STACK':'MEASURE_AND_SUSTAIN',
+  proofTier:'DER',source:'Expansion_Mandala_Operators_Handbook_20736D.pdf',physicalProof:false});
+}
+
 export function cycleR881(step,active_steps){
  numberIn(step,0,Number.MAX_SAFE_INTEGER,'STEP');numberIn(active_steps,0,step,'ACTIVE_STEPS');
  return Object.freeze({step,active_steps,skipped:step-active_steps,phase:PHASES[active_steps%12],phaseIndex:active_steps%12,microLoop188:active_steps%188});
@@ -108,7 +128,7 @@ export function atlasR881(rowId){
  return Object.freeze({...coords,schema:R881_SCHEMA,antipodeRowId:antipodeR881(rowId),turn1RowId:turnR881(rowId,1),provenance:'DER',proofTier:'DER',state:'DEFINITIONAL_INDEX',dimension_20736_is_physical_claim:false,junction_is_new_physical_primitive:false,authority:'CF-D0001/2/3'});
 }
 export function disclosureR881(){
- return Object.freeze({schema:R881_SCHEMA,governance:'R237 NO_STAGE_PROMOTED_BEYOND_EVIDENCE',sourceReported:REPORTED,scores:SCORES,phases:PHASES,motifs:MOTIFS,regulation:Array.from({length:12},(_,i)=>'R'+(i+1)),orion:gateR881({id:'ORION_GATE'}),policy:gateR881({id:'R170'}),TIT:gateR881({id:'CF-N0001'}),execution:{edge:'READ_ONLY_DEFINITIONAL',local:'NOT_NATIVE_HOST_ACCEPTED',external:'NOT_VALIDATED'},nativePcAccepted:false,federationClosure:false,empiricalPhysicsValidated:false,canonicalMutation:false,truthBoundary:'Reported totals are source expectations, not independent replays of all 7,655 ledger records.'});
+ return Object.freeze({schema:R881_SCHEMA,governance:'R237 NO_STAGE_PROMOTED_BEYOND_EVIDENCE',sourceReported:REPORTED,scores:SCORES,phases:PHASES,phaseNames:PHASE_NAMES,domains:DOMAIN_NAMES,regulationNames:REGULATION_NAMES,lenses:LENS_NAMES,motifs:MOTIFS,regulation:Array.from({length:12},(_,i)=>'R'+(i+1)),orion:gateR881({id:'ORION_GATE'}),policy:gateR881({id:'R170'}),TIT:gateR881({id:'CF-N0001'}),execution:{edge:'READ_ONLY_DEFINITIONAL',local:'NOT_NATIVE_HOST_ACCEPTED',external:'NOT_VALIDATED'},nativePcAccepted:false,federationClosure:false,empiricalPhysicsValidated:false,canonicalMutation:false,truthBoundary:'Reported totals are source expectations, not independent replays of all 7,655 ledger records.'});
 }
 export async function byteReceiptR881(text,meta={}){
  const bytes=text instanceof Uint8Array?text:text instanceof ArrayBuffer?new Uint8Array(text):new TextEncoder().encode(typeof text==='string'?text:JSON.stringify(text));
