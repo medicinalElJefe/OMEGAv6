@@ -194,7 +194,7 @@ async function fetchR116(request,env){
  const url=new URL(request.url),path=url.pathname,corsPath=path.startsWith('/api/hybrid/')||path.startsWith('/api/federation/')||path.startsWith('/api/execution/')||path.startsWith('/api/intelligence/r331/')||path.startsWith('/api/intelligence/r332/qti/')||path==='/api/earth/geocode'||path==='/api/chat'||path==='/api/health'||path==='/api/core-health'||path==='/api/system/convergence'||path==='/api/system/manifest'||path==='/api/system/operational';
  if(request.method==='OPTIONS'&&corsPath)return preflightR116(request);
  if(path==='/api/earth/geocode'&&request.method==='GET')return withCorsR116(await earthGeocodeR3563(request),request);
- const studioR881=await creationStudioApiR881(request);if(studioR881)return withCorsR116(studioR881,request);
+ const studioR881=await creationStudioApiR881(request,env);if(studioR881)return withCorsR116(studioR881,request);
  const qtiR332=await publicQtiR332(request);if(qtiR332)return withCorsR116(qtiR332,request);
  const learningR331=await publicLearningR331(request,env,r115.fetch.bind(r115));if(learningR331)return withCorsR116(learningR331,request);
  if((path==='/api/health'||path==='/api/core-health')&&request.method==='GET')return withCorsR116(coreHealthR163(request,env),request);
