@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import worker from '../edge/r901CanonStudioReadOnly.mjs';
+const request=async(path,method='GET')=>worker.fetch(new Request('https://candidate.test'+path,{method}));
+const health=await request('/api/canon-studio/health');
+assert.equal(health.status,200);
+const h=await health.json();
+assert.equal(h.native_pc_verified,false);
+assert.equal(h.canonical_mutation,false);
+const status=await request('/api/canon-studio/status');
+assert.equal(status.status,200);
+const s=await status.json();
+assert.equal(s.rec011,'HOLD_RULE_SOURCE_NEEDED');
+assert.equal(s.r170,'POLICY_BLOCKED_BRANCH_HELD');
+assert.equal(s.ten_ledger_7655_attested,false);
+assert.equal((await request('/api/canon-studio/health','POST')).status,405);
+assert.equal((await request('/api/health')).status,404);
+console.log('R901 read-only edge contract: 9 assertions passed (local Node only, not deployed)');
