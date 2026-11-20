@@ -27,6 +27,7 @@ jobs:
         run: |
           node tests/r881-creation-canon-invariants.mjs
           node tests/r884-geodetic-epqs-proof.mjs
+          node tests/r885-version-visibility-proof.mjs
           python3 -m unittest discover -s tests -p test_omega_local_hub_r881.py -v
           python3 -m unittest discover -s tests -p test_omega_falsification_r884.py -v
           python3 -m unittest discover -s tests -p test_omega_ledger_verifier_r884.py -v
