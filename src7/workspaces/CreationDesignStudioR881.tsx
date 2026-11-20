@@ -81,7 +81,8 @@ function makeXlsx(points:readonly Pos[]){
  return zipSync(files,{level:0});
 }
 function renderWebGL(canvas:HTMLCanvasElement,points:readonly Pos[],rotation:number,mode:Mode,color:string){
- const gl=canvas.getContext('webgl2',{preserveDrawingBuffer:true,antialias:false});
+ const scratch=document.createElement('canvas');scratch.width=canvas.width;scratch.height=canvas.height;
+ const gl=scratch.getContext('webgl2',{preserveDrawingBuffer:true,antialias:false});
  if(!gl)return false;
  const vert='#version 300 es\nin vec3 position;uniform float angle;uniform float size;void main(){float c=cos(angle),s=sin(angle);vec3 p=vec3(position.x*c+position.z*s,position.y,-position.x*s+position.z*c);float scale=1.0/(1.7-p.z*.35);gl_Position=vec4(p.x*scale,p.y*scale,.0,1.0);gl_PointSize=size;}';
  const frag='#version 300 es\nprecision mediump float;uniform vec3 tint;uniform float isLine;out vec4 outColor;void main(){if(isLine<.5){vec2 xy=gl_PointCoord-vec2(.5);if(dot(xy,xy)>.25)discard;}outColor=vec4(tint,.8);}';
@@ -99,6 +100,8 @@ function renderWebGL(canvas:HTMLCanvasElement,points:readonly Pos[],rotation:num
  const rgb=[1,3,5].map(i=>parseInt(color.slice(i,i+2),16)/255);gl.uniform3f(gl.getUniformLocation(program,'tint'),rgb[0],rgb[1],rgb[2]);
  gl.uniform1f(gl.getUniformLocation(program,'isLine'),isLine?1:0);
  gl.drawArrays(isLine?gl.LINES:gl.POINTS,0,positions.length/3);
+ gl.finish();const target=canvas.getContext('2d');if(!target)return false;
+ target.clearRect(0,0,canvas.width,canvas.height);target.drawImage(scratch,0,0);
  gl.deleteBuffer(buffer);gl.deleteProgram(program);gl.deleteShader(vs);gl.deleteShader(fs);
  return true;
 }
@@ -109,8 +112,8 @@ export default function CreationDesignStudioR881({address,onAddress}:{address:nu
  const [mode,setMode]=useState<Mode>('atlas3d'),[rotation,setRotation]=useState(22),[color,setColor]=useState('#5fcecb');
  const [title,setTitle]=useState('New Canon composition'),[prompt,setPrompt]=useState(''),[message,setMessage]=useState('');
  const [receipts,setReceipts]=useState<Receipt[]>([]),[project,setProject]=useState('Untitled');
- const [assets,setAssets]=useState<{name:string;sha256:string;byteSize:number}[]>([]);
- useEffect(()=>{if(!canvas.current)return;const ok=renderWebGL(canvas.current,points,rotation,mode,color);
+ const [assets,setAssets]=useState<{name:string;sha256:string;byteSize:number;proofTier:'OBS';source:string}[]>([]);
+ useEffect(()=>{if(!canvas.current)return;const ok=renderWebGL(canvas.current,points,rotation,mode,color);rendererIsWebgl.current=ok;
   if(!ok){const ctx=canvas.current.getContext('2d');if(ctx){ctx.fillStyle='#07111e';ctx.fillRect(0,0,canvas.current.width,canvas.current.height);ctx.fillStyle=color;for(const p of points){const [x,y]=project(p,rotation);ctx.fillRect(x,y,1,1)}}}
  },[points,rotation,mode,color]);
  const log=async(name:string,bytes:Uint8Array|string,type:string,source='CF-D0001/2/3')=>{
@@ -118,6 +121,22 @@ export default function CreationDesignStudioR881({address,onAddress}:{address:nu
   const receipt=await byteReceiptR881(data,{source,proofTier:'DER'});
   const row={name,sha256:receipt.sha256,byteSize:receipt.byteSize,proofTier:'DER',source};
   saveBlob(name,new Blob([data as BlobPart],{type}));setReceipts(old=>[row,...old].slice(0,50));setMessage(name+' exported with byte receipt');return row;
+ };
+ const rendererIsWebgl=useRef(false);
+ const pickPoint=(clientX:number,clientY:number,el:HTMLCanvasElement)=>{
+  const rect=el.getBoundingClientRect(),px=(clientX-rect.left)*el.width/rect.width,py=(clientY-rect.top)*el.height/rect.height;
+  if(!Number.isFinite(px)||!Number.isFinite(py))return;
+  const theta=rotation*Math.PI/180,c=Math.cos(theta),sn=Math.sin(theta);
+  let bestRow=-1,bestDistance=18*18;
+  for(const item of points){
+   const p=visualPositionR884(item,mode),screen=rendererIsWebgl.current?(()=>{
+    const x=p.x*c+p.z*sn,z=-p.x*sn+p.z*c,k=1/(1.7-z*.35);
+    return [(1+x*k)*el.width/2,(1-p.y*k)*el.height/2] as const;
+   })():project(p,rotation);
+   const dx=screen[0]-px,dy=screen[1]-py,d2=dx*dx+dy*dy;
+   if(d2<bestDistance){bestDistance=d2;bestRow=item.rowId}
+  }
+  if(bestRow>=0){onAddress(bestRow);setMessage('Atlas node '+bestRow+' selected from the scene; source-defined coordinates '+JSON.stringify(coordinatesR881(bestRow)))}
  };
  const exportSvg=()=>log('omega-canon-r881.svg',svgSource(points,mode,rotation,color,title),'image/svg+xml');
  const exportCsv=()=>log('omega-canon-r881.csv','rowId,d,p,r,l,x,y,z,proofTier,source\n'+points.map(p=>[p.rowId,p.d,p.p,p.r,p.l,p.x,p.y,p.z,'DER','CF-D0001/2/3'].join(',')).join('\n')+'\n','text/csv');
@@ -127,10 +146,10 @@ export default function CreationDesignStudioR881({address,onAddress}:{address:nu
  const exportManifest=()=>log('omega-master-truth-run-manifest.json',JSON.stringify({schema:'OMEGA_MASTER_TRUTH_RUN_MANIFEST_R881',project,title,prompt,renderAuthority:'BROWSER_WEBGL2',fontAuthority:'BROWSER_SYSTEM_UI',source:'CF-D0001/2/3',proofTier:'DER',nodeCount:20736,physicalMeasurement:false,localPcAccepted:false,assets,exports:receipts},null,2),'application/json','BROWSER_EXPORT_LEDGER');
  const saveProject=()=>{const data={project,title,prompt,mode,rotation,color,address,assets};try{localStorage.setItem('omega.r881.project.'+project,JSON.stringify(data));setMessage('Saved locally in this browser: '+project)}catch{setMessage('Local browser storage unavailable')}}; 
  const loadProject=()=>{try{const v=JSON.parse(localStorage.getItem('omega.r881.project.'+project)||'null');if(!v){setMessage('No local project found: '+project);return}setTitle(v.title);setPrompt(v.prompt);setMode(v.mode);setRotation(v.rotation);setColor(v.color);onAddress(v.address);setAssets(v.assets||[]);setMessage('Loaded browser-local project: '+project)}catch{setMessage('Project could not be opened')}};
- const pickFiles=async(e:React.ChangeEvent<HTMLInputElement>)=>{const list=Array.from(e.target.files||[]);for(const f of list){const result=await byteReceiptR881(new Uint8Array(await f.arrayBuffer()),{source:'USER_SELECTED_FILE',proofTier:'OBS'});setAssets(old=>[...old,{name:f.name,sha256:result.sha256,byteSize:result.byteSize}]);}e.target.value='';};
+ const pickFiles=async(e:React.ChangeEvent<HTMLInputElement>)=>{const list=Array.from(e.target.files||[]);for(const f of list){const result=await byteReceiptR881(new Uint8Array(await f.arrayBuffer()),{source:'USER_SELECTED_FILE',proofTier:'OBS'});setAssets(old=>[...old,{name:f.name,sha256:result.sha256,byteSize:result.byteSize,proofTier:'OBS',source:'USER_SELECTED_FILE'}]);}e.target.value='';};
  return <section data-r881-creation-studio='REAL_COMPUTED_20736' style={{...panel,color:'#e9f5ff'}}>
   <header><b>Creation & Design Studio · 20,736-address instrument</b><p>Source-defined directional geometry · all 20,736 points computed · WebGL2 with Canvas fallback · DER, not measured physics. R237 no promotion beyond evidence.</p></header>
-  <div style={{display:'grid',gridTemplateColumns:'minmax(225px,300px) minmax(0,1fr)',gap:14}}>
+  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,290px),1fr))',gap:14}}>
    <div style={{...panel,display:'grid',gap:8,alignContent:'start'}}>
     <label>Project name<input style={input} value={project} onChange={e=>setProject(e.target.value)}/></label>
     <label>Composition title<input style={input} value={title} onChange={e=>setTitle(e.target.value)}/></label>
@@ -145,7 +164,7 @@ export default function CreationDesignStudioR881({address,onAddress}:{address:nu
     <small>Asset bytes remain with you; only filename, length, and hash are stored as project metadata.</small>
    </div>
    <div style={{minWidth:0}}>
-    <canvas ref={canvas} width={1000} height={660} aria-label='Computed 20,736-node definitional atlas' style={{width:'100%',maxHeight:480,background:'#07111e',borderRadius:10,border:'1px solid #405a72'}}/>
+    <canvas ref={canvas} width={1000} height={660} onClick={e=>pickPoint(e.clientX,e.clientY,e.currentTarget)} tabIndex={0} aria-label='Interactive computed 20,736-node definitional atlas' style={{width:'100%',maxHeight:480,background:'#07111e',borderRadius:10,border:'1px solid #405a72'}}/>
     <div style={{display:'flex',flexWrap:'wrap',gap:8,marginTop:10}}>
      <button onClick={exportSvg}>SVG</button><button onClick={exportPng}>PNG</button><button onClick={exportCsv}>CSV</button><button onClick={exportJson}>JSON</button><button onClick={exportXlsx}>XLSX</button><button onClick={exportManifest}>Proof manifest</button>
     </div>
