@@ -1,0 +1,36 @@
+name: R881 Creation Studio and Local Hub Verification
+on:
+  pull_request:
+    paths:
+      - 'src/system/creationCanonR881.mjs'
+      - 'src/system/creationStudioApiR881.mjs'
+      - 'src/system/geoTruthR881.mjs'
+      - 'src/workerR116.js'
+      - 'src7/workspaces/CreationDesignStudioR881.tsx'
+      - 'src7/workspaces/WorkCreateWorkspaceR443.tsx'
+      - 'tools/omega_local_hub_r881.py'
+      - 'tests/r881-*'
+      - 'tests/test_omega_local_hub_r881.py'
+      - '.github/workflows/r881-creation-hub.yml'
+  workflow_dispatch:
+jobs:
+  bounded-verification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - run: node tests/r881-creation-canon-invariants.mjs
+      - run: python -m unittest discover -s tests -p test_omega_local_hub_r881.py -v
+      - run: npm run build
+      - name: R237 regression invariants
+        run: node tests/r237-hybrid-command-authority-invariants.mjs
