@@ -11,6 +11,11 @@ export function visibleCandidateR885(document,expected) {
   return {ok:false,state:'INVALID_UPLOADED_VERSION_ID_HELD'};
  if(!document||typeof document!=='object')
   return {ok:false,state:'CLOUDFLARE_VERSION_LIST_SCHEMA_HELD'};
+ // A transport/API error envelope must never be promoted by a nested UUID.
+ // Wrangler normally exits nonzero for these, but independently guard JSON input.
+ if(!Array.isArray(document) && (document.success===false || document.error ||
+    (Array.isArray(document.errors)&&document.errors.length>0)))
+  return {ok:false,state:'CLOUDFLARE_VERSION_LIST_ERROR_HELD'};
  const candidates=[];
  const seen=new Set(),stack=[{value:document,depth:0}];
  while(stack.length){
