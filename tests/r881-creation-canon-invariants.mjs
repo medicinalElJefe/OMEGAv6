@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {rowIdR881,coordinatesR881,antipodeR881,turnR881,cycleR881,gateR881,statePacketR881,scopedScoreR881,verifyLedgerSplitR881,atlasR881,byteReceiptR881,disclosureR881,decisionBandR884,typedScarR884,compareFormulasR884,canonicalStateR884,domainShiftR884,PHASES,REGULATION_NAMES,LENS_NAMES,MOTIFS,adjacencyR884,coordinateRouteR884,spanningParentR884} from '../src/system/creationCanonR881.mjs';
+import {rowIdR881,coordinatesR881,antipodeR881,turnR881,cycleR881,gateR881,statePacketR881,scopedScoreR881,verifyLedgerSplitR881,atlasR881,byteReceiptR881,disclosureR881,decisionBandR884,typedScarR884,compareFormulasR884,canonicalStateR884,domainShiftR884,PHASES,REGULATION_NAMES,LENS_NAMES,MOTIFS,adjacencyR884,coordinateRouteR884,spanningParentR884,validateSymbolRegistryR884} from '../src/system/creationCanonR881.mjs';
 import {creationStudioApiR881} from '../src/system/creationStudioApiR881.mjs';
 for(let n=0;n<20736;n++){
  const c=coordinatesR881(n);
@@ -61,6 +61,13 @@ response=await creationStudioApiR881(new Request('https://test.invalid/api/creat
 assert.equal((await response.json()).result.state,'HOLD_RULE_SOURCE_NEEDED');
 assert.equal(await creationStudioApiR881(new Request('https://test.invalid/api/other')),null);
 
+const fakeReceipt={sha256:'a'.repeat(64)};
+assert.equal(validateSymbolRegistryR884(null,fakeReceipt).state,'SOURCE_SYMBOL_REGISTRY_REQUIRED');
+const nsSymbols=Array.from({length:41},(_,i)=>({namespace:'N'+Math.floor(i/4),symbol:'S'+i,alias:i%3===0?'Shared Display Name':'Alias '+i}));
+assert.equal(validateSymbolRegistryR884(nsSymbols,fakeReceipt).state,'SOURCE_STRUCTURALLY_VALIDATED');
+assert.equal(validateSymbolRegistryR884([...nsSymbols.slice(0,40),nsSymbols[0]],fakeReceipt).state,'SYMBOL_COLLISION_HELD');
+assert.equal(validateSymbolRegistryR884(nsSymbols.slice(0,40),fakeReceipt).state,'REGISTRY_CARDINALITY_MISMATCH_HELD');
+assert.equal(decisionBandR884(scopedScoreR881({variant:'S_orion',version:'v1',value:2}),{variant:'S_orion',version:'v1',low:.7,high:2}).state,'HOLD_RULE_SOURCE_NEEDED');
 const sd=scopedScoreR881({variant:'S_dec',version:'R0054_TEST',value:1.2});
 const band={variant:'S_dec',version:'R0054_TEST',low:.8,high:2};
 assert.equal(decisionBandR884(sd,band).decision,'TURN');
