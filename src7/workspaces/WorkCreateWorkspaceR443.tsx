@@ -11,6 +11,8 @@ import {corpusState,decodeAddress,evaluateCorpusModes,initCorpusPack} from '../.
 import type {Omega7Depth} from '../capabilityRegistry';
 
 const SomaAudioEngine=lazy(()=>import('../../src/SomaAudioEngine'));
+const CreationDesignStudioR881=lazy(()=>import('./CreationDesignStudioR881'));
+
 
 export type Omega7WorkCreateRoute='Workspace'|'Projects'|'Memory'|'Create'|'Render Queue'|'Assets';
 type Props={route:Omega7WorkCreateRoute;onNavigate:(route:string)=>void;depth:Omega7Depth;autoOpen?:boolean};
@@ -23,6 +25,7 @@ export default function WorkCreateWorkspaceR443({route,onNavigate,depth,autoOpen
  const[ready,setReady]=useState(false),[error,setError]=useState(''),[address,setAddress]=useState(readAddress),[instrumentOpen,setInstrumentOpen]=useState(depth!=='STANDARD'||autoOpen);
  const[status,setStatus]=useState<any>(null),[restore,setRestore]=useState<any>(null),[uiMode,setUiMode]=useState('AUTO');
  const[soundOpen,setSoundOpen]=useState(false);
+ const[studioOpen,setStudioOpen]=useState(false);
  useEffect(()=>{if(route!=='Create')setSoundOpen(false)},[route]);
  useEffect(()=>{setInstrumentOpen(depth!=='STANDARD'||autoOpen)},[depth,route,autoOpen]);
  useEffect(()=>{let live=true;initCorpusPack().then(()=>{if(live){setReady(true);setError('')}}).catch(e=>{if(live)setError(e instanceof Error?e.message:String(e))});return()=>{live=false}},[]);
@@ -66,6 +69,12 @@ export default function WorkCreateWorkspaceR443({route,onNavigate,depth,autoOpen
   </section>}
 
   {(route==='Projects'||route==='Assets')&&<SharedArtifactLibraryR864 onNavigate={onNavigate}/>}
+
+  {route==='Create'&&<section className='o7-native-surface' data-r881-create-studio='GOVERNED_CANON_EDITOR'>
+   <h2>Creation & Design Studio · full 20,736-state atlas</h2><p>WebGL2 geometry, local project registry, five export formats and source-bound SHA-256 receipts. This is definitional rendering, not empirical measurement or native-device acceptance.</p>
+   <button type='button' aria-expanded={studioOpen} onClick={()=>setStudioOpen(v=>!v)}>{studioOpen?'Close Creation Studio':'Open Creation Studio'}</button>
+   {studioOpen&&<Suspense fallback={<p role='status'>Loading indexed creation studio…</p>}><CreationDesignStudioR881 address={address} onAddress={commit}/></Suspense>}
+  </section>}
 
   {route==='Create'&&<section data-r805-create-sound-temple='true' aria-label='Sound Temple' className='o7-native-surface'>
    <h2>Sound Temple · SOMA</h2>
