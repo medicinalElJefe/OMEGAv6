@@ -213,6 +213,45 @@ test -n "$CANDIDATE_VERSION_ID"
 test "$CANDIDATE_VERSION_ID" != "$PREVIOUS_VERSION_ID"
 echo "Candidate uploaded without production traffic: $CANDIDATE_VERSION_ID"
 
+# R885: "versions upload" can acknowledge a version before Cloudflare exposes it
+# to "versions deploy" (observed 100146 four times on main 57d925f3).
+# Poll the published version catalogue and require exact UUID visibility BEFORE
+# attempting any traffic mutation. Only the documented 100146 is retryable on
+# a failing catalogue request; authentication/unknown errors fail immediately.
+# Catalogue visibility is necessary but NOT sufficient: R321 still requires
+# current-main ownership, previous@100/candidate@0 membership, version-override
+# functional tests and post-promotion receipt checks.
+wait_uploaded_version_visible_r885(){
+  local attempt rc
+  for attempt in $(seq 1 30); do
+    assert_current_main_owner || return $?
+    : > "$TMP_DIR/r885-version-list.json"
+    : > "$TMP_DIR/r885-version-list.err"
+    if npx wrangler versions list --name "$WORKER_NAME" --json \
+      > "$TMP_DIR/r885-version-list.json" 2> "$TMP_DIR/r885-version-list.err"; then
+      if node scripts/r885-version-visibility.mjs "$TMP_DIR/r885-version-list.json" "$CANDIDATE_VERSION_ID"; then
+        echo "R885 exact candidate version $CANDIDATE_VERSION_ID independently visible before staged mutation (attempt $attempt)."
+        return 0
+      fi
+    else
+      rc=$?
+      cat "$TMP_DIR/r885-version-list.err" >&2
+      if ! grep -Fq '[code: 100146]' "$TMP_DIR/r885-version-list.err" ||
+         ! grep -Fq 'The requested Worker version could not be found' "$TMP_DIR/r885-version-list.err"; then
+        echo "::error title=VERSION LIST HARD ERROR::Refusing to retry unknown Wrangler/API error rc=$rc."
+        return "$rc"
+      fi
+    fi
+    if [[ "$attempt" == "30" ]]; then
+      echo "::error title=R885 VERSION NOT REGISTERED::Cloudflare did not expose uploaded candidate $CANDIDATE_VERSION_ID in 30 bounded catalogue checks. Previous 100% traffic remains authoritative. No silent 100% candidate promotion."
+      return 1
+    fi
+    echo "::warning title=R885 VERSION CATALOGUE PENDING::Exact candidate not listed (attempt $attempt/30). No production traffic changed."
+    sleep 5
+  done
+}
+wait_uploaded_version_visible_r885
+
 # Primary R321 path: Cloudflare version overrides can target only a version
 # that belongs to the current deployment. Admit the candidate at 0% while
 # keeping ordinary user traffic on the previous version.
