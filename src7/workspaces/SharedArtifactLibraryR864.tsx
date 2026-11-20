@@ -20,9 +20,10 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
  const [localTurnCount,setLocalTurnCount]=useState('12');
  const [selectedExecutionStep,setSelectedExecutionStep]=useState(0);
  const [executionPlaying,setExecutionPlaying]=useState(false);
- useEffect(()=>{if(!executionPlaying||!localTurnResult)return;const max=localTurnResult.trace.length-1;if(selectedExecutionStep>=max){setExecutionPlaying(false);return}const timer=window.setInterval(()=>setSelectedExecutionStep(step=>Math.min(max,step+1)),550);return()=>window.clearInterval(timer)},[executionPlaying,selectedExecutionStep,localTurnResult]);
 
  const [localTurnResult,setLocalTurnResult]=useState<{trace:{step:number;address:number;coordinates:number[]}[];artifact:{id:string;contentSha256:string}}|null>(null);
+ useEffect(()=>{if(!executionPlaying||!localTurnResult)return;const max=localTurnResult.trace.length-1;if(selectedExecutionStep>=max){setExecutionPlaying(false);return}const timer=window.setInterval(()=>setSelectedExecutionStep(step=>Math.min(max,step+1)),550);return()=>window.clearInterval(timer)},[executionPlaying,selectedExecutionStep,localTurnResult]);
+
  const executeLocalTurns=async()=>{
   if(executionLease.current)return;
   executionLease.current=true;setRunning(true);setError('');setLocalTurnResult(null);setSelectedExecutionStep(0);setExecutionPlaying(false);
