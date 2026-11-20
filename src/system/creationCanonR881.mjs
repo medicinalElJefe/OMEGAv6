@@ -124,7 +124,7 @@ export function compareFormulasR884(left,right,{versionLeft,versionRight,toleran
 }
 
 export function atlasR881(rowId){
- const coords=coordinatesR881(rowId);
+ const coords=canonicalStateR884(rowId);
  return Object.freeze({...coords,schema:R881_SCHEMA,antipodeRowId:antipodeR881(rowId),turn1RowId:turnR881(rowId,1),provenance:'DER',proofTier:'DER',state:'DEFINITIONAL_INDEX',dimension_20736_is_physical_claim:false,junction_is_new_physical_primitive:false,authority:'CF-D0001/2/3'});
 }
 export function disclosureR881(){
