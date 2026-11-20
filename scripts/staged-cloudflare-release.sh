@@ -229,7 +229,17 @@ wait_uploaded_version_visible_r885(){
     : > "$TMP_DIR/r885-version-list.err"
     if npx wrangler versions list --name "$WORKER_NAME" --json \
       > "$TMP_DIR/r885-version-list.json" 2> "$TMP_DIR/r885-version-list.err"; then
-      if node scripts/r885-version-visibility.mjs "$TMP_DIR/r885-version-list.json" "$CANDIDATE_VERSION_ID"; then
+      local verdict
+      verdict="$(node scripts/r885-version-visibility.mjs "$TMP_DIR/r885-version-list.json" "$CANDIDATE_VERSION_ID")" || {
+        echo "$verdict"
+        if [[ "$verdict" != *'"state":"EXACT_UPLOADED_VERSION_NOT_YET_VISIBLE"'* ]]; then
+          echo "::error title=VERSION LIST INVALID::Catalogue schema, API envelope, or identity proof failed; refusing retries."
+          return 1
+        fi
+        verdict=''
+      }
+      if [[ -n "$verdict" ]]; then
+        echo "$verdict"
         echo "R885 exact candidate version $CANDIDATE_VERSION_ID independently visible before staged mutation (attempt $attempt)."
         return 0
       fi
