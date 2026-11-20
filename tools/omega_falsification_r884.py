@@ -37,7 +37,9 @@ def null_l1(y):
     ordered=sorted(y)
     return ordered[(len(ordered)-1)//2]
 def mae(pairs):
-    return sum(abs(a-b) for a,b in pairs)/len(pairs)
+    values=list(pairs)
+    if not values: raise ValueError('NO_EVALUATION_PAIRS')
+    return sum(abs(a-b) for a,b in values)/len(values)
 def held(gate,state,reason,extra=None):
     return {"schema":SCHEMA,"gate":gate,"state":state,"outcome":"INCONCLUSIVE_DATA_LIMIT",
             "reason":reason,"physicalProof":False,"canonPromotion":False,**(extra or {})}
