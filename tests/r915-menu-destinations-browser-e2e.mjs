@@ -10,7 +10,7 @@ try{
   await page.locator('.o7-app[data-omega7="true"]').waitFor({state:'visible',timeout:30000});
   const domains=['HOME','WORK','EXPLORE','CREATE','DEVELOP','SYSTEM'];const seen=new Set();
   for(const domain of domains){
-   const primary=page.locator('.o7-nav-r519 button[aria-label]');
+   const primary=page.locator('.o7-nav-r519');
    const labels={HOME:'Home',WORK:'Work',EXPLORE:'Explore',CREATE:'Create',DEVELOP:'Develop',SYSTEM:'System'};
    await primary.getByRole('button',{name:labels[domain],exact:true}).click();
    const links=page.locator('[data-r912-menu-route]');
