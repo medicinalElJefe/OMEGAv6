@@ -123,6 +123,43 @@ export function compareFormulasR884(left,right,{versionLeft,versionRight,toleran
   allEquivalent:passCount===left.length,proofTier:'DER',source:'R0066_NUMERICAL_WITHIN_TOLERANCE',physicalProof:false});
 }
 
+
+/** One-edge coordinate neighbors in the bounded product graph, no periodic wrap. */
+export function adjacencyR884(rowId){
+ const c=coordinatesR881(rowId),out=[];
+ for(const k of ['d','p','r','l']){
+  for(const step of [-1,1]){
+   const next=c[k]+step;
+   if(next>=1&&next<=12){
+    const n=rowIdR881({...c,[k]:next});
+    out.push(Object.freeze({rowId:n,axis:k,direction:step,proofTier:'DER',source:'CF-D0001_PRODUCT_LATTICE'}));
+   }
+  }
+ }
+ return Object.freeze(out);
+}
+/** Deterministic arborescence: lexicographic coordinate descent to D1,P1,R1,L1. */
+export function spanningParentR884(rowId){
+ const c=coordinatesR881(rowId);
+ if(rowId===0)return null;
+ for(const axis of ['l','r','p','d']){
+  if(c[axis]>1)return rowIdR881({...c,[axis]:c[axis]-1});
+ }
+ throw new Error('UNREACHABLE_ROOT_PARENT');
+}
+export function coordinateRouteR884(start,end){
+ const a=coordinatesR881(start),b=coordinatesR881(end),current={...a},route=[start];
+ for(const axis of ['d','p','r','l']){
+  while(current[axis]!==b[axis]){
+   current[axis]+=current[axis]<b[axis]?1:-1;
+   route.push(rowIdR881(current));
+  }
+ }
+ return Object.freeze({from:start,to:end,rowIds:Object.freeze(route),edgeCount:route.length-1,
+  proofTier:'DER',source:'CF-D0001_PRODUCT_GRAPH_DEFINITION',historicalRouteAssignment:'NOT_VERIFIED',
+  physicalTopologyClaim:false});
+}
+
 export function atlasR881(rowId){
  const coords=canonicalStateR884(rowId);
  return Object.freeze({...coords,schema:R881_SCHEMA,antipodeRowId:antipodeR881(rowId),turn1RowId:turnR881(rowId,1),provenance:'DER',proofTier:'DER',state:'DEFINITIONAL_INDEX',dimension_20736_is_physical_claim:false,junction_is_new_physical_primitive:false,authority:'CF-D0001/2/3'});
