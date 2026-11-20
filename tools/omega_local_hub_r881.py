@@ -27,7 +27,7 @@ ALLOWED_ORIGINS = frozenset({
     "http://127.0.0.1:8765", "http://localhost:8765"
 })
 READ_ONLY_REPLAY = frozenset({"HASH_TREE", "CSV_STATS", "VERIFY_LEDGER_SPLIT"})
-OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "RESIDUAL_RESTORE"})
+OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "RESIDUAL_RESTORE"})
 STATUS = frozenset({"QUEUED", "WAIT_EVENT", "RUNNING", "COMPLETED", "FAILED", "HELD", "CANCELLED"})
 def utc_ms(): return int(time.time() * 1000)
 def sha_file(path: Path) -> str:
@@ -119,6 +119,20 @@ class Hub:
         return {"event":event_name,"released":len(ids)}
     def execute(self,operation,args):
         if operation=="RESIDUAL_RESTORE": raise ValueError("R195_RESIDUAL_SOURCE_AND_AUTHORITY_REQUIRED")
+        if operation=="VERIFY_LEDGER_SET":
+            import importlib.util
+            spec_path=Path(__file__).resolve().with_name("omega_absolute_truth_verifier_r884.py")
+            if not spec_path.is_file(): raise ValueError("R884_TEN_LEDGER_VERIFIER_REQUIRED")
+            manifest_path=safe_under(self.root,args.get("source",""),True)
+            if manifest_path.stat().st_size>MAX_BODY:raise ValueError("LEDGER_MANIFEST_SIZE_LIMIT_HELD")
+            with manifest_path.open("r",encoding="utf-8") as f:manifest=json.load(f)
+            module_spec=importlib.util.spec_from_file_location("_omega_ten_ledger_verifier_r884",spec_path)
+            verifier=importlib.util.module_from_spec(module_spec)
+            module_spec.loader.exec_module(verifier)
+            result=verifier.verify(self.root,manifest)
+            if not result.get("ok"):raise ValueError("LEDGER_SET_"+str(result.get("state","UNKNOWN"))+"_HELD")
+            return {"state":result["state"],"countReceipt":result,"inputManifest":receipt(manifest_path,self.root),
+                    "authority":"R237_COUNT_ONLY_NOT_SEMANTIC_OR_PHYSICAL_PROOF"}
         if operation=="VERIFY_LEDGER_SPLIT":
             path=safe_under(self.root,args.get("source",""),True)
             with path.open("r",encoding="utf-8") as f: rows=json.load(f)
