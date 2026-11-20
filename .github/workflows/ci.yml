@@ -178,6 +178,8 @@ jobs:
           npm run test:r599
           npm run test:r600
           npm run test:r601
+      - name: R885 Cloudflare uploaded-version visibility and release ownership fail-closed proofs
+        run: node tests/r885-cloudflare-version-visibility.mjs
       - run: npm run check
       - run: node tests/r581-radar-tile-registration-invariants.mjs
       - name: R577 verified chronological satellite and radar observation admission
