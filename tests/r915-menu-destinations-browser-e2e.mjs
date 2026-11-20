@@ -11,7 +11,7 @@ try{
   const domains=['HOME','WORK','EXPLORE','CREATE','DEVELOP','SYSTEM'];const seen=new Set();
   for(const domain of domains){
    const primary=page.locator('.o7-nav-r519 button[aria-label]');
-   const labels={HOME:'Home',WORK:'Work',EXPLORE:'Explore',CREATE:'Create',DEVELOP:'Build',SYSTEM:'System'};
+   const labels={HOME:'Home',WORK:'Work',EXPLORE:'Explore',CREATE:'Create',DEVELOP:'Develop',SYSTEM:'System'};
    await primary.getByRole('button',{name:labels[domain],exact:true}).click();
    const links=page.locator('[data-r912-menu-route]');
    const count=await links.count();if(!count)throw Error(label+': empty domain '+domain);
@@ -24,8 +24,6 @@ try{
   for(const route of expected){
    // The global HOME directory must expose every registered destination.
    await page.locator('.o7-nav-r519').getByRole('button',{name:'Home',exact:true}).click();
-   const link=page.locator('[data-r912-menu-route]').filter({has:page.locator('span')}).locator('xpath=..');
-   const destination=page.locator('[data-r912-menu-route]').filter({hasText:route});
    const exact=page.locator('[data-r912-menu-route="'+route+'"]');
    if(await exact.count()!==1)throw Error(label+': missing or duplicated '+route);
    await exact.click();
