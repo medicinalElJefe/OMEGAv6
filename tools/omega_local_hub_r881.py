@@ -238,7 +238,7 @@ def serve(hub,token,port):
                 if path=="/api/hub/jobs":
                     obj=hub.enqueue(data.get("operation"),data.get("args"),data.get("scheduled_ms"),data.get("event_name"))
                     return self._send({"ok":True,"job":obj},202)
-                if path=="/api/hub/events":return self._send({"ok":True,...hub.emit_event(data.get("event_name"))})
+                if path=="/api/hub/events":return self._send({"ok":True, **hub.emit_event(data.get("event_name"))})
                 if path.startswith("/api/hub/replay/"):return self._send(hub.replay(path.rsplit("/",1)[-1]))
                 if path.startswith("/api/hub/cancel/"):return self._send(hub.cancel(path.rsplit("/",1)[-1]))
                 return self._send({"ok":False,"state":"NOT_FOUND"},404)
