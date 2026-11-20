@@ -124,7 +124,8 @@
         "../../src/platformAdapter",
         "../../src/sourceBackedModeRuntimeR21",
         "../SelfBuildTruthR539",
-        "../capabilityRegistry"
+        "../capabilityRegistry",
+        "./OmegaLocalHubPanelR884"
       ],
       "classification": "STATIC_FIRST_HOP_IMPORTS_ONLY",
       "transitiveClosure": "NOT_AUDITED",
