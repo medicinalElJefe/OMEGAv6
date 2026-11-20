@@ -1,4 +1,4 @@
-import {useEffect,useMemo,useState} from 'react';
+import {useEffect,useMemo,useState,lazy,Suspense} from 'react';
 import SelfBuildTruthR539 from '../SelfBuildTruthR539';
 import HybridMissionControlR8 from '../../src/HybridMissionControlR8';
 import UniversalQualityControl from '../../src/UniversalQualityControl';
@@ -10,6 +10,7 @@ import {api} from '../../src/platformAdapter';
 import {corpusState,decodeAddress,initCorpusPack} from '../../src/corpusRuntime';
 import {sourceBackedModeSummary} from '../../src/sourceBackedModeRuntimeR21';
 import type {Omega7Depth} from '../capabilityRegistry';
+const OmegaLocalHubPanelR884=lazy(()=>import('./OmegaLocalHubPanelR884'));
 
 export type Omega7DevelopmentRoute='Hybrid Link'|'Quality Compiler'|'Build Out'|'Development'|'Kernel Intelligence'|'SAI Lab';
 type Props={route:Omega7DevelopmentRoute;onNavigate:(route:string)=>void;depth:Omega7Depth};
@@ -66,6 +67,8 @@ export default function DevelopmentComputeWorkspaceR444({route,onNavigate,depth}
    </div>
    <button className='o7-open-instrument' onClick={()=>setInstrumentOpen(true)}>Open full {route} workspace</button>
   </section>}
+
+  {route==='Hybrid Link'&&<Suspense fallback={<section role='status'>Loading local automation hub controls…</section>}><OmegaLocalHubPanelR884/></Suspense>}
 
   {instrumentOpen&&<div className='o7-native-surface'>
    {route==='Hybrid Link'?<HybridMissionControlR8 status={status} record={record}/>:

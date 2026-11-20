@@ -23,6 +23,13 @@ jobs:
         run: npm install
       - name: Audit locked application dependency tree
         run: npm audit --audit-level=high
+      - name: Prove R884 scoped Canon and bounded local automation hub
+        run: |
+          node tests/r881-creation-canon-invariants.mjs
+          node tests/r884-geodetic-epqs-proof.mjs
+          python3 -m unittest discover -s tests -p test_omega_local_hub_r881.py -v
+          python3 -m unittest discover -s tests -p test_omega_falsification_r884.py -v
+          python3 -m unittest discover -s tests -p test_omega_ledger_verifier_r884.py -v
       - name: Prove R237 command authority and R238 shared snapshot
         run: |
           node tests/r237-hybrid-command-authority-invariants.mjs
@@ -164,4 +171,38 @@ jobs:
               echo "::error title=R243 browser proof timeout::Execution-motion proof exceeded 150 seconds and was terminated fail-closed." >&2
             fi
             exit "$motion_status"
+          fi
+
+  menu-browser-proof:
+    needs: source-proof
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npm run build
+      - run: npm install --no-save playwright@1.63.0
+      - run: npx playwright install --with-deps chromium
+      - name: Prove every OMEGA7 menu destination, original deep links, and Studio/Hub operators
+        shell: bash
+        run: |
+          npx vite preview --host 127.0.0.1 --port 4173 >/tmp/r884-vite.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          ready=0
+          for i in $(seq 1 45); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then ready=1; break; fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then cat /tmp/r884-vite.log; exit 1; fi
+          set +e
+          timeout --signal=TERM --kill-after=15s 600s env OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r884-all-44-menu-browser-e2e.mjs
+          browser_status=$?
+          set -e
+          if [ "$browser_status" -ne 0 ]; then
+            cat /tmp/r884-vite.log >&2 || true
+            exit "$browser_status"
           fi
