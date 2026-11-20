@@ -74,7 +74,7 @@ export function disclosureR881(){
  return Object.freeze({schema:R881_SCHEMA,governance:'R237 NO_STAGE_PROMOTED_BEYOND_EVIDENCE',sourceReported:REPORTED,scores:SCORES,phases:PHASES,motifs:MOTIFS,regulation:Array.from({length:12},(_,i)=>'R'+(i+1)),orion:gateR881({id:'ORION_GATE'}),policy:gateR881({id:'R170'}),TIT:gateR881({id:'CF-N0001'}),execution:{edge:'READ_ONLY_DEFINITIONAL',local:'NOT_NATIVE_HOST_ACCEPTED',external:'NOT_VALIDATED'},nativePcAccepted:false,federationClosure:false,empiricalPhysicsValidated:false,canonicalMutation:false,truthBoundary:'Reported totals are source expectations, not independent replays of all 7,655 ledger records.'});
 }
 export async function byteReceiptR881(text,meta={}){
- const bytes=new TextEncoder().encode(typeof text==='string'?text:JSON.stringify(text));
+ const bytes=text instanceof Uint8Array?text:text instanceof ArrayBuffer?new Uint8Array(text):new TextEncoder().encode(typeof text==='string'?text:JSON.stringify(text));
  const hash=await crypto.subtle.digest('SHA-256',bytes);
  return Object.freeze({schema:'OMEGA_BYTE_RECEIPT_R881',sha256:Array.from(new Uint8Array(hash)).map(n=>n.toString(16).padStart(2,'0')).join(''),byteSize:bytes.byteLength,proofTier:meta.proofTier||'DER',source:meta.source||'R881',physicalProof:false});
 }
