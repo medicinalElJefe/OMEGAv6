@@ -42,7 +42,7 @@ test('R926 browser persistence uses portable integrity verification before repla
  const verified=restore.indexOf('const payload=await readPortableAtlasR924(JSON.parse(stored));');
  const displayed=restore.indexOf('setLocalTurnResult({trace:payload.trace',verified);
  assert.ok(verified>=0 && displayed>verified,'restore must verify before displaying a recovered trace');
- assert.match(restore,/stored\.length>131072/);
+ assert.match(restore,/new TextEncoder\(\)\.encode\(stored\)\.byteLength>131072/);
  assert.match(restore,/offline-model-derived/);
  assert.match(ui,/Save offline trace in this browser/);
  assert.match(ui,/Restore saved offline trace/);
