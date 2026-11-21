@@ -110,7 +110,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
  };
  const importPortableAtlasR924=async(file:File)=>{
   if(executionLease.current)return;
-  executionLease.current=true;setRunning(true);setError('');setExecutionPlaying(false);
+  executionLease.current=true;setRunning(true);setError('');setExecutionPlaying(false);setLocalTurnResult(null);setSelectedExecutionStep(0);
   try{
    if(file.size>131072)throw Error('Portable JSON exceeds 128 KiB');
    const payload=await readPortableAtlasR924(JSON.parse(await file.text()));
@@ -130,7 +130,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
  };
  const restoreOfflineAtlasR926=async()=>{
   if(executionLease.current)return;
-  executionLease.current=true;setRunning(true);setError('');setExecutionPlaying(false);
+  executionLease.current=true;setRunning(true);setError('');setExecutionPlaying(false);setLocalTurnResult(null);setSelectedExecutionStep(0);
   try{
    const stored=localStorage.getItem('omega.portable.atlas.r926');
    if(!stored||stored.length>131072)throw Error('Saved offline Atlas trace absent or exceeds 128 KiB');
