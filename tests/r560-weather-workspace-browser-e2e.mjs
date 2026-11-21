@@ -21,7 +21,7 @@ async function assertWeatherProviderUnavailable(page,widget,label){
  if(observed.state==='READY'&&!observed.error){
   // Re-probe with a fresh, witnessed forecast response instead of treating
   // disappearing error text as success.
-  const target=observed.target.match(/(-?\\d+\\.\\d+)°,\\s*(-?\\d+\\.\\d+)°/);
+  const target=observed.target.match(/(-?\d+\.\d+)°,\s*(-?\d+\.\d+)°/);
   if(!target)throw Error(label+': recovered READY has no valid target coordinates');
   const responsePromise=page.waitForResponse(r=>r.url().includes('/api/earth/weather?')&&r.request().method()==='GET',{timeout:45000});
   await widget.getByRole('button',{name:'Refresh weather'}).click();
@@ -44,11 +44,11 @@ async function assertWeatherProviderUnavailable(page,widget,label){
    console.log('R560 '+label+' provider recovered after ERROR transition, refresh HTTP 200 and coherent READY view PASS');
    return;
   }
-  if(payload?.state!=='PROVIDER_UNAVAILABLE'||payload?.current!==null||!Array.isArray(payload?.hourly)||payload.hourly.length||!Array.isArray(payload?.daily)||payload.daily.length||payload?.canonicalMutation!==false||typeof payload?.evidenceHash!=='string'||!payload.evidenceHash||snapshot.state!=='ERROR'||!/OMEGA request failed \\(502\\)/.test(snapshot.error)||snapshot.forecastCards||!/—/.test(snapshot.current))throw Error(label+': refresh 502 did not produce complete truthful provider-unavailable evidence');
+  if(payload?.state!=='PROVIDER_UNAVAILABLE'||payload?.current!==null||!Array.isArray(payload?.hourly)||payload.hourly.length||!Array.isArray(payload?.daily)||payload.daily.length||payload?.canonicalMutation!==false||typeof payload?.evidenceHash!=='string'||!payload.evidenceHash||snapshot.state!=='ERROR'||!/OMEGA request failed \(502\)/.test(snapshot.error)||snapshot.forecastCards||!/—/.test(snapshot.current))throw Error(label+': refresh 502 did not produce complete truthful provider-unavailable evidence');
   console.log('R560 '+label+' provider transiently recovered then reverted to witnessed 502; honest ERROR view PASS');
   return;
  }
- if(observed.state!=='ERROR'||!/OMEGA request failed \\(502\\)/.test(observed.error))throw Error(label+': incoherent weather state '+JSON.stringify(observed));
+ if(observed.state!=='ERROR'||!/OMEGA request failed \(502\)/.test(observed.error))throw Error(label+': incoherent weather state '+JSON.stringify(observed));
  const error=observed.error;
  if(!/OMEGA request failed \(502\)/.test(error))throw Error(label+': unexpected weather error '+error);
  const target=await widget.locator('.earth-r375-head small').innerText();
