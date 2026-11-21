@@ -60,3 +60,17 @@ test('R927 rejected offline recovery cannot leave an older trace visible',()=>{
   assert.ok(body.indexOf('setSelectedExecutionStep(0)')<body.indexOf('readPortableAtlasR924('),'reset cursor before integrity validation');
  }
 });
+
+test('R929 failed verified-host JSON recovery cannot retain a stale trace',()=>{
+ const ui=readFileSync(new URL('../src7/workspaces/SharedArtifactLibraryR864.tsx',import.meta.url),'utf8');
+ const start=ui.indexOf('const verifyExportedExecutionJson=');
+ const end=ui.indexOf('const downloadLocalTurnCsv=',start);
+ assert.ok(start>=0&&end>start,'verified-host recovery handler exists');
+ const body=ui.slice(start,end);
+ const validation=body.indexOf("if(file.size>131072)");
+ const clear=body.indexOf('setLocalTurnResult(null)');
+ const reset=body.indexOf('setSelectedExecutionStep(0)');
+ const display=body.indexOf('setLocalTurnResult({trace,artifact:');
+ assert.ok(clear>=0&&reset>=0&&validation>clear&&validation>reset,'clear prior trace and cursor before parsing');
+ assert.ok(display>validation,'only display a validated trace');
+});
