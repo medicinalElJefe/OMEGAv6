@@ -123,6 +123,23 @@ async function prove(browser,label,viewport){
   await raster.click({position:{x:size.width*(.5/192),y:size.height*(.5/108)}});
   assert.match(await lab.locator('[data-r892-selected-address]').innerText(),/Selected inner state: 1 of 20736/);
   console.log('R892 BROWSER '+label.toUpperCase()+' PASS: exact last/first inner address, unique outer agent address and projection switching.');
+  // R893: verify real autonomous scheduling sweeps distinct nested inner coordinates.
+  const schedule=lab.getByLabel('Autonomous inner-state schedule');
+  await schedule.selectOption('ALL_20736');
+  await lab.getByLabel('Autonomous steps per cycle').selectOption('12');
+  const sweepBefore=(await lab.locator('[data-r893-sweep-progress]').innerText()).match(/Autonomous inner sweep: (\d+)/);
+  assert.ok(sweepBefore,label+' sweep progress exists');
+  await lab.getByRole('button',{name:'Run local agent autonomy'}).click();
+  await page.waitForFunction(()=>{
+    const text=document.querySelector('[data-r893-sweep-progress]')?.textContent||'';
+    const match=text.match(/Autonomous inner sweep: (\d+)/);
+    return Boolean(match&&Number(match[1])>1);
+  },null,{timeout:8000});
+  await lab.getByRole('button',{name:'Pause local agent autonomy'}).click();
+  const sweepAfter=await lab.locator('[data-r893-sweep-progress]').innerText();
+  assert.match(sweepAfter,/Autonomous inner sweep: [2-9]\d* \/ 20736/);
+  assert.match(sweepAfter,/local only/);
+  console.log('R893 BROWSER '+label.toUpperCase()+' PASS: all-inner autonomy executes distinct logical addresses and stops on user pause.');
   assert.equal(errors.length,0,label+' unexpected uncaught errors '+errors.join('; '));
   console.log('R888 BROWSER '+label.toUpperCase()+' PASS: exact inner-state action, symmetric exchange, explicit checkpoint, exact restore and malformed checkpoint refusal');
  }finally{await ctx.close()}
