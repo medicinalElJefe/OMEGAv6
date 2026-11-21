@@ -142,7 +142,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
  };
  const verifyExportedExecutionJson=async(file:File)=>{
   if(executionLease.current)return;
-  executionLease.current=true;setRunning(true);setError('');setExecutionPlaying(false);
+  executionLease.current=true;setRunning(true);setError('');setExecutionPlaying(false);setLocalTurnResult(null);setSelectedExecutionStep(0);
   try{
    if(file.size>131072)throw Error('JSON export exceeds 128 KiB verification limit');
    const exported=JSON.parse(await file.text()) as {schema?:string;modelOnly?:boolean;artifactId?:string;contentSha256?:string;trace?:unknown};
