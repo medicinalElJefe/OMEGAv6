@@ -88,6 +88,12 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
  };
  const downloadLocalTurnJson=()=>{
   if(!localTurnResult)return;
+  // The legacy R922 export asserts a verified local-host artifact. An R924 offline
+  // import has no such provenance; use the explicitly unattested portable export.
+  if(localTurnResult.artifact.id==='offline-model-derived'){
+   setError('Offline model-derived traces cannot be exported as verified local-host artifacts. Use Portable Atlas JSON export.');
+   return;
+  }
   const payload={schema:'OMEGA_LOCAL_ATLAS_EXECUTION_EXPORT_R922_V1',provenance:'verified-local-executor-artifact',modelOnly:true,artifactId:localTurnResult.artifact.id,contentSha256:localTurnResult.artifact.contentSha256,coordinateOrder:['D','P','R','L'],addressRange:[0,20735],trace:localTurnResult.trace};
   const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)+'\n'],{type:'application/json;charset=utf-8'}));
   const link=document.createElement('a');link.href=url;link.download='omega-atlas-execution-'+localTurnResult.artifact.id+'.json';document.body.appendChild(link);link.click();link.remove();window.setTimeout(()=>URL.revokeObjectURL(url),1000);
