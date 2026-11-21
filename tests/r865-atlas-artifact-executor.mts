@@ -62,3 +62,19 @@ test('R931 new execution and offline/host imports clear previous success status 
   assert.ok(clear>=0&&clear<validate,'stale success must be cleared before validation: '+start);
  }
 });
+
+test('R933 offline Atlas chart and CSV exports preserve explicit model-derived provenance',()=>{
+ const ui=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
+ const csv=ui.split('const downloadLocalTurnCsv=()=>{')[1]?.split('const computeAndSave=')[0];
+ assert.ok(csv,'CSV download handler exists');
+ assert.match(csv,/offline-model-derived-origin-unverified/);
+ assert.match(csv,/step,address,d,p,r,l,provenance,origin_verified/);
+ assert.match(csv,/offline\?'false':'true'/);
+ assert.match(csv,/offline-model-derived-/);
+ const svg=ui.split('const downloadLocalTurnSvg=()=>{')[1]?.split('const downloadLocalTurnJson=')[0];
+ assert.ok(svg,'SVG download handler exists');
+ assert.match(svg,/offline-model-derived-/);
+ assert.match(ui,/Download offline model-derived CSV/);
+ assert.match(ui,/Download offline model-derived chart SVG/);
+ assert.match(ui,/Offline model-derived trace · /);
+});
