@@ -11,7 +11,45 @@ if(expectedSha){
 // External weather-provider outages are truthful ERROR states, not application deployment failures.
 // Inspect the same target's 502 evidence; never accept arbitrary HTTP errors or fake forecast values.
 async function assertWeatherProviderUnavailable(page,widget,label){
- const error=await widget.locator('.earth-r375-error').innerText();
+ // Take an atomic DOM snapshot. A provider may recover between the earlier ERROR
+ // state check and a later locator lookup; do not misclassify READY as an outage.
+ const observed=await widget.evaluate(el=>({
+  state:el.getAttribute('data-weather-state'),
+  error:el.querySelector('.earth-r375-error')?.textContent||'',
+  target:el.querySelector('.earth-r375-head small')?.textContent||''
+ }));
+ if(observed.state==='READY'&&!observed.error){
+  // Re-probe with a fresh, witnessed forecast response instead of treating
+  // disappearing error text as success.
+  const target=observed.target.match(/(-?\\d+\\.\\d+)°,\\s*(-?\\d+\\.\\d+)°/);
+  if(!target)throw Error(label+': recovered READY has no valid target coordinates');
+  const responsePromise=page.waitForResponse(r=>r.url().includes('/api/earth/weather?')&&r.request().method()==='GET',{timeout:45000});
+  await widget.getByRole('button',{name:'Refresh weather'}).click();
+  const response=await responsePromise;
+  if(![200,502].includes(response.status()))throw Error(label+': recovered refresh unexpected HTTP '+response.status());
+  const payload=await response.json();
+  const state=response.status()===200?'READY':'ERROR';
+  await page.waitForFunction(({studio,state})=>{
+    const el=studio?document.querySelector('[data-r563-forecast-panel] [data-weather-state]'):document.querySelector('[data-omega7-native="earth.weather"] [data-earth-view="WEATHER"]');
+    return el?.getAttribute('data-weather-state')===state;
+  },{studio:label.includes('studio'),state},{timeout:45000});
+  const snapshot=await widget.evaluate(el=>({
+   state:el.getAttribute('data-weather-state'),
+   error:el.querySelector('.earth-r375-error')?.textContent||'',
+   current:el.querySelector('.earth-r375-head h3')?.textContent||'',
+   forecastCards:el.querySelectorAll('.earth-r375-hourly-card,.earth-r375-day-card').length
+  }));
+  if(response.status()===200){
+   if(snapshot.state!=='READY'||snapshot.error||!payload?.current||!payload?.target||/—/.test(snapshot.current))throw Error(label+': recovered provider HTTP 200 lacks coherent weather view');
+   console.log('R560 '+label+' provider recovered after ERROR transition, refresh HTTP 200 and coherent READY view PASS');
+   return;
+  }
+  if(payload?.state!=='PROVIDER_UNAVAILABLE'||payload?.current!==null||!Array.isArray(payload?.hourly)||payload.hourly.length||!Array.isArray(payload?.daily)||payload.daily.length||payload?.canonicalMutation!==false||typeof payload?.evidenceHash!=='string'||!payload.evidenceHash||snapshot.state!=='ERROR'||!/OMEGA request failed \\(502\\)/.test(snapshot.error)||snapshot.forecastCards||!/—/.test(snapshot.current))throw Error(label+': refresh 502 did not produce complete truthful provider-unavailable evidence');
+  console.log('R560 '+label+' provider transiently recovered then reverted to witnessed 502; honest ERROR view PASS');
+  return;
+ }
+ if(observed.state!=='ERROR'||!/OMEGA request failed \\(502\\)/.test(observed.error))throw Error(label+': incoherent weather state '+JSON.stringify(observed));
+ const error=observed.error;
  if(!/OMEGA request failed \(502\)/.test(error))throw Error(label+': unexpected weather error '+error);
  const target=await widget.locator('.earth-r375-head small').innerText();
  const match=target.match(/(-?\d+\.\d+)°,\s*(-?\d+\.\d+)°/);
