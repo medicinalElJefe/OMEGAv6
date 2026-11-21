@@ -108,6 +108,21 @@ async function prove(browser,label,viewport){
   const afterAuto=(await lab.innerText()).match(/receipts: (\d+)/);
   assert.ok(afterAuto&&Number(afterAuto[1])>Number(beforeAuto[1]),label+' actual autonomous receipts must increase');
   console.log('R891 BROWSER '+label.toUpperCase()+' PASS: local agent autonomy creates real receipts and pauses via UI.');
+  // R892: each of the exact 20,736 pixels is a unique inner/outer state address.
+  const raster=lab.locator('canvas[data-r892-projection]');
+  const projection=lab.getByLabel('20,736 pixel address projection');
+  assert.equal(await raster.getAttribute('data-r892-projection'),'INNER_20736');
+  const size=await raster.evaluate(el=>({width:el.getBoundingClientRect().width,height:el.getBoundingClientRect().height}));
+  await raster.click({position:{x:size.width*(191.5/192),y:size.height*(107.5/108)}});
+  assert.match(await lab.locator('[data-r892-selected-address]').innerText(),/Selected inner state: 20736 of 20736/);
+  await projection.selectOption('OUTER_20736');
+  assert.equal(await raster.getAttribute('data-r892-projection'),'OUTER_20736');
+  await raster.click({position:{x:size.width*(18.5/192),y:size.height*(.5/108)}});
+  assert.match(await lab.locator('.r887-side h3').innerText(),/Agent 19\b/);
+  await projection.selectOption('INNER_20736');
+  await raster.click({position:{x:size.width*(.5/192),y:size.height*(.5/108)}});
+  assert.match(await lab.locator('[data-r892-selected-address]').innerText(),/Selected inner state: 1 of 20736/);
+  console.log('R892 BROWSER '+label.toUpperCase()+' PASS: exact last/first inner address, unique outer agent address and projection switching.');
   assert.equal(errors.length,0,label+' unexpected uncaught errors '+errors.join('; '));
   console.log('R888 BROWSER '+label.toUpperCase()+' PASS: exact inner-state action, symmetric exchange, explicit checkpoint, exact restore and malformed checkpoint refusal');
  }finally{await ctx.close()}
