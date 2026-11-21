@@ -53,7 +53,7 @@ test('R931 new execution and offline/host imports clear previous success status 
   ['const importPortableAtlasR924=async(file:File)=>{','const saveOfflineAtlasR926=async()=>{'],
   ['const restoreOfflineAtlasR926=async()=>{','const verifyExportedExecutionJson=async(file:File)=>{'],
   ['const verifyExportedExecutionJson=async(file:File)=>{','const executionMetrics=']
- ){
+ ]){
   const begin=ui.indexOf(start);
   assert.ok(begin>=0,'handler exists: '+start);
   const segment=ui.slice(begin,ui.indexOf(end,begin)>begin?ui.indexOf(end,begin):begin+6000);
