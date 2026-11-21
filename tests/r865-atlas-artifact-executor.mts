@@ -103,3 +103,12 @@ test('R935 local executor verifies bounded artifact schema before displaying tra
  const display=segment.indexOf('setLocalTurnResult(result)');
  assert.ok(bound>=0&&schema>bound&&digest>schema&&display>digest,'bounded schema and digest validation precede visible result');
 });
+
+test('R936 browser-local Atlas trace can be cleared without deleting host artifacts',()=>{
+ const ui=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
+ const segment=ui.split('const clearSavedOfflineAtlasR936=()=>{')[1]?.split('const restoreOfflineAtlasR926=async()=>{')[0];
+ assert.ok(segment,'clear handler exists');
+ assert.match(segment,/localStorage\.removeItem\('omega\.portable\.atlas\.r926'\)/);
+ assert.doesNotMatch(segment,/fetch\(|removeSaved\(|deleteArtifact/);
+ assert.match(ui,/onClick=\{clearSavedOfflineAtlasR936\}>Clear saved offline trace from this browser/);
+});
