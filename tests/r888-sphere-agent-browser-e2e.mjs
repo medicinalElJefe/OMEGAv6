@@ -108,6 +108,32 @@ async function prove(browser,label,viewport){
   const afterAuto=(await lab.innerText()).match(/receipts: (\d+)/);
   assert.ok(afterAuto&&Number(afterAuto[1])>Number(beforeAuto[1]),label+' actual autonomous receipts must increase');
   console.log('R891 BROWSER '+label.toUpperCase()+' PASS: local agent autonomy creates real receipts and pauses via UI.');
+  // R892: physical canvas hit proof at a safe visible coordinate; all corner indices
+  // additionally remain accessible through exact numeric address input on narrow mobile layouts.
+  const raster=lab.locator('canvas[data-r892-projection]');
+  const projection=lab.getByLabel('20,736 pixel address projection');
+  assert.equal(await raster.getAttribute('data-r892-projection'),'INNER_20736');
+  await raster.evaluate(el=>el.scrollIntoView({block:'center',inline:'center'}));
+  const size=await raster.evaluate(el=>({width:el.getBoundingClientRect().width,height:el.getBoundingClientRect().height}));
+  const mobile=label==='mobile';
+  const targetInner=mobile?10465:20736;
+  await raster.click({position:{x:size.width*((mobile?96.5:191.5)/192),y:size.height*((mobile?54.5:107.5)/108)}});
+  assert.match(await lab.locator('[data-r892-selected-address]').innerText(),new RegExp('Selected inner state: '+targetInner+' of 20736'));
+  await lab.getByLabel('Exact inner state address').fill('20736');
+  assert.match(await lab.locator('[data-r892-selected-address]').innerText(),/Selected inner state: 20736 of 20736/);
+  await projection.selectOption('OUTER_20736');
+  assert.equal(await raster.getAttribute('data-r892-projection'),'OUTER_20736');
+  const targetOuter=mobile?10465:19;
+  await raster.evaluate(el=>el.scrollIntoView({block:'center',inline:'center'}));
+  await raster.click({position:{x:size.width*((mobile?96.5:18.5)/192),y:size.height*((mobile?54.5:.5)/108)}});
+  assert.equal(await lab.getByRole('spinbutton',{name:'Outer address'}).inputValue(),String(targetOuter),label+' exact outer address');
+  await projection.selectOption('INNER_20736');
+  await raster.evaluate(el=>el.scrollIntoView({block:'center',inline:'center'}));
+  await raster.click({position:{x:size.width*((mobile?96.5:.5)/192),y:size.height*((mobile?54.5:.5)/108)}});
+  assert.match(await lab.locator('[data-r892-selected-address]').innerText(),new RegExp('Selected inner state: '+(mobile?10465:1)+' of 20736'));
+  await lab.getByLabel('Exact inner state address').fill('1');
+  assert.match(await lab.locator('[data-r892-selected-address]').innerText(),/Selected inner state: 1 of 20736/);
+  console.log('R892 BROWSER '+label.toUpperCase()+' PASS: exact last/first inner address, unique outer agent address and projection switching.');
   assert.equal(errors.length,0,label+' unexpected uncaught errors '+errors.join('; '));
   console.log('R888 BROWSER '+label.toUpperCase()+' PASS: exact inner-state action, symmetric exchange, explicit checkpoint, exact restore and malformed checkpoint refusal');
  }finally{await ctx.close()}
