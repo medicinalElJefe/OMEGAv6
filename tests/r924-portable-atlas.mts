@@ -44,3 +44,16 @@ test('R926 browser persistence uses portable integrity verification before repla
  assert.match(ui,/Save offline trace in this browser/);
  assert.match(ui,/Restore saved offline trace/);
 });
+
+
+test('R927 rejected offline recovery cannot leave an older trace visible',()=>{
+ const ui=readFileSync(new URL('../src7/workspaces/SharedArtifactLibraryR864.tsx',import.meta.url),'utf8');
+ for(const [handler,next] of [['const importPortableAtlasR924=','const saveOfflineAtlasR926='],['const restoreOfflineAtlasR926=','const verifyExportedExecutionJson=']]){
+  const start=ui.indexOf(handler),end=ui.indexOf(next,start);
+  assert.ok(start>=0&&end>start,'recovery handler exists');
+  const body=ui.slice(start,end);
+  assert.ok(body.indexOf('setLocalTurnResult(null)')>=0,'clear prior replay before import');
+  assert.ok(body.indexOf('setLocalTurnResult(null)')<body.indexOf('readPortableAtlasR924('),'clear prior replay before integrity validation');
+  assert.ok(body.indexOf('setSelectedExecutionStep(0)')<body.indexOf('readPortableAtlasR924('),'reset cursor before integrity validation');
+ }
+});
