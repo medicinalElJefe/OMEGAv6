@@ -148,7 +148,8 @@ async function prove(browser,label,viewport){
   },null,{timeout:8000});
   await lab.getByRole('button',{name:'Pause local agent autonomy'}).click();
   const sweepAfter=await lab.locator('[data-r893-sweep-progress]').innerText();
-  assert.match(sweepAfter,/Autonomous inner sweep: [2-9]\d* \/ 20736/);
+  const advanced=sweepAfter.match(/Autonomous inner sweep: (\d+) \/ 20736/);
+  assert.ok(advanced&&Number(advanced[1])>1,label+' actual sweep progressed beyond first state');
   assert.match(sweepAfter,/local only/);
   // R893 continuation: resume exact sweep address, not just mutable fabric values.
   const savedPosition=(await lab.locator('[data-r893-sweep-progress]').innerText()).match(/Autonomous inner sweep: (\d+)/);
