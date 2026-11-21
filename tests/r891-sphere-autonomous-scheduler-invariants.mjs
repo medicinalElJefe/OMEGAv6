@@ -4,6 +4,7 @@ import {agentId,createFabric,getAgent,stateValue,submitTask} from '../src/sphere
 import {collectiveMembersR890} from '../src/sphereCollectiveR890.mjs';
 import {autonomousTickR891,R891_SCHEMA} from '../src/sphereAutonomousR891.mjs';
 const f=createFabric(),root=agentId(3,12345),inner=732,members=collectiveMembersR890(root,9);
+const untouchedInnerBefore=members.map(id=>stateValue(f,id,inner+1));
 let cursor=0,lastTick=0;
 for(let i=0;i<36;i++){
  const r=autonomousTickR891(f,members,inner,cursor,1);
@@ -13,6 +14,7 @@ for(let i=0;i<36;i++){
  assert.ok(f.active.size<=9);
 }
 assert.ok(new Set(f.receipts.map(r=>r.agent)).size>=5,'scheduler must distribute work across independent identities');
+assert.deepEqual(members.map(id=>stateValue(f,id,inner+1)),untouchedInnerBefore,'autonomous work may not mutate unrelated inner coordinates');
 const prior=f.tick;
 submitTask(f,{agent:root,kind:'OBSERVE',inner});
 const queued=autonomousTickR891(f,members,inner,cursor,1);
