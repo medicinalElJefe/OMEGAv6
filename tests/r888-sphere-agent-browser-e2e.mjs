@@ -78,6 +78,21 @@ async function prove(browser,label,viewport){
    await page.waitForFunction(()=>document.querySelector('[data-r889-cloud-bridge]')?.textContent?.includes('Mission accepted'),null,{timeout:6000});
    assert.equal(posted,2);
    assert.equal(request.providerBudget,1,label+' optional one-model budget only');
+   const collective=lab.locator('[data-r890-collective="EXPLICIT_BOUNDED_FLOCK"]');
+   await collective.waitFor({state:'visible',timeout:5000});
+   assert.equal(posted,2,label+' no collective ambient dispatch');
+   await collective.getByLabel('Collective member count').selectOption('3');
+   const members=await collective.locator('[data-r890-member-ids]').innerText();
+   assert.equal(members.match(/\d+/g).length,3,label+' unique visible member IDs');
+   await collective.getByRole('button',{name:'Dispatch selected collective'}).click();
+   await collective.locator('[data-r890-receipt="RETURNED_NOT_ADMITTED"]').waitFor({state:'visible',timeout:8000});
+   assert.equal(posted,3,label+' one deliberate collective dispatch');
+   assert.equal(request.mode,'FLOCK');assert.equal(request.requestedCells,3);assert.equal(request.providerBudget,1);
+   assert.match(request.intent,/member 3/);assert.match(await collective.innerText(),/SWARM_RESULT_NOT_CANON_ADMITTED/);
+   await collective.getByRole('button',{name:'Refresh collective receipt'}).click();
+   await collective.getByText(/Unverified|Fixture output only/).waitFor({state:'visible',timeout:8000});
+   assert.equal(reads,2,label+' deliberate collective refresh');
+   console.log('R890 BROWSER '+label.toUpperCase()+' PASS: explicit group membership, bounded 3-agent FLOCK and unadmitted receipt.');
    console.log('R889 BROWSER '+label.toUpperCase()+' PASS: no ambient dispatch, exact inner state, 0/1 model budget, explicit receipt and status proof bounds.');
   }
   assert.equal(errors.length,0,label+' unexpected uncaught errors '+errors.join('; '));
