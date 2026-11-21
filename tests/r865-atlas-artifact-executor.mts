@@ -97,7 +97,7 @@ test('R935 local executor verifies bounded artifact schema before displaying tra
  const ui=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
  const segment=ui.split('const executeLocalTurns=async()=>{')[1]?.split('const recoverLocalTurns=async(id:string)=>{')[0];
  assert.ok(segment,'local executor handler exists');
- const bound=segment.indexOf('saved.content.length>131072');
+ const bound=segment.indexOf('new TextEncoder().encode(saved.content).byteLength>131072');
  const schema=segment.indexOf("artifactPayload.schema!=='OMEGA_LOCAL_ATLAS_EXECUTION_R910_V1'");
  const digest=segment.indexOf('digest!==result.artifact.contentSha256');
  const display=segment.indexOf('setLocalTurnResult(result)');
@@ -140,4 +140,19 @@ test('R938 browser Atlas persistence uses byte limits and verifies deletion befo
  const success=clear.indexOf("setExecutionStatus('Saved browser-local Atlas trace cleared.");
  assert.ok(remove>=0&&verify>remove&&success>verify,'clear success requires storage absence readback');
  assert.doesNotMatch(clear,/fetch\(|deleteArtifact|removeSaved\(/);
+});
+
+
+test('R940 bounds local artifact readbacks in UTF-8 bytes before accepting recovered content',()=>{
+ const ui=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
+ const execution=ui.split('const executeLocalTurns=async()=>{')[1]?.split('const recoverLocalTurns=async(id:string)=>{')[0];
+ const recovery=ui.split('const recoverLocalTurns=async(id:string)=>{')[1]?.split('const executionMetrics=')[0];
+ const exported=ui.split('const verifyExportedExecutionJson=async(file:File)=>{')[1]?.split('const downloadLocalTurnCsv=')[0];
+ assert.ok(execution&&recovery&&exported,'all three local readback handlers must exist');
+ for(const [name,handler] of [['execute',execution],['recover',recovery],['verify export',exported]]){
+  const bound=handler.indexOf('new TextEncoder().encode(saved.content).byteLength>131072');
+  const accept=handler.indexOf('setLocalTurnResult(');
+  assert.ok(bound>=0&&accept>bound,name+' must check UTF-8 byte length before accepting artifact');
+ }
+ assert.doesNotMatch(execution,/saved\.content\.length>131072/);
 });
