@@ -112,3 +112,17 @@ test('R936 browser-local Atlas trace can be cleared without deleting host artifa
  assert.doesNotMatch(segment,/fetch\(|removeSaved\(|deleteArtifact/);
  assert.match(ui,/onClick=\{clearSavedOfflineAtlasR936\}>Clear saved offline trace from this browser/);
 });
+
+test('R937 browser-local Atlas save verifies exact storage readback and portable integrity before success',()=>{
+ const ui=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
+ const segment=ui.split('const saveOfflineAtlasR926=async()=>{')[1]?.split('const clearSavedOfflineAtlasR936=()=>{')[0];
+ assert.ok(segment,'browser save handler exists');
+ const write=segment.indexOf("localStorage.setItem('omega.portable.atlas.r926',serialized)");
+ const read=segment.indexOf("localStorage.getItem('omega.portable.atlas.r926')");
+ const match=segment.indexOf('persisted!==serialized');
+ const verify=segment.indexOf('await readPortableAtlasR924(JSON.parse(persisted))');
+ const success=segment.indexOf("setExecutionStatus('Saved and readback-verified ");
+ assert.ok(write>=0&&read>write&&match>read&&verify>match&&success>verify,'persistent readback and integrity validation must precede success');
+ assert.match(segment,/serialized.length>131072/);
+ assert.match(segment,/recovered.trace.length!==payload.trace.length/);
+});
