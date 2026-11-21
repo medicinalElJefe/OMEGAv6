@@ -45,3 +45,20 @@ test('R930 host recovery clears stale replay and stops playback before reading a
  const accept=recovery.indexOf('setLocalTurnResult({trace:data.trace');
  assert.ok(reset>=0&&read>reset&&accept>read,'reset must precede host read and verified display');
 });
+
+test('R931 new execution and offline/host imports clear previous success status before validation',()=>{
+ const ui=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
+ for(const [start,end] of [
+  ['const executeLocalTurns=async()=>{','const recoverLocalTurns=async(id:string)=>{'],
+  ['const importPortableAtlasR924=async(file:File)=>{','const saveOfflineAtlasR926=async()=>{'],
+  ['const restoreOfflineAtlasR926=async()=>{','const verifyExportedExecutionJson=async(file:File)=>{'],
+  ['const verifyExportedExecutionJson=async(file:File)=>{','const executionMetrics=']
+ ){
+  const begin=ui.indexOf(start);
+  assert.ok(begin>=0,'handler exists: '+start);
+  const segment=ui.slice(begin,ui.indexOf(end,begin)>begin?ui.indexOf(end,begin):begin+6000);
+  const clear=segment.indexOf("setExecutionStatus('')");
+  const validate=segment.indexOf('try{');
+  assert.ok(clear>=0&&clear<validate,'stale success must be cleared before validation: '+start);
+ }
+});
