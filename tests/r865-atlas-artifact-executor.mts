@@ -35,3 +35,13 @@ test('R918 live local Atlas response refuses inconsistent coordinates and initia
  assert.match(ui,/x\.address!==1728\*\(x\.coordinates\[0\]-1\)\+144\*\(x\.coordinates\[1\]-1\)\+12\*\(x\.coordinates\[2\]-1\)\+x\.coordinates\[3\]-1/);
  assert.match(ui,/i===0&&x\.address!==address/);
 });
+
+test('R930 host recovery clears stale replay and stops playback before reading artifact',()=>{
+ const ui=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
+ const recovery=ui.split('const recoverLocalTurns=async(id:string)=>{')[1]?.split('const executionMetrics=')[0];
+ assert.ok(recovery,'host recovery handler exists');
+ const reset=recovery.indexOf("setExecutionStatus('');setExecutionPlaying(false);setLocalTurnResult(null);setSelectedExecutionStep(0)");
+ const read=recovery.indexOf("fetch('/__omega_local/artifacts/'");
+ const accept=recovery.indexOf('setLocalTurnResult({trace:data.trace');
+ assert.ok(reset>=0&&read>reset&&accept>read,'reset must precede host read and verified display');
+});
