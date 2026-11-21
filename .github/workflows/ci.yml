@@ -26,6 +26,8 @@ jobs:
       - name: R606 archive capability intake focused invariants
         run: node --test tests/archive-capability-intake.test.mjs
       - run: npm install
+      - name: R916 strict Atlas input boundary and full 20,736-address model regression
+        run: npm run test:r896
       - name: Audit locked application dependency tree
         run: npm audit --audit-level=high
       - name: Prove R812/R813 governed successor refusal and independent production verifier
