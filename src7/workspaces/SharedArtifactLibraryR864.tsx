@@ -127,8 +127,14 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
   executionLease.current=true;setRunning(true);setError('');
   try{
    const payload=await makePortableAtlasR924(localTurnResult.trace);
-   localStorage.setItem('omega.portable.atlas.r926',JSON.stringify(payload));
-   setExecutionStatus('Saved '+payload.trace.length+' model-derived Atlas states in this browser. Origin unverified; use Restore saved offline trace after reload.');
+   const serialized=JSON.stringify(payload);
+   if(serialized.length>131072)throw Error('Offline Atlas trace exceeds 128 KiB browser recovery limit');
+   localStorage.setItem('omega.portable.atlas.r926',serialized);
+   const persisted=localStorage.getItem('omega.portable.atlas.r926');
+   if(persisted!==serialized)throw Error('Browser storage readback differs from saved Atlas trace');
+   const recovered=await readPortableAtlasR924(JSON.parse(persisted));
+   if(recovered.trace.length!==payload.trace.length)throw Error('Browser storage trace count differs after integrity verification');
+   setExecutionStatus('Saved and readback-verified '+recovered.trace.length+' model-derived Atlas states in this browser. Origin unverified; use Restore saved offline trace after reload.');
   }catch(e){setError('Offline Atlas save refused: '+String(e))}finally{executionLease.current=false;setRunning(false)}
  };
  const clearSavedOfflineAtlasR936=()=>{
