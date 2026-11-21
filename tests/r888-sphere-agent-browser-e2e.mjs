@@ -48,6 +48,38 @@ async function prove(browser,label,viewport){
   await page.evaluate(()=>localStorage.setItem('omega.r888.sphere.agent.checkpoint.v1','{"invalid":true}'));
   await lab.getByRole('button',{name:'Restore checkpoint'}).click();
   assert.match(await lab.getByRole('alert').innerText(),/Checkpoint restore refused/);
+  if(process.env.OMEGA_R888_USE_FIXTURES==='1'){
+   const cloud=lab.locator('[data-r889-cloud-bridge="EXPLICIT_OPERATOR_DISPATCH_ONLY"]');
+   await cloud.waitFor({state:'visible',timeout:5000});
+   let posted=0,request=null,reads=0;
+   await page.route('**/api/swarm/missions',async route=>{
+    posted++;request=route.request().postDataJSON();
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({mission:{id:'r889-fixture-001',status:'QUEUED'}})});
+   });
+   await page.route('**/api/swarm/missions/r889-fixture-001',async route=>{
+    reads++;
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({mission:{id:'r889-fixture-001',status:'COMPLETE',completed:1,failed:0,proofState:'RETURNED_NOT_ADMITTED',finalSynthesis:{text:'Fixture output only'}}})});
+   });
+   assert.equal(posted,0,label+' cloud request must not happen on mount');
+   await cloud.getByLabel('Agent cloud objective').fill('Reconcile selected agent state');
+   await cloud.getByRole('button',{name:'Dispatch selected agent to governed swarm'}).click();
+   await cloud.locator('[data-r889-receipt="RETURNED_NOT_ADMITTED"]').waitFor({state:'visible',timeout:8000});
+   assert.equal(posted,1,label+' explicit dispatch only');
+   assert.equal(request.providerBudget,0,label+' default zero model budget');
+   assert.equal(request.requestedCells,1,label+' bounded one-cell swarm');
+   assert.equal(request.mode,'SOLO');
+   assert.match(request.intent,/inner 149\/20736/);
+   assert.match(await cloud.innerText(),/CLOUD_RECEIPT_RETURNED_NOT_CANON_ADMITTED/);
+   await cloud.getByRole('button',{name:'Refresh cloud mission receipt'}).click();
+   await cloud.getByText(/Fixture output only/).waitFor({state:'visible',timeout:6000});
+   assert.equal(reads,1,label+' refresh requires explicit operator click');
+   await cloud.getByLabel('Model synthesis budget').selectOption('1');
+   await cloud.getByRole('button',{name:'Dispatch selected agent to governed swarm'}).click();
+   await page.waitForFunction(()=>document.querySelector('[data-r889-cloud-bridge]')?.textContent?.includes('Mission accepted'),null,{timeout:6000});
+   assert.equal(posted,2);
+   assert.equal(request.providerBudget,1,label+' optional one-model budget only');
+   console.log('R889 BROWSER '+label.toUpperCase()+' PASS: no ambient dispatch, exact inner state, 0/1 model budget, explicit receipt and status proof bounds.');
+  }
   assert.equal(errors.length,0,label+' unexpected uncaught errors '+errors.join('; '));
   console.log('R888 BROWSER '+label.toUpperCase()+' PASS: exact inner-state action, symmetric exchange, explicit checkpoint, exact restore and malformed checkpoint refusal');
  }finally{await ctx.close()}
