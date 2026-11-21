@@ -47,7 +47,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
  };
  const recoverLocalTurns=async(id:string)=>{
   if(executionLease.current)return;
-  executionLease.current=true;setRunning(true);setError('');setLocalTurnResult(null);
+  executionLease.current=true;setRunning(true);setError('');setExecutionStatus('');setExecutionPlaying(false);setLocalTurnResult(null);setSelectedExecutionStep(0);
   try{
    if(!/^[a-f0-9-]{36}$/.test(id))throw Error('Invalid artifact ID');
    const response=await fetch('/__omega_local/artifacts/'+encodeURIComponent(id));
