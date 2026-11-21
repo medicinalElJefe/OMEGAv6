@@ -1,3 +1,12 @@
+/** R916: fail closed on untrusted browser input; empty text must never alias address zero. */
+export function parseAtlasAddressInputR916(input:string):number{
+ const trimmed=input.trim();
+ if(!/^(?:0|[1-9][0-9]*)$/.test(trimmed))throw Error('Atlas address must be an integer from 0 to 20735');
+ const address=Number(trimmed);
+ if(!Number.isSafeInteger(address)||address<0||address>=20736)throw Error('Atlas address must be an integer from 0 to 20735');
+ return address;
+}
+
 import type {Mandala20736Field} from '../../src/mandala20736Runtime';
 
 /** R896: export every compiled address without sampling or inventing a physical dimension. */
