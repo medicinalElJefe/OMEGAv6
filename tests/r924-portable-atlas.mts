@@ -38,7 +38,10 @@ test('R926 browser persistence uses portable integrity verification before repla
  assert.match(save,/makePortableAtlasR924\(localTurnResult\.trace\)/);
  assert.match(save,/localStorage\.setItem\('omega\.portable\.atlas\.r926'/);
  assert.match(restore,/readPortableAtlasR924\(JSON\.parse\(stored\)\)/);
- assert.ok(restore.indexOf('readPortableAtlasR924')<restore.indexOf('setLocalTurnResult'),'restore must verify before displaying');
+ assert.ok(restore.indexOf('setLocalTurnResult(null)')>=0 && restore.indexOf('setLocalTurnResult(null)')<restore.indexOf('readPortableAtlasR924'),'restore clears stale replay before verifying');
+ const verified=restore.indexOf('const payload=await readPortableAtlasR924(JSON.parse(stored));');
+ const displayed=restore.indexOf('setLocalTurnResult({trace:payload.trace',verified);
+ assert.ok(verified>=0 && displayed>verified,'restore must verify before displaying a recovered trace');
  assert.match(restore,/stored\.length>131072/);
  assert.match(restore,/offline-model-derived/);
  assert.match(ui,/Save offline trace in this browser/);
