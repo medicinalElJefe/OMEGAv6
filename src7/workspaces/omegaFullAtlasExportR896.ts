@@ -1,0 +1,118 @@
+/** R916: fail closed on untrusted browser input; empty text must never alias address zero. */
+export function parseAtlasAddressInputR916(input:string):number{
+ const trimmed=input.trim();
+ if(!/^(?:0|[1-9][0-9]*)$/.test(trimmed))throw Error('Atlas address must be an integer from 0 to 20735');
+ const address=Number(trimmed);
+ if(!Number.isSafeInteger(address)||address<0||address>=20736)throw Error('Atlas address must be an integer from 0 to 20735');
+ return address;
+}
+
+import type {Mandala20736Field} from '../../src/mandala20736Runtime';
+
+/** R896: export every compiled address without sampling or inventing a physical dimension. */
+export function exportFullAtlasCsvR896(field:Mandala20736Field):string{
+ if(field.count!==20736)throw Error('Full Atlas requires exactly 20736 compiled addresses');
+ const keys=['x','y','z','phase','C','Phi','q','Lambda','scar','evidence','rsc','geometry','motion','symmetry','forecast','route','continuityGate','motionDrive','velocity','acceleration','routeNext','domain'] as const;
+ for(const key of keys)if(field[key].length!==field.count)throw Error('Incomplete Atlas field: '+key);
+ const lines=['address,'+keys.join(',')];
+ for(let i=0;i<field.count;i++){
+  const values=keys.map(key=>{
+   const value=field[key][i];
+   if(!Number.isFinite(value))throw Error('Nonfinite Atlas field '+key+' at address '+i);
+   if(key==='routeNext'&&(value<0||value>=field.count||!Number.isInteger(value)))throw Error('Invalid route target at '+i);
+   return String(value);
+  });
+  lines.push(i+','+values.join(','));
+ }
+ return lines.join('\n')+'\n';
+}
+
+/** R897: inspect one real compiled Atlas address without exporting a 20,736-row file. */
+export function inspectAtlasAddressR897(field:Mandala20736Field,address:number):Array<{name:string;value:number}>{
+ if(field.count!==20736||!Number.isInteger(address)||address<0||address>=field.count)throw Error('Atlas address must be 0–20735');
+ const keys=['x','y','z','phase','C','Phi','q','Lambda','scar','evidence','rsc','geometry','motion','symmetry','forecast','route','continuityGate','motionDrive','velocity','acceleration','routeNext','domain'] as const;
+ return keys.map(name=>{
+  if(field[name].length!==field.count)throw Error('Incomplete Atlas field: '+name);
+  const value=field[name][address];
+  if(!Number.isFinite(value))throw Error('Nonfinite Atlas field '+name+' at address '+address);
+  if(name==='routeNext'&&(!Number.isInteger(value)||value<0||value>=field.count))throw Error('Invalid route target at '+address);
+  return {name,value};
+ });
+}
+
+/** R899: execute the compiled route graph, stopping at the first repeated address. */
+export function traceAtlasRouteR899(field:Mandala20736Field,start:number,maxSteps:number):{addresses:number[];cycleAt:number|null;truncated:boolean}{
+ if(!Number.isInteger(maxSteps)||maxSteps<1||maxSteps>256)throw Error('Route steps must be 1–256');
+ if(!Number.isInteger(start)||start<0||start>=20736)throw Error('Atlas address must be 0–20735');
+ const visited=new Map<number,number>(),addresses:number[]=[];
+ let current=start;
+ for(let step=0;step<maxSteps;step++){
+  const cycle=visited.get(current);
+  if(cycle!==undefined)return {addresses,cycleAt:cycle,truncated:false};
+  visited.set(current,addresses.length);
+  const values=inspectAtlasAddressR897(field,current);
+  addresses.push(current);
+  current=values.find(item=>item.name==='routeNext')!.value;
+ }
+ return {addresses,cycleAt:visited.get(current)??null,truncated:!visited.has(current)};
+}
+
+/** R900: export exactly the executed route with full computed fields and cycle evidence. */
+export function exportAtlasRouteCsvR900(field:Mandala20736Field,trace:{addresses:number[];cycleAt:number|null;truncated:boolean}):string{
+ if(!Array.isArray(trace.addresses)||trace.addresses.length<1||trace.addresses.length>256)throw Error('Invalid route trace length');
+ if(trace.cycleAt!==null&&(!Number.isInteger(trace.cycleAt)||trace.cycleAt<0||trace.cycleAt>=trace.addresses.length))throw Error('Invalid cycle index');
+ const names=inspectAtlasAddressR897(field,trace.addresses[0]).map(item=>item.name);
+ const lines=['step,address,'+names.join(',')+',cycle_return_step,truncated'];
+ const seen=new Set<number>();
+ for(let index=0;index<trace.addresses.length;index++){
+  const address=trace.addresses[index];
+  if(seen.has(address))throw Error('Route repeats before cycle boundary');
+  seen.add(address);
+  const values=inspectAtlasAddressR897(field,address);
+  if(index>0&&values.length!==names.length)throw Error('Route field mismatch');
+  lines.push([index+1,address,...values.map(item=>item.value),trace.cycleAt===null?'':trace.cycleAt+1,trace.truncated?'true':'false'].join(','));
+  if(index+1<trace.addresses.length&&values.find(item=>item.name==='routeNext')?.value!==trace.addresses[index+1])throw Error('Discontinuous route trace');
+ }
+ const last=inspectAtlasAddressR897(field,trace.addresses[trace.addresses.length-1]);
+ const next=last.find(item=>item.name==='routeNext')!.value;
+ if(trace.cycleAt!==null&&next!==trace.addresses[trace.cycleAt])throw Error('Cycle return does not match compiled route');
+ if(trace.cycleAt===null&&seen.has(next))throw Error('Unreported route cycle');
+ if(trace.truncated!==(trace.cycleAt===null))throw Error('Inconsistent route termination');
+ return lines.join('\n')+'\n';
+}
+
+/** R901: summarize the actual executed route, preserving cycle versus step-limit semantics. */
+export function summarizeAtlasRouteR901(field:Mandala20736Field,trace:{addresses:number[];cycleAt:number|null;truncated:boolean}):{visited:number;cycleLength:number|null;transientLength:number|null;meanStepDistance:number;maxStepDistance:number}{
+ // Reuse the strict R900 continuity and termination checks before deriving metrics.
+ exportAtlasRouteCsvR900(field,trace);
+ let sum=0,max=0,edges=0;
+ for(let i=1;i<trace.addresses.length;i++){
+  const a=inspectAtlasAddressR897(field,trace.addresses[i-1]),b=inspectAtlasAddressR897(field,trace.addresses[i]);
+  const coordinate=(values:typeof a,name:string)=>values.find(item=>item.name===name)!.value;
+  const distance=Math.hypot(...(['x','y','z'] as const).map(name=>coordinate(b,name)-coordinate(a,name)));
+  if(!Number.isFinite(distance))throw Error('Invalid Atlas coordinate displacement');
+  sum+=distance;max=Math.max(max,distance);edges++;
+ }
+ // A detected cycle includes its closing edge. Omitting it underreports
+ // displacement, especially for a one-address self-loop versus longer cycles.
+ if(trace.cycleAt!==null){
+  const last=inspectAtlasAddressR897(field,trace.addresses[trace.addresses.length-1]);
+  const first=inspectAtlasAddressR897(field,trace.addresses[trace.cycleAt]);
+  const coordinate=(values:typeof last,name:string)=>values.find(item=>item.name===name)!.value;
+  const closing=Math.hypot(...(['x','y','z'] as const).map(name=>coordinate(first,name)-coordinate(last,name)));
+  if(!Number.isFinite(closing))throw Error('Invalid Atlas cycle closing displacement');
+  sum+=closing;max=Math.max(max,closing);edges++;
+ }
+ return {visited:trace.addresses.length,cycleLength:trace.cycleAt===null?null:trace.addresses.length-trace.cycleAt,transientLength:trace.cycleAt,meanStepDistance:edges?sum/edges:0,maxStepDistance:max};
+}
+
+/** R902: compare two independently executed route paths in the same compiled field. */
+export function compareAtlasRoutesR902(field:Mandala20736Field,first:{addresses:number[];cycleAt:number|null;truncated:boolean},second:{addresses:number[];cycleAt:number|null;truncated:boolean}):{sharedAddresses:number;firstOnly:number;secondOnly:number;firstSharedStep:number|null;secondSharedStep:number|null;commonPrefix:number;firstCycleLength:number|null;secondCycleLength:number|null}{
+ exportAtlasRouteCsvR900(field,first);
+ exportAtlasRouteCsvR900(field,second);
+ const left=new Set(first.addresses),right=new Set(second.addresses);
+ const shared=first.addresses.filter(address=>right.has(address));
+ let prefix=0;
+ while(prefix<Math.min(first.addresses.length,second.addresses.length)&&first.addresses[prefix]===second.addresses[prefix])prefix++;
+ return {sharedAddresses:shared.length,firstOnly:left.size-shared.length,secondOnly:right.size-shared.length,firstSharedStep:shared.length?first.addresses.indexOf(shared[0])+1:null,secondSharedStep:shared.length?second.addresses.findIndex(address=>left.has(address))+1:null,commonPrefix:prefix,firstCycleLength:first.cycleAt===null?null:first.addresses.length-first.cycleAt,secondCycleLength:second.cycleAt===null?null:second.addresses.length-second.cycleAt};
+}

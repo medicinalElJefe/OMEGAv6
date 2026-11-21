@@ -26,6 +26,8 @@ jobs:
       - name: R606 archive capability intake focused invariants
         run: node --test tests/archive-capability-intake.test.mjs
       - run: npm install
+      - name: R916 strict Atlas input boundary and full 20,736-address model regression
+        run: npm run test:r896
       - name: Audit locked application dependency tree
         run: npm audit --audit-level=high
       - name: Prove R812/R813 governed successor refusal and independent production verifier
@@ -231,7 +233,7 @@ jobs:
   omega7-user-parity:
     if: github.event_name == 'pull_request'
     needs: verify
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # The 25-minute budget cancelled exact-head #40411937799 after R705 passed,
     # during R520, leaving later browser gates unexecuted. Keep the full gate.
     timeout-minutes: 45
@@ -267,6 +269,10 @@ jobs:
         env:
           OMEGA_E2E_URL: http://127.0.0.1:4173
         run: npm run test:r599:browser
+      - name: Prove every OMEGA7 menu destination opens on desktop and mobile
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: npm run test:r915:browser
       - name: Prove 44-route desktop and mobile OMEGA7 parity
         env:
           OMEGA_E2E_URL: http://127.0.0.1:4173
@@ -438,6 +444,55 @@ jobs:
         shell: bash
         run: |
           if [ -f /tmp/omega7-r446-vite.pid ]; then kill "$(cat /tmp/omega7-r446-vite.pid)" || true; fi
+
+  # R882: first-launch Windows proof uses canonical CI, never a 25th workflow.
+  # Independent of verify so a cloud audit veto does not suppress desktop
+  # compilation and diagnostics. This job has no production write authority.
+  r882-portable-windows:
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    runs-on: windows-latest
+    timeout-minutes: 40
+    permissions:
+      contents: read
+    env:
+      OMEGA_DESKTOP_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.OMEGA_DESKTOP_SOURCE_SHA }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: R882 install locked source dependencies
+        run: npm ci
+      - name: R882 prove loopback security and startup failure behavior
+        run: node --test tests/r881-desktop-server.test.mjs
+      - name: R882 compile actual OMEGA7 production assets
+        env:
+          GITHUB_SHA: ${{ env.OMEGA_DESKTOP_SOURCE_SHA }}
+        run: npm run build
+      - name: R882 install Edge smoke driver
+        run: npm install --no-save playwright@1.63.0
+      - name: R882 package source-bound Windows portable runtime
+        shell: pwsh
+        run: ./scripts/pack-omega-desktop-r881.ps1 -SourceSha '${{ env.OMEGA_DESKTOP_SOURCE_SHA }}'
+      - name: R882 clean-extract, launch and render in Edge
+        shell: pwsh
+        run: ./scripts/smoke-omega-desktop-r881.ps1 -SourceSha '${{ env.OMEGA_DESKTOP_SOURCE_SHA }}'
+      - name: R882 record exact package SHA256
+        shell: pwsh
+        run: |
+          $zip='artifacts/OMEGA7-portable-win-x64.zip'
+          (Get-FileHash -Algorithm SHA256 $zip).Hash.ToLowerInvariant() + '  OMEGA7-portable-win-x64.zip' | Set-Content artifacts/OMEGA7-portable-win-x64.sha256
+      - name: R882 preserve Windows ZIP and first-render screenshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: omega7-r882-windows-portable-${{ env.OMEGA_DESKTOP_SOURCE_SHA }}
+          path: |
+            artifacts/OMEGA7-portable-win-x64.zip
+            artifacts/OMEGA7-portable-win-x64.sha256
+            artifacts/omega7-r882-first-launch.png
+          retention-days: 14
 
   r680-native-repair-windows:
     if: github.event_name == 'pull_request'
