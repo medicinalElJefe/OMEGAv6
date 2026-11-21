@@ -78,3 +78,17 @@ test('R933 offline Atlas chart and CSV exports preserve explicit model-derived p
  assert.match(ui,/Download offline model-derived chart SVG/);
  assert.match(ui,/Offline model-derived trace · /);
 });
+
+test('R934 live executor requires artifact identity and type before accepting SHA readback',()=>{
+ const ui=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
+ const segment=ui.split('const executeLocalTurns=async()=>{')[1]?.split('const recoverLocalTurns=async(id:string)=>{')[0];
+ assert.ok(segment,'local executor exists');
+ assert.match(segment,/typeof result\.artifact\?\.id!=='string'/);
+ assert.match(segment,/\^\[a-f0-9-\]\{36\}\$/);
+ assert.match(segment,/saved\.id!==result\.artifact\.id/);
+ assert.match(segment,/saved\.kind!=='atlas_execution'/);
+ const identity=segment.indexOf("saved.id!==result.artifact.id");
+ const hash=segment.indexOf("crypto.subtle.digest('SHA-256',new TextEncoder().encode(saved.content))");
+ const accept=segment.indexOf('setLocalTurnResult(result)');
+ assert.ok(identity>=0&&hash>identity&&accept>hash,'identity and content digest must precede display');
+});
