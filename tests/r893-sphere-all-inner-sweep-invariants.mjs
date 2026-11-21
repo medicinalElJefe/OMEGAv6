@@ -1,0 +1,28 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {createFabric,agentId,getAgent,submitTask,stateValue,SIZE} from '../src/sphereAgentFabricR887.mjs';
+import {collectiveMembersR890} from '../src/sphereCollectiveR890.mjs';
+import {autonomousSweepR893,sweepCoordinateR893,R893_SCHEMA,R893_MAX_BATCH} from '../src/sphereFullInnerSweepR893.mjs';
+const f=createFabric(),root=agentId(4,137),members=collectiveMembersR890(root,3);
+assert.equal(R893_SCHEMA,'OMEGA_SPHERE_ALL_INNER_SWEEP_R893');assert.equal(R893_MAX_BATCH,64);
+const visited=new Set();let step=0;
+for(let i=0;i<20;i++){const result=autonomousSweepR893(f,members,step,48);assert.equal(result.mode,'LOCAL_DETERMINISTIC_FULL_INNER_SWEEP');assert.equal(result.receipts.length,48);assert.equal(result.visits.length,48);assert.equal(result.cloudCalls,0);assert.equal(result.canonicalWrites,0);for(const visit of result.visits)visited.add(visit.agent+':'+visit.inner);step=result.nextStepCursor}
+assert.equal(step,960);assert.equal(visited.size,960);assert.ok(f.active.size<=3);
+assert.equal(sweepCoordinateR893(members,0).inner,0);assert.equal(sweepCoordinateR893(members,2).memberIndex,2);assert.equal(sweepCoordinateR893(members,3).inner,1);
+assert.equal(sweepCoordinateR893(members,3*SIZE-1).inner,SIZE-1);
+assert.equal(sweepCoordinateR893(members,3*SIZE).inner,0);
+assert.equal(sweepCoordinateR893(members,3*SIZE).completedCycles,1);
+const boundary=createFabric();
+let b=autonomousSweepR893(boundary,members,3*SIZE-2,4);
+assert.deepEqual(b.visits.map(x=>x.inner),[20735,20735,0,0]);
+const queue=createFabric();submitTask(queue,{agent:root,kind:'OBSERVE',inner:3});
+const priority=autonomousSweepR893(queue,members,10,32);
+assert.equal(priority.mode,'OPERATOR_QUEUE_FIRST');assert.equal(priority.nextStepCursor,10);assert.equal(priority.receipts[0].inner,3);
+const cap=createFabric();for(let i=0;i<512;i++)getAgent(cap,i);
+const pre=stateValue(cap,root,1),held=autonomousSweepR893(cap,members,3,64);
+assert.equal(held.mode,'HELD_CAPACITY');assert.equal(held.nextStepCursor,3);assert.equal(held.visits.length,0);assert.equal(cap.tick,0);assert.equal(cap.queue.length,0);assert.equal(stateValue(cap,root,1),pre);
+for(const bad of [-1,1.3,Number.MAX_SAFE_INTEGER+1,NaN])assert.throws(()=>sweepCoordinateR893(members,bad),RangeError);
+for(const bad of [0,-1,65,1.5])assert.throws(()=>autonomousSweepR893(createFabric(),members,0,bad),RangeError);
+const ui=readFileSync('src/SphereAgentInstrumentR887.tsx','utf8');
+for(const token of ['autonomousSweepR893','Autonomous inner-state schedule','Sweep all 20,736 inner states','Autonomous steps per cycle','data-r893-sweep-progress','fullSweepCursor'])assert.ok(ui.includes(token),'Missing R893 UI '+token);
+console.log('R893 PASS: 960 independently addressed state operations, dimension wrap at 20,736, priority, capacity atomicity, bounded 1–64 batch and zero cloud calls.');
