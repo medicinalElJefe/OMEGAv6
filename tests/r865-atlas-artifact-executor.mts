@@ -126,3 +126,18 @@ test('R937 browser-local Atlas save verifies exact storage readback and portable
  assert.match(segment,/serialized.length>131072/);
  assert.match(segment,/recovered.trace.length!==payload.trace.length/);
 });
+
+test('R938 browser Atlas persistence uses byte limits and verifies deletion before success',()=>{
+ const ui=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
+ const save=ui.split('const saveOfflineAtlasR926=async()=>{')[1]?.split('const clearSavedOfflineAtlasR936=()=>{')[0];
+ const clear=ui.split('const clearSavedOfflineAtlasR936=()=>{')[1]?.split('const restoreOfflineAtlasR926=async()=>{')[0];
+ const restore=ui.split('const restoreOfflineAtlasR926=async()=>{')[1]?.split('const verifyExportedExecutionJson=async')[0];
+ assert.ok(save&&clear&&restore,'save, clear and restore handlers must exist');
+ assert.match(save,/new TextEncoder\(\)\.encode\(serialized\)\.byteLength>131072/);
+ assert.match(restore,/new TextEncoder\(\)\.encode\(stored\)\.byteLength>131072/);
+ const remove=clear.indexOf("localStorage.removeItem('omega.portable.atlas.r926')");
+ const verify=clear.indexOf("localStorage.getItem('omega.portable.atlas.r926')!==null");
+ const success=clear.indexOf("setExecutionStatus('Saved browser-local Atlas trace cleared.");
+ assert.ok(remove>=0&&verify>remove&&success>verify,'clear success requires storage absence readback');
+ assert.doesNotMatch(clear,/fetch\(|deleteArtifact|removeSaved\(/);
+});
