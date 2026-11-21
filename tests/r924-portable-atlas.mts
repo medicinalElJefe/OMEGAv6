@@ -29,3 +29,18 @@ test('R925 offline replay cannot be mislabeled as verified local-host R922 expor
  assert.match(legacy,/provenance:'verified-local-executor-artifact'/);
  assert.ok(legacy.indexOf("artifact.id==='offline-model-derived'")<legacy.indexOf("provenance:'verified-local-executor-artifact'"),'refusal precedes verified-host claim');
 });
+
+
+test('R926 browser persistence uses portable integrity verification before replay',()=>{
+ const ui=readFileSync(new URL('../src7/workspaces/SharedArtifactLibraryR864.tsx',import.meta.url),'utf8');
+ const save=ui.slice(ui.indexOf('const saveOfflineAtlasR926='),ui.indexOf('const restoreOfflineAtlasR926='));
+ const restore=ui.slice(ui.indexOf('const restoreOfflineAtlasR926='),ui.indexOf('const verifyExportedExecutionJson='));
+ assert.match(save,/makePortableAtlasR924\(localTurnResult\.trace\)/);
+ assert.match(save,/localStorage\.setItem\('omega\.portable\.atlas\.r926'/);
+ assert.match(restore,/readPortableAtlasR924\(JSON\.parse\(stored\)\)/);
+ assert.ok(restore.indexOf('readPortableAtlasR924')<restore.indexOf('setLocalTurnResult'),'restore must verify before displaying');
+ assert.match(restore,/stored\.length>131072/);
+ assert.match(restore,/offline-model-derived/);
+ assert.match(ui,/Save offline trace in this browser/);
+ assert.match(ui,/Restore saved offline trace/);
+});
