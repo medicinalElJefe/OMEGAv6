@@ -180,8 +180,24 @@ async function prove(browser,label,viewport){
    assert.equal(j.single.localStateMutated,false);
    assert.equal(j.collective.localMutation,false);
    const cloud=lab.locator('[data-r889-cloud-bridge="EXPLICIT_OPERATOR_DISPATCH_ONLY"]');
+   // Renew an explicitly authorized pending mission, then check GET polling does not dispatch POST.
+   let watchPosts=0,watchReads=0;
+   await page.route('**/api/swarm/missions',async route=>{
+    watchPosts++;
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({mission:{id:'r889-fixture-001',status:'QUEUED'}})});
+   });
+   await page.route('**/api/swarm/missions/r889-fixture-001',async route=>{
+    watchReads++;
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({mission:{id:'r889-fixture-001',status:'COMPLETE',completed:1,failed:0,proofState:'RETURNED_NOT_ADMITTED',finalSynthesis:{text:'Read-only watch fixture'}}})});
+   });
+   await cloud.getByRole('button',{name:'Dispatch selected agent to governed swarm'}).click();
+   await page.waitForFunction(()=>document.querySelector('[data-r889-receipt]')?.textContent?.includes('QUEUED'),null,{timeout:8000});
+   assert.equal(watchPosts,1,label+' only deliberate dispatch may POST');
+   assert.equal(watchReads,0,label+' no ambient GET before opt-in');
    await cloud.getByLabel('Watch individual cloud mission read-only').check();
-   await cloud.getByText(/COMPLETE/).waitFor({state:'visible',timeout:9000});
+   await page.waitForFunction(()=>document.querySelector('[data-r889-receipt]')?.textContent?.includes('COMPLETE'),null,{timeout:9500});
+   assert.ok(watchReads>=1,label+' opt-in watcher must GET the mission');
+   assert.equal(watchPosts,1,label+' read-only watcher must never POST');
    await cloud.getByLabel('Watch individual cloud mission read-only').uncheck();
    const beforeReloadJournal=await page.evaluate(()=>localStorage.getItem('omega.r894.sphere.missions.v1'));
    assert.ok(beforeReloadJournal);
