@@ -36,10 +36,11 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
    const response=await fetch('/__omega_local/execute/atlas',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input)});
    if(!response.ok)throw Error('Local executor unavailable or rejected input: HTTP '+response.status);
    const result=await response.json() as {trace:{step:number;address:number;coordinates:number[]}[];artifact:{id:string;contentSha256:string}};
-   if(!Array.isArray(result.trace)||result.trace.length!==turns+1||!result.artifact?.id||!/^[a-f0-9]{64}$/.test(result.artifact.contentSha256)||result.trace.some((x,i)=>!x||x.step!==i||!Number.isInteger(x.address)||x.address<0||x.address>=20736||!Array.isArray(x.coordinates)||x.coordinates.length!==4||x.coordinates.some(n=>!Number.isInteger(n)||n<1||n>12)||x.address!==1728*(x.coordinates[0]-1)+144*(x.coordinates[1]-1)+12*(x.coordinates[2]-1)+x.coordinates[3]-1)||(i===0&&x.address!==address))throw Error('Malformed local executor result');
+   if(!Array.isArray(result.trace)||result.trace.length!==turns+1||typeof result.artifact?.id!=='string'||!/^[a-f0-9-]{36}$/.test(result.artifact.id)||!/^[a-f0-9]{64}$/.test(result.artifact.contentSha256)||result.trace.some((x,i)=>!x||x.step!==i||!Number.isInteger(x.address)||x.address<0||x.address>=20736||!Array.isArray(x.coordinates)||x.coordinates.length!==4||x.coordinates.some(n=>!Number.isInteger(n)||n<1||n>12)||x.address!==1728*(x.coordinates[0]-1)+144*(x.coordinates[1]-1)+12*(x.coordinates[2]-1)+x.coordinates[3]-1)||(i===0&&x.address!==address))throw Error('Malformed local executor result');
    const readback=await fetch('/__omega_local/artifacts/'+encodeURIComponent(result.artifact.id));
    if(!readback.ok)throw Error('Local executor artifact readback failed');
-   const saved=await readback.json() as {content:string;contentSha256:string};
+   const saved=await readback.json() as {id?:string;kind?:string;content:string;contentSha256:string};
+   if(saved.id!==result.artifact.id||saved.kind!=='atlas_execution'||typeof saved.content!=='string')throw Error('Local executor artifact identity or kind mismatch');
    const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(saved.content)))).map(x=>x.toString(16).padStart(2,'0')).join('');
    if(digest!==result.artifact.contentSha256||saved.contentSha256!==digest||JSON.stringify(JSON.parse(saved.content).trace)!==JSON.stringify(result.trace))throw Error('Local executor result failed SHA-256 or trace readback');
    setLocalTurnResult(result);setExecutionStatus('Local address-turn executor completed '+turns+' turns; recovered SHA-256 verified artifact '+result.artifact.id+'. Model-derived only.');
