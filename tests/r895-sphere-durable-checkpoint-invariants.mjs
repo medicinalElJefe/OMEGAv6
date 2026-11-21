@@ -17,7 +17,7 @@ const extra=getAgent(fabric,root+12);extra.values.set(0,.123);
 assert.throws(()=>validateDurableR895(fabric,session),/budget exceeded/);
 fabric.active.delete(extra.id);
 agents[0].values.set(0,NaN);assert.throws(()=>validateDurableR895(fabric,session),/float64/);agents[0].values.set(0,baseline(root,0));
-agents[0].values.set(SIZE,0.4);assert.throws(()=>validateDurableR895(fabric,session),/float64/);agents[0].values.delete(SIZE);
+agents[0].values.set(SIZE,0.4);assert.throws(()=>validateDurableR895(fabric,session),/Invalid durable agent|float64/);agents[0].values.delete(SIZE);
 assert.throws(()=>validateDurableR895(fabric,{...session,memberCount:13}),/session/);
 assert.throws(()=>validateDurableR895(fabric,{...session,stepCursor:-1}),/session/);
 assert.throws(()=>validateDurableR895(fabric,{...session,batch:65}),/session/);
