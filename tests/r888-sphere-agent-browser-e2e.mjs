@@ -18,6 +18,13 @@ async function openAtlas(page){
 async function prove(browser,label,viewport){
  const ctx=await browser.newContext({viewport,deviceScaleFactor:label==='mobile'?2:1});
  const page=await ctx.newPage(),errors=[];page.on('pageerror',e=>errors.push(String(e)));
+ // Transport fixtures are explicit and do not establish real backend/model execution.
+ if(process.env.OMEGA_R888_USE_FIXTURES==='1'){
+  const json=(route,body)=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(body)});
+  await page.route('**/api/status',route=>json(route,{status:'READY',state:'READY'}));
+  await page.route('**/api/hybrid/status',route=>json(route,{state:'DEVICE_PROOF_REQUIRED',nativeExecutionClaimed:false,devices:[],jobs:[]}));
+  await page.route('**/omega-federation.json',route=>json(route,{schema:'OMEGA_R888_TEST_TRANSPORT_FIXTURE',nodes:[]}));
+ }
  try{
   const lab=await openAtlas(page);
   await lab.getByRole('spinbutton',{name:'Inner page (144 values)'}).fill('2');
