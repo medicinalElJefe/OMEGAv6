@@ -23,7 +23,7 @@ assert.throws(()=>validateDurableR895(fabric,{...session,stepCursor:-1}),/sessio
 assert.throws(()=>validateDurableR895(fabric,{...session,batch:65}),/session/);
 assert.throws(()=>validateDurableR895(fabric,{...session,mode:'UNBOUNDED'}),/session/);
 const ui=readFileSync('src/SphereAgentInstrumentR887.tsx','utf8');
-for(const token of ['saveDurableR895','restoreDurableR895','Save full-state durable checkpoint','Restore full-state durable checkpoint','Full-state checkpoints use atomic IndexedDB'])assert.ok(ui.includes(token),token+' missing');
+for(const token of ['saveDurableR895','restoreDurableR895','Save full-state durable checkpoint','Restore full-state durable checkpoint','data-r895-exact-inner-value','Full-state checkpoints use atomic IndexedDB'])assert.ok(ui.includes(token),token+' missing');
 const source=readFileSync('src/sphereDurableCheckpointR895.mjs','utf8');
 for(const token of ['structuredClone(fabric)','indexedDB.open(DB,1)','tx.objectStore(STORE).put(record,KEY)','tx.oncomplete','R895_MAX_VALUES','validateDurableR895(record.fabric,record.session)'])assert.ok(source.includes(token),token+' missing');
 assert.ok(!source.includes('api.post'),'R895 persistence never creates cloud tasks');
