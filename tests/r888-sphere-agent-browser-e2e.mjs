@@ -155,7 +155,7 @@ async function prove(browser,label,viewport){
   },Number(savedPosition[1]),{timeout:8000});
   await lab.getByRole('button',{name:'Pause local agent autonomy'}).click();
   await lab.getByRole('button',{name:'Restore checkpoint'}).click();
-  assert.match(await lab.getByRole('status').last().innerText(),/sweep cursor/);
+  assert.match(await lab.locator('p.r887-key[role="status"]').innerText(),/sweep cursor/);
   const resumedText=await lab.locator('[data-r893-sweep-progress]').innerText();
   assert.match(resumedText,new RegExp('Autonomous inner sweep: '+(Math.floor(persistedStep/3)%20736+1)+' \\/ 20736'));
   console.log('R893 CONTINUITY '+label.toUpperCase()+' PASS: save, advance, restore exact bounded inner-state sweep cursor.');
