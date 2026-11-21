@@ -159,6 +159,29 @@ async function prove(browser,label,viewport){
   const resumedText=await lab.locator('[data-r893-sweep-progress]').innerText();
   assert.match(resumedText,new RegExp('Autonomous inner sweep: '+(Math.floor(persistedStep/3)%20736+1)+' \\/ 20736'));
   console.log('R893 CONTINUITY '+label.toUpperCase()+' PASS: save, advance, restore exact bounded inner-state sweep cursor.');
+  if(process.env.OMEGA_R888_USE_FIXTURES==='1'){
+   // Cloud missions are resumed by identity only; reloading must not create new work.
+   const currentJournal=await page.evaluate(()=>localStorage.getItem('omega.r894.sphere.missions.v1'));
+   const j=JSON.parse(currentJournal||'null');
+   assert.equal(j.schema,'OMEGA_SPHERE_MISSION_JOURNAL_R894',label+' journal schema');
+   assert.equal(j.single.missionId,'r889-fixture-001');
+   assert.equal(j.collective.missionId,'r889-fixture-001');
+   assert.equal(j.single.localStateMutated,false);
+   assert.equal(j.collective.localMutation,false);
+   const cloud=lab.locator('[data-r889-cloud-bridge="EXPLICIT_OPERATOR_DISPATCH_ONLY"]');
+   await cloud.getByLabel('Watch individual cloud mission read-only').check();
+   await cloud.getByText(/COMPLETE/).waitFor({state:'visible',timeout:9000});
+   await cloud.getByLabel('Watch individual cloud mission read-only').uncheck();
+   const beforeReloadJournal=await page.evaluate(()=>localStorage.getItem('omega.r894.sphere.missions.v1'));
+   assert.ok(beforeReloadJournal);
+   const reattached=await openAtlas(page);
+   await reattached.locator('[data-r889-receipt="RETURNED_NOT_ADMITTED"]').waitFor({state:'visible',timeout:5000});
+   await reattached.locator('[data-r890-receipt="RETURNED_NOT_ADMITTED"]').waitFor({state:'visible',timeout:5000});
+   assert.match(await reattached.innerText(),/r889-fixture-001/);
+   assert.equal(await reattached.getByLabel('Watch individual cloud mission read-only').isChecked(),false,label+' reattachment does not automatically enable network polling');
+   console.log('R894 BROWSER '+label.toUpperCase()+' PASS: bounded mission journal survives navigation, opt-in GET-only status watch and no automatic re-dispatch.');
+  }
+
   console.log('R893 BROWSER '+label.toUpperCase()+' PASS: all-inner autonomy executes distinct logical addresses and stops on user pause.');
   assert.equal(errors.length,0,label+' unexpected uncaught errors '+errors.join('; '));
   console.log('R888 BROWSER '+label.toUpperCase()+' PASS: exact inner-state action, symmetric exchange, explicit checkpoint, exact restore and malformed checkpoint refusal');
