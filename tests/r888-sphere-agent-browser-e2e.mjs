@@ -95,6 +95,19 @@ async function prove(browser,label,viewport){
    console.log('R890 BROWSER '+label.toUpperCase()+' PASS: explicit group membership, bounded 3-agent FLOCK and unadmitted receipt.');
    console.log('R889 BROWSER '+label.toUpperCase()+' PASS: no ambient dispatch, exact inner state, 0/1 model budget, explicit receipt and status proof bounds.');
   }
+  // R891: starting evolution must schedule actual bounded local agent tasks, not only redraw a canvas.
+  const beforeAuto=(await lab.innerText()).match(/receipts: (\d+)/);
+  assert.ok(beforeAuto,label+' local receipt counter visible');
+  await lab.getByRole('button',{name:'Run local agent autonomy'}).click();
+  await page.waitForFunction(previous=>{
+    const text=document.querySelector('[data-r887-agent-fabric]')?.textContent||'';
+    const match=text.match(/receipts: (\d+)/);
+    return Boolean(match&&Number(match[1])>previous);
+  },Number(beforeAuto[1]),{timeout:6000});
+  await lab.getByRole('button',{name:'Pause local agent autonomy'}).click();
+  const afterAuto=(await lab.innerText()).match(/receipts: (\d+)/);
+  assert.ok(afterAuto&&Number(afterAuto[1])>Number(beforeAuto[1]),label+' actual autonomous receipts must increase');
+  console.log('R891 BROWSER '+label.toUpperCase()+' PASS: local agent autonomy creates real receipts and pauses via UI.');
   assert.equal(errors.length,0,label+' unexpected uncaught errors '+errors.join('; '));
   console.log('R888 BROWSER '+label.toUpperCase()+' PASS: exact inner-state action, symmetric exchange, explicit checkpoint, exact restore and malformed checkpoint refusal');
  }finally{await ctx.close()}
