@@ -128,7 +128,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
   try{
    const payload=await makePortableAtlasR924(localTurnResult.trace);
    const serialized=JSON.stringify(payload);
-   if(serialized.length>131072)throw Error('Offline Atlas trace exceeds 128 KiB browser recovery limit');
+   if(new TextEncoder().encode(serialized).byteLength>131072)throw Error('Offline Atlas trace exceeds 128 KiB browser recovery limit');
    localStorage.setItem('omega.portable.atlas.r926',serialized);
    const persisted=localStorage.getItem('omega.portable.atlas.r926');
    if(persisted!==serialized)throw Error('Browser storage readback differs from saved Atlas trace');
@@ -142,6 +142,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
   setError('');setExecutionStatus('');
   try{
    localStorage.removeItem('omega.portable.atlas.r926');
+   if(localStorage.getItem('omega.portable.atlas.r926')!==null)throw Error('Browser storage still contains the saved Atlas trace after removal');
    setExecutionStatus('Saved browser-local Atlas trace cleared. The current on-screen trace is unchanged; no host artifact was deleted.');
   }catch(e){setError('Offline Atlas clear refused: '+String(e))}
  };
@@ -150,7 +151,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
   executionLease.current=true;setRunning(true);setError('');setExecutionStatus('');setExecutionPlaying(false);setLocalTurnResult(null);setSelectedExecutionStep(0);
   try{
    const stored=localStorage.getItem('omega.portable.atlas.r926');
-   if(!stored||stored.length>131072)throw Error('Saved offline Atlas trace absent or exceeds 128 KiB');
+   if(!stored||new TextEncoder().encode(stored).byteLength>131072)throw Error('Saved offline Atlas trace absent or exceeds 128 KiB');
    const payload=await readPortableAtlasR924(JSON.parse(stored));
    setLocalTurnResult({trace:payload.trace,artifact:{id:'offline-model-derived',contentSha256:payload.sha256}});
    setSelectedExecutionStep(0);
