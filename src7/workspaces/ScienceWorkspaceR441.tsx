@@ -9,6 +9,7 @@ import AtlasViewport from '../../src/AtlasViewport';
 import RouteBasinInstrumentR732 from './RouteBasinInstrumentR732';
 import MotionSourceInstrumentR537 from '../MotionSourceInstrumentR537';
 import FullSphereInstrumentR525 from '../../src/FullSphereInstrumentR525';
+import SphereAgentInstrumentR887 from '../../src/SphereAgentInstrumentR887';
 import SourceExecutionWorkspaceR531 from '../SourceExecutionWorkspaceR531';
 import AtlasCalculatorPanel from '../../src/AtlasCalculatorPanel';
 import RecursiveScalePanel from '../../src/RecursiveScalePanel';
@@ -28,7 +29,7 @@ const readAddress=()=>{try{return clamp(Number(localStorage.getItem('omega.v6.ad
 const writeAddress=(n:number)=>{const next=clamp(n);try{localStorage.setItem('omega.v6.address',String(next));window.dispatchEvent(new CustomEvent('omega7-address-changed',{detail:{address:next}}))}catch{}return next};
 const SCIENCE_INSTRUMENTS:Partial<Record<Omega7ScienceRoute,readonly {id:string;label:string}[]>>={
  Relativity:[{id:'relativity-lab',label:'Relativity lab'},{id:'temporal-workbench',label:'Temporal workbench'},{id:'pell-research',label:'Pell research'},{id:'typed-provenance',label:'Provenance'},{id:'canon-topology',label:'Canon topology'}],
- Atlas:[{id:'full-sphere',label:'Full sphere'},{id:'route-basin',label:'Route basin'},{id:'atlas-topology',label:'Canon topology'},{id:'source-execution',label:'Source execution'},{id:'motion-source',label:'Motion source'},{id:'atlas-viewport',label:'Atlas viewport'}]
+ Atlas:[{id:'full-sphere',label:'Full sphere'},{id:'sphere-agent-fabric',label:'Sphere agent fabric'},{id:'route-basin',label:'Route basin'},{id:'atlas-topology',label:'Canon topology'},{id:'source-execution',label:'Source execution'},{id:'motion-source',label:'Motion source'},{id:'atlas-viewport',label:'Atlas viewport'}]
 };
 const fromCoords=(c:{d:number;p:number;r:number;l:number})=>clamp(1728*c.d+144*c.p+12*c.r+c.l);
 
@@ -102,7 +103,7 @@ export default function ScienceWorkspaceR441({route,onNavigate,depth}:Props){
   {instrumentOpen&&<div className='o7-native-surface'>
    {route==='Relativity'?<><section id='o7-relativity-lab' tabIndex={-1}><RelativityLab record={record} state={state} onNavigate={onNavigate}/></section><section id='o7-temporal-workbench' tabIndex={-1}><DeweyTemporalWorkbenchV9/></section><section id='o7-pell-research' tabIndex={-1}><PellResearchWorkbenchR755/></section><section id='o7-typed-provenance' tabIndex={-1}><TypedProvenanceWorkbenchR757 address={address} onAddress={commit}/></section><section id='o7-canon-topology' tabIndex={-1}><CanonTopologyWorkbenchR763 onAddress={commit}/></section></>:
     route==='Reality Lab'?<AppliedRealityLab canonicalAddress={address} onCommitAddress={commit}/>:
-    route==='Atlas'?<><section id='o7-full-sphere' tabIndex={-1}><FullSphereInstrumentR525 address={address} onAddress={commit}/></section><section id='o7-route-basin' tabIndex={-1}><RouteBasinInstrumentR732 address={address} onAddress={commit}/></section><section id='o7-atlas-topology' tabIndex={-1}><CanonTopologyWorkbenchR763 onAddress={commit}/></section><section id='o7-source-execution' tabIndex={-1}><SourceExecutionWorkspaceR531 address={address} onAddress={commit}/></section><section id='o7-motion-source' tabIndex={-1}><MotionSourceInstrumentR537/></section><section id='o7-atlas-viewport' tabIndex={-1}><AtlasViewport state={state} onSelect={c=>commit(fromCoords(c))}/></section></>:
+    route==='Atlas'?<><section id='o7-full-sphere' tabIndex={-1}><FullSphereInstrumentR525 address={address} onAddress={commit}/></section><section id='o7-sphere-agent-fabric' tabIndex={-1}><SphereAgentInstrumentR887 address={address} onAddress={commit}/></section><section id='o7-route-basin' tabIndex={-1}><RouteBasinInstrumentR732 address={address} onAddress={commit}/></section><section id='o7-atlas-topology' tabIndex={-1}><CanonTopologyWorkbenchR763 onAddress={commit}/></section><section id='o7-source-execution' tabIndex={-1}><SourceExecutionWorkspaceR531 address={address} onAddress={commit}/></section><section id='o7-motion-source' tabIndex={-1}><MotionSourceInstrumentR537/></section><section id='o7-atlas-viewport' tabIndex={-1}><AtlasViewport state={state} onSelect={c=>commit(fromCoords(c))}/></section></>:
     route==='Atlas Calculator'?<AtlasCalculatorPanel record={record} onCommit={commit}/>:
     route==='Scale Compiler'?<RecursiveScalePanel address={address} onAddress={commit}/>:
     <OmegaInfinityPanel record={record}/>}
