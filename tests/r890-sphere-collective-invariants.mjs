@@ -1,0 +1,35 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {createFabric,agentId,stateValue,submitTask,stepFabric} from '../src/sphereAgentFabricR887.mjs';
+import {collectiveMembersR890,collectiveRequestR890,collectiveReceiptR890,collectiveStatusR890,R890_SCHEMA} from '../src/sphereCollectiveR890.mjs';
+const f=createFabric(),id=agentId(3,12345),inner=732;
+for(const count of [1,2,3,4,6,8,9,10,12]){
+ const ids=collectiveMembersR890(id,count);
+ assert.equal(ids.length,count);assert.equal(ids[0],id);assert.equal(new Set(ids).size,count);
+ assert.deepEqual(ids,collectiveMembersR890(id,count),'collective membership must be deterministic');
+ const before=f.active.size;const {packet,request}=collectiveRequestR890(f,id,inner,'Compare bounded logical states',count,0);
+ assert.equal(f.active.size,before,'read-only collective preparation');
+ assert.equal(packet.schema,R890_SCHEMA);assert.equal(packet.members.length,count);assert.deepEqual(packet.members.map(x=>x.id),ids);
+ assert.equal(request.requestedCells,count);assert.equal(request.mode,count===1?'SOLO':'FLOCK');
+ assert.equal(request.providerBudget,0);assert.ok(request.intent.includes('NOT external')===false||request.intent.includes('not observations'));
+ assert.ok(packet.members.every(x=>x.authority==='SYNTHETIC_LOCAL_COMPUTATION'));
+}
+for(const count of [0,-1,13,1.5,NaN])assert.throws(()=>collectiveMembersR890(id,count));
+for(const budget of [-1,2,.5,NaN])assert.throws(()=>collectiveRequestR890(f,id,inner,'test',9,budget));
+for(const objective of ['', '  ', 'a'.repeat(801),'\u0000bad'])assert.throws(()=>collectiveRequestR890(f,id,inner,objective));
+const before=stateValue(f,id,inner),start=collectiveRequestR890(f,id,inner,'Compare snapshots',9,1);
+assert.equal(start.request.providerBudget,1);assert.equal(start.packet.members[0].value,Number(before.toFixed(9)));
+const receipt=collectiveReceiptR890({mission:{id:'m-r890_1',status:'QUEUED'}},start.packet);
+assert.equal(receipt.members.length,9);assert.equal(receipt.localMutation,false);
+assert.equal(receipt.authority,'SWARM_RESULT_NOT_CANON_ADMITTED');
+for(const input of [{},{mission:{}},{mission:{id:'../../unsafe'}}])assert.throws(()=>collectiveReceiptR890(input,start.packet));
+assert.throws(()=>collectiveStatusR890({mission:{id:'different'}},receipt),/mismatch/);
+const returned=collectiveStatusR890({mission:{id:'m-r890_1',status:'COMPLETE',completed:9,failed:0,finalSynthesis:{text:'Unverified conclusion'}}},receipt);
+assert.equal(returned.completed,9);assert.equal(returned.status,'COMPLETE');assert.equal(returned.localMutation,false);
+assert.equal(stateValue(f,id,inner),before,'cloud result cannot alter agent state');
+assert.equal(f.active.size,0);
+submitTask(f,{agent:id,kind:'RELAX',inner});stepFabric(f,1);
+assert.equal(collectiveRequestR890(f,id,inner,'After local mutation',3).packet.members[0].epoch,1);
+const ui=readFileSync('src/SphereAgentInstrumentR887.tsx','utf8');
+for(const name of ['data-r890-collective','Collective member count','collectiveRequestR890','collectiveReceiptR890','collectiveStatusR890','Dispatch selected collective','Refresh collective receipt'])assert.ok(ui.includes(name),name+' missing');
+console.log('R890 PASS: deterministic 1–12 member graph, state/identity preservation, fail-closed input, budget 0/1, receipt integrity, no canonical mutation.');
