@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {SIZE,AGENTS,agentId,neighbors,createFabric,getAgent,stateValue,releaseAgent,submitTask,stepFabric,serializeFabricR888,restoreFabricR888,CHECKPOINT_SCHEMA_R888} from '../src/sphereAgentFabricR887.mjs';
+import {SIZE,AGENTS,agentId,neighbors,createFabric,getAgent,stateValue,agentSnapshot,releaseAgent,submitTask,stepFabric,serializeFabricR888,restoreFabricR888,CHECKPOINT_SCHEMA_R888} from '../src/sphereAgentFabricR887.mjs';
 const f=createFabric(), a=agentId(4,515), b=neighbors(a)[0], inner=144;
 assert.equal(f.active.size,0);
 // Reading any address must not consume bounded execution capacity.
-for(let k=0;k<1024;k++)assert.equal((await import('../src/sphereAgentFabricR887.mjs')).agentSnapshot(f,k%AGENTS,0,1).values.length,1);
+for(let k=0;k<1024;k++)assert.equal(agentSnapshot(f,k%AGENTS,0,1).values.length,1);
 assert.equal(f.active.size,0,'read-only probes may not allocate agents');
 const sum=stateValue(f,a,inner)+stateValue(f,b,inner);
 submitTask(f,{agent:a,kind:'EXCHANGE',target:b,inner,weight:.8});
