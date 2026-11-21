@@ -23,6 +23,8 @@ for(const value of [-1,20736,1.2,NaN])assert.throws(()=>rasterCoordinateR892(val
 for(const coords of [[-1,0],[192,0],[0,108],[0,-1],[.1,2]])assert.throws(()=>rasterAddressR892(...coords));
 assert.throws(()=>rasterCoordinateR892(0,'BAD_MODE'));
 assert.throws(()=>pointerAddressR892(0,0,0,0,0,108));
+const canvasStyle=readFileSync('src/sphereAgentInstrumentR887.css','utf8');
+assert.match(canvasStyle,/cursor:crosshair;touch-action:manipulation;border:1px solid #4b7381;border-radius:0;/,'corner addresses must remain clickable and visible; no clipped rounded raster corners');
 const ui=readFileSync('src/SphereAgentInstrumentR887.tsx','utf8');
 for(const token of ['rasterAddressR892(x,y,pixelProjection)','pointerAddressR892(e.clientX','20,736 inner states · selected agent','20,736 outer agents · selected shell','data-r892-selected-address','setActiveInner(pixel.address)','setOuter(pixel.address)','data-r892-projection={pixelProjection}'])assert.ok(ui.includes(token),'Missing exact R892 UI mapping: '+token);
 assert.ok(!ui.includes('inner=(innerPage*144+(x+y*WIDTH)%144)%SIZE'),'Old 144-repeated pixel sampling must be removed');
