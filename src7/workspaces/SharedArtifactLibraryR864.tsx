@@ -42,7 +42,9 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
    const saved=await readback.json() as {id?:string;kind?:string;content:string;contentSha256:string};
    if(saved.id!==result.artifact.id||saved.kind!=='atlas_execution'||typeof saved.content!=='string')throw Error('Local executor artifact identity or kind mismatch');
    const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(saved.content)))).map(x=>x.toString(16).padStart(2,'0')).join('');
-   if(digest!==result.artifact.contentSha256||saved.contentSha256!==digest||JSON.stringify(JSON.parse(saved.content).trace)!==JSON.stringify(result.trace))throw Error('Local executor result failed SHA-256 or trace readback');
+   if(saved.content.length>131072)throw Error('Local executor artifact exceeds 128 KiB verification limit');
+   const artifactPayload=JSON.parse(saved.content) as {schema?:string;trace?:unknown};
+   if(artifactPayload.schema!=='OMEGA_LOCAL_ATLAS_EXECUTION_R910_V1'||digest!==result.artifact.contentSha256||saved.contentSha256!==digest||JSON.stringify(artifactPayload.trace)!==JSON.stringify(result.trace))throw Error('Local executor result failed schema, SHA-256 or trace readback');
    setLocalTurnResult(result);setExecutionStatus('Local address-turn executor completed '+turns+' turns; recovered SHA-256 verified artifact '+result.artifact.id+'. Model-derived only.');
   }catch(e){setError('Local execution refused: '+String(e))}finally{executionLease.current=false;setRunning(false)}
  };
