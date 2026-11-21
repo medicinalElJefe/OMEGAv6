@@ -28,3 +28,10 @@ test('R865 rejects invalid model addresses and wires execution into Projects and
  assert.match(ui,/parseAtlasAddressInputR916\(atlasAddress\)/);
  assert.match(ui,/address>=20736/);
 });
+
+test('R918 live local Atlas response refuses inconsistent coordinates and initial address before artifact acceptance',()=>{
+ const ui=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
+ assert.match(ui,/result\.trace\.some\(\(x,i\)=>/);
+ assert.match(ui,/x\.address!==1728\*\(x\.coordinates\[0\]-1\)\+144\*\(x\.coordinates\[1\]-1\)\+12\*\(x\.coordinates\[2\]-1\)\+x\.coordinates\[3\]-1/);
+ assert.match(ui,/i===0&&x\.address!==address/);
+});
