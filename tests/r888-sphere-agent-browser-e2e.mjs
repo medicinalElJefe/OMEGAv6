@@ -183,6 +183,20 @@ async function prove(browser,label,viewport){
   }
 
   console.log('R893 BROWSER '+label.toUpperCase()+' PASS: all-inner autonomy executes distinct logical addresses and stops on user pause.');
+  // R895: exact float64 state survives a real atomic IndexedDB checkpoint and page navigation.
+  const firstCell=lab.getByRole('gridcell',{name:/Select and observe inner state 1 value/});
+  await lab.getByRole('button',{name:'Local update'}).click();
+  const storedValue=await firstCell.getAttribute('aria-label');
+  await lab.getByRole('button',{name:'Save full-state durable checkpoint'}).click();
+  await page.waitForFunction(()=>document.querySelector('.r887-side p[role="status"]')?.textContent?.includes('Durable checkpoint saved'),null,{timeout:8000});
+  await lab.getByRole('button',{name:'Local update'}).click();
+  const changedValue=await firstCell.getAttribute('aria-label');
+  assert.notEqual(changedValue,storedValue,label+' second local computation changes inner value');
+  const durableLab=await openAtlas(page);
+  await durableLab.getByRole('button',{name:'Restore full-state durable checkpoint'}).click();
+  await page.waitForFunction(()=>document.querySelector('.r887-side p[role="status"]')?.textContent?.includes('Durable checkpoint restored'),null,{timeout:8000});
+  assert.equal(await durableLab.getByRole('gridcell',{name:/Select and observe inner state 1 value/}).getAttribute('aria-label'),storedValue,label+' exact saved float64 state recovered after navigation');
+  console.log('R895 BROWSER '+label.toUpperCase()+' PASS: atomic IndexedDB state survived reload, rejected unrecorded update, recovered exact inner value.');
   assert.equal(errors.length,0,label+' unexpected uncaught errors '+errors.join('; '));
   console.log('R888 BROWSER '+label.toUpperCase()+' PASS: exact inner-state action, symmetric exchange, explicit checkpoint, exact restore and malformed checkpoint refusal');
  }finally{await ctx.close()}
