@@ -42,7 +42,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
    const saved=await readback.json() as {id?:string;kind?:string;content:string;contentSha256:string};
    if(saved.id!==result.artifact.id||saved.kind!=='atlas_execution'||typeof saved.content!=='string')throw Error('Local executor artifact identity or kind mismatch');
    const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(saved.content)))).map(x=>x.toString(16).padStart(2,'0')).join('');
-   if(saved.content.length>131072)throw Error('Local executor artifact exceeds 128 KiB verification limit');
+   if(new TextEncoder().encode(saved.content).byteLength>131072)throw Error('Local executor artifact exceeds 128 KiB verification limit');
    const artifactPayload=JSON.parse(saved.content) as {schema?:string;trace?:unknown};
    if(artifactPayload.schema!=='OMEGA_LOCAL_ATLAS_EXECUTION_R910_V1'||digest!==result.artifact.contentSha256||saved.contentSha256!==digest||JSON.stringify(artifactPayload.trace)!==JSON.stringify(result.trace))throw Error('Local executor result failed schema, SHA-256 or trace readback');
    setLocalTurnResult(result);setExecutionStatus('Local address-turn executor completed '+turns+' turns; recovered SHA-256 verified artifact '+result.artifact.id+'. Model-derived only.');
@@ -58,6 +58,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
    const saved=await response.json() as {id:string;kind:string;content:string;contentSha256:string};
    if(saved.id!==id||saved.kind!=='atlas_execution'||typeof saved.content!=='string')throw Error('Not a local Atlas execution artifact');
    const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(saved.content)))).map(x=>x.toString(16).padStart(2,'0')).join('');
+   if(new TextEncoder().encode(saved.content).byteLength>131072)throw Error('Recovered artifact exceeds 128 KiB verification limit');
    if(hash!==saved.contentSha256)throw Error('Artifact checksum mismatch');
    const data=JSON.parse(saved.content) as {schema:string;trace:{step:number;address:number;coordinates:number[]}[]};
    if(data.schema!=='OMEGA_LOCAL_ATLAS_EXECUTION_R910_V1'||!Array.isArray(data.trace)||data.trace.length<1||data.trace.length>257||data.trace.some((x,i)=>x.step!==i||!Number.isInteger(x.address)||x.address<0||x.address>=20736||!Array.isArray(x.coordinates)||x.coordinates.length!==4||x.coordinates.some(n=>!Number.isInteger(n)||n<1||n>12)||x.address!==1728*(x.coordinates[0]-1)+144*(x.coordinates[1]-1)+12*(x.coordinates[2]-1)+x.coordinates[3]-1))throw Error('Artifact trace invalid');
@@ -170,6 +171,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
    const saved=await response.json() as {id?:string;kind?:string;content?:string;contentSha256?:string};
    if(saved.id!==exported.artifactId||saved.kind!=='atlas_execution'||typeof saved.content!=='string'||saved.contentSha256!==exported.contentSha256)throw Error('Export does not match the original local artifact');
    const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(saved.content)))).map(n=>n.toString(16).padStart(2,'0')).join('');
+   if(new TextEncoder().encode(saved.content).byteLength>131072)throw Error('Original artifact exceeds 128 KiB verification limit');
    if(hash!==exported.contentSha256)throw Error('Original local artifact checksum mismatch');
    const original=JSON.parse(saved.content) as {schema?:string;trace?:unknown};
    if(original.schema!=='OMEGA_LOCAL_ATLAS_EXECUTION_R910_V1'||JSON.stringify(original.trace)!==JSON.stringify(exported.trace))throw Error('Exported trace differs from SHA-256 verified local artifact');
