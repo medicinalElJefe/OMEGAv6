@@ -92,3 +92,14 @@ test('R934 live executor requires artifact identity and type before accepting SH
  const accept=segment.indexOf('setLocalTurnResult(result)');
  assert.ok(identity>=0&&hash>identity&&accept>hash,'identity and content digest must precede display');
 });
+
+test('R935 local executor verifies bounded artifact schema before displaying trace',()=>{
+ const ui=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
+ const segment=ui.split('const executeLocalTurns=async()=>{')[1]?.split('const recoverLocalTurns=async(id:string)=>{')[0];
+ assert.ok(segment,'local executor handler exists');
+ const bound=segment.indexOf('saved.content.length>131072');
+ const schema=segment.indexOf("artifactPayload.schema!=='OMEGA_LOCAL_ATLAS_EXECUTION_R910_V1'");
+ const digest=segment.indexOf('digest!==result.artifact.contentSha256');
+ const display=segment.indexOf('setLocalTurnResult(result)');
+ assert.ok(bound>=0&&schema>bound&&digest>schema&&display>digest,'bounded schema and digest validation precede visible result');
+});
