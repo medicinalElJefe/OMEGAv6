@@ -2,7 +2,7 @@
   "schema": "OMEGA7_WORKSPACE_FIRST_HOP_DEPENDENCIES_V1",
   "sourceCommit": "287a6238a820a2b3b85de2f7c9f592e2ac9da3db",
   "scope": "EIGHT_NATIVE_WORKSPACE_DIRECT_RELATIVE_IMPORTS",
-  "note": "Imported source existence is weaker than reachability and successful execution. Every direct relative module specifier is copied from source and checked for drift. No network, host or production assertions. R884 extends WorkCreate with the audited source-bound Studio lazy import; first-hop evidence only.",
+  "note": "Imported source existence is weaker than reachability and successful execution. Every direct relative module specifier is copied from source and checked for drift. No network, host or production assertions. R884 extends WorkCreate with the audited source-bound Studio lazy import; first-hop evidence only. R887 adds a declared first-hop Sphere Agent instrument import; this does not certify runtime or deployment.",
   "modules": [
     {
       "workspace": "src7/workspaces/CommandWorkspaceR439.tsx",
@@ -55,6 +55,7 @@
         "../../src/PellResearchWorkbenchR755",
         "../../src/RecursiveScalePanel",
         "../../src/RelativityLab",
+        "../../src/SphereAgentInstrumentR887",
         "../../src/TypedProvenanceWorkbenchR757",
         "../../src/capabilityAtlasR43",
         "../../src/corpusRuntime",
