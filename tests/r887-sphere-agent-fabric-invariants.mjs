@@ -23,5 +23,5 @@ assert.ok(workspace.includes("id:'sphere-agent-fabric',label:'Sphere agent fabri
 assert.ok(workspace.includes("id='o7-sphere-agent-fabric' tabIndex={-1}"));
 assert.ok(workspace.includes('<SphereAgentInstrumentR887'));
 const ui=readFileSync('src/SphereAgentInstrumentR887.tsx','utf8');
-for(const token of ['canvas','Run evolution','Agent decide','Coordinate neighbors','Export all 20,736 CSV states','DETERMINISTIC_INTERNAL_MODEL'])assert.ok(ui.includes(token));
+for(const token of ['canvas','Run local agent autonomy','Agent decide','Coordinate neighbors','Export all 20,736 CSV states','DETERMINISTIC_INTERNAL_MODEL'])assert.ok(ui.includes(token));
 console.log('R887 PASS: canonical 12^4 indexing, 12-shell nested 5,159,780,352 address roundtrips, reciprocal graph, bounded independent agents, conserved exchange, CSV, mounted UI.');
