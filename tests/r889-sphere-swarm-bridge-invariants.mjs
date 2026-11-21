@@ -30,7 +30,7 @@ assert.match(status.externalProof,/NOT_SCIENTIFIC_EVIDENCE/);
 const unknown=validateSwarmStatusR889({mission:{id:'mission_ABC-1',status:'CANON_ADMITTED',completed:-100,failed:Infinity}},returned);
 assert.equal(unknown.status,'NOT_REPORTED');assert.equal(unknown.completed,0);assert.equal(unknown.failed,0);
 assert.equal(fabric.active.size,0,'status processing must not allocate agents');
-submitTask(fabric,{agent,kind:'OBSERVE',inner});stepFabric(fabric,1);
+submitTask(fabric,{agent,kind:'RELAX',inner,weight:.25});stepFabric(fabric,1);
 const own=sphereSwarmRequestR889(fabric,agent,inner,'After local execution',0);
 assert.equal(own.packet.epoch,1);
 const ui=readFileSync('src/SphereAgentInstrumentR887.tsx','utf8');
