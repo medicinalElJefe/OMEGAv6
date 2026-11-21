@@ -29,7 +29,7 @@ assert.throws(()=>serializeMissionJournalR894(null,{...collective,members:[id,id
 assert.throws(()=>serializeMissionJournalR894(null,{...collective,authority:'CANON_APPROVED'}),/Untrusted/);
 assert.throws(()=>restoreMissionJournalR894(JSON.stringify({schema:R894_SCHEMA})),/Invalid/);
 const ui=readFileSync('src/SphereAgentInstrumentR887.tsx','utf8');
-for(const token of [R894_STORAGE_KEY,'serializeMissionJournalR894','restoreMissionJournalR894','shouldWatchMissionR894','Watch individual cloud mission read-only','Watch collective cloud mission read-only','5000','api.get<any>','window.localStorage.setItem(R894_STORAGE_KEY'])assert.ok(ui.includes(token),'R894 UI contract missing '+token);
+for(const token of ['R894_STORAGE_KEY','serializeMissionJournalR894','restoreMissionJournalR894','shouldWatchMissionR894','Watch individual cloud mission read-only','Watch collective cloud mission read-only','5000','api.get<any>','window.localStorage.setItem(R894_STORAGE_KEY'])assert.ok(ui.includes(token),'R894 UI contract missing '+token);
 const watchers=ui.split(" useEffect(()=>{if(!watchCloud")[1]?.split(" const choose=")[0]||'';
 assert.ok(!watchers.includes('api.post<'),'R894 status watch must never dispatch a cloud mission');
 console.log('R894 PASS: bounded persistent cloud mission identity, read-only watch, schema and authority preservation, malicious journal rejection, no ambient POST.');
