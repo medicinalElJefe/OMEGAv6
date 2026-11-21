@@ -1,7 +1,7 @@
 import {useEffect,useRef,useState} from 'react';
 import {getMandala20736Field} from '../../src/mandala20736Runtime';
 import {executeAtlasArtifactR865} from './omegaAtlasArtifactExecutorR865';
-import {exportFullAtlasCsvR896,inspectAtlasAddressR897,traceAtlasRouteR899,exportAtlasRouteCsvR900,summarizeAtlasRouteR901,compareAtlasRoutesR902} from './omegaFullAtlasExportR896';
+import {exportFullAtlasCsvR896,inspectAtlasAddressR897,traceAtlasRouteR899,exportAtlasRouteCsvR900,summarizeAtlasRouteR901,compareAtlasRoutesR902,parseAtlasAddressInputR916} from './omegaFullAtlasExportR896';
 import {appendArtifactR862,notifyArtifactChangeR867,OMEGA_ARTIFACT_CHANGED_R867} from './omegaArtifactSpineR862';
 import {OMEGA_ARTIFACT_STORAGE_R862,decodeArtifactsR862,exportArtifactBundleR863,importArtifactBundleR863,type OmegaArtifactR862} from './omegaArtifactSpineR862';
 /** R864: one browser-local artifact collection consumed by Atlas, Projects and Assets. */
@@ -29,7 +29,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
   if(executionLease.current)return;
   executionLease.current=true;setRunning(true);setError('');setLocalTurnResult(null);setSelectedExecutionStep(0);setExecutionPlaying(false);
   try{
-   const address=Number(atlasAddress),turns=Number(localTurnCount);
+   const address=parseAtlasAddressInputR916(atlasAddress),turns=Number(localTurnCount);
    if(!Number.isInteger(address)||address<0||address>=20736||!Number.isInteger(turns)||turns<0||turns>256)throw Error('Address must be 0–20735 and turns 0–256');
    const input={D:Math.floor(address/1728)+1,P:Math.floor(address/144)%12+1,R:Math.floor(address/12)%12+1,L:address%12+1,turns};
    const response=await fetch('/__omega_local/execute/atlas',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input)});
@@ -124,8 +124,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
   if(executionLease.current)return;
   executionLease.current=true;setRunning(true);setError('');setExecutionStatus('');setLatestCsv(null);
   try{
-   const address=Number(atlasAddress.trim());
-   if(atlasAddress.trim()===''||!Number.isInteger(address)||address<0||address>=20736)throw Error('Atlas address must be an integer from 0 to 20735');
+   const address=parseAtlasAddressInputR916(atlasAddress);
    const length=Number(atlasLength.trim());
    if(atlasLength.trim()===''||!Number.isInteger(length)||length<2||length>64)throw Error('Atlas traversal length must be an integer from 2 to 64');
    const field=await getMandala20736Field();
@@ -185,7 +184,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
   try{
    if(atlasAddress.trim()===''||routeSteps.trim()==='')throw Error('Enter a start address and step count');
    const field=await getMandala20736Field();
-   const trace=traceAtlasRouteR899(field,Number(atlasAddress),Number(routeSteps));
+   const trace=traceAtlasRouteR899(field,parseAtlasAddressInputR916(atlasAddress),Number(routeSteps));
    setRouteSummary(summarizeAtlasRouteR901(field,trace));setRouteTrace(trace);
    setExecutionStatus('Executed '+trace.addresses.length+' compiled route states. Model-derived route, not geographic navigation.');
   }catch(e){setError('Atlas route execution rejected: '+String(e))}finally{executionLease.current=false;setRunning(false)}
@@ -196,7 +195,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
   try{
    if(compareAddress.trim()==='')throw Error('Enter a comparison address');
    const field=await getMandala20736Field();
-   const other=traceAtlasRouteR899(field,Number(compareAddress),Number(routeSteps));
+   const other=traceAtlasRouteR899(field,parseAtlasAddressInputR916(compareAddress),Number(routeSteps));
    const comparison=compareAtlasRoutesR902(field,routeTrace,other);
    setRouteComparison(comparison);
    setExecutionStatus('Compared two validated compiled Atlas routes. Overlap is model graph topology, not physical proximity.');
@@ -208,7 +207,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
   if(executionLease.current)return;
   executionLease.current=true;setRunning(true);setError('');setExecutionStatus('');
   try{
-   const address=target??Number(atlasAddress.trim());
+   const address=target??parseAtlasAddressInputR916(atlasAddress);
    if(target===undefined&&atlasAddress.trim()==='')throw Error('Enter an Atlas address');
    const field=await getMandala20736Field();
    const values=inspectAtlasAddressR897(field,address);
