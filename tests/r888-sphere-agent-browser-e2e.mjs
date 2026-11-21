@@ -112,6 +112,8 @@ async function prove(browser,label,viewport){
   const raster=lab.locator('canvas[data-r892-projection]');
   const projection=lab.getByLabel('20,736 pixel address projection');
   assert.equal(await raster.getAttribute('data-r892-projection'),'INNER_20736');
+  // Keep the entire raster clear of OMEGA7's fixed mobile navigation before an edge click.
+  await raster.evaluate(el=>el.scrollIntoView({block:'center',inline:'center'}));
   const size=await raster.evaluate(el=>({width:el.getBoundingClientRect().width,height:el.getBoundingClientRect().height}));
   await raster.click({position:{x:size.width*(191.5/192),y:size.height*(107.5/108)}});
   assert.match(await lab.locator('[data-r892-selected-address]').innerText(),/Selected inner state: 20736 of 20736/);
@@ -121,6 +123,10 @@ async function prove(browser,label,viewport){
   assert.equal(await lab.getByRole('spinbutton',{name:'Outer address'}).inputValue(),'19',label+' exact outer address');
   await projection.selectOption('INNER_20736');
   await raster.click({position:{x:size.width*(.5/192),y:size.height*(.5/108)}});
+  assert.match(await lab.locator('[data-r892-selected-address]').innerText(),/Selected inner state: 1 of 20736/);
+  await lab.getByLabel('Exact inner state address').fill('20736');
+  assert.match(await lab.locator('[data-r892-selected-address]').innerText(),/Selected inner state: 20736 of 20736/);
+  await lab.getByLabel('Exact inner state address').fill('1');
   assert.match(await lab.locator('[data-r892-selected-address]').innerText(),/Selected inner state: 1 of 20736/);
   console.log('R892 BROWSER '+label.toUpperCase()+' PASS: exact last/first inner address, unique outer agent address and projection switching.');
   assert.equal(errors.length,0,label+' unexpected uncaught errors '+errors.join('; '));
