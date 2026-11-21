@@ -118,7 +118,7 @@ async function prove(browser,label,viewport){
   await projection.selectOption('OUTER_20736');
   assert.equal(await raster.getAttribute('data-r892-projection'),'OUTER_20736');
   await raster.click({position:{x:size.width*(18.5/192),y:size.height*(.5/108)}});
-  assert.match(await lab.locator('.r887-side h3').innerText(),/Agent 19\b/);
+  assert.equal(await lab.getByRole('spinbutton',{name:'Outer address'}).inputValue(),'19',label+' exact outer address');
   await projection.selectOption('INNER_20736');
   await raster.click({position:{x:size.width*(.5/192),y:size.height*(.5/108)}});
   assert.match(await lab.locator('[data-r892-selected-address]').innerText(),/Selected inner state: 1 of 20736/);
