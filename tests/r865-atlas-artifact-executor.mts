@@ -123,7 +123,7 @@ test('R937 browser-local Atlas save verifies exact storage readback and portable
  const verify=segment.indexOf('await readPortableAtlasR924(JSON.parse(persisted))');
  const success=segment.indexOf("setExecutionStatus('Saved and readback-verified ");
  assert.ok(write>=0&&read>write&&match>read&&verify>match&&success>verify,'persistent readback and integrity validation must precede success');
- assert.match(segment,/serialized.length>131072/);
+ assert.match(segment,/new TextEncoder\(\)\.encode\(serialized\)\.byteLength>131072/);
  assert.match(segment,/recovered.trace.length!==payload.trace.length/);
 });
 
