@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {getMandala20736Field} from '../src/mandala20736Runtime';
-import {exportFullAtlasCsvR896,inspectAtlasAddressR897,traceAtlasRouteR899,exportAtlasRouteCsvR900,summarizeAtlasRouteR901,compareAtlasRoutesR902} from '../src7/workspaces/omegaFullAtlasExportR896';
+import {exportFullAtlasCsvR896,inspectAtlasAddressR897,traceAtlasRouteR899,exportAtlasRouteCsvR900,summarizeAtlasRouteR901,compareAtlasRoutesR902,parseAtlasAddressInputR916} from '../src7/workspaces/omegaFullAtlasExportR896';
 
 const field=await getMandala20736Field();
 const csv=exportFullAtlasCsvR896(field);
@@ -111,3 +111,11 @@ assert.equal(shiftedOverlap.firstSharedStep,1);
 assert.equal(shiftedOverlap.secondSharedStep,1);
 assert.equal(shiftedOverlap.commonPrefix,0);
 console.log('R902: independent route overlap, disjoint sets and malformed-route rejection');
+
+for(const input of ['',' ','\\t','-1','20736','1.5','1e2','0x10','NaN','Infinity','+0','01','1abc']){
+ assert.throws(()=>parseAtlasAddressInputR916(input),/Atlas address/,'rejected '+JSON.stringify(input));
+}
+for(const [input,expected] of [['0',0],['11498',11498],['20735',20735],[' 12 ',12]]){
+ assert.equal(parseAtlasAddressInputR916(input),expected);
+}
+console.log('R916: Atlas input boundary rejects blanks and malformed addresses without zero-coercion');
