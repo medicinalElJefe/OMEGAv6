@@ -40,7 +40,7 @@ async function assertWeatherProviderUnavailable(page,widget,label){
    forecastCards:el.querySelectorAll('.earth-r375-hourly-card,.earth-r375-day-card').length
   }));
   if(response.status()===200){
-   if(snapshot.state!=='READY'||snapshot.error||!payload?.current||!payload?.target||/—/.test(snapshot.current))throw Error(label+': recovered provider HTTP 200 lacks coherent weather view');
+   if(snapshot.state!=='READY'||snapshot.error||!payload?.current||!payload?.target||!Number.isFinite(Number(payload.current.temperatureC))||Math.abs(Number(payload.target.lat)-Number(target[1]))>0.00015||Math.abs(Number(payload.target.lon)-Number(target[2]))>0.00015||/—/.test(snapshot.current))throw Error(label+': recovered provider HTTP 200 lacks coherent weather view');
    console.log('R560 '+label+' provider recovered after ERROR transition, refresh HTTP 200 and coherent READY view PASS');
    return;
   }
