@@ -25,6 +25,6 @@ test('R865 rejects invalid model addresses and wires execution into Projects and
  assert.match(ui,/new Blob\(\[latestCsv\.csv\]/);
  assert.match(ui,/id='r865-atlas-address'/);
  assert.match(ui,/value=\{atlasAddress\}/);
- assert.match(ui,/Number\(atlasAddress\.trim\(\)\)/);
+ assert.match(ui,/parseAtlasAddressInputR916\(atlasAddress\)/);
  assert.match(ui,/address>=20736/);
 });
