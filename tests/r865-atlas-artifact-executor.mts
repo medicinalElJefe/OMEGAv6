@@ -229,7 +229,7 @@ test('R946 Atlas visit index exports actual distinct recorded visits with proven
  assert.match(segment,/source_trace_sha256,provenance/);
  assert.match(segment,/offline-model-derived-origin-unverified/);
  assert.match(segment,/verified-local-executor-artifact/);
- assert.match(segment,/lines\.join\('\\r\\n'\)/);
+ assert.ok(segment.includes(String.raw`lines.join('\r\n')`),'CSV uses real CRLF escapes');
  const trace=[{step:0,address:12},{step:1,address:7},{step:2,address:12},{step:3,address:7},{step:4,address:12}];
  const visits=new Map<number,{count:number;first:number;last:number}>();
  for(const state of trace){const prior=visits.get(state.address);if(prior){prior.count++;prior.last=state.step}else visits.set(state.address,{count:1,first:state.step,last:state.step})}
