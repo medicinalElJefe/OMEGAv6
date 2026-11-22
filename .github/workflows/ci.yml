@@ -531,6 +531,7 @@ jobs:
           Copy-Item -LiteralPath '.\install\Start-OMEGA-Local.ps1' -Destination (Join-Path $folder 'Start-OMEGA-Local.ps1')
           Copy-Item -LiteralPath '.\install\OPEN-OMEGA-HUB.cmd' -Destination (Join-Path $folder 'OPEN-OMEGA-HUB.cmd')
           Copy-Item -LiteralPath '.\install\OPEN-OMEGA-INTEGRATED.cmd' -Destination (Join-Path $folder 'OPEN-OMEGA-INTEGRATED.cmd')
+          Copy-Item -LiteralPath '.\install\Start-OMEGA-Integrated.ps1' -Destination (Join-Path $folder 'Start-OMEGA-Integrated.ps1')
           Copy-Item -LiteralPath '.\tools\omega_local_hub_r881.py' -Destination (Join-Path $folder 'omega_local_hub_r881.py')
           Copy-Item -LiteralPath '.\tools\omega_absolute_truth_verifier_r884.py' -Destination (Join-Path $folder 'omega_absolute_truth_verifier_r884.py')
           Copy-Item -LiteralPath '.\install\Verify-OMEGA-Package.ps1' -Destination (Join-Path $folder 'Verify-OMEGA-Package.ps1')
@@ -574,6 +575,17 @@ jobs:
         run: |
           & pwsh -NoProfile -NonInteractive -File .\tests\r897-windows-packaged-hub-smoke.ps1 -PackageRoot (Join-Path $env:RUNNER_TEMP 'OMEGA-Windows-Portable')
           if ($LASTEXITCODE -ne 0) { throw 'R897 packaged authenticated local worker smoke failed' }
+      - name: Prove complete integrated Windows Studio plus compiled Hub lifecycle
+        shell: pwsh
+        run: |
+          $root = Join-Path $env:RUNNER_TEMP ('omega-r898-approved-' + [guid]::NewGuid().ToString('N'))
+          New-Item -ItemType Directory -Path $root -Force | Out-Null
+          try {
+            & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File (Join-Path $env:RUNNER_TEMP 'OMEGA-Windows-Portable\Start-OMEGA-Integrated.ps1') -ApprovedRoot $root -SelfTest
+            if ($LASTEXITCODE -ne 0) { throw 'R898 integrated worker and studio lifecycle failed' }
+          } finally {
+            if (Test-Path -LiteralPath $root) { Remove-Item -LiteralPath $root -Recurse -Force -ErrorAction SilentlyContinue }
+          }
       - name: Zip actual tested portable UI, under 160 MiB
         shell: pwsh
         run: |
