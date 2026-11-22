@@ -366,3 +366,25 @@ test('R954 selected transition exposes computed coordinate deltas in the playbac
  const from=[1,11,5,0],to=[3,0,5,9];
  assert.deepEqual(to.map((value,i)=>value-from[i]),[2,-11,0,9]);
 });
+
+
+test('R957 exports complete recorded transition series as provenance-bearing JSON without re-execution',()=>{
+ const ui=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
+ const start=ui.indexOf('const downloadAllTransitionsR957=()=>');
+ const end=ui.indexOf('const downloadSelectedTransitionR953=()=>',start);
+ assert.ok(start>=0&&end>start,'series export handler exists');
+ const handler=ui.slice(start,end);
+ assert.match(handler,/OMEGA_ATLAS_TRANSITION_SERIES_R957_V1/);
+ assert.match(handler,/current.address===previous.address\?\[\]:/);
+ assert.match(handler,/sourceTraceSha256:localTurnResult.artifact.contentSha256/);
+ assert.match(handler,/originVerified:!offline/);
+ assert.match(handler,/physicalMeasurement:false,canonAdmission:false/);
+ assert.match(handler,/transitionCount:transitions.length,transitions/);
+ assert.match(handler,/coordinates:current.coordinates.map/);
+ assert.ok(handler.includes(String.raw`JSON.stringify(payload,null,2)+'\\n'`),'JSON uses newline escape rather than literal backslash characters');
+ assert.match(ui,/onClick={downloadAllTransitionsR957}>Download all transitions JSON/);
+ assert.doesNotMatch(handler,/fetch\(|executeLocalTurns\(/);
+ const trace=[{step:0,address:3,coordinates:[1,1,1,4]},{step:1,address:3,coordinates:[1,1,1,4]},{step:2,address:8,coordinates:[1,1,1,9]},{step:3,address:8,coordinates:[1,1,1,9]},{step:4,address:2,coordinates:[1,1,1,3]}];
+ const transitions=trace.slice(1).flatMap((current,i)=>{const previous=trace[i];return current.address===previous.address?[]:[{from:previous.step,to:current.step,delta:current.coordinates.map((value,j)=>value-previous.coordinates[j])}];});
+ assert.deepEqual(transitions,[{from:1,to:2,delta:[0,0,0,5]},{from:3,to:4,delta:[0,0,0,-6]}]);
+});
