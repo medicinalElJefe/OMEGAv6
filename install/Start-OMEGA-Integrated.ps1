@@ -24,6 +24,11 @@ try {
     }
     $rootItem = Get-Item -LiteralPath (Resolve-Path -LiteralPath $ApprovedRoot).Path -Force
     $root = $rootItem.FullName.TrimEnd([char[]]@('\','/'))
+    # An approved project must be a directory beneath the drive root,
+    # never a whole drive or a drive-relative path.
+    if ($rootItem.FullName -eq [System.IO.Path]::GetPathRoot($rootItem.FullName)) {
+        throw 'Select a specific approved project folder, not a drive root'
+    }
     $drive = [System.IO.Path]::GetPathRoot($root)
     if (-not $drive -or $drive.StartsWith('\\') -or
         $drive.TrimEnd([char[]]@('\','/')).Equals($env:SystemDrive,[System.StringComparison]::OrdinalIgnoreCase)) {
