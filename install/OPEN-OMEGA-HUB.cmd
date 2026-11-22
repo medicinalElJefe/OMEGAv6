@@ -20,7 +20,7 @@ echo.
 echo Your local Hub stores its private access token within this approved folder.
 echo Never publish the token or paste it into cloud chats.
 echo.
-if not exist "%~dp0OMEGA-Local-Hub.exe" (
+if not exist "%~dp0OMEGA-Local-Hub\OMEGA-Local-Hub.exe" (
   echo OMEGA-Local-Hub.exe missing. Use the complete tested Windows package.
   goto :failure
 )
@@ -29,7 +29,7 @@ echo Starting token-protected Hub on 127.0.0.1:8765.
 echo Open OMEGA7 and select Local / Edge Automation Hub, then enter
 echo the private token from the approved folder's .omega directory.
 echo Close this window to stop the worker.
-"%~dp0OMEGA-Local-Hub.exe" --root "%OMEGA_ROOT%" --port 8765
+"%~dp0OMEGA-Local-Hub\OMEGA-Local-Hub.exe" --root "%OMEGA_ROOT%" --port 8765
 if errorlevel 1 goto :failure
 exit /b 0
 :invalid
