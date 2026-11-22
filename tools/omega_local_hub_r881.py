@@ -44,7 +44,7 @@ def allowed_browser_origin(origin):
         return False
 
 READ_ONLY_REPLAY = frozenset({"HASH_TREE", "CSV_STATS", "VERIFY_LEDGER_SPLIT"})
-OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "RESIDUAL_RESTORE"})
+OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "LOCAL_INFER", "RESIDUAL_RESTORE"})
 STATUS = frozenset({"QUEUED", "WAIT_EVENT", "RUNNING", "COMPLETED", "FAILED", "HELD", "CANCELLED"})
 def utc_ms(): return int(time.time() * 1000)
 def sha_file(path: Path) -> str:
@@ -136,6 +136,14 @@ class Hub:
         return {"event":event_name,"released":len(ids)}
     def execute(self,operation,args):
         if operation=="RESIDUAL_RESTORE": raise ValueError("R195_RESIDUAL_SOURCE_AND_AUTHORITY_REQUIRED")
+        if operation=="LOCAL_INFER":
+            import importlib.util
+            adapter_path=Path(__file__).resolve().with_name("omega_local_inference_r899.py")
+            if not adapter_path.is_file(): raise ValueError("R899_LOCAL_MODEL_ADAPTER_REQUIRED")
+            spec=importlib.util.spec_from_file_location("_omega_local_inference_r899",adapter_path)
+            adapter=importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(adapter)
+            return adapter.infer_local_r899(args)
         if operation=="VERIFY_LEDGER_SET":
             import importlib.util
             spec_path=Path(__file__).resolve().with_name("omega_absolute_truth_verifier_r884.py")
