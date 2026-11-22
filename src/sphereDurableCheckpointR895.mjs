@@ -30,6 +30,16 @@ export function validateDurableR895(fabric,session){
  if(!fabric.receipts.every(r=>receipt(r,fabric.sequence,fabric.tick)))throw new Error('Invalid durable ledger receipt');
  return{schema:R895_SCHEMA,fabric,session:{agent:session.agent,memberCount:session.memberCount,stepCursor:session.stepCursor,batch:session.batch,mode:session.mode,selectedInner:session.selectedInner},activeAgents:fabric.active.size,modifiedValues:values};
 }
+// Corruption detection only. This digest is not an authentication signature.
+async function integrityDigestR895(record){
+ if(!globalThis.crypto?.subtle)throw new Error('Secure SHA-256 digest unavailable: durable persistence refused');
+ const payload=JSON.stringify(record,(_key,value)=>value instanceof Map
+  ? {__r895Map:[...value.entries()].sort((a,b)=>a[0]-b[0])}
+  : value);
+ const bytes=new TextEncoder().encode(payload);
+ const hash=await globalThis.crypto.subtle.digest('SHA-256',bytes);
+ return Array.from(new Uint8Array(hash),n=>n.toString(16).padStart(2,'0')).join('');
+}
 function openDatabase(){
  return new Promise((resolve,reject)=>{
   if(typeof indexedDB==='undefined')return reject(new Error('IndexedDB is unavailable on this device'));
@@ -43,6 +53,7 @@ function openDatabase(){
 export async function saveDurableR895(fabric,session){
  // Structured clone snapshots all maps, receipts and float64 values before asynchronous storage begins.
  const record=validateDurableR895(structuredClone(fabric),session);
+ record.integrity=await integrityDigestR895(record);
  const db=await openDatabase();
  try{return await new Promise((resolve,reject)=>{
   const tx=db.transaction(STORE,'readwrite');
@@ -58,7 +69,7 @@ export async function restoreDurableR895(){
   let record=null;const tx=db.transaction(STORE,'readonly');const request=tx.objectStore(STORE).get(KEY);
   request.onsuccess=()=>{record=request.result};
   request.onerror=()=>{};
-  tx.oncomplete=()=>{try{if(!record||record.schema!==R895_SCHEMA)throw new Error('No valid durable checkpoint');resolve(validateDurableR895(record.fabric,record.session))}catch(e){reject(e)}};
+  tx.oncomplete=()=>{void (async()=>{try{if(!record||record.schema!==R895_SCHEMA)throw new Error('No valid durable checkpoint');const verified=validateDurableR895(record.fabric,record.session);if(typeof record.integrity!=='string'||!/^[a-f0-9]{64}$/.test(record.integrity)||record.integrity!==await integrityDigestR895(verified))throw new Error('Durable checkpoint integrity mismatch; restore refused');resolve(verified)}catch(e){reject(e)}})()};
   tx.onabort=()=>reject(tx.error||new Error('Durable checkpoint read failed'));
  })}finally{db.close()}
 }
