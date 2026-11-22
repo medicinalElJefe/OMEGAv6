@@ -331,7 +331,7 @@ async function prove(browser,label,viewport){
       for(let inner=0;inner<20736;inner++)member.values.set(inner,((inner+agentIndex)%1024)/1024);
       active.set(agentId,member);
     }
-    const record={...original,fabric:{...original.fabric,active},session:{...original.session,memberCount:12}};
+    const record={...original,fabric:{...original.fabric,active},session:{...original.session,memberCount:12},activeAgents:12,modifiedValues:248832};
     delete record.integrity;
     const serialized=JSON.stringify(record,(_key,value)=>value instanceof Map
       ? {__r895Map:[...value.entries()].sort((a,b)=>a[0]-b[0])}:value);
