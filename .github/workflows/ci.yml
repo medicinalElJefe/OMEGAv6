@@ -474,6 +474,18 @@ jobs:
           }
           if ($receipt.receipt_sha256 -notmatch '^[a-f0-9]{64}$') { throw 'Missing native SHA-256 evidence digest' }
           Write-Host "R895 Windows-hosted CI smoke PASS: $($receipt.status); no target-PC, installer or GPU proof claimed."
+      - name: R895 zero-argument Windows check - user action smoke
+        shell: pwsh
+        run: |
+          $reportPath = Join-Path $env:RUNNER_TEMP 'r895-windows-no-arguments.json'
+          & pwsh -NoProfile -NonInteractive -File .\install\run-r895-windows-preflight.ps1 -Output $reportPath
+          if ($LASTEXITCODE -ne 0) { throw "OMEGA user-friendly Windows check failed with exit $LASTEXITCODE" }
+          $report = Get-Content -LiteralPath $reportPath -Raw | ConvertFrom-Json
+          if ($report.status -ne 'READY_FOR_PAIRED_HOST_PROOF') { throw 'Zero-argument check did not give READY result' }
+          if ($report.source.actual_commit -ne $env:GITHUB_SHA) { throw 'Auto-detected Git revision does not match exact candidate' }
+          if ($report.installer_lifecycle_proven -ne $false -or $report.native_gpu_workload_proven -ne $false -or $report.verified_execution_return -ne $false) { throw 'Non-executed machine proof was incorrectly promoted' }
+          Write-Host 'R895 zero-argument Windows check PASS - no copied SHA, no edits or installer execution.'
+
 
   cloudflare-auth-probe:
     if: github.event_name == 'pull_request'
