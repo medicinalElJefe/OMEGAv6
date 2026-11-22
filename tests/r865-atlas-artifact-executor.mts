@@ -400,7 +400,7 @@ test('R958 exports only actual address changes with signed coordinate deltas and
  assert.match(handler,/delta_D,delta_P,delta_R,delta_L/);
  assert.match(handler,/source_trace_sha256,provenance/);
  assert.match(handler,/localTurnResult.artifact.contentSha256/);
- assert.ok(handler.includes(String.raw`rows.join('\\r\\n')+'\\r\\n'`),'CSV uses actual CRLF escape sequences');
+ assert.ok(handler.includes(String.raw`rows.join('\r\n')+'\r\n'`),'CSV uses actual CRLF escape sequences');
  assert.match(handler,/offline-model-derived-origin-unverified/);
  assert.match(ui,/onClick={downloadTransitionDeltasR958}>Download transition deltas CSV/);
  assert.doesNotMatch(handler,/fetch\(|executeLocalTurns\(/);
