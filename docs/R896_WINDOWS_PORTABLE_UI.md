@@ -39,18 +39,21 @@ application as disconnected or offline-sovereign.
 
 ## Integrated Windows local worker executable (R898)
 
-The same portable package now includes a **standalone Windows executable**
-`OMEGA-Local-Hub.exe` compiled from the existing governed R881 Python Hub.
+The same portable package now includes a **portable Windows executable**
+`OMEGA-Local-Hub/OMEGA-Local-Hub.exe`, plus its bundled runtime files,
+compiled from the existing governed R881 Python Hub.
 The R884 ten-ledger verifier is bundled in that executable for the Hub's
 `VERIFY_LEDGER_SET` operation. The source scripts remain included for audit
 and byte-identity checks. The normal UI and the compiled Hub require **no
 Python, Node, Git, package manager, or administrator installation** on the
-operator's Windows machine.
+operator's Windows machine. The worker uses a portable directory build so
+it does not self-extract an entire bundled Python runtime into the system
+temporary directory on launch; keep its companion files intact.
 
 For a single entry point to the local studio and bounded worker, double-click
 `OPEN-OMEGA-INTEGRATED.cmd` and supply the existing approved non-system
 project root when prompted. That launcher verifies the entire package,
-starts `OMEGA-Local-Hub.exe` on loopback, then starts the existing UI. No
+starts the bundled `OMEGA-Local-Hub/OMEGA-Local-Hub.exe` on loopback, then starts the existing UI. No
 Python/Node install or administrator elevation is needed. Pairing to the
 canonical cloud Hybrid Link still requires the application's explicit
 authenticated connection flow.
