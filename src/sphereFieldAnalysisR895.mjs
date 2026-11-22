@@ -72,7 +72,9 @@ export function analyzeCollectiveRelationsR895(fabric,members){
   }
   const varA=Math.max(0,m2A/SIZE),varB=Math.max(0,m2B/SIZE);
   const covariance=cross/SIZE;
+  if(!Number.isFinite(varA)||!Number.isFinite(varB)||!Number.isFinite(covariance))throw new Error('Invalid bivariate field accumulator');
   const correlation=varA===0||varB===0?null:Math.max(-1,Math.min(1,covariance/Math.sqrt(varA*varB)));
+  if(correlation!==null&&!Number.isFinite(correlation))throw new Error('Invalid paired field correlation');
   pairs.push({agentA,agentB,sharedCoordinates:SIZE,covariance,correlation,varianceA:varA,varianceB:varB,
    undefinedReason:correlation===null?'ZERO_VARIANCE':null});
  }
