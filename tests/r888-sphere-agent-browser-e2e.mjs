@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
+import {readFileSync} from 'node:fs';
 const base=(process.env.OMEGA_E2E_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 async function openAtlas(page){
  await page.goto(base+'/?omega7=1&r888='+Date.now(),{waitUntil:'domcontentloaded',timeout:45000});
@@ -226,6 +227,24 @@ async function prove(browser,label,viewport){
   await durableLab.getByRole('button',{name:'Restore full-state durable checkpoint'}).click();
   await page.waitForFunction(()=>document.querySelector('.r887-side p[role="status"]')?.textContent?.includes('Durable checkpoint restored'),null,{timeout:8000});
   assert.equal((await durableLab.locator('[data-r895-exact-inner-value]').innerText()).split('Exact selected state: ')[1],storedValue,label+' exact float64 inner value recovered after true page reload');
+  // R895 PORTABLE: export a real download, then re-import and restore without cloud calls.
+  const [portableDownload]=await Promise.all([
+    page.waitForEvent('download',{timeout:10000}),
+    durableLab.getByRole('button',{name:'Export portable checkpoint JSON'}).click()
+  ]);
+  assert.match(portableDownload.suggestedFilename(),/omega-r895-portable-checkpoint\\.json$/);
+  const portableBytes=readFileSync(await portableDownload.path());
+  const portableText=portableBytes.toString('utf8');
+  const portableRecord=JSON.parse(portableText);
+  assert.equal(portableRecord.schema,'OMEGA_SPHERE_DURABLE_CHECKPOINT_R895');
+  assert.match(portableRecord.integrity,/^[a-f0-9]{64}$/);
+  await durableLab.getByRole('button',{name:'Local update'}).click();
+  await durableLab.getByLabel('Import portable checkpoint JSON').setInputFiles({name:'omega-r895-portable-checkpoint.json',mimeType:'application/json',buffer:portableBytes});
+  await page.waitForFunction(()=>document.querySelector('.r887-side p[role="status"]')?.textContent?.includes('Portable checkpoint imported'),null,{timeout:10000});
+  await durableLab.getByRole('button',{name:'Restore full-state durable checkpoint'}).click();
+  await page.waitForFunction(()=>document.querySelector('.r887-side p[role="status"]')?.textContent?.includes('Durable checkpoint restored'),null,{timeout:8000});
+  assert.equal((await durableLab.locator('[data-r895-exact-inner-value]').innerText()).split('Exact selected state: ')[1],storedValue,label+' portable imported float64 matches exported snapshot');
+  console.log('R895 PORTABLE '+label.toUpperCase()+' PASS: downloaded SHA-256-bound checkpoint, imported and restored exact float64.');
   // R895 VALID-VALUE TAMPER: structurally valid numeric alteration must fail SHA-256 verification.
   const beforeNumericTamper=(await durableLab.locator('[data-r895-exact-inner-value]').innerText()).split('Exact selected state: ')[1];
   await page.evaluate(async()=>{
