@@ -5,7 +5,7 @@ const launch=readFileSync('install/OPEN-OMEGA.cmd','utf8');
 const smoke=readFileSync('tests/r896-windows-local-studio-smoke.ps1','utf8');
 for(const key of [
  '[System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopback,0)',
- 'Get-OmegaMime','Send-OmegaResponse','-NoBrowser','ReadyFile',
+ 'Get-OmegaMime','Send-OmegaResponse','[switch] $NoBrowser','ReadyFile',
  "CLOUD_SERVICE_NOT_AVAILABLE_LOCALLY","'index.html'","Method Not Allowed",
  'Forbidden path','Not found','GetFullPath','Content-Length','X-Content-Type-Options'
 ])assert.ok(server.includes(key),'R896 local server contract missing: '+key);
