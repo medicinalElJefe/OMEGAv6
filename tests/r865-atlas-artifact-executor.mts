@@ -325,3 +325,24 @@ test('R952 renders selectable recorded address transitions without synthesizing 
  const trace=[{step:0,address:4},{step:1,address:4},{step:2,address:7},{step:3,address:7},{step:4,address:4}];
  assert.deepEqual(trace.slice(1).filter((state,i)=>state.address!==trace[i].address).map(x=>x.step),[2,4]);
 });
+
+test('R953 exports a selected actual transition with explicit provenance and refuses repeated-state selections',()=>{
+ const ui=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
+ const start=ui.indexOf('const downloadSelectedTransitionR953=()=>');
+ const end=ui.indexOf('const downloadSelectedAtlasStepR943=()=>',start);
+ assert.ok(start>=0&&end>start,'selected transition JSON exporter is registered');
+ const handler=ui.slice(start,end);
+ assert.match(handler,/trace\[index\]\.address===trace\[index-1\]\.address/);
+ assert.match(handler,/Select an actual recorded address transition/);
+ assert.match(handler,/sourceTraceSha256:localTurnResult\.artifact\.contentSha256/);
+ assert.match(handler,/originVerified:!offline/);
+ assert.match(handler,/physicalMeasurement:false,canonAdmission:false/);
+ assert.match(handler,/from:\{step:previous\.step,address:previous\.address,coordinates:previous\.coordinates\}/);
+ assert.match(handler,/to:\{step:current\.step,address:current\.address,coordinates:current\.coordinates\}/);
+ assert.ok(handler.includes(String.raw`JSON.stringify(payload,null,2)+'\\n'`),'JSON export uses a real newline escape');
+ assert.match(ui,/onClick={downloadSelectedTransitionR953}>Download selected transition JSON/);
+ const trace=[{step:0,address:3},{step:1,address:3},{step:2,address:8},{step:3,address:8}];
+ assert.deepEqual(trace.map((x,i)=>i>0&&x.address!==trace[i-1].address),[false,false,true,false]);
+ const payload={schema:'OMEGA_ATLAS_SELECTED_TRANSITION_R953_V1',from:trace[1],to:trace[2],originVerified:false,physicalMeasurement:false};
+ assert.equal(JSON.parse(JSON.stringify(payload)).to.address,8);
+});
