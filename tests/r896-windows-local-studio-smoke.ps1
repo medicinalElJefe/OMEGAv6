@@ -50,7 +50,25 @@ try {
         if ($null -ne $response -and [int]$response.StatusCode -eq 404) { $missing = $true }
     }
     if (-not $missing) { throw 'Missing assets must return 404 instead of SPA HTML' }
-    Write-Host "R896 LOCAL WINDOWS STUDIO PASS: loopback-only URL, real index and nested route, HEAD, unavailable API 503, asset 404. $url"
+    # A Windows junction inside dist must never expose a file outside dist.
+    $outside = Join-Path $env:RUNNER_TEMP ('omega-r896-outside-' + $token)
+    $junction = Join-Path (Join-Path $package 'dist') ('omega-r896-link-' + $token)
+    try {
+        New-Item -ItemType Directory -Path $outside -Force | Out-Null
+        [System.IO.File]::WriteAllText((Join-Path $outside 'private.txt'),'OUTSIDE_PACKAGE_SENTINEL')
+        New-Item -ItemType Junction -Path $junction -Target $outside -ErrorAction Stop | Out-Null
+        $forbidden = $false
+        try { $null = Invoke-WebRequest -Uri ($url + (Split-Path $junction -Leaf) + '/private.txt') -UseBasicParsing -TimeoutSec 10 }
+        catch {
+            $response = $_.Exception.Response
+            if ($null -ne $response -and [int]$response.StatusCode -eq 403) { $forbidden = $true }
+        }
+        if (-not $forbidden) { throw 'Portable server followed a junction outside dist' }
+    } finally {
+        if (Test-Path -LiteralPath $junction) { Remove-Item -LiteralPath $junction -Force -ErrorAction SilentlyContinue }
+        if (Test-Path -LiteralPath $outside) { Remove-Item -LiteralPath $outside -Recurse -Force -ErrorAction SilentlyContinue }
+    }
+    Write-Host "R896 LOCAL WINDOWS STUDIO PASS: loopback-only URL, real index and nested route, HEAD, unavailable API 503, asset 404, junction escape 403. $url"
 } finally {
     if ($null -ne $process -and -not $process.HasExited) { Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue }
     if (Test-Path -LiteralPath $ready) { Remove-Item -LiteralPath $ready -Force -ErrorAction SilentlyContinue }
