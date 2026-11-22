@@ -467,7 +467,8 @@ jobs:
           if ($receipt.schema -ne 'OMEGA_R895_WINDOWS_HOST_PREFLIGHT') { throw 'Unexpected native receipt schema' }
           if ($receipt.host.platform -ne 'win32') { throw 'Real Windows runner platform was not observed' }
           if ($receipt.source.actual_commit -ne $env:GITHUB_SHA) { throw 'Exact Git source drift on native Windows runner' }
-          if ($receipt.source.files.base.sha256 -ne '49a3be453b1e67e5eb7e8e29411e82f07d30d2fd45fa52fa0bf28ef57774a046') { throw 'Immutable Hybrid base SHA mismatch on Windows' }
+          if ($receipt.source.files.base.git_blob_sha256 -ne '49a3be453b1e67e5eb7e8e29411e82f07d30d2fd45fa52fa0bf28ef57774a046') { throw 'Immutable Hybrid base SHA mismatch on Windows' }
+          if ($null -eq $receipt.source.files.base.checkout_matches_git_blob) { throw 'Missing transparent Windows checkout byte-identity observation' }
           if ($receipt.verified_execution_return -ne $false -or $receipt.installer_lifecycle_proven -ne $false -or $receipt.native_gpu_workload_proven -ne $false) {
             throw 'CI Windows runner was incorrectly promoted to device/workload execution proof'
           }
