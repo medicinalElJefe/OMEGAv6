@@ -63,6 +63,22 @@ worker and verifier SHA-256 values with their canonical checked-out sources. Thi
 automation*, not native GPU acceleration, authenticated Hybrid Link R141 host
 return, unattended installation, model inference, or production acceptance.
 
+## R897 full-package integrity guard
+
+`OPEN-OMEGA.cmd` now runs `Verify-OMEGA-Package.ps1` before opening the
+studio. The bundled `OMEGA-PACKAGE-EVIDENCE.json` includes a SHA-256 and
+byte count for **every** packaged file except the evidence manifest itself.
+The verification refuses missing, altered, unexpected or duplicate files,
+unsafe relative paths, and junction/symbolic-link content. A Windows CI test
+changes a built `index.html` byte stream, proves refusal, then restores it
+and proves successful verification. The normal UI remains free of installed
+Python or Node dependencies.
+
+The manifest is **not digitally signed**; it detects modification relative
+to the manifest but cannot authenticate a manifest that an attacker has also
+replaced. Source provenance comes from GitHub's checked-out SHA and workflow
+artifact evidence. It does not establish physical-PC or installer acceptance.
+
 ## Evidence and release boundary
 
 GitHub Actions builds and tests the ZIP from the exact PR commit.
