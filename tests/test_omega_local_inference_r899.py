@@ -36,6 +36,13 @@ class LocalInferenceTests(unittest.TestCase):
     def _mock(self, *, response=None, status=200, redirect=None):
         calls = []
         class Handler(BaseHTTPRequestHandler):
+            def do_GET(self):
+                calls.append({"path": self.path, "method": "GET"})
+                self.send_response(302 if redirect else status)
+                self.send_header("Content-Type", "application/json")
+                if redirect: self.send_header("Location", redirect)
+                self.end_headers()
+                if response is not None: self.wfile.write(json.dumps(response).encode())
             def do_POST(self):
                 raw = self.rfile.read(int(self.headers.get("Content-Length", "0")))
                 calls.append({"path": self.path, "body": json.loads(raw)})
@@ -85,6 +92,30 @@ class LocalInferenceTests(unittest.TestCase):
             server.shutdown()
             thread.join(timeout=3)
             server.server_close()
+
+    def test_local_model_inventory_and_remote_redirect_refusal(self):
+        server, thread, calls = self._mock(response={
+            "models": [{"name": "llama3.2:latest"}, {"name": "phi3:mini"}]
+        })
+        try:
+            result = adapter.list_local_models_r899(
+                endpoint=f"http://127.0.0.1:{server.server_port}/api/tags"
+            )
+            self.assertEqual(result["schema"], "OMEGA_LOCAL_MODELS_R899")
+            self.assertEqual(result["models"], ["llama3.2:latest", "phi3:mini"])
+            self.assertFalse(result["gpuProven"])
+            self.assertEqual(calls[0]["path"], "/api/tags")
+        finally:
+            server.shutdown();thread.join(timeout=3);server.server_close()
+        server, thread, calls = self._mock(redirect="https://example.org/api/tags")
+        try:
+            with self.assertRaisesRegex(ValueError, "LOCAL_MODEL_BACKEND_NOT_AVAILABLE_HELD"):
+                adapter.list_local_models_r899(
+                    endpoint=f"http://127.0.0.1:{server.server_port}/api/tags"
+                )
+            self.assertEqual(len(calls), 1)
+        finally:
+            server.shutdown();thread.join(timeout=3);server.server_close()
 
     def test_backend_model_identity_refusal(self):
         server, thread, calls = self._mock(response={
