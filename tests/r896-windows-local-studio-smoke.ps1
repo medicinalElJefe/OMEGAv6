@@ -56,8 +56,14 @@ try {
     $combined = Join-Path $package 'OPEN-OMEGA-INTEGRATED.cmd'
     if (-not (Test-Path -LiteralPath $combined -PathType Leaf)) { throw 'Unified OMEGA7 launch entry missing' }
     $combinedText = Get-Content -LiteralPath $combined -Raw
-    foreach ($guard in @('Verify-OMEGA-Package.ps1','OMEGA-Local-Hub.exe','OPEN-OMEGA.cmd','SystemDrive')) {
-        if (-not $combinedText.Contains($guard)) { throw ('Unified OMEGA7 launch path missing: ' + $guard) }
+    if (-not $combinedText.Contains('Start-OMEGA-Integrated.ps1')) {
+        throw 'Unified OMEGA7 launcher must delegate to lifecycle supervisor'
+    }
+    $supervisorFile = Join-Path $package 'Start-OMEGA-Integrated.ps1'
+    if (-not (Test-Path -LiteralPath $supervisorFile -PathType Leaf)) { throw 'Integrated supervisor missing' }
+    $supervisorText = Get-Content -LiteralPath $supervisorFile -Raw
+    foreach ($guard in @('Verify-OMEGA-Package.ps1','OMEGA-Local-Hub.exe','Start-OMEGA-Local.ps1','SystemDrive','Stop-Process','-SelfTest')) {
+        if (-not $supervisorText.Contains($guard)) { throw ('Unified OMEGA7 supervision guard missing: ' + $guard) }
     }
     $hubLauncherText = Get-Content -LiteralPath $hubLauncher -Raw
     if ($hubLauncherText -notmatch 'OMEGA-Local-Hub[.]exe' -or $hubLauncherText -notmatch '8765') {
