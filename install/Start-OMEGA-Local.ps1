@@ -81,7 +81,13 @@ try {
                 if ($headersRead -gt 16384) { break }
             } while ($line.Length -gt 0)
             if ($headersRead -gt 16384) { continue }
-            $requestMatch = [System.Text.RegularExpressions.Regex]::Match($requestLine,'^(GET|HEAD) (/[^ ]*) HTTP/1\.[01]
+            $requestMatch = [System.Text.RegularExpressions.Regex]::Match($requestLine,'^(GET|HEAD) (/[^ ]*) HTTP/1\.[01]$')
+            if (-not $requestMatch.Success) {
+                Send-OmegaResponse $stream 405 'Method Not Allowed' 'text/plain' ([System.Text.Encoding]::UTF8.GetBytes('GET and HEAD only')) $false
+                continue
+            }
+            $isHead = $requestMatch.Groups[1].Value -eq 'HEAD'
+            $rawPath = ($requestMatch.Groups[2].Value -split '[?#]',2)[0]
             try { $decoded = [System.Uri]::UnescapeDataString($rawPath) } catch { $decoded = '' }
             $invalidPath = [string]::IsNullOrEmpty($decoded)
             if (-not $decoded.StartsWith('/')) { $invalidPath = $true }
@@ -90,49 +96,6 @@ try {
             if ([regex]::IsMatch($decoded,'(^|/)\.\.?(/|$)')) { $invalidPath = $true }
             if ([regex]::IsMatch($decoded,'[\x00-\x1f:]')) { $invalidPath = $true }
             if ($invalidPath) {
-                Send-OmegaResponse $stream 403 'Forbidden' 'text/plain' ([System.Text.Encoding]::UTF8.GetBytes('Forbidden path')) $isHead
-                continue
-            }
-            if ($decoded -match '^/(api|admin|internal)(/|$)') {
-                Send-OmegaResponse $stream 503 'Service Unavailable' 'application/json' ([System.Text.Encoding]::UTF8.GetBytes('{"status":"CLOUD_SERVICE_NOT_AVAILABLE_LOCALLY"}')) $isHead
-                continue
-            }
-            $relative = $decoded.TrimStart('/')
-            if (-not $relative) { $relative = 'index.html' }
-            $candidate = [System.IO.Path]::GetFullPath((Join-Path $root $relative))
-            if (-not $candidate.StartsWith($rootPrefix,[System.StringComparison]::OrdinalIgnoreCase)) {
-                Send-OmegaResponse $stream 403 'Forbidden' 'text/plain' ([System.Text.Encoding]::UTF8.GetBytes('Forbidden path')) $isHead
-                continue
-            }
-            if (-not [System.IO.File]::Exists($candidate)) {
-                if ($relative -notmatch '\.[^/]+$') { $candidate = Join-Path $root 'index.html' }
-                else {
-                    Send-OmegaResponse $stream 404 'Not Found' 'text/plain' ([System.Text.Encoding]::UTF8.GetBytes('Not found')) $isHead
-                    continue
-                }
-            }
-            $body = [System.IO.File]::ReadAllBytes($candidate)
-            Send-OmegaResponse $stream 200 'OK' (Get-OmegaMime $candidate) $body $isHead
-        } catch {
-            Write-Warning ('Local request refused: ' + $_.Exception.Message)
-        } finally {
-            if ($null -ne $client) { $client.Close() }
-        }
-    }
-} finally {
-    $listener.Stop()
-    if ($ReadyFile -and (Test-Path -LiteralPath $ReadyFile)) { Remove-Item -LiteralPath $ReadyFile -Force }
-}
-)
-            if (-not $requestMatch.Success) {
-                Send-OmegaResponse $stream 405 'Method Not Allowed' 'text/plain' ([System.Text.Encoding]::UTF8.GetBytes('GET and HEAD only')) $false
-                continue
-            }
-            $isHead = $requestMatch.Groups[1].Value -eq 'HEAD'
-            $rawPath = ($requestMatch.Groups[2].Value -split '[?#]',2)[0]
-            try { $decoded = [System.Uri]::UnescapeDataString($rawPath) } catch { $decoded = '' }
-            if (-not $decoded.StartsWith('/') -or $decoded.Contains('\') -or $decoded.Contains([char]0) -or
-                $decoded -match '(^|/)\.\.?(/|$)' -or $decoded -match '[\x00-\x1f:]') {
                 Send-OmegaResponse $stream 403 'Forbidden' 'text/plain' ([System.Text.Encoding]::UTF8.GetBytes('Forbidden path')) $isHead
                 continue
             }
