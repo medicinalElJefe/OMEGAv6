@@ -122,6 +122,10 @@ class LocalHubTests(unittest.TestCase):
             with self.assertRaises(urllib.error.HTTPError) as bad:
                 urllib.request.urlopen(urllib.request.Request(endpoint,headers={"X-Omega-Local-Token":"bad"}),timeout=2)
             self.assertEqual(bad.exception.code,401)
+            # Model inventory must never bypass the Hub's private token.
+            with self.assertRaises(urllib.error.HTTPError) as unauthorized_models:
+                urllib.request.urlopen(f"http://127.0.0.1:{port}/api/hub/models",timeout=2)
+            self.assertEqual(unauthorized_models.exception.code,401)
             valid={"X-Omega-Local-Token":token,"Origin":"https://omegav6.jeffdeweyeljefe.workers.dev"}
             with urllib.request.urlopen(urllib.request.Request(endpoint,headers=valid),timeout=2) as res:
                 body=json.load(res)
