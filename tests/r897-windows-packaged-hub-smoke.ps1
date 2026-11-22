@@ -54,7 +54,19 @@ try {
     $queued = Invoke-WebRequest -Uri "http://127.0.0.1:$port/api/hub/jobs" -Headers $headers -UseBasicParsing -Method Post -ContentType 'application/json' -Body $body -TimeoutSec 5
     $receipt = $queued.Content | ConvertFrom-Json
     if ($queued.StatusCode -ne 202 -or -not $receipt.job.id -or $receipt.job.state -ne 'QUEUED') { throw 'Packaged worker did not persist a bounded job' }
-    Write-Host 'R897 PACKAGED WINDOWS HUB PASS: authentic Python worker, ephemeral loopback origin, private token refusal, persistent bounded job. CI RUNNER ONLY.'
+    $finished = $null
+    for ($poll=0;$poll -lt 80;$poll++) {
+        $read = Invoke-WebRequest -Uri ("http://127.0.0.1:$port/api/hub/jobs/" + $receipt.job.id) -Headers $headers -UseBasicParsing -TimeoutSec 5
+        $finished = ($read.Content | ConvertFrom-Json).job
+        if ($finished.state -in @('COMPLETED','FAILED','HELD')) { break }
+        Start-Sleep -Milliseconds 100
+    }
+    if ($null -eq $finished -or $finished.state -ne 'COMPLETED' -or
+        $finished.result.state -ne 'INTERNAL_FILE_HASHES_ONLY' -or
+        -not $finished.result_sha256 -or $finished.result.nativePcAccepted -ne $false) {
+        throw "Packaged Hub did not execute and receipt-bound the actual local hash job: $($finished.state) $($finished.error)"
+    }
+    Write-Host 'R897 PACKAGED WINDOWS HUB PASS: authentic Python worker, ephemeral loopback origin, private token refusal, completed local HASH_TREE and SHA-256 receipt. CI RUNNER ONLY.'
 } finally {
     if ($null -ne $process -and -not $process.HasExited) { Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue }
     if (Test-Path -LiteralPath $root) { Remove-Item -LiteralPath $root -Recurse -Force -ErrorAction SilentlyContinue }
