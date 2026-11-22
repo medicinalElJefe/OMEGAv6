@@ -20,6 +20,14 @@ assert.equal(server.split('try { $decoded = [System.Uri]::UnescapeDataString').l
 assert.equal(server.split('$requestMatch = [System.Text.RegularExpressions.Regex]::Match').length,2,'R896 must contain exactly one intact HTTP request parser');
 
 assert.ok(launch.includes('Start-OMEGA-Local.ps1'),'R896 must be double-click launchable');
+assert.ok(launch.includes('Verify-OMEGA-Package.ps1')&&launch.includes('if errorlevel 1'),'R897 startup must fail closed when package integrity is not verified');
+const verify=readFileSync('install/Verify-OMEGA-Package.ps1','utf8');
+for(const key of ['OMEGA_WINDOWS_PACKAGE_FILES_SHA256_R897','Get-FileHash','SHA256','ReparsePoint','Package file count differs','Duplicate package manifest path'])
+ assert.ok(verify.includes(key),'R897 manifest integrity guard missing: '+key);
+const workflow=readFileSync('.github/workflows/ci.yml','utf8');
+for(const key of ['hash_schema = \'OMEGA_WINDOWS_PACKAGE_FILES_SHA256_R897\'','Verify-OMEGA-Package.ps1','hash_authentication_signature = $false'])
+ assert.ok(workflow.includes(key),'R897 package assembly and evidence contract missing: '+key);
+
 for(const key of ['Invoke-WebRequest','Start-Process','127','api/health','StatusCode -eq 503','StatusCode -eq 404','ItemType Junction','StatusCode -eq 403','Stop-Process'])
  assert.ok(smoke.includes(key),'R896 Windows smoke contract missing: '+key);
 console.log('R896 LOCAL STUDIO PASS: read-only loopback-only, SPA fallback, unavailable APIs, no-runtime double-click and real Windows smoke contracts.');
