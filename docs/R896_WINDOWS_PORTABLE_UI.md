@@ -47,6 +47,14 @@ and byte-identity checks. The normal UI and the compiled Hub require **no
 Python, Node, Git, package manager, or administrator installation** on the
 operator's Windows machine.
 
+For a single entry point to the local studio and bounded worker, double-click
+`OPEN-OMEGA-INTEGRATED.cmd` and supply the existing approved non-system
+project root when prompted. That launcher verifies the entire package,
+starts `OMEGA-Local-Hub.exe` on loopback, then starts the existing UI. No
+Python/Node install or administrator elevation is needed. Pairing to the
+canonical cloud Hybrid Link still requires the application's explicit
+authenticated connection flow.
+
 Double-click `OPEN-OMEGA.cmd` to open the local OMEGA7 interface.
 For bounded local jobs, double-click `OPEN-OMEGA-HUB.cmd`, supply an existing
 approved non-system project folder, and keep its window open. In the UI's
