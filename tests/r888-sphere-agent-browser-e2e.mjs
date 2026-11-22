@@ -232,7 +232,7 @@ async function prove(browser,label,viewport){
     page.waitForEvent('download',{timeout:10000}),
     durableLab.getByRole('button',{name:'Export portable checkpoint JSON'}).click()
   ]);
-  assert.match(portableDownload.suggestedFilename(),/omega-r895-portable-checkpoint\\.json$/);
+  assert.equal(portableDownload.suggestedFilename(),'omega-r895-portable-checkpoint.json');
   const portableBytes=readFileSync(await portableDownload.path());
   const portableText=portableBytes.toString('utf8');
   const portableRecord=JSON.parse(portableText);
