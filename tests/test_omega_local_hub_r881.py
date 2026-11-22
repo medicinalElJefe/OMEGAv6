@@ -133,6 +133,12 @@ class LocalHubTests(unittest.TestCase):
             with urllib.request.urlopen(urllib.request.Request(endpoint,headers=portable),timeout=2) as res:
                 self.assertEqual(res.status,200)
                 self.assertEqual(res.headers["Access-Control-Allow-Origin"],portable["Origin"])
+            with self.assertRaises(urllib.error.HTTPError) as no_token:
+                urllib.request.urlopen(urllib.request.Request(endpoint,headers={"Origin":portable["Origin"]}),timeout=2)
+            self.assertEqual(no_token.exception.code,401)
+            with self.assertRaises(urllib.error.HTTPError) as bad_token:
+                urllib.request.urlopen(urllib.request.Request(endpoint,headers={"Origin":portable["Origin"],"X-Omega-Local-Token":"incorrect"}),timeout=2)
+            self.assertEqual(bad_token.exception.code,401)
             portable_preflight=urllib.request.Request(endpoint,method="OPTIONS",headers={"Origin":portable["Origin"],"Access-Control-Request-Private-Network":"true"})
             with urllib.request.urlopen(portable_preflight,timeout=2) as res:
                 self.assertEqual(res.headers["Access-Control-Allow-Private-Network"],"true")
