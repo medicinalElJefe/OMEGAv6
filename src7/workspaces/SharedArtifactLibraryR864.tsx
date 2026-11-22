@@ -29,7 +29,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
 
  const executeLocalTurns=async()=>{
   if(executionLease.current)return;
-  executionLease.current=true;setRunning(true);setError('');setExecutionStatus('');setLocalTurnResult(null);setSelectedExecutionStep(0);setExecutionPlaying(false);
+  executionLease.current=true;setRunning(true);setError('');setExecutionStatus('');setLocalTurnResult(null);setSelectedExecutionStep(0);setInspectedAddress(null);setInspectedValues([]);setExecutionPlaying(false);
   try{
    const address=parseAtlasAddressInputR916(atlasAddress),turns=Number(localTurnCount);
    if(!Number.isInteger(address)||address<0||address>=20736||!Number.isInteger(turns)||turns<0||turns>256)throw Error('Address must be 0–20735 and turns 0–256');
@@ -51,7 +51,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
  };
  const recoverLocalTurns=async(id:string)=>{
   if(executionLease.current)return;
-  executionLease.current=true;setRunning(true);setError('');setExecutionStatus('');setExecutionPlaying(false);setLocalTurnResult(null);setSelectedExecutionStep(0);
+  executionLease.current=true;setRunning(true);setError('');setExecutionStatus('');setExecutionPlaying(false);setLocalTurnResult(null);setSelectedExecutionStep(0);setInspectedAddress(null);setInspectedValues([]);
   try{
    if(!/^[a-f0-9-]{36}$/.test(id))throw Error('Invalid artifact ID');
    const response=await fetch('/__omega_local/artifacts/'+encodeURIComponent(id));
@@ -189,7 +189,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
  };
  const importPortableAtlasR924=async(file:File)=>{
   if(executionLease.current)return;
-  executionLease.current=true;setRunning(true);setError('');setExecutionStatus('');setExecutionPlaying(false);setLocalTurnResult(null);setSelectedExecutionStep(0);
+  executionLease.current=true;setRunning(true);setError('');setExecutionStatus('');setExecutionPlaying(false);setLocalTurnResult(null);setSelectedExecutionStep(0);setInspectedAddress(null);setInspectedValues([]);
   try{
    if(file.size>131072)throw Error('Portable JSON exceeds 128 KiB');
    const payload=await readPortableAtlasR924(JSON.parse(await file.text()));
@@ -224,7 +224,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
  };
  const restoreOfflineAtlasR926=async()=>{
   if(executionLease.current)return;
-  executionLease.current=true;setRunning(true);setError('');setExecutionStatus('');setExecutionPlaying(false);setLocalTurnResult(null);setSelectedExecutionStep(0);
+  executionLease.current=true;setRunning(true);setError('');setExecutionStatus('');setExecutionPlaying(false);setLocalTurnResult(null);setSelectedExecutionStep(0);setInspectedAddress(null);setInspectedValues([]);
   try{
    const stored=localStorage.getItem('omega.portable.atlas.r926');
    if(!stored||new TextEncoder().encode(stored).byteLength>131072)throw Error('Saved offline Atlas trace absent or exceeds 128 KiB');
@@ -236,7 +236,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
  };
  const verifyExportedExecutionJson=async(file:File)=>{
   if(executionLease.current)return;
-  executionLease.current=true;setRunning(true);setError('');setExecutionStatus('');setExecutionPlaying(false);setLocalTurnResult(null);setSelectedExecutionStep(0);
+  executionLease.current=true;setRunning(true);setError('');setExecutionStatus('');setExecutionPlaying(false);setLocalTurnResult(null);setSelectedExecutionStep(0);setInspectedAddress(null);setInspectedValues([]);
   try{
    if(file.size>131072)throw Error('JSON export exceeds 128 KiB verification limit');
    const exported=JSON.parse(await file.text()) as {schema?:string;modelOnly?:boolean;artifactId?:string;contentSha256?:string;trace?:unknown};
