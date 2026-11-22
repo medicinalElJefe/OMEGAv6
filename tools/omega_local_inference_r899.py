@@ -95,7 +95,11 @@ def infer_local_r899(args: dict, *, endpoint: str = LOCAL_MODEL_ENDPOINT_R899) -
         data = json.loads(raw.decode("utf-8"))
     except (UnicodeError, ValueError) as exc:
         raise ValueError("LOCAL_INFER_BACKEND_JSON_HELD") from exc
-    if not isinstance(data, dict) or data.get("model") != model or data.get("done") is not True:
+    # Ollama's omitted model tag denotes :latest. Preserve identity without
+    # rejecting a legitimate backend that returns the canonical tagged form.
+    actual_model = data.get("model") if isinstance(data, dict) else None
+    accepted_model_names = (model, model + ":latest") if ":" not in model else (model,)
+    if actual_model not in accepted_model_names or data.get("done") is not True:
         raise ValueError("LOCAL_INFER_BACKEND_IDENTITY_OR_COMPLETION_HELD")
     answer = data.get("response")
     if not isinstance(answer, str) or len(answer) > 32768:
