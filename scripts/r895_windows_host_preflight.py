@@ -48,6 +48,20 @@ def sha256_file(source: Path) -> str:
     return digest.hexdigest()
 
 
+
+def canonical_base_blob_digest(root: Path) -> str | None:
+    """Hash exact Git blob bytes; checkout line-ending conversion is not a source rewrite."""
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(root), "show", "HEAD:public/omega-hybrid-agent-base-r205.py"],
+            shell=False, capture_output=True, timeout=12, check=False
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    if result.returncode != 0 or not 1000 <= len(result.stdout) <= MAX_SOURCE_BYTES:
+        return None
+    return digest_bytes(result.stdout)
+
 def run_command(args: list[str], timeout: int = 12) -> tuple[int, str]:
     try:
         result = subprocess.run(args, shell=False, text=True, capture_output=True,
@@ -103,6 +117,10 @@ def build_receipt(root: Path, expected_commit: str, *, host_platform: str | None
             files[name] = {"sha256": sha256_file(source), "available": True}
         except (OSError, ValueError):
             files[name] = {"sha256": None, "available": False}
+    files["base"]["git_blob_sha256"] = canonical_base_blob_digest(root)
+    files["base"]["checkout_matches_git_blob"] = (
+        files["base"]["sha256"] == files["base"]["git_blob_sha256"]
+    )
     code, output = runner(["git", "-C", str(root), "rev-parse", "HEAD"])
     actual_commit = output.strip() if code == 0 and re.fullmatch("[a-f0-9]{40}", output.strip()) else None
     dirty_code, dirty_output = runner(["git", "-C", str(root), "status", "--porcelain", "--",
@@ -111,7 +129,7 @@ def build_receipt(root: Path, expected_commit: str, *, host_platform: str | None
     clean_sources = dirty_code == 0 and not dirty_output.strip()
     gpu = gpu_observation(is_windows, runner)
     source_matches = actual_commit == expected_commit and clean_sources
-    base_matches = files["base"]["sha256"] == BASE_SHA256
+    base_matches = files["base"]["git_blob_sha256"] == BASE_SHA256
     wrapper_available = files["wrapper"]["available"]
     python_supported = sys.version_info >= (3, 10)
     conditions = {"windows_observed": is_windows, "python_supported": python_supported,
