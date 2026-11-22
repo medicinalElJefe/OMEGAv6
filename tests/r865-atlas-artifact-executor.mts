@@ -151,7 +151,7 @@ test('R940 bounds local artifact readbacks in UTF-8 bytes before accepting recov
  assert.ok(execution&&recovery&&exported,'all three local readback handlers must exist');
  for(const [name,handler] of [['execute',execution],['recover',recovery],['verify export',exported]]){
   const bound=handler.indexOf('new TextEncoder().encode(saved.content).byteLength>131072');
-  const accept=handler.indexOf('setLocalTurnResult(');
+  const accept=handler.lastIndexOf('setLocalTurnResult(');
   assert.ok(bound>=0&&accept>bound,name+' must check UTF-8 byte length before accepting artifact');
  }
  assert.doesNotMatch(execution,/saved\.content\.length>131072/);
