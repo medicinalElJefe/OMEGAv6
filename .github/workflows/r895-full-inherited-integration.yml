@@ -1,0 +1,43 @@
+name: R895 Full Inherited Integration Gate
+
+on:
+  push:
+    branches:
+      - feature/r895-canonical-durable-state
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r895-full-inherited-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  full-inherited-node:
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Install exact candidate dependencies
+        run: npm install --no-fund
+      - name: Audit complete locked dependency graph
+        run: npm audit --audit-level=high
+      - name: Execute inherited OMEGA6 and OMEGA7 regression graph, static checks and production build
+        run: npm run check
+      - name: Re-prove exact R887-R895 nested fabric and checkpoint invariants
+        run: npm run test:r777
+      - name: Verify Cloudflare package without deploy authority
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r895-full-gate
+      - name: Prove repository route contracts
+        run: |
+          npm run test:routes
+          npm run test:navigation
+          npm run test:applications
+      - name: Preserve fact that this gate does not deploy
+        run: |
+          test "${{ github.ref }}" != "refs/heads/main"
+          echo "Candidate evidence only. No production writer, promotion, or native-device proof."
