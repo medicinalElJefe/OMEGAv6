@@ -276,3 +276,19 @@ test('R948 playback jumps to next actual address transition and refuses an absen
  assert.equal(nextChange(3),4);
  assert.equal(nextChange(4),undefined);
 });
+
+test('R949 previous address change skips repeated states and refuses nonexistent earlier changes',()=>{
+ const ui=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
+ const button=ui.split('}}>Next address change</button>')[1]?.split('}}>Previous address change</button>')[0];
+ assert.ok(button,'previous distinct-address navigation is visible');
+ assert.match(button,/previousIndex=selectedExecutionStep-1/);
+ assert.match(button,/while\(previousIndex>=0&&localTurnResult\.trace\[previousIndex\]\.address===current\)previousIndex--/);
+ assert.match(button,/previousIndex<0/);
+ assert.match(button,/setExecutionPlaying\(false\)/);
+ assert.match(button,/setSelectedExecutionStep\(previousIndex\)/);
+ const prior=(addresses:number[],at:number)=>{const current=addresses[at];let index=at-1;while(index>=0&&addresses[index]===current)index--;return index};
+ assert.equal(prior([10,10,12,12,14],4),3);
+ assert.equal(prior([10,10,12,12,14],3),1);
+ assert.equal(prior([10,10,12,12,14],1),-1);
+ assert.equal(prior([10,12,10],2),1);
+});
