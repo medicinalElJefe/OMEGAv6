@@ -41,7 +41,7 @@ try {
     $actual = @($actual | Where-Object { $_.FullName -ne $manifestPath })
     if ($actual.Count -ne $expected.Count) { throw 'Package file count differs from manifest' }
     foreach ($file in $actual) {
-        $rel = $file.FullName.Substring($root.Length + 1).Replace('\\','/')
+        $rel = $file.FullName.Substring($root.Length + 1).Replace('\','/')
         $key = $rel.ToLowerInvariant()
         if (-not $expected.ContainsKey($key)) { throw ('Unlisted package file: ' + $rel) }
         $entry = $expected[$key]
