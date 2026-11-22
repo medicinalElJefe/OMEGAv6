@@ -42,6 +42,15 @@ try {
         (Get-FileHash -LiteralPath $sourceHub -Algorithm SHA256).Hash) {
         throw 'Packaged local Hub bytes diverge from the governed source implementation'
     }
+    $verifier = Join-Path $package 'omega_absolute_truth_verifier_r884.py'
+    $verifierSource = Join-Path (Get-Location).Path 'tools/omega_absolute_truth_verifier_r884.py'
+    if (-not (Test-Path -LiteralPath $verifier -PathType Leaf)) {
+        throw 'R884 canonical ten-ledger verifier missing from packaged local worker'
+    }
+    if ((Get-FileHash -LiteralPath $verifier -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $verifierSource -Algorithm SHA256).Hash) {
+        throw 'Packaged R884 verifier bytes differ from the canonical source'
+    }
     $hubLauncherText = Get-Content -LiteralPath $hubLauncher -Raw
     if ($hubLauncherText -notmatch 'omega_local_hub_r881[.]py' -or $hubLauncherText -notmatch '8765') {
         throw 'Optional Hub launcher does not execute the pinned local Hub endpoint'
