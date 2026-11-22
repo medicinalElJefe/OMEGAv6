@@ -170,3 +170,18 @@ test('R942 selected Atlas playback state can seed the next real local execution'
  const executor=ui.split('const executeLocalTurns=async()=>{')[1]?.split('const recoverLocalTurns=async(id:string)=>{')[0];
  assert.ok(executor&&executor.includes('parseAtlasAddressInputR916(atlasAddress)'),'new execution consumes the selected Atlas start address');
 });
+
+
+test('R943 selected Atlas step exports inspectable model-state JSON with provenance',()=>{
+ const ui=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
+ const segment=ui.split('const downloadSelectedAtlasStepR943=()=>{')[1]?.split('const downloadLocalTurnJson=()=>{')[0];
+ assert.ok(segment,'selected step exporter exists');
+ assert.match(segment,/OMEGA_ATLAS_SELECTED_STEP_R943_V1/);
+ assert.match(segment,/selectedExecutionStep/);
+ assert.match(segment,/sourceTraceSha256:localTurnResult\.artifact\.contentSha256/);
+ assert.match(segment,/offline-model-derived-origin-unverified/);
+ assert.match(segment,/originVerified:!offline/);
+ assert.match(segment,/coordinates:\{D:selected\.coordinates\[0\]/);
+ assert.match(segment,/physicalMeasurement:false,canonAdmission:false/);
+ assert.match(ui,/onClick=\{downloadSelectedAtlasStepR943\}>Download selected step JSON/);
+});
