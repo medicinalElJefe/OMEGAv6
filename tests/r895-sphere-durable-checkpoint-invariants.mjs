@@ -27,6 +27,8 @@ for(const token of ['saveDurableR895','restoreDurableR895','Save full-state dura
 const source=readFileSync('src/sphereDurableCheckpointR895.mjs','utf8');
 for(const token of ['structuredClone(fabric)','indexedDB.open(DB,1)','tx.objectStore(STORE).put(record,KEY)','tx.oncomplete','R895_MAX_VALUES','validateDurableR895(record.fabric,record.session)'])assert.ok(source.includes(token),token+' missing');
 assert.ok(!source.includes('api.post'),'R895 persistence never creates cloud tasks');
+for(const token of ['exportDurablePortableR895','importDurablePortableR895','R895_PORTABLE_MAX_BYTES','Portable checkpoint integrity mismatch; import refused'])assert.ok(source.includes(token),'Missing R895 portable transfer contract '+token);
+for(const token of ['Export portable checkpoint JSON','Import portable checkpoint JSON','exportPortable','importPortable'])assert.ok(ui.includes(token),'Missing R895 portable UI '+token);
 for(const token of ['durableBusy=useRef(false)','if(durableBusy.current)return','finally{durableBusy.current=false;setDurablePending(false)}','disabled={durablePending}'])assert.ok(ui.includes(token),'R895 concurrent checkpoint protection missing: '+token);
 for(const token of ["globalThis.crypto?.subtle","digest('SHA-256'","record.integrity=await integrityDigestR895(record)","Durable checkpoint integrity mismatch; restore refused"])assert.ok(source.includes(token),'Missing checkpoint integrity guarantee '+token);
 console.log('R895 PASS: 248,832 exact float64 modified values (12 full 20,736D agents), atomic durable storage contract, fail-closed bounds and restored Map identity.');
