@@ -123,7 +123,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
    return current.address===previous.address?[]:[{from:{step:previous.step,address:previous.address,coordinates:previous.coordinates},to:{step:current.step,address:current.address,coordinates:current.coordinates},delta:{address:current.address-previous.address,coordinates:current.coordinates.map((value,j)=>value-previous.coordinates[j])}}];
   });
   const payload={schema:'OMEGA_ATLAS_TRANSITION_SERIES_R957_V1',provenance:offline?'offline-model-derived-origin-unverified':'verified-local-executor-artifact',originVerified:!offline,modelOnly:true,physicalMeasurement:false,canonAdmission:false,sourceTraceSha256:localTurnResult.artifact.contentSha256,artifactId:offline?null:localTurnResult.artifact.id,traceLength:trace.length,transitionCount:transitions.length,transitions};
-  const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)+'\\n'],{type:'application/json;charset=utf-8'}));
+  const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)+'\n'],{type:'application/json;charset=utf-8'}));
   const link=document.createElement('a');link.href=url;link.download='omega-atlas-transition-series-'+(offline?'offline-model':'local-verified')+'.json';document.body.appendChild(link);link.click();link.remove();window.setTimeout(()=>URL.revokeObjectURL(url),1000);
   setExecutionStatus('Exported '+transitions.length+' recorded address transitions as JSON. '+(offline?'Offline origin remains unverified.':'Local artifact provenance retained.')+' Model coordinates are not physical measurements.');
  };
