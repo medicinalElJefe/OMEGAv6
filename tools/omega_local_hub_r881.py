@@ -26,6 +26,23 @@ ALLOWED_ORIGINS = frozenset({
     "http://127.0.0.1:5173", "http://localhost:5173",
     "http://127.0.0.1:8765", "http://localhost:8765"
 })
+def allowed_browser_origin(origin):
+    """Allow canonical cloud UI or exact HTTP loopback host with a valid port.
+
+    The portable Windows studio chooses an ephemeral loopback port. A broad
+    wildcard CORS rule would be unsafe; an exact local origin still requires
+    the separate Hub token and correct Host header for every API request.
+    """
+    if not isinstance(origin, str): return False
+    if origin in ALLOWED_ORIGINS: return True
+    try:
+        parts = urlsplit(origin)
+        return (parts.scheme == "http" and parts.hostname in ("127.0.0.1", "localhost")
+                and parts.port is not None and 1 <= parts.port <= 65535
+                and origin == f"http://{parts.hostname}:{parts.port}")
+    except ValueError:
+        return False
+
 READ_ONLY_REPLAY = frozenset({"HASH_TREE", "CSV_STATS", "VERIFY_LEDGER_SPLIT"})
 OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "RESIDUAL_RESTORE"})
 STATUS = frozenset({"QUEUED", "WAIT_EVENT", "RUNNING", "COMPLETED", "FAILED", "HELD", "CANCELLED"})
@@ -230,7 +247,7 @@ def serve(hub,token,port):
             data=json_bytes(obj);self.send_response(status);self.send_header("Content-Type","application/json")
             self.send_header("Cache-Control","no-store")
             origin=self.headers.get("Origin","")
-            if origin in ALLOWED_ORIGINS:
+            if allowed_browser_origin(origin):
                 self.send_header("Access-Control-Allow-Origin",origin);self.send_header("Vary","Origin")
                 self.send_header("Access-Control-Allow-Headers","Content-Type,X-Omega-Local-Token")
                 self.send_header("Access-Control-Allow-Methods","GET,POST,OPTIONS")
@@ -241,11 +258,11 @@ def serve(hub,token,port):
             return self.headers.get("Host","").lower() in (f"127.0.0.1:{port}",f"localhost:{port}")
         def _valid_origin(self):
             origin=self.headers.get("Origin","")
-            return not origin or origin in ALLOWED_ORIGINS
+            return not origin or allowed_browser_origin(origin)
         def _authorized(self):
             return self._valid_host() and self._valid_origin() and hmac.compare_digest(self.headers.get("X-Omega-Local-Token",""),token)
         def do_OPTIONS(self):
-            if not self._valid_host() or self.headers.get("Origin","") not in ALLOWED_ORIGINS:self._send({"ok":False,"state":"ORIGIN_OR_HOST_HELD"},403)
+            if not self._valid_host() or not allowed_browser_origin(self.headers.get("Origin","")):self._send({"ok":False,"state":"ORIGIN_OR_HOST_HELD"},403)
             else:self._send({"ok":True,"state":"PREFLIGHT_ONLY"})
         def do_GET(self):
             if not self._authorized():return self._send({"ok":False,"state":"AUTH_REQUIRED"},401)
