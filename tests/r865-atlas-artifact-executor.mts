@@ -339,7 +339,7 @@ test('R953 exports a selected actual transition with explicit provenance and ref
  assert.match(handler,/physicalMeasurement:false,canonAdmission:false/);
  assert.match(handler,/from:\{step:previous\.step,address:previous\.address,coordinates:previous\.coordinates\}/);
  assert.match(handler,/to:\{step:current\.step,address:current\.address,coordinates:current\.coordinates\}/);
- assert.ok(handler.includes(String.raw`JSON.stringify(payload,null,2)+'\\n'`),'JSON export uses a real newline escape');
+ assert.ok(handler.includes(String.raw`JSON.stringify(payload,null,2)+'\n'`),'JSON export uses a real newline escape');
  assert.match(ui,/onClick={downloadSelectedTransitionR953}>Download selected transition JSON/);
  const trace=[{step:0,address:3},{step:1,address:3},{step:2,address:8},{step:3,address:8}];
  assert.deepEqual(trace.map((x,i)=>i>0&&x.address!==trace[i-1].address),[false,false,true,false]);
