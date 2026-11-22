@@ -64,12 +64,16 @@ assert.ok(Math.abs(positive.pairs[0].correlation-1)<1e-11,'identical linear fiel
 assert.ok(Math.abs(positive.pairs[1].correlation+1)<1e-11,'inverted linear fields correlate -1');
 assert.ok(Math.abs(positive.pairs[2].correlation+1)<1e-11,'inverted pair correlates -1');
 assert.equal(first.values.size,SIZE);
+const reversed=analyzeCollectiveRelationsR895(related,[thirdId,secondId,id]);
+assert.equal(reversed.pairCount,3);
+assert.ok(reversed.pairs.every(p=>Number.isFinite(p.correlation)),'reverse breadth-first membership must preserve all populated correlations');
+assert.ok(Math.abs(reversed.pairs.find(p=>p.agentA===secondId&&p.agentB===id).correlation-1)<1e-11,'pairwise relationship is orientation-independent');
 const constant=createFabric();const constantA=getAgent(constant,id),constantB=getAgent(constant,secondId);
 for(let i=0;i<SIZE;i++){constantA.values.set(i,.5);constantB.values.set(i,.5)}
 const zero=analyzeCollectiveRelationsR895(constant,[id,secondId]).pairs[0];
 assert.equal(zero.correlation,null,'zero-variance Pearson correlation is undefined');
 assert.equal(zero.undefinedReason,'ZERO_VARIANCE');
 const ui=readFileSync('src/SphereAgentInstrumentR887.tsx','utf8');
-for(const token of ['Analyze full collective field','data-r895-field-analysis','data-r895-field-result','analyzeCollectiveFieldR895(fabric.current,collectiveIds)','fieldAnalysis.version===version','Complete agent relationship matrix','Export complete pairwise relations CSV','data-r895-pairwise-relations'])
+for(const token of ['Analyze full collective field','data-r895-field-analysis','data-r895-field-result','analyzeCollectiveFieldR895(fabric.current,collectiveIds)','fieldAnalysis.version===version','Complete agent relationship matrix','Export complete pairwise relations CSV','data-r895-pairwise-relations','(p.agentA===rowId&&p.agentB===colId)||(p.agentA===colId&&p.agentB===rowId)'])
  assert.ok(ui.includes(token),'R895 collective analysis UI contract missing: '+token);
 console.log('R895 FIELD PASS: 12 agents × 20,736 complete exact logical reads; repeatable variance/extrema; no state, cloud or Canon mutation. elapsed ms '+(Date.now()-start));
