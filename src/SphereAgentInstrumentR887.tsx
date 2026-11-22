@@ -92,7 +92,7 @@ export default function SphereAgentInstrumentR887({address,onAddress}:{address:n
       <div style={{overflowX:'auto'}}>
        <table aria-label='Complete agent relationship matrix'><thead><tr><th scope='col'>Agent</th>{collectiveIds.map(id=><th scope='col' key={id}>{id}</th>)}</tr></thead>
        <tbody>{collectiveIds.map((rowId,rowIndex)=><tr key={rowId}><th scope='row'>{rowId}</th>{collectiveIds.map((colId,colIndex)=>{
-        const relation=fieldAnalysis.relations.pairs.find((p:any)=>p.agentA===Math.min(rowId,colId)&&p.agentB===Math.max(rowId,colId));
+        const relation=fieldAnalysis.relations.pairs.find((p:any)=>(p.agentA===rowId&&p.agentB===colId)||(p.agentA===colId&&p.agentB===rowId));
         const correlation=rowIndex===colIndex?1:relation?.correlation;
         return <td key={colId} title={rowIndex===colIndex?'Self-address (identity)':correlation===null?'Undefined: zero variance':'Pearson correlation over 20,736 corresponding inner states'}>{rowIndex===colIndex?'self':correlation==null?'undefined':correlation.toFixed(4)}</td>;
        })}</tr>)}</tbody></table>
