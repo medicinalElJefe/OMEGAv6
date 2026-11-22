@@ -375,6 +375,18 @@ async function prove(browser,label,viewport){
   await durableLab.getByRole('alert').getByText(/Global address navigation refused/).waitFor({state:'visible',timeout:8000});
   assert.match(await durableLab.locator('[data-r895-global-address]').innerText(),/Global nested address: 0 \/ 5,159,780,351/);
   console.log('R895 GLOBAL ADDRESS '+label.toUpperCase()+' PASS: first/last exact nested addresses, shell/inner projection, invalid address refusal.');
+  // R895 FIELD BROWSER: entire 12 × 20,736 lazy state field is read through
+  // the actual operator control, with an explicitly invalidated stale result.
+  await durableLab.getByLabel('Collective member count').selectOption('12');
+  await durableLab.getByRole('button',{name:'Analyze full collective field'}).click();
+  await durableLab.locator('[data-r895-field-result]').waitFor({state:'visible',timeout:12000});
+  assert.match(await durableLab.locator('[data-r895-field-result]').innerText(),/Analyzed 248,832 logical values across 12 agents/);
+  const fieldBeforeChange=await durableLab.locator('[data-r895-field-result]').innerText();
+  assert.match(fieldBeforeChange,/variance [0-9.]+/);
+  await durableLab.getByRole('button',{name:'Local update'}).click();
+  await durableLab.locator('[data-r895-field-status]').waitFor({state:'visible',timeout:8000});
+  assert.equal(await durableLab.locator('[data-r895-field-result]').count(),0,'read-only field result must not masquerade as fresh after state mutation');
+  console.log('R895 FIELD BROWSER '+label.toUpperCase()+' PASS: complete 248,832-value scan, no stale analytics after local state update.');
   console.log('R895 BROWSER '+label.toUpperCase()+' PASS: atomic IndexedDB state survived reload, rejected unrecorded update, recovered exact inner value.');
   assert.equal(errors.length,0,label+' unexpected uncaught errors '+errors.join('; '));
   console.log('R888 BROWSER '+label.toUpperCase()+' PASS: exact inner-state action, symmetric exchange, explicit checkpoint, exact restore and malformed checkpoint refusal');
