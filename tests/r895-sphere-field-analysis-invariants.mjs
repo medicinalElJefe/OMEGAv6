@@ -42,6 +42,7 @@ const relations=analyzeCollectiveRelationsR895(fresh,members);
 assert.equal(relations.pairCount,66);
 assert.equal(relations.sharedInnerCoordinates,SIZE);
 assert.equal(relations.pairs.length,66);
+assert.ok(relations.pairs.every(p=>Number.isFinite(p.varianceA)&&Number.isFinite(p.varianceB)&&Number.isFinite(p.covariance)&&(p.correlation===null||Number.isFinite(p.correlation))), 'all bounded pairwise statistics must be finite or explicitly undefined');
 assert.equal(relations.cloudDispatch,false);
 assert.equal(relations.canonMutated,false);
 assert.equal(relations.physicalCausalityClaimed,false);
