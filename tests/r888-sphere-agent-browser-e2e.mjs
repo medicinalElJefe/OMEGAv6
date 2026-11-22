@@ -357,6 +357,24 @@ async function prove(browser,label,viewport){
   assert.equal((await durableLab.locator('[data-r895-exact-inner-value]').innerText()).split('Exact selected state: ')[1],'0');
   console.log('R895 FULL-CAPACITY '+label.toUpperCase()+' PASS: real IndexedDB restores all 248,832 float64 values across 12 logical agents.');
 
+  // R895 GLOBAL ADDRESS: navigate the entire 5,159,780,352-coordinate
+  // address universe without allocating 248,832 agents or their states.
+  const jump=durableLab.getByLabel('Global nested address');
+  await jump.fill('5159780351');
+  await durableLab.getByRole('button',{name:'Go to exact nested address'}).click();
+  await page.waitForFunction(()=>document.querySelector('[data-r895-global-address]')?.textContent?.includes('5,159,780,351'),null,{timeout:10000});
+  assert.match(await durableLab.locator('.r887-side h3').innerText(),/Agent 248,831/);
+  assert.match(await durableLab.getByText('Shell 12 · outer 20736 · 20,736 independent inner values').innerText(),/Shell 12/);
+  assert.equal(await durableLab.getByLabel('Exact inner state address').inputValue(),'20736');
+  await jump.fill('0');
+  await durableLab.getByRole('button',{name:'Go to exact nested address'}).click();
+  assert.match(await durableLab.locator('[data-r895-global-address]').innerText(),/Global nested address: 0 \/ 5,159,780,351/);
+  assert.equal(await durableLab.getByLabel('Exact inner state address').inputValue(),'1');
+  await jump.fill('5159780352');
+  await durableLab.getByRole('button',{name:'Go to exact nested address'}).click();
+  await durableLab.getByRole('alert').getByText(/Global address navigation refused/).waitFor({state:'visible',timeout:8000});
+  assert.match(await durableLab.locator('[data-r895-global-address]').innerText(),/Global nested address: 0 \/ 5,159,780,351/);
+  console.log('R895 GLOBAL ADDRESS '+label.toUpperCase()+' PASS: first/last exact nested addresses, shell/inner projection, invalid address refusal.');
   console.log('R895 BROWSER '+label.toUpperCase()+' PASS: atomic IndexedDB state survived reload, rejected unrecorded update, recovered exact inner value.');
   assert.equal(errors.length,0,label+' unexpected uncaught errors '+errors.join('; '));
   console.log('R888 BROWSER '+label.toUpperCase()+' PASS: exact inner-state action, symmetric exchange, explicit checkpoint, exact restore and malformed checkpoint refusal');
