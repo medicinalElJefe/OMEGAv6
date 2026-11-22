@@ -226,6 +226,34 @@ async function prove(browser,label,viewport){
   await durableLab.getByRole('button',{name:'Restore full-state durable checkpoint'}).click();
   await page.waitForFunction(()=>document.querySelector('.r887-side p[role="status"]')?.textContent?.includes('Durable checkpoint restored'),null,{timeout:8000});
   assert.equal((await durableLab.locator('[data-r895-exact-inner-value]').innerText()).split('Exact selected state: ')[1],storedValue,label+' exact float64 inner value recovered after true page reload');
+  // R895 VALID-VALUE TAMPER: structurally valid numeric alteration must fail SHA-256 verification.
+  const beforeNumericTamper=(await durableLab.locator('[data-r895-exact-inner-value]').innerText()).split('Exact selected state: ')[1];
+  await page.evaluate(async()=>{
+    const db=await new Promise((resolve,reject)=>{
+      const request=indexedDB.open('omega-sphere-durable-r895',1);
+      request.onsuccess=()=>resolve(request.result);
+      request.onerror=()=>reject(request.error);
+    });
+    try{
+      await new Promise((resolve,reject)=>{
+        const tx=db.transaction('checkpoints','readwrite'),store=tx.objectStore('checkpoints');
+        const get=store.get('latest');
+        get.onsuccess=()=>{
+          const snapshot=get.result;
+          const agent=snapshot.fabric.active.get(snapshot.session.agent);
+          const original=agent.values.get(snapshot.session.selectedInner);
+          agent.values.set(snapshot.session.selectedInner,original===0.5?0.625:0.5);
+          store.put(snapshot,'latest'); // deliberately retain original integrity digest
+        };
+        tx.oncomplete=resolve;
+        tx.onabort=()=>reject(tx.error);
+      });
+    }finally{db.close()}
+  });
+  await durableLab.getByRole('button',{name:'Restore full-state durable checkpoint'}).click();
+  await durableLab.getByRole('alert').getByText(/integrity mismatch/).waitFor({state:'visible',timeout:8000});
+  assert.equal((await durableLab.locator('[data-r895-exact-inner-value]').innerText()).split('Exact selected state: ')[1],beforeNumericTamper,label+' modified in-range snapshot refused without live-state mutation');
+  console.log('R895 VALID-VALUE TAMPER '+label.toUpperCase()+' PASS: SHA-256 rejects modified in-range float64 state.');
   // R895 CORRUPTION: a damaged on-device checkpoint must be refused without mutating live state.
   const liveBeforeCorrupt=await durableLab.getByRole('gridcell',{name:/Select and observe inner state 1 value/}).getAttribute('aria-label');
   await page.evaluate(async()=>{
