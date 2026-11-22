@@ -310,3 +310,18 @@ test('R950 exports only actual address transitions as parseable provenance-beari
  assert.deepEqual(rows,['1,2,10,11','3,4,11,10']);
  assert.equal(rows.join('\r\n').split('\r\n').length,2);
 });
+
+test('R952 renders selectable recorded address transitions without synthesizing new execution',()=>{
+ const ui=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
+ const start=ui.indexOf("aria-label='Recorded Atlas address transitions'");
+ const end=ui.indexOf('Download address visit index CSV',start);
+ assert.ok(start>=0&&end>start,'recorded transitions have an interactive list');
+ const segment=ui.slice(start,end);
+ assert.match(segment,/trace\.slice\(1\)\.filter\(\(state,i\)=>state\.address!==localTurnResult\.trace\[i\]\.address\)/);
+ assert.match(segment,/setExecutionPlaying\(false\)/);
+ assert.match(segment,/setSelectedExecutionStep\(state\.step\)/);
+ assert.match(segment,/aria-pressed={selectedExecutionStep===state\.step}/);
+ assert.doesNotMatch(segment,/fetch\(|executeLocalTurns\(/);
+ const trace=[{step:0,address:4},{step:1,address:4},{step:2,address:7},{step:3,address:7},{step:4,address:4}];
+ assert.deepEqual(trace.slice(1).filter((state,i)=>state.address!==trace[i].address).map(x=>x.step),[2,4]);
+});
