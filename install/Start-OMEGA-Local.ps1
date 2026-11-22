@@ -111,6 +111,25 @@ try {
                 Send-OmegaResponse $stream 403 'Forbidden' 'text/plain' ([System.Text.Encoding]::UTF8.GetBytes('Forbidden path')) $isHead
                 continue
             }
+            # GetFullPath only checks lexical containment. A junction or symlink within
+            # dist could otherwise redirect a valid-looking URL outside the package.
+            # Fail closed for any existing reparse component before opening a file.
+            $walk = $root
+            $redirected = $false
+            foreach ($part in ($relative -split '[\\/]')) {
+                if (-not $part) { continue }
+                $walk = Join-Path $walk $part
+                if (-not (Test-Path -LiteralPath $walk)) { break }
+                $item = Get-Item -LiteralPath $walk -Force
+                if (($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) -ne 0) {
+                    $redirected = $true
+                    break
+                }
+            }
+            if ($redirected) {
+                Send-OmegaResponse $stream 403 'Forbidden' 'text/plain' ([System.Text.Encoding]::UTF8.GetBytes('Forbidden reparse path')) $isHead
+                continue
+            }
             if (-not [System.IO.File]::Exists($candidate)) {
                 if ($relative -notmatch '\.[^/]+$') { $candidate = Join-Path $root 'index.html' }
                 else {
