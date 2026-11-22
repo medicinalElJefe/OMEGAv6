@@ -88,3 +88,16 @@ test('R959 selecting a recorded transition inspects its compiled destination add
  assert.match(inspect,/inspectAtlasAddressR897\(field,address\)/,'inspection executes against the compiled model');
  assert.match(inspect,/setInspectedAddress\(address\);setInspectedValues\(values\)/,'inspection produces visible field values');
 });
+
+test('R960 Atlas inspection clears stale address and values before compiling another destination',()=>{
+ const ui=readFileSync(new URL('../src7/workspaces/SharedArtifactLibraryR864.tsx',import.meta.url),'utf8');
+ const start=ui.indexOf('const inspectAtlas=async(');
+ const end=ui.indexOf('const exportCompleteAtlas=',start);
+ assert.ok(start>=0&&end>start,'Atlas inspector exists');
+ const body=ui.slice(start,end);
+ const clear=body.indexOf('setInspectedAddress(null);setInspectedValues([]);');
+ const execute=body.indexOf('const field=await getMandala20736Field();');
+ const display=body.indexOf('setInspectedAddress(address);setInspectedValues(values);');
+ assert.ok(clear>=0&&execute>clear&&display>execute,'clear stale inspection before compilation; display only computed values');
+ assert.match(body,/catch\(e\)\{setError\('Atlas inspection rejected:/,'failed compilation must surface an error');
+});
