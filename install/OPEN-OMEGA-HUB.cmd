@@ -5,7 +5,7 @@ cd /d "%~dp0"
 echo.
 echo OMEGA LOCAL AUTOMATION HUB - OPTIONAL
 echo This is the bounded R881 worker, not the Hybrid Link native agent.
-echo Python 3.12 or newer must already be installed for this optional service.
+echo Self-contained Windows Hub executable (no Python installation required).
 echo No project files are modified without a submitted, allowed local job.
 echo.
 set "OMEGA_ROOT=%~1"
@@ -20,20 +20,8 @@ echo.
 echo Your local Hub stores its private access token within this approved folder.
 echo Never publish the token or paste it into cloud chats.
 echo.
-set "OMEGA_PYTHON="
-where py >nul 2>&1
-if not errorlevel 1 set "OMEGA_PYTHON=py -3"
-if not defined OMEGA_PYTHON (
-  where python >nul 2>&1
-  if not errorlevel 1 set "OMEGA_PYTHON=python"
-)
-if not defined OMEGA_PYTHON (
-  echo Python was not found. The UI still works with OPEN-OMEGA.cmd.
-  goto :failure
-)
-%OMEGA_PYTHON% -c "import sys; sys.exit(0 if sys.version_info >= (3,12) else 1)"
-if errorlevel 1 (
-  echo Python 3.12 or newer is required for the optional local Hub.
+if not exist "%~dp0OMEGA-Local-Hub.exe" (
+  echo OMEGA-Local-Hub.exe missing. Use the complete tested Windows package.
   goto :failure
 )
 echo.
@@ -41,7 +29,7 @@ echo Starting token-protected Hub on 127.0.0.1:8765.
 echo Open OMEGA7 and select Local / Edge Automation Hub, then enter
 echo the private token from the approved folder's .omega directory.
 echo Close this window to stop the worker.
-%OMEGA_PYTHON% "%~dp0omega_local_hub_r881.py" --root "%OMEGA_ROOT%" --port 8765
+"%~dp0OMEGA-Local-Hub.exe" --root "%OMEGA_ROOT%" --port 8765
 if errorlevel 1 goto :failure
 exit /b 0
 :invalid
