@@ -20,13 +20,13 @@ if not defined OMEGA_ROOT goto :invalid
 if not exist "%OMEGA_ROOT%\." goto :invalid
 for %%I in ("%OMEGA_ROOT%") do set "OMEGA_FULL_ROOT=%%~fI"
 if /I "%OMEGA_FULL_ROOT:~0,2%"=="%SystemDrive%" goto :invalid
-if not exist "%~dp0OMEGA-Local-Hub.exe" (
+if not exist "%~dp0OMEGA-Local-Hub\OMEGA-Local-Hub.exe" (
   echo The compiled local worker is missing.
   goto :failure
 )
 echo.
 echo Starting bounded local worker with the selected approved root.
-start "OMEGA7 LOCAL HUB" "%~dp0OMEGA-Local-Hub.exe" --root "%OMEGA_FULL_ROOT%" --port 8765
+start "OMEGA7 LOCAL HUB" "%~dp0OMEGA-Local-Hub\OMEGA-Local-Hub.exe" --root "%OMEGA_FULL_ROOT%" --port 8765
 if errorlevel 1 goto :failure
 echo Opening the existing OMEGA7 local interface.
 echo The private Hub token is in the approved root's .omega folder.
