@@ -43,6 +43,15 @@ def allowed_browser_origin(origin):
     except ValueError:
         return False
 
+def load_local_inference_adapter_r899():
+    import importlib.util
+    adapter_path=Path(__file__).resolve().with_name("omega_local_inference_r899.py")
+    if not adapter_path.is_file(): raise ValueError("R899_LOCAL_MODEL_ADAPTER_REQUIRED")
+    spec=importlib.util.spec_from_file_location("_omega_local_inference_r899",adapter_path)
+    adapter=importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(adapter)
+    return adapter
+
 READ_ONLY_REPLAY = frozenset({"HASH_TREE", "CSV_STATS", "VERIFY_LEDGER_SPLIT"})
 OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "LOCAL_INFER", "RESIDUAL_RESTORE"})
 STATUS = frozenset({"QUEUED", "WAIT_EVENT", "RUNNING", "COMPLETED", "FAILED", "HELD", "CANCELLED"})
@@ -137,13 +146,7 @@ class Hub:
     def execute(self,operation,args):
         if operation=="RESIDUAL_RESTORE": raise ValueError("R195_RESIDUAL_SOURCE_AND_AUTHORITY_REQUIRED")
         if operation=="LOCAL_INFER":
-            import importlib.util
-            adapter_path=Path(__file__).resolve().with_name("omega_local_inference_r899.py")
-            if not adapter_path.is_file(): raise ValueError("R899_LOCAL_MODEL_ADAPTER_REQUIRED")
-            spec=importlib.util.spec_from_file_location("_omega_local_inference_r899",adapter_path)
-            adapter=importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(adapter)
-            return adapter.infer_local_r899(args)
+            return load_local_inference_adapter_r899().infer_local_r899(args)
         if operation=="VERIFY_LEDGER_SET":
             import importlib.util
             spec_path=Path(__file__).resolve().with_name("omega_absolute_truth_verifier_r884.py")
@@ -276,6 +279,11 @@ def serve(hub,token,port):
             if not self._authorized():return self._send({"ok":False,"state":"AUTH_REQUIRED"},401)
             path=urlsplit(self.path).path
             if path=="/api/hub/status":return self._send({"ok":True,"schema":SCHEMA,"jobs":len(hub.list()),"edgeAccepted":False,"physicalPcAccepted":False,"scope":"LOCAL_LOOPBACK_ONLY","R195":"HELD_SOURCE_REQUIRED"})
+            if path=="/api/hub/models":
+                try:
+                    return self._send({"ok":True, **load_local_inference_adapter_r899().list_local_models_r899()})
+                except ValueError as exc:
+                    return self._send({"ok":False,"state":"LOCAL_MODELS_HELD","reason":str(exc)},503)
             if path=="/api/hub/jobs":return self._send({"ok":True,"jobs":hub.list()})
             if path.startswith("/api/hub/jobs/"):
                 obj=hub.get(path.rsplit("/",1)[-1]);return self._send({"ok":bool(obj),"job":obj},200 if obj else 404)
