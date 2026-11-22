@@ -27,6 +27,10 @@ assert.throws(()=>serializeMissionJournalR894({...single,missionId:'../bad'},nul
 assert.throws(()=>serializeMissionJournalR894({...single,localStateMutated:true},null),/Untrusted/);
 assert.throws(()=>serializeMissionJournalR894(null,{...collective,members:[id,id]}),/Untrusted/);
 assert.throws(()=>serializeMissionJournalR894(null,{...collective,authority:'CANON_APPROVED'}),/Untrusted/);
+for(const badStatus of ['COMPLETE_BUT_NOT_REAL','',42,null,'RUNNING\\nCANON_APPROVED']){
+ assert.throws(()=>restoreMissionJournalR894(JSON.stringify({schema:R894_SCHEMA,single:{...single,status:badStatus},collective:null})),/Untrusted cloud mission status/);
+ assert.throws(()=>restoreMissionJournalR894(JSON.stringify({schema:R894_SCHEMA,single:null,collective:{...collective,status:badStatus}})),/Untrusted cloud mission status/);
+}
 assert.throws(()=>restoreMissionJournalR894(JSON.stringify({schema:R894_SCHEMA})),/Invalid/);
 const ui=readFileSync('src/SphereAgentInstrumentR887.tsx','utf8');
 for(const token of ['R894_STORAGE_KEY','serializeMissionJournalR894','restoreMissionJournalR894','shouldWatchMissionR894','Watch individual cloud mission read-only','Watch collective cloud mission read-only','5000','api.get<any>','window.localStorage.setItem(R894_STORAGE_KEY'])assert.ok(ui.includes(token),'R894 UI contract missing '+token);
