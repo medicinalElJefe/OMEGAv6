@@ -97,7 +97,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
   const selected=trace[index];
   const offline=localTurnResult.artifact.id==='offline-model-derived';
   const payload={schema:'OMEGA_ATLAS_SELECTED_STEP_R943_V1',provenance:offline?'offline-model-derived-origin-unverified':'verified-local-executor-artifact',originVerified:!offline,modelOnly:true,artifactId:offline?null:localTurnResult.artifact.id,sourceTraceSha256:localTurnResult.artifact.contentSha256,step:selected.step,address:selected.address,coordinates:{D:selected.coordinates[0],P:selected.coordinates[1],R:selected.coordinates[2],L:selected.coordinates[3]},traceLength:trace.length,physicalMeasurement:false,canonAdmission:false};
-  const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)+'\\n'],{type:'application/json;charset=utf-8'}));
+  const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)+'\n'],{type:'application/json;charset=utf-8'}));
   const link=document.createElement('a');link.href=url;link.download='omega-atlas-step-'+selected.step+'-'+selected.address+(offline?'-offline-model':'-local-verified')+'.json';document.body.appendChild(link);link.click();link.remove();window.setTimeout(()=>URL.revokeObjectURL(url),1000);
   setExecutionStatus('Exported selected Atlas step '+selected.step+' address '+selected.address+' with '+(offline?'unverified offline origin':'verified local artifact provenance')+'. This is a model state, not a physical measurement.');
  };
