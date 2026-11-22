@@ -394,7 +394,7 @@ async function prove(browser,label,viewport){
   ]);
   assert.equal(relationsDownload.suggestedFilename(),'omega-r895-agent-relations.csv');
   const relationCSV=readFileSync(await relationsDownload.path(),'utf8');
-  const records=relationCSV.trim().split(/\\r?\\n/);
+  const records=relationCSV.trim().split(/\r?\n/);
   assert.equal(records.length,67,'CSV must include one header and exactly 66 pairs');
   assert.match(records[0],/^agent_a,agent_b,shared_inner_coordinates,covariance,pearson_correlation/);
   assert.ok(records.slice(1).every(line=>line.split(',')[2]==='20736'),'each pair must compare all 20,736 coordinates');
