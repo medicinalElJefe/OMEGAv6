@@ -9,7 +9,7 @@ import {serializeSweepContinuationR893,restoreSweepContinuationR893} from './sph
 import {serializeMissionJournalR894,restoreMissionJournalR894,shouldWatchMissionR894,R894_STORAGE_KEY} from './sphereMissionJournalR894.mjs';
 import {saveDurableR895,restoreDurableR895,exportDurablePortableR895,importDurablePortableR895,R895_PORTABLE_MAX_BYTES} from './sphereDurableCheckpointR895.mjs';
 import {rasterAddressR892,rasterCoordinateR892,pointerAddressR892,R892_PIXELS} from './spherePixelProjectionR892.mjs';
-import {analyzeCollectiveFieldR895} from './sphereFieldAnalysisR895.mjs';
+import {analyzeCollectiveFieldR895,analyzeCollectiveRelationsR895} from './sphereFieldAnalysisR895.mjs';
 import './sphereAgentInstrumentR887.css';
 
 type Lens='STATE'|'EXCHANGE'|'ACTIVITY';
@@ -63,7 +63,8 @@ export default function SphereAgentInstrumentR887({address,onAddress}:{address:n
  const collectiveIds=useMemo(()=>collectiveMembersR890(selected,collectiveCount),[selected,collectiveCount]);
  const analyzeFullField=()=>{try{
   const stats=analyzeCollectiveFieldR895(fabric.current,collectiveIds);
-  setFieldAnalysis({stats,selected,memberCount:collectiveCount,version});
+  const relations=analyzeCollectiveRelationsR895(fabric.current,collectiveIds);
+  setFieldAnalysis({stats,relations,selected,memberCount:collectiveCount,version});
   setError('');
  }catch(e){setError('Complete field analysis refused: '+String(e))}
  };
@@ -85,6 +86,20 @@ export default function SphereAgentInstrumentR887({address,onAddress}:{address:n
    {fieldAnalysis&&fieldAnalysis.selected===selected&&fieldAnalysis.memberCount===collectiveCount&&fieldAnalysis.version===version
     ? <output data-r895-field-result='true'>Analyzed {fieldAnalysis.stats.count.toLocaleString()} logical values across {fieldAnalysis.stats.memberCount} agents · mean {fieldAnalysis.stats.mean.toFixed(12)} · variance {fieldAnalysis.stats.variance.toFixed(12)} · minimum {fieldAnalysis.stats.min.toFixed(8)} at address {fieldAnalysis.stats.minAddress.toLocaleString()} · maximum {fieldAnalysis.stats.max.toFixed(8)} at address {fieldAnalysis.stats.maxAddress.toLocaleString()} · {fieldAnalysis.stats.modifiedValues.toLocaleString()} explicitly modified values · internal synthetic computation, not physical observation</output>
     : <p data-r895-field-status='true'>No current field analysis. Run after any state change or membership change.</p>}
+   {fieldAnalysis&&fieldAnalysis.selected===selected&&fieldAnalysis.memberCount===collectiveCount&&fieldAnalysis.version===version
+    ? <div data-r895-pairwise-relations='true'>
+      <p>{fieldAnalysis.relations.pairCount} complete agent pairs, {fieldAnalysis.relations.sharedInnerCoordinates.toLocaleString()} shared inner coordinates per pair. Pearson correlation is descriptive synthetic-state mathematics, not learned intelligence or physical causality. Undefined correlations are explicitly marked.</p>
+      <div style={{overflowX:'auto'}}>
+       <table aria-label='Complete agent relationship matrix'><thead><tr><th scope='col'>Agent</th>{collectiveIds.map(id=><th scope='col' key={id}>{id}</th>)}</tr></thead>
+       <tbody>{collectiveIds.map((rowId,rowIndex)=><tr key={rowId}><th scope='row'>{rowId}</th>{collectiveIds.map((colId,colIndex)=>{
+        const relation=fieldAnalysis.relations.pairs.find((p:any)=>p.agentA===Math.min(rowId,colId)&&p.agentB===Math.max(rowId,colId));
+        const correlation=rowIndex===colIndex?1:relation?.correlation;
+        return <td key={colId} title={rowIndex===colIndex?'Self-address (identity)':correlation===null?'Undefined: zero variance':'Pearson correlation over 20,736 corresponding inner states'}>{rowIndex===colIndex?'self':correlation==null?'undefined':correlation.toFixed(4)}</td>;
+       })}</tr>)}</tbody></table>
+      </div>
+      <button onClick={()=>{try{const lines=['agent_a,agent_b,shared_inner_coordinates,covariance,pearson_correlation,undefined_reason,model_evidence',...fieldAnalysis.relations.pairs.map((p:any)=>[p.agentA,p.agentB,p.sharedCoordinates,p.covariance,p.correlation===null?'':p.correlation,p.undefinedReason||'',fieldAnalysis.relations.evidence].join(','))];const url=URL.createObjectURL(new Blob([lines.join('\\n')+'\\n'],{type:'text/csv;charset=utf-8'}));try{const link=document.createElement('a');link.href=url;link.download='omega-r895-agent-relations.csv';link.click()}finally{window.setTimeout(()=>URL.revokeObjectURL(url),1000)}}catch(e){setError('Relationship CSV export refused: '+String(e))}}}>Export complete pairwise relations CSV</button>
+     </div>
+    : null}
   </section>
   <section className='r890-collective' data-r890-collective='EXPLICIT_BOUNDED_FLOCK' aria-label='SPHERE cooperative agent cloud mission'><h3>R890 · Cooperative agent cloud</h3><p>Choose a bounded neighborhood of independently addressed agents. One deliberate action submits a governed R121 SOLO/FLOCK mission; all identities stay distinct and outputs return as unadmitted receipts. No ambient model execution.</p><label>Collective membership <select aria-label='Collective member count' value={collectiveCount} onChange={e=>setCollectiveCount(Number(e.target.value))}>{[1,2,3,4,6,8,9,10,12].map(n=><option key={n} value={n}>{n} agent{n===1?'':'s'}</option>)}</select></label><p className='r890-members' data-r890-member-ids='true'>Members: {collectiveIds.join(' · ')}</p><p>Uses the objective and 0/1 synthesis budget above; cloud execution is explicitly operator-initiated.</p><div className='r889-actions'><button disabled={collectiveBusy||!cloudObjective.trim()} onClick={()=>void launchCollective()}>Dispatch selected collective</button><button disabled={collectiveBusy||!collectiveReceipt?.missionId} onClick={()=>void refreshCollective()}>Refresh collective receipt</button></div><label className='r894-watch'><input type='checkbox' aria-label='Watch collective cloud mission read-only' checked={watchCollective} onChange={e=>setWatchCollective(e.target.checked)} disabled={!collectiveReceipt?.missionId}/> Watch collective mission (GET-only status every 5 seconds while active)</label><p role='status'>{collectiveMessage}</p>{collectiveReceipt&&<output data-r890-receipt='RETURNED_NOT_ADMITTED'>Mission {collectiveReceipt.missionId} · {collectiveReceipt.members.length} agents · {collectiveReceipt.status} · {collectiveReceipt.authority} · Canon unchanged{collectiveReceipt.summary?<span> · Summary (unverified): {collectiveReceipt.summary}</span>:null}</output>}</section>
   <div className='r887-inner'><h3>Selected agent · interior tensor window</h3><p>12×12 page of the agent's 12×12×12×12 state. Page {innerPage+1}/144. All other pages are accessible without reallocating the agent.</p><div className='r887-cells' role='grid' aria-label='Selected agent inner state page'>{snapshot?.values.map((v:number,i:number)=><button key={i} role='gridcell' title={'Inner '+(innerPage*144+i+1)+' · '+v.toFixed(8)} style={{backgroundColor:'hsl('+Math.round(190+110*v)+' 55% '+Math.round(12+48*v)+'%)'}} aria-pressed={activeInner===innerPage*144+i} onClick={()=>{setActiveInner(innerPage*144+i);try{submitTask(fabric.current,{agent:selected,kind:'OBSERVE',inner:innerPage*144+i,weight:0});stepFabric(fabric.current,1);setVersion(z=>z+1)}catch(e){setError(String(e))}}} aria-label={'Select and observe inner state '+(innerPage*144+i+1)+' value '+v.toFixed(4)}/>)}</div></div>
