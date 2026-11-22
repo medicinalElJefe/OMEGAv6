@@ -18,6 +18,40 @@ MAX_TOKENS_R899 = 512
 MODEL_PATTERN_R899 = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,127}$")
 
 
+def list_local_models_r899(*, endpoint: str = "http://127.0.0.1:11434/api/tags") -> dict:
+    """Discover models from local Ollama only; never download or probe remote hosts."""
+    req = urllib.request.Request(endpoint, method="GET", headers={"Accept": "application/json"})
+    class NoRedirect(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self, request, fp, code, msg, headers, newurl):
+            return None
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect)
+    try:
+        with opener.open(req, timeout=5) as response:
+            if response.status != 200: raise ValueError("LOCAL_MODELS_BACKEND_STATUS_HELD")
+            data_bytes = response.read(MAX_RESPONSE_BYTES_R899 + 1)
+    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        raise ValueError("LOCAL_MODEL_BACKEND_NOT_AVAILABLE_HELD") from exc
+    if len(data_bytes) > MAX_RESPONSE_BYTES_R899:
+        raise ValueError("LOCAL_MODELS_RESPONSE_BOUND_HELD")
+    try:
+        data = json.loads(data_bytes.decode("utf-8"))
+    except (UnicodeError, ValueError) as exc:
+        raise ValueError("LOCAL_MODELS_JSON_HELD") from exc
+    if not isinstance(data, dict) or not isinstance(data.get("models"), list):
+        raise ValueError("LOCAL_MODELS_SCHEMA_HELD")
+    if len(data["models"]) > 512: raise ValueError("LOCAL_MODELS_COUNT_HELD")
+    names = []
+    for entry in data["models"]:
+        if not isinstance(entry, dict) or not isinstance(entry.get("name"), str):
+            raise ValueError("LOCAL_MODELS_ENTRY_HELD")
+        name = entry["name"]
+        if not MODEL_PATTERN_R899.fullmatch(name): raise ValueError("LOCAL_MODELS_NAME_HELD")
+        names.append(name)
+    if len(set(names)) != len(names): raise ValueError("LOCAL_MODELS_DUPLICATE_HELD")
+    return {"schema": "OMEGA_LOCAL_MODELS_R899", "models": sorted(names), "backend": "OLLAMA_LOOPBACK_ONLY",
+            "nativePcAccepted": False, "gpuProven": False}
+
+
 def infer_local_r899(args: dict, *, endpoint: str = LOCAL_MODEL_ENDPOINT_R899) -> dict:
     if not isinstance(args, dict):
         raise ValueError("LOCAL_INFER_ARGS_REQUIRED")
