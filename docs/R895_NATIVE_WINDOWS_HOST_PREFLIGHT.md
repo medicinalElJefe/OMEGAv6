@@ -1,53 +1,40 @@
-# R895 Native Windows / Hybrid Link Host Preflight
+# OMEGA Windows Check
 
-This is an executable **local target-machine observation**, not a Windows
-installer, paired R141 return, successful GPU compute dispatch, or production
-promotion. The canonical Hybrid Link agent remains the independently governed
-R207 wrapper plus the immutable R205 base.
+## Run it
 
-## Windows 10 execution
+In the OMEGA repository folder, **double-click**:
 
-From a clean clone of the exact candidate source with Git and Python 3.10+
-available, open PowerShell in the repository and run:
+`install/OMEGA-Windows-Check.cmd`
 
-```powershell
-.\install\run-r895-windows-preflight.ps1 -ExpectedCommit (git rev-parse HEAD) -Output .\omega-r895-windows-preflight-receipt.json
-```
+The window stays open and gives one of two results:
 
-For strict independent verification, specify a known approved 40-character
-commit instead of computing it locally. This command **does not** start the
-Hybrid Link agent, pair the PC, alter the registry, install software, elevate
-privileges, or contact Cloudflare.
+- **READY**: The basic Windows, Python, Git-source and GPU-controller observation checks passed. This is **not** proof of an installed OMEGA app, functioning GPU computation, or a paired PC agent.
+- **NEEDS ATTENTION**: It displays the specific missing or mismatched requirement in plain language.
 
-The script checks the actual source commit, clean tracked agent files,
-published immutable R205 base SHA-256, Python version, Windows platform,
-and a local PowerShell CIM video-controller observation. Missing or mismatched
-evidence returns code 2 with a JSON receipt whose `status` is `HOLD`;
-a malformed source checkout or arguments returns code 3. A passing preflight
-returns 0 with `READY_FOR_PAIRED_HOST_PROOF`, **not** native runtime proof.
+No SHA copying, command-line arguments, manual JSON inspection, admin privileges, cloud pairing, installation or registry changes are necessary.
 
-The output includes `receipt_sha256` computed over sorted, compact JSON
-excluding that field. This detects accidental and adversarial modification
-of the receipt *after collection*, but is not an authenticated signature,
-a hardware attestation, or proof that a reported GPU supports compute.
+The check creates `omega-windows-check.json` in the repository folder for exact provenance and machine-readable diagnostics. The JSON is SHA-256 integrity checked, but not signed hardware attestation.
 
-## Remaining authoritative host sequence
+If Git or Python 3.10+ is missing, the launcher explains the dependency. The repository must be an actual Git checkout, not a source ZIP, because the exact canonical Hybrid Link source blob is verified through Git. It checks the commit currently checked out; that establishes local source consistency, **not independent approval of that commit**.
 
-The local host must separately demonstrate R470 clean installer lifecycle:
-package SHA, exact source SHA, clean install, first launch and health,
-state-preserving upgrade, relaunch, uninstall, clean reinstall, and version
-reconciliation. A real paired Hybrid Link R141 return is required for
-`VERIFIED_EXECUTION_RETURN`; an actual measured GPU workload/readback is
-required for GPU-compute proof. Preserve R125 Canon admission and R170/R237
-release gates. Do not promote these statuses based on this preflight alone.
+## Alternative: PowerShell
 
-## Local testing
+From the repository folder:
 
 ```powershell
-py -3 tests\r895-windows-host-preflight-invariants.py
+.\install\run-r895-windows-preflight.ps1
 ```
 
-The integration regression is automatically executed by
-`npm run test:r777` and the inherited OMEGA release checks. On non-Windows
-CI hosts, fixture tests explicitly return `HOLD` rather than impersonating
-the target machine.
+An advanced verifier can still bind the check to an independently approved revision using `-ExpectedCommit <40-character-sha>`, or choose a report location with `-Output <path>`. Neither option is needed for ordinary use.
+
+## What it actually checks
+
+The utility observes Windows, Python version, locally reported GPU controller metadata, clean Hybrid Link source files, exact checked-out Git revision, and the immutable canonical R205 **Git blob** digest. It distinguishes Windows line-ending conversion of the working file from Git-object bytes rather than misreporting checkout conversion as canonical source mutation.
+
+An absent or mismatched requirement reports **NEEDS ATTENTION** and a nonzero held status. The resulting JSON has the detailed facts.
+
+This read-only check never runs the native installer or a GPU compute workload. It never starts the Hybrid Link agent or pairs the machine. R470 installer lifecycle proof, R141 paired execution return, GPU workload/readback, and R125 Canon admission still require their actual authoritative evidence.
+
+## Automated regression
+
+`npm run test:r777` exercises the source and launcher invariants. The existing Cloud Bridge Windows runner also executes the PowerShell preflight on a real Windows CI machine. A CI runner is not the user's PC.
