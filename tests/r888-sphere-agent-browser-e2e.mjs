@@ -226,6 +226,27 @@ async function prove(browser,label,viewport){
   await durableLab.getByRole('button',{name:'Restore full-state durable checkpoint'}).click();
   await page.waitForFunction(()=>document.querySelector('.r887-side p[role="status"]')?.textContent?.includes('Durable checkpoint restored'),null,{timeout:8000});
   assert.equal((await durableLab.locator('[data-r895-exact-inner-value]').innerText()).split('Exact selected state: ')[1],storedValue,label+' exact float64 inner value recovered after true page reload');
+  // R895 CORRUPTION: a damaged on-device checkpoint must be refused without mutating live state.
+  const liveBeforeCorrupt=await durableLab.getByRole('gridcell',{name:/Select and observe inner state 1 value/}).getAttribute('aria-label');
+  await page.evaluate(async()=>{
+    const db=await new Promise((resolve,reject)=>{
+      const request=indexedDB.open('omega-sphere-durable-r895',1);
+      request.onsuccess=()=>resolve(request.result);
+      request.onerror=()=>reject(request.error);
+    });
+    try{
+      await new Promise((resolve,reject)=>{
+        const tx=db.transaction('checkpoints','readwrite');
+        tx.objectStore('checkpoints').put({schema:'OMEGA_SPHERE_DURABLE_CHECKPOINT_R895',fabric:{active:'corrupt'},session:{}},'latest');
+        tx.oncomplete=resolve;
+        tx.onabort=()=>reject(tx.error);
+      });
+    }finally{db.close()}
+  });
+  await durableLab.getByRole('button',{name:'Restore full-state durable checkpoint'}).click();
+  await durableLab.getByRole('alert').getByText(/Atomic full-state restore refused/).waitFor({state:'visible',timeout:8000});
+  assert.equal(await durableLab.getByRole('gridcell',{name:/Select and observe inner state 1 value/}).getAttribute('aria-label'),liveBeforeCorrupt,label+' refused corrupt checkpoint without mutating current state');
+  console.log('R895 CORRUPTION '+label.toUpperCase()+' PASS: malformed atomic checkpoint refused without live-state mutation.');
   console.log('R895 BROWSER '+label.toUpperCase()+' PASS: atomic IndexedDB state survived reload, rejected unrecorded update, recovered exact inner value.');
   assert.equal(errors.length,0,label+' unexpected uncaught errors '+errors.join('; '));
   console.log('R888 BROWSER '+label.toUpperCase()+' PASS: exact inner-state action, symmetric exchange, explicit checkpoint, exact restore and malformed checkpoint refusal');
