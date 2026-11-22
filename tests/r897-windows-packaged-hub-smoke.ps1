@@ -16,8 +16,8 @@ $endpoint = "http://127.0.0.1:$port/api/hub/status"
 $process = $null
 try {
     # Bound loopback-only worker process; no native host pairing or shell jobs.
-    $args = @('-u',('"' + $worker + '"'),'--root',('"' + $root + '"'),'--port',"$port")
-    $process = Start-Process -FilePath 'python' -ArgumentList $args -PassThru -WindowStyle Hidden -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+    $workerArgs = @('-u',('"' + $worker + '"'),'--root',('"' + $root + '"'),'--port',"$port")
+    $process = Start-Process -FilePath 'python' -ArgumentList $workerArgs -PassThru -WindowStyle Hidden -RedirectStandardOutput $stdout -RedirectStandardError $stderr
     $tokenPath = Join-Path $root '.omega/hub-r881.token'
     $token = $null
     for ($attempt=0;$attempt -lt 100;$attempt++) {
