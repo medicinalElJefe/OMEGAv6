@@ -520,6 +520,7 @@ jobs:
           Copy-Item -LiteralPath '.\install\Start-OMEGA-Local.ps1' -Destination (Join-Path $folder 'Start-OMEGA-Local.ps1')
           Copy-Item -LiteralPath '.\install\OPEN-OMEGA-HUB.cmd' -Destination (Join-Path $folder 'OPEN-OMEGA-HUB.cmd')
           Copy-Item -LiteralPath '.\tools\omega_local_hub_r881.py' -Destination (Join-Path $folder 'omega_local_hub_r881.py')
+          Copy-Item -LiteralPath '.\tools\omega_absolute_truth_verifier_r884.py' -Destination (Join-Path $folder 'omega_absolute_truth_verifier_r884.py')
           if (-not (Test-Path (Join-Path $folder 'dist\index.html'))) { throw 'Packaged OMEGA entry not found' }
           $evidence = @{
             schema = 'OMEGA_WINDOWS_PORTABLE_UI_R896'
