@@ -352,6 +352,8 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
  const inspectAtlas=async(target?:number)=>{
   if(executionLease.current)return;
   executionLease.current=true;setRunning(true);setError('');setExecutionStatus('');
+  // Never leave fields from a previous address visible when a new inspection fails.
+  setInspectedAddress(null);setInspectedValues([]);
   try{
    const address=target??parseAtlasAddressInputR916(atlasAddress);
    if(target===undefined&&atlasAddress.trim()==='')throw Error('Enter an Atlas address');
