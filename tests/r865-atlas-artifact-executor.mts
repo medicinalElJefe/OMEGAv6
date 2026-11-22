@@ -346,3 +346,19 @@ test('R953 exports a selected actual transition with explicit provenance and ref
  const payload={schema:'OMEGA_ATLAS_SELECTED_TRANSITION_R953_V1',from:trace[1],to:trace[2],originVerified:false,physicalMeasurement:false};
  assert.equal(JSON.parse(JSON.stringify(payload)).to.address,8);
 });
+
+
+test('R954 selected transition exposes computed coordinate deltas in the playback UI without another executor call',()=>{
+ const ui=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
+ const start=ui.indexOf("aria-label='Selected Atlas transition coordinate deltas'");
+ const end=ui.indexOf('Download address visit index CSV',start);
+ assert.ok(start>0&&end>start,'selected transition deltas are visible beside transition exports');
+ const segment=ui.slice(start,end);
+ assert.match(segment,/selectedExecutionStep>0/);
+ assert.match(segment,/address!==localTurnResult\.trace\[selectedExecutionStep-1\]\.address/);
+ assert.match(segment,/coordinates\.map\(\(value,i\)=>value-localTurnResult\.trace\[selectedExecutionStep-1\]\.coordinates\[i\]\)/);
+ assert.match(segment,/not physical displacement/);
+ assert.doesNotMatch(segment,/fetch\(|executeLocalTurns\(/);
+ const from=[1,11,5,0],to=[3,0,5,9];
+ assert.deepEqual(to.map((value,i)=>value-from[i]),[2,-11,0,9]);
+});
