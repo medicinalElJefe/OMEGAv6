@@ -306,6 +306,57 @@ async function prove(browser,label,viewport){
   await durableLab.getByRole('alert').getByText(/Atomic full-state restore refused/).waitFor({state:'visible',timeout:8000});
   assert.equal(await durableLab.getByRole('gridcell',{name:/Select and observe inner state 1 value/}).getAttribute('aria-label'),liveBeforeCorrupt,label+' refused corrupt checkpoint without mutating current state');
   console.log('R895 CORRUPTION '+label.toUpperCase()+' PASS: malformed atomic checkpoint refused without live-state mutation.');
+
+  // R895 FULL-CAPACITY: a real IndexedDB transaction and operator restore must
+  // roundtrip 12 independently addressed agents x every one of 20,736 inner states.
+  // Build the fixture from the previously exported valid checkpoint, preserving
+  // real fabric and receipt shapes and recomputing a corruption-detection digest.
+  await page.evaluate(async portableJSON=>{
+    const revive=(_key,value)=>value&&typeof value==='object'&&!Array.isArray(value)
+      &&Object.keys(value).length===1&&Array.isArray(value.__omega_r895_map__)
+        ?new Map(value.__omega_r895_map__):value;
+    const original=JSON.parse(portableJSON,revive);
+    const root=original.session.agent;
+    const template=original.fabric.active.get(root);
+    if(!template)throw new Error('Full-capacity fixture needs selected agent snapshot');
+    const active=new Map();
+    for(let agentIndex=0;agentIndex<12;agentIndex++){
+      const agentId=root+agentIndex;
+      const member=structuredClone(template);
+      member.id=agentId;
+      member.epoch=0;
+      member.memory=[];
+      member.inbox=[];
+      member.values=new Map();
+      for(let inner=0;inner<20736;inner++)member.values.set(inner,((inner+agentIndex)%1024)/1024);
+      active.set(agentId,member);
+    }
+    const record={...original,fabric:{...original.fabric,active},session:{...original.session,memberCount:12}};
+    delete record.integrity;
+    const serialized=JSON.stringify(record,(_key,value)=>value instanceof Map
+      ? {__r895Map:[...value.entries()].sort((a,b)=>a[0]-b[0])}:value);
+    const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(serialized));
+    record.integrity=Array.from(new Uint8Array(digest),n=>n.toString(16).padStart(2,'0')).join('');
+    const db=await new Promise((resolve,reject)=>{
+      const request=indexedDB.open('omega-sphere-durable-r895',1);
+      request.onsuccess=()=>resolve(request.result);
+      request.onerror=()=>reject(request.error);
+    });
+    try{
+      await new Promise((resolve,reject)=>{
+        const tx=db.transaction('checkpoints','readwrite');
+        tx.objectStore('checkpoints').put(record,'latest');
+        tx.oncomplete=resolve;
+        tx.onabort=()=>reject(tx.error);
+      });
+    }finally{db.close()}
+  },portableText);
+  await durableLab.getByRole('button',{name:'Restore full-state durable checkpoint'}).click();
+  await page.waitForFunction(()=>document.querySelector('.r887-side p[role="status"]')?.textContent?.includes('248832 exact values'),null,{timeout:20000});
+  assert.match(await durableLab.locator('.r887-side p[role="status"]').innerText(),/12 agents.*248832 exact values/);
+  assert.equal((await durableLab.locator('[data-r895-exact-inner-value]').innerText()).split('Exact selected state: ')[1],'0');
+  console.log('R895 FULL-CAPACITY '+label.toUpperCase()+' PASS: real IndexedDB restores all 248,832 float64 values across 12 logical agents.');
+
   console.log('R895 BROWSER '+label.toUpperCase()+' PASS: atomic IndexedDB state survived reload, rejected unrecorded update, recovered exact inner value.');
   assert.equal(errors.length,0,label+' unexpected uncaught errors '+errors.join('; '));
   console.log('R888 BROWSER '+label.toUpperCase()+' PASS: exact inner-state action, symmetric exchange, explicit checkpoint, exact restore and malformed checkpoint refusal');
