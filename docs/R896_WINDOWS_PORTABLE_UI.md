@@ -79,6 +79,29 @@ prove Hybrid Link pairing on the operator's PC, a native GPU workload,
 cloud authority, a signed installer lifecycle or full offline AI inference.
 That separate authority remains governed by R125/R141/R146/R147/R237.
 
+## R899 bounded local AI inference
+
+The existing R881 durable Hub exposes an operator-submitted `LOCAL_INFER`
+operation. It makes one bounded request to an **already installed and running**
+Ollama model on `127.0.0.1:11434`. In the OMEGA7 Local / Edge Hub panel,
+select `LOCAL_INFER`, enter an exact installed model name and prompt, then
+submit the job. No arbitrary inference server URL, remote provider, shell
+operation, model download, or training command is permitted. The request has
+an 8,192-character prompt ceiling, 512 generated-token ceiling, fixed
+45-second network timeout, and 64 KiB response cap. It never follows HTTP
+redirects. The returned output is durable job data and inherits the existing
+SQLite receipt, event gate, and crash recovery semantics.
+
+`omega_local_inference_r899.py` is bundled as source for audit and inside
+the compiled Windows worker. Tests use a local fake HTTP model server to prove
+real request/response plumbing, strict model identity and completion checks,
+invalid payload refusal, unavailable backend holds, and remote redirect
+refusal. No unit test represents a downloaded/trained language model or GPU.
+Without a local running Ollama server, `LOCAL_INFER` is held and produces no
+fabricated result. Operator prompts and returned text are kept in the
+approved root's local job database; do not submit sensitive information
+unless that local persistence is intended.
+
 ## R897 full-package integrity guard
 
 `OPEN-OMEGA.cmd` now runs `Verify-OMEGA-Package.ps1` before opening the
