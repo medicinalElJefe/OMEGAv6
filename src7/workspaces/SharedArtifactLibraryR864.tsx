@@ -125,7 +125,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
    const delta=current.coordinates.map((value,j)=>value-previous.coordinates[j]);
    rows.push([previous.step,current.step,previous.address,current.address,current.address-previous.address,...delta,localTurnResult.artifact.contentSha256,offline?'offline-model-derived-origin-unverified':'verified-local-executor-artifact'].join(','));
   }
-  const url=URL.createObjectURL(new Blob([rows.join('\\r\\n')+'\\r\\n'],{type:'text/csv;charset=utf-8'}));
+  const url=URL.createObjectURL(new Blob([rows.join('\r\n')+'\r\n'],{type:'text/csv;charset=utf-8'}));
   const link=document.createElement('a');link.href=url;link.download='omega-atlas-transition-deltas-'+(offline?'offline-model':'local-verified')+'.csv';document.body.appendChild(link);link.click();link.remove();window.setTimeout(()=>URL.revokeObjectURL(url),1000);
   setExecutionStatus('Exported '+(rows.length-1)+' signed Atlas transition deltas as CSV. '+(offline?'Offline origin remains unverified.':'Local artifact provenance retained.')+' Model coordinates are not physical measurements.');
  };
