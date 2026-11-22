@@ -97,7 +97,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
   for(const state of localTurnResult.trace){const prior=visits.get(state.address);if(prior){prior.count++;prior.last=state.step}else visits.set(state.address,{count:1,first:state.step,last:state.step})}
   const offline=localTurnResult.artifact.id==='offline-model-derived';
   const lines=['address,visits,first_step,last_step,source_trace_sha256,provenance',...Array.from(visits.entries()).sort((a,b)=>a[0]-b[0]).map(([address,v])=>[address,v.count,v.first,v.last,localTurnResult.artifact.contentSha256,offline?'offline-model-derived-origin-unverified':'verified-local-executor-artifact'].join(','))];
-  const url=URL.createObjectURL(new Blob([lines.join('\\r\\n')+'\\r\\n'],{type:'text/csv;charset=utf-8'}));
+  const url=URL.createObjectURL(new Blob([lines.join('\r\n')+'\r\n'],{type:'text/csv;charset=utf-8'}));
   const link=document.createElement('a');link.href=url;link.download='omega-atlas-address-visits-'+(offline?'offline-model':'verified-local')+'.csv';document.body.appendChild(link);link.click();link.remove();window.setTimeout(()=>URL.revokeObjectURL(url),1000);
   setExecutionStatus('Exported '+visits.size+' distinct recorded addresses and their visit counts from '+localTurnResult.trace.length+' states. '+(offline?'Offline origin remains unverified.':'Local artifact provenance retained.')+' Model coordinates are not physical measurements.');
  };
