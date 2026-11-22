@@ -1,11 +1,11 @@
-# Windows CI proof for the exact Python Hub shipped inside the extracted portable UI.
+# Windows CI proof for the standalone EXE compiled from the governed local Hub.
 # This CI runner is NOT the user's PC and does not prove R141/GPU/installer acceptance.
 [CmdletBinding()]
 param([Parameter(Mandatory=$true)][string]$PackageRoot)
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $package = (Resolve-Path -LiteralPath $PackageRoot).Path
-$worker = Join-Path $package 'omega_local_hub_r881.py'
+$worker = Join-Path $package 'OMEGA-Local-Hub.exe'
 if (-not (Test-Path -LiteralPath $worker -PathType Leaf)) { throw 'Packaged local worker missing' }
 $root = Join-Path $env:RUNNER_TEMP ('omega-r897-hub-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $root -Force | Out-Null
@@ -16,8 +16,8 @@ $endpoint = "http://127.0.0.1:$port/api/hub/status"
 $process = $null
 try {
     # Bound loopback-only worker process; no native host pairing or shell jobs.
-    $workerArgs = @('-u',('"' + $worker + '"'),'--root',('"' + $root + '"'),'--port',"$port")
-    $process = Start-Process -FilePath 'python' -ArgumentList $workerArgs -PassThru -WindowStyle Hidden -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+    $workerArgs = @('--root',('"' + $root + '"'),'--port',"$port")
+    $process = Start-Process -FilePath $worker -ArgumentList $workerArgs -PassThru -WindowStyle Hidden -RedirectStandardOutput $stdout -RedirectStandardError $stderr
     $tokenPath = Join-Path $root '.omega/hub-r881.token'
     $token = $null
     for ($attempt=0;$attempt -lt 100;$attempt++) {
@@ -66,7 +66,7 @@ try {
         -not $finished.result_sha256 -or $finished.result.nativePcAccepted -ne $false) {
         throw "Packaged Hub did not execute and receipt-bound the actual local hash job: $($finished.state) $($finished.error)"
     }
-    Write-Host 'R897 PACKAGED WINDOWS HUB PASS: authentic Python worker, ephemeral loopback origin, private token refusal, completed local HASH_TREE and SHA-256 receipt. CI RUNNER ONLY.'
+    Write-Host 'R898 PACKAGED WINDOWS HUB EXE PASS: authenticated compiled worker, ephemeral loopback origin, private token refusal, completed local HASH_TREE and SHA-256 receipt. CI RUNNER ONLY.'
 } finally {
     if ($null -ne $process -and -not $process.HasExited) { Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue }
     if (Test-Path -LiteralPath $root) { Remove-Item -LiteralPath $root -Recurse -Force -ErrorAction SilentlyContinue }
