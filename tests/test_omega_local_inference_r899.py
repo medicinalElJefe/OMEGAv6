@@ -79,6 +79,24 @@ class LocalInferenceTests(unittest.TestCase):
             thread.join(timeout=3)
             server.server_close()
 
+    def test_canonical_latest_tag_accepted_but_other_tag_refused(self):
+        server, thread, calls = self._mock(response={
+            "model": "llama3.2:latest", "response": "local latest", "done": True
+        })
+        try:
+            result = adapter.infer_local_r899(
+                {"model": "llama3.2", "prompt": "hello"},
+                endpoint=f"http://127.0.0.1:{server.server_port}/api/generate"
+            )
+            self.assertEqual(result["response"], "local latest")
+            with self.assertRaisesRegex(ValueError, "LOCAL_INFER_BACKEND_IDENTITY_OR_COMPLETION_HELD"):
+                adapter.infer_local_r899(
+                    {"model": "llama3.2:other", "prompt": "hello"},
+                    endpoint=f"http://127.0.0.1:{server.server_port}/api/generate"
+                )
+        finally:
+            server.shutdown();thread.join(timeout=3);server.server_close()
+
     def test_remote_redirect_not_followed(self):
         server, thread, calls = self._mock(redirect="https://example.org/api/generate")
         try:
