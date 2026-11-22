@@ -5,19 +5,26 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
 $package = (Resolve-Path -LiteralPath $PackageRoot).Path
 $server = Join-Path $package 'Start-OMEGA-Local.ps1'
-$ready = Join-Path $env:RUNNER_TEMP ('omega-r896-' + [guid]::NewGuid().ToString('N') + '.txt')
+$token = [guid]::NewGuid().ToString('N')
+$ready = Join-Path $env:RUNNER_TEMP ('omega-r896-' + $token + '.txt')
+$stderrFile = Join-Path $env:RUNNER_TEMP ('omega-r896-' + $token + '.stderr.txt')
+$stdoutFile = Join-Path $env:RUNNER_TEMP ('omega-r896-' + $token + '.stdout.txt')
 $process = $null
 try {
     $arguments = @('-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',
                    ('"' + $server + '"'),'-NoBrowser','-ReadyFile',('"' + $ready + '"'))
-    $process = Start-Process -FilePath 'powershell.exe' -ArgumentList $arguments -PassThru -WindowStyle Hidden
+    $process = Start-Process -FilePath 'powershell.exe' -ArgumentList $arguments -PassThru -WindowStyle Hidden -RedirectStandardOutput $stdoutFile -RedirectStandardError $stderrFile
     $url = $null
     for ($attempt=0;$attempt -lt 120;$attempt++) {
         if (Test-Path -LiteralPath $ready) {
             $url = (Get-Content -LiteralPath $ready -Raw).Trim()
             break
         }
-        if ($process.HasExited) { throw "OMEGA local server exited early with code $($process.ExitCode)" }
+        if ($process.HasExited) {
+            $errors = if (Test-Path $stderrFile) { Get-Content $stderrFile -Raw } else { '(no stderr file)' }
+            $output = if (Test-Path $stdoutFile) { Get-Content $stdoutFile -Raw } else { '(no stdout file)' }
+            throw "OMEGA local server exited early with code $($process.ExitCode). stderr: $errors stdout: $output"
+        }
         Start-Sleep -Milliseconds 250
     }
     if (-not $url -or $url -notmatch '^http://127\.0\.0\.1:[0-9]+/$') {
@@ -47,4 +54,5 @@ try {
 } finally {
     if ($null -ne $process -and -not $process.HasExited) { Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue }
     if (Test-Path -LiteralPath $ready) { Remove-Item -LiteralPath $ready -Force -ErrorAction SilentlyContinue }
+    foreach ($file in @($stderrFile,$stdoutFile)) { if (Test-Path -LiteralPath $file) { Remove-Item -LiteralPath $file -Force -ErrorAction SilentlyContinue } }
 }
