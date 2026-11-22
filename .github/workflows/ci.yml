@@ -455,6 +455,730 @@ jobs:
           python tests/r680-native-archive-reconciliation.py
           python tests/r681-native-decision-truth-audit.py
 
+      - name: R895 Windows native host preflight smoke · CI runner is not target PC
+        shell: pwsh
+        run: |
+          $receiptPath = Join-Path $env:RUNNER_TEMP 'r895-windows-ci-preflight.json'
+          & pwsh -NoProfile -NonInteractive -File .\install\run-r895-windows-preflight.ps1 -ExpectedCommit $env:GITHUB_SHA -Output $receiptPath
+          $resultCode = $LASTEXITCODE
+          if ($resultCode -notin @(0,2)) { throw "Windows preflight failed before a valid held/ready receipt (exit $resultCode)" }
+          if (-not (Test-Path -LiteralPath $receiptPath)) { throw 'Native host preflight produced no receipt' }
+          $receipt = Get-Content -LiteralPath $receiptPath -Raw | ConvertFrom-Json
+          if ($receipt.schema -ne 'OMEGA_R895_WINDOWS_HOST_PREFLIGHT') { throw 'Unexpected native receipt schema' }
+          if ($receipt.host.platform -ne 'win32') { throw 'Real Windows runner platform was not observed' }
+          if ($receipt.source.actual_commit -ne $env:GITHUB_SHA) { throw 'Exact Git source drift on native Windows runner' }
+          if ($receipt.source.files.base.sha256 -ne '49a3be453b1e67e5eb7e8e29411e82f07d30d2fd45fa52fa0bf28ef57774a046') { throw 'Immutable Hybrid base SHA mismatch on Windows' }
+          if ($receipt.verified_execution_return -ne $false -or $receipt.installer_lifecycle_proven -ne $false -or $receipt.native_gpu_workload_proven -ne $false) {
+            throw 'CI Windows runner was incorrectly promoted to device/workload execution proof'
+          }
+          if ($receipt.receipt_sha256 -notmatch '^[a-f0-9]{64}
+    if: github.event_name == 'pull_request'
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.OMEGA_CLOUDFLARE_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Verify production secret availability
+        shell: bash
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::error title=AUTH REQUIRED::Repository secret OMEGA_CLOUDFLARE_TOKEN is not available to the production environment."
+            exit 1
+          fi
+          if [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::error title=ACCOUNT REQUIRED::CLOUDFLARE_ACCOUNT_ID is not available to the production environment."
+            exit 1
+          fi
+          echo "Cloudflare production secrets are present."
+      - name: Verify Cloudflare token without deployment
+        run: npx wrangler whoami
+
+  deploy-main:
+    # R619: squash lineage needs the GitHub commit-associated PR endpoint.
+    # Explicit job permissions preserve contents/actions grants and add PR read.
+    permissions:
+      contents: read
+      actions: write
+      pull-requests: read
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    needs: verify
+    runs-on: ubuntu-latest
+    concurrency:
+      group: omega-canonical-production-deploy
+      cancel-in-progress: false
+    environment: production
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.OMEGA_CLOUDFLARE_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    outputs:
+      release_current: ${{ steps.ownership.outputs.current }}
+      release_superseded_during_stage: ${{ steps.deploy_worker.outputs.superseded || 'false' }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Verify exact deployment checkout
+        shell: bash
+        run: |
+          checked_out_sha="$(git rev-parse HEAD)"
+          if [ "$checked_out_sha" != "$GITHUB_SHA" ]; then
+            echo "::error title=DEPLOY CHECKOUT DRIFT::Expected workflow SHA $GITHUB_SHA but checkout resolved to $checked_out_sha."
+            exit 1
+          fi
+          echo "Exact deployment checkout bound to $checked_out_sha."
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Verify this run still owns current main
+        id: ownership
+        shell: bash
+        run: |
+          git fetch origin main
+          current_main="$(git rev-parse origin/main)"
+          if [ "$current_main" != "$GITHUB_SHA" ]; then
+            echo "::notice title=SUPERSEDED RELEASE RETIRED::This run targets $GITHUB_SHA but current main is $current_main. Production remains untouched and the newer exact-main run owns release authority."
+            echo "current=false" >> "$GITHUB_OUTPUT"
+            echo "OMEGA_RELEASE_SUPERSEDED=1" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          echo "current=true" >> "$GITHUB_OUTPUT"
+          echo "Exact current-main ownership confirmed for $GITHUB_SHA."
+      - name: Bind promoted merge or exact-squash PR lineage
+        if: steps.ownership.outputs.current == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/r619-release-lineage.mjs
+      - run: npm install
+        if: steps.ownership.outputs.current == 'true'
+      - name: Install pinned browser proof runtime
+        if: steps.ownership.outputs.current == 'true'
+        run: npm install --no-save playwright@1.63.0
+      - name: Audit locked application dependency tree
+        if: steps.ownership.outputs.current == 'true'
+        run: npm audit --audit-level=high
+      - name: Cloudflare authorization preflight
+        if: steps.ownership.outputs.current == 'true'
+        shell: bash
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::error title=AUTH REQUIRED::Repository secret OMEGA_CLOUDFLARE_TOKEN is not available to the production deployment job."
+            exit 1
+          fi
+          if [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::notice title=Cloudflare account discovery::CLOUDFLARE_ACCOUNT_ID is not set; Wrangler will attempt account discovery from the API token."
+          fi
+      - name: Stage, prove, and Deploy canonical OMEGA Worker
+        if: steps.ownership.outputs.current == 'true'
+        id: deploy_worker
+        env:
+          OMEGA_WORKER_NAME: omegav6
+        run: bash scripts/staged-cloudflare-release.sh
+      - name: Deploy isolated private SAI doorway
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: sai_doorway
+        run: npx wrangler deploy --config wrangler.sai-door-r256.jsonc
+      - name: Verify private SAI doorway non-disclosure boundary
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: sai_doorway_hidden
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_SAI_DOOR_URL.replace(/\/$/,'');
+          const invalid='x'.repeat(64);
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          async function hidden(path){
+            let last='';
+            for(let attempt=1;attempt<=12;attempt++){
+              try{
+                const r=await fetch(base+path,{headers:{'cache-control':'no-cache'}});
+                const text=await r.text();
+                if(r.status===404&&String(r.headers.get('x-robots-tag')||'').includes('noindex')){console.log(`R258 PRIVATE HIDDEN PASS ${path} attempt ${attempt}`);return}
+                last=`HTTP ${r.status} ${text.slice(0,180)}`;
+              }catch(e){last=String(e)}
+              await sleep(5000);
+            }
+            throw new Error(`R258 private hidden-boundary verification failed ${path}: ${last}`);
+          }
+          await hidden('/');
+          await hidden('/sai-door/'+invalid);
+          await hidden('/api/admin/sai-peers');
+          console.log('R258 private SAI doorway deployed and public discovery boundary is closed.');
+          NODE
+      - name: Verify canonical public runtime
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: live_runtime
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const targets=[['root','/'],['health','/api/health'],['core-health','/api/core-health'],['status','/api/status'],['restoration','/api/restoration'],['hybrid','/api/hybrid/status']];
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          function verifyCoreHealth(response,data,path){
+            if(data.schema!=='OMEGA_CANONICAL_CORE_HEALTH_R163'||data.revision!=='R163'||data.state!=='LIVE'||data.ok!==true)throw new Error(`R163 core health schema/state mismatch on ${path}`);
+            if(data.canonicalRequest!==true)throw new Error(`R163 canonical request identity missing on ${path}`);
+            if(data.requiredBindings?.assets!==true||data.requiredBindings?.durableRuntime!==true)throw new Error(`R163 required core binding proof missing on ${path}`);
+            if(data.executionPlanes?.sovereignGateway?.requiredForCoreHealth!==false)throw new Error(`R163 optional sovereign gateway boundary regressed on ${path}`);
+            if(data.executionPlanes?.canonicalAdmission?.authority!=='R125')throw new Error(`R163 canonical admission authority regressed on ${path}`);
+            if(response.headers.get('x-omega-core-health')!=='R163-FIRST-HAND')throw new Error(`R163 first-hand health header missing on ${path}`);
+            if(response.headers.get('x-omega-canonical-origin')!==base)throw new Error(`R163 canonical origin header mismatch on ${path}`);
+          }
+          function verifyHybrid(data){
+            const current=Array.isArray(data.devices)?data.devices.filter(d=>d?.online&&!d?.revoked):[];
+            if(data.state==='VERIFIED_DEVICE_ONLINE'){
+              if(data.nativeExecutionClaimed!==true||current.length<1)throw new Error('Hybrid claims PC online without a current authenticated device heartbeat');
+              return;
+            }
+            if(data.state==='DEVICE_PROOF_REQUIRED'){
+              if(data.nativeExecutionClaimed!==false||current.length!==0)throw new Error('Hybrid claims device-proof-required while current online proof exists');
+              return;
+            }
+            throw new Error(`Hybrid returned unsupported truth state ${data.state}`);
+          }
+          async function probe(name,path){
+            let last='';
+            for(let attempt=1;attempt<=12;attempt++){
+              try{
+                const r=await fetch(base+path,{headers:{'cache-control':'no-cache'}});
+                const text=await r.text();
+                if(r.ok && text.length){
+                  const data=path.startsWith('/api/')?JSON.parse(text):null;
+                  if(path==='/api/health'||path==='/api/core-health')verifyCoreHealth(r,data,path);
+                  if(path==='/api/hybrid/status')verifyHybrid(data);
+                  console.log(`LIVE VERIFY ${name}: HTTP ${r.status} attempt ${attempt}`);
+                  return;
+                }
+                last=`HTTP ${r.status} ${text.slice(0,240)}`;
+              }catch(e){last=e instanceof Error?e.message:String(e)}
+              await sleep(5000);
+            }
+            throw new Error(`${name} verification failed: ${last}`);
+          }
+          for(const [name,path] of targets) await probe(name,path);
+          console.log(`OMEGA R163 public verification PASS: ${base}`);
+          NODE
+      - name: Verify canonical Hybrid agent download
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: hybrid_agent
+        shell: bash
+        run: |
+          node <<'NODE'
+          import {createHash} from 'node:crypto';
+          import {readFileSync} from 'node:fs';
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const expectedSha256=createHash('sha256').update(readFileSync('public/omega-hybrid-agent.py')).digest('hex');
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          let last='';
+          for(let attempt=1;attempt<=12;attempt++){
+            try{
+              const r=await fetch(base+'/api/hybrid/agent-download',{headers:{'cache-control':'no-cache'}});
+              const text=await r.text();
+              if(!r.ok) throw new Error(`HTTP ${r.status}: ${text.slice(0,240)}`);
+              if(text.length<1000) throw new Error(`agent too small: ${text.length} bytes`);
+              if(!text.startsWith('#!/usr/bin/env python3')) throw new Error('agent is not Python source');
+              if(!text.includes("DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'")) throw new Error('agent canonical server binding missing');
+              if(!text.includes('OMEGA Hybrid Link agent')) throw new Error('agent signature missing');
+              const origin=r.headers.get('x-omega-canonical-origin');
+              if(origin!==base) throw new Error(`canonical origin header mismatch: ${origin}`);
+              const version=r.headers.get('x-omega-agent-version');
+              if(!version) throw new Error('agent version header missing');
+              const servedSha256=createHash('sha256').update(text).digest('hex');
+              const receiptSha256=r.headers.get('x-omega-agent-sha256');
+              if(servedSha256!==expectedSha256) throw new Error(`agent source SHA-256 mismatch: expected ${expectedSha256}, received ${servedSha256}`);
+              if(receiptSha256!==expectedSha256) throw new Error(`agent receipt SHA-256 mismatch: ${receiptSha256}`);
+              console.log(`OMEGA HYBRID AGENT LIVE PASS · ${version} · ${text.length} bytes · sha256 ${servedSha256} · ${origin}`);
+              process.exit(0);
+            }catch(error){last=error instanceof Error?error.message:String(error)}
+            await sleep(5000);
+          }
+          throw new Error(`canonical Hybrid agent verification failed: ${last}`);
+          NODE
+      - name: Verify Federation Run and canonical RCWA downloads
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: federation_rcwa
+        run: node scripts/verify_federation_live_r1681.mjs
+      - name: Verify R8 Earth evidence and governed Hybrid contracts
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: earth_r8
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          async function get(path){
+            const r=await fetch(base+path,{headers:{'cache-control':'no-cache'}});
+            const raw=await r.text();
+            if(!r.ok) throw new Error(`${path} HTTP ${r.status}: ${raw.slice(0,500)}`);
+            return JSON.parse(raw);
+          }
+          async function post(path,body){
+            const r=await fetch(base+path,{method:'POST',headers:{'content-type':'application/json','cache-control':'no-cache'},body:JSON.stringify(body)});
+            const raw=await r.text();
+            if(!r.ok) throw new Error(`${path} HTTP ${r.status}: ${raw.slice(0,500)}`);
+            return JSON.parse(raw);
+          }
+          const caps=await get('/api/hybrid/capabilities');
+          if(!String(caps.state||'').includes('DEVICE_PROOF_REQUIRED')) throw new Error('R8 Hybrid capability truth gate missing');
+          if(!Array.isArray(caps.operations)||!caps.operations.includes('TRAIN_LOCAL')||!caps.operations.includes('BUILD')||!caps.operations.includes('READ_VISIBLE_TEXT')||!caps.operations.includes('SAR_R344_CLOSURE')) throw new Error('R345 Hybrid typed operation registry incomplete');
+          if(caps.trainLocal?.foundationWeightsChanged!==false) throw new Error('TRAIN_LOCAL foundation-weight truth boundary regressed');
+          const plan=await post('/api/hybrid/plan',{prompt:'Inspect this project, hash the tree, repair the smallest proven defect, build, test, package, and return proof.',root:'.'});
+          if(plan.draft?.state!=='DRAFT_ONLY_NOT_QUEUED'||plan.draft?.confirmed!==false||plan.draft?.deviceId!==null) throw new Error('Hybrid draft mutated queue/confirmation/device state');
+          if(!Array.isArray(plan.draft?.operations)||plan.draft.operations[0]?.op!=='INDEX'||plan.draft.operations[1]?.op!=='HASH_TREE') throw new Error('broad-root discovery gate missing from Hybrid draft');
+          const validation=await post('/api/hybrid/validate',{plan:plan.draft});
+          if(validation.valid!==true) throw new Error(`Hybrid validation failed: ${JSON.stringify(validation)}`);
+          const earth=await get('/api/earth/evidence?lat=32.2217&lon=-110.9265');
+          if(earth.schema!=='OMEGA_EARTH_EVIDENCE_V1'||earth.target?.crs!=='WGS84 / EPSG:4326'||String(earth.evidenceHash||'').length!==64) throw new Error('R8 Earth evidence schema/hash/WGS84 contract missing');
+          for(const source of ['usgs','eonet','swpc','openMeteo']) if(!earth.sources?.[source]) throw new Error(`Earth source envelope missing ${source}`);
+          const noaa=await get('/api/earth/noaa/catalog');
+          if(noaa.schema!=='OMEGA_EARTH_NOAA_CATALOG_V1'||!Array.isArray(noaa.coverages)||noaa.coverages.length!==9) throw new Error('NOAA nine-coverage catalog missing');
+          for(const id of ['G19-CONUS','G19-FD','G18-FD','G19-CAR','G19-CAM','G19-TAW','G19-CAN','G18-WUS','G18-TPW']) if(!noaa.coverages.some(x=>x.id===id)) throw new Error(`NOAA coverage missing ${id}`);
+          console.log('OMEGA R8 PUBLIC RESTORE PASS · Earth evidence envelope + NOAA 9 coverage identities + Hybrid V90 draft/validation');
+          NODE
+      - name: Verify R9 Earth ground traversal contracts
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: earth_r9
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const r=await fetch(base+'/api/earth/ground/evidence?lat=32.2217&lon=-110.9265&radius=750',{headers:{'cache-control':'no-cache'}});
+          const raw=await r.text();
+          if(!r.ok) throw new Error(`ground evidence HTTP ${r.status}: ${raw.slice(0,600)}`);
+          const g=JSON.parse(raw);
+          if(g.schema!=='OMEGA_EARTH_GROUND_EVIDENCE_V1'||g.target?.crs!=='WGS84 / EPSG:4326'||String(g.evidenceHash||'').length!==64) throw new Error('R9 ground schema/WGS84/hash contract missing');
+          for(const level of ['EARTH','REGION','CITY','STREET','GROUND']) if(!g.levels?.[level]) throw new Error(`R9 hierarchy missing ${level}`);
+          for(const source of ['kartaView','usgsEpqs','osmReverse','osmOverpass']) if(!g.sources?.[source]) throw new Error(`R9 source envelope missing ${source}`);
+          if(g.levels.STREET?.state==='RETURNED_KARTAVIEW_PHOTO'&&!g.levels.STREET?.photo) throw new Error('street evidence claimed without returned photo');
+          if(g.levels.GROUND?.state==='RETURNED_USGS_ELEVATION'&&!Number.isFinite(Number(g.levels.GROUND?.elevationM))) throw new Error('ground elevation claimed without numeric USGS value');
+          console.log('OMEGA R9 PUBLIC GROUND PASS · Earth→Region→City→Street→Ground source envelopes verified; unavailable providers allowed without synthetic substitution');
+          NODE
+      - name: Verify live route-before-generation and AI synthesis
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: live_ai
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          async function post(path,body){
+            const r=await fetch(base+path,{method:'POST',headers:{'content-type':'application/json','cache-control':'no-cache'},body:JSON.stringify(body)});
+            const text=await r.text();
+            if(!r.ok) throw new Error(`${path} HTTP ${r.status}: ${text.slice(0,400)}`);
+            return JSON.parse(text);
+          }
+          const text='Explain the current OMEGA continuity relationship in one concise sentence.';
+          const route=await post('/api/route-preview',{text});
+          if(!String(route.route||'').startsWith('ROUTED_MODEL')) throw new Error(`route-before-generation classifier did not select model route: ${JSON.stringify(route)}`);
+          const context={address:11498,stateId:11499,phase:8,decision:'TURN',modePolicy:'ALL',modeCount:179,nextAddress:11499,metrics:{continuity:.5,plasticity:.5,contradiction:.2,burden:.3,scar:.2,evidence:.5}};
+          const chat=await post('/api/chat',{text,context});
+          if(chat.ok!==true) throw new Error(`chat did not return ok: ${JSON.stringify(chat)}`);
+          if(chat.modelInvoked!==true) throw new Error(`Workers AI synthesis did not execute; fallback is not accepted as AI LIVE PASS: ${JSON.stringify(chat)}`);
+          if(!String(chat.provider||'').startsWith('WORKERS_AI:')) throw new Error(`unexpected live synthesis provider: ${chat.provider}`);
+          if(String(chat.reply||'').trim().length<12) throw new Error('live AI returned an empty/insufficient reply');
+          console.log(`OMEGA LIVE AI PASS · ${chat.provider} · route ${route.route}`);
+          NODE
+      - name: Record exact live production observability
+        id: production_observability_r471
+        if: always() && steps.deploy_worker.outcome == 'success' && steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        env:
+          OMEGA_WORKER_VERSION_ID: ${{ steps.deploy_worker.outputs.candidate_version_id }}
+        run: node scripts/verify_production_observability_r471.mjs
+      - name: Upload exact live production observability receipt
+        if: always() && steps.production_observability_r471.outcome == 'success' && steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: omega-production-observability-${{ github.sha }}
+          path: artifacts/omega-production-observability-r471.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: R637 capture Genesis historical browser proof on promoted production SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: genesis_browser_r637
+        shell: bash
+        run: |
+          test -n "${OMEGA_PROMOTED_SHA:-}" || { echo "::error::Promoted SHA unavailable"; exit 1; }
+          OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_PUBLIC_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node scripts/run-genesis-browser-proof-r636.mjs historical-rh-traversal
+      - name: R639 validate Genesis browser evidence before retention
+        id: genesis_evidence_verify_r639
+        if: steps.genesis_browser_r637.outcome == 'success' && steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        shell: bash
+        run: OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node scripts/verify-genesis-browser-artifact-r639.mjs artifacts/genesis-browser/historical-rh-traversal.json
+      - name: R637 retain Genesis production browser execution artifact
+        if: steps.genesis_evidence_verify_r639.outcome == 'success' && steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: omega-genesis-browser-${{ github.sha }}
+          path: artifacts/genesis-browser/historical-rh-traversal.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Verify deployed R200 total-experience browser on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r200
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r200-current-browser-proof-e2e.mjs
+      - name: Verify deployed R510 visual-functional HOME on exact promoted runtime
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r510
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r510-omega7-visual-functional-browser-e2e.mjs
+      - name: Verify deployed R512 capability-first menus and recovered executors
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r512
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r512-capability-menu-execution-browser-e2e.mjs
+      - name: Verify deployed R519 visual navigation and native execution paths on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r519
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r519-visual-navigation-browser-e2e.mjs
+      - name: Verify deployed R606 original Time Mandala on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r606
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r606-historical-mandala-browser-e2e.mjs
+      - name: Verify deployed R622 historical RH graph desktop/mobile traversal on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r622
+        shell: bash
+        run: |
+          # R644: the R637 Genesis runner already executes this exact R622 Playwright proof.
+          # Its R639 validation is mandatory; do not run the same live browser test twice.
+          test "${{ steps.genesis_browser_r637.outcome }}" = "success" || { echo "::error::Genesis R622 browser execution did not pass"; exit 1; }
+          test "${{ steps.genesis_evidence_verify_r639.outcome }}" = "success" || { echo "::error::Genesis R622 artifact integrity did not pass"; exit 1; }
+          test -s artifacts/genesis-browser/historical-rh-traversal.json || { echo "::error::Genesis R622 evidence missing"; exit 1; }
+          echo "R622 historical desktop/mobile browser proof inherited from validated Genesis production execution"
+      - name: Verify deployed R594 Seven-Star interactive traversal on desktop/mobile
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r594
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r594-seven-star-browser-e2e.mjs
+      - name: Verify deployed R623 address traversal on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r623
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r623-corpus-traversal-browser-e2e.mjs
+      - name: Verify deployed R625 inherited developmental replay on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r625
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r625-inherited-development-browser-e2e.mjs
+      - name: Verify deployed R705 capability audit and actual route launch on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r705
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r705-capability-recovery-browser-e2e.mjs
+      - name: Verify deployed R707 typed vector topology and portable SVG on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r707
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r707-woven-topology-browser-e2e.mjs
+      - name: Verify deployed R735 source-metric traversal on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r735
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r735-source-route-browser-e2e.mjs
+      - name: Verify deployed R736 source phase portrait on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r736
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r736-source-phase-browser-e2e.mjs
+      - name: Verify deployed R737 source exchange and JSON export on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r737
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r737-source-phase-exchange-browser-e2e.mjs
+      - name: Verify deployed R738 exact source recovery on desktop/mobile
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r738
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r738-source-exchange-recovery-browser-e2e.mjs
+      - name: Verify deployed R739 inverse source traversal on desktop/mobile
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r739
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r739-source-preimage-browser-e2e.mjs
+      - name: Verify deployed R740 conservation ledger on desktop/mobile
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r740
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r740-source-continuity-browser-e2e.mjs
+      - name: Verify deployed R741 directed source route on desktop/mobile
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r741
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r741-directed-source-route-browser-e2e.mjs
+      - name: Verify deployed R742 four-axis Atlas traversal on desktop/mobile
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r742
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r742-pi-atlas-browser-e2e.mjs
+      - name: Verify deployed R750 exact temporal workbench on desktop/mobile and exact SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r750
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/dewey-temporal-workbench-v9-browser-e2e.mjs
+      - name: Verify deployed R520 complete function library on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r520
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r520-complete-function-library-browser-e2e.mjs
+      - name: Verify live R525 exact Full Sphere instrument and prior Atlas on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r525
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r525-full-sphere-browser-e2e.mjs
+      - name: Verify live R598/R601 conservative formation and governed topology on desktop/mobile exact SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: live_spatial_r601
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r599-lab-browser-e2e.mjs
+      - name: Verify live R556 20736D workbench against exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r556
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r554-omega7-ux-atlas-browser-e2e.mjs
+      - name: Verify R676/R678 historical graph and original full-vector replay against exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: live_original_operator_r678
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r676-exact-operator-browser-e2e.mjs
+      - name: Verify R679/R684 portable source replay, export/import and tamper refusal on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: live_canonical_session_r679
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r679-canonical-session-browser-e2e.mjs
+      - name: Verify R682 source-only NOAA coverage recovery and exact promoted real image source on desktop/mobile
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r682-noaa-recovery-browser-e2e.mjs
+      - name: Verify R681 native decision census and proof veto on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r681-native-decision-browser-e2e.mjs
+      - name: Verify live R560 weather source, persisted view and satellite switch on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r560-weather-workspace-browser-e2e.mjs
+      - name: Verify live R583 radar tile pixels and chronological playback on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r583-radar-browser-e2e.mjs
+      - name: Verify live R202 operational source-authority surface
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: live_r202
+        run: node scripts/verify_live_operational_source_authority_r202.mjs
+      - name: Verify live R237 authenticated Hybrid command authority
+        id: live_r237
+        if: always() && steps.deploy_worker.outcome == 'success' && steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        continue-on-error: true
+        run: node scripts/verify_live_hybrid_command_authority_r237.mjs
+      - name: Verify live R238 Hybrid host intelligence
+        id: live_r238
+        if: always() && steps.deploy_worker.outcome == 'success' && steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        continue-on-error: true
+        run: node scripts/verify_live_hybrid_host_intelligence_r238.mjs
+      - name: Enforce complete Hybrid live-proof closure
+        if: always() && steps.deploy_worker.outcome == 'success' && steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        shell: bash
+        run: |
+          failed=0
+          if [ "${{ steps.live_r237.outcome }}" != "success" ]; then
+            echo "::error title=R237 LIVE PROOF FAILED::R237 outcome=${{ steps.live_r237.outcome }}"
+            failed=1
+          fi
+          if [ "${{ steps.live_r238.outcome }}" != "success" ]; then
+            echo "::error title=R238 LIVE PROOF FAILED::R238 outcome=${{ steps.live_r238.outcome }}"
+            failed=1
+          fi
+          if [ "$failed" -ne 0 ]; then
+            echo "R240.1 production truth closure FAILED: both R237 and R238 live proofs are independently observable and both are required."
+            exit 1
+          fi
+          echo "R240.1 production truth closure PASS: R237 and R238 live proofs both succeeded."
+      - name: Roll back canonical OMEGA Worker on post-promotion proof failure
+        if: failure() && steps.deploy_worker.outputs.previous_version_id != '' && steps.deploy_worker.outputs.rollback_eligible == 'true' && steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: rollback_worker
+        shell: bash
+        run: |
+          status_json="$(mktemp)"
+          npx wrangler deployments status --name omegav6 --json > "$status_json"
+          node - "$status_json" "${{ steps.deploy_worker.outputs.candidate_version_id }}" <<'NODE'
+          const fs=require('fs');
+          const data=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+          const candidate=process.argv[3],rows=[];
+          function walk(value){
+            if(!value||typeof value!=='object')return;
+            if(Array.isArray(value)){for(const x of value)walk(x);return}
+            const id=typeof value.version_id==='string'?value.version_id:(typeof value.versionId==='string'?value.versionId:null);
+            const raw=value.percentage??value.traffic_percentage??value.trafficPercentage;
+            const pct=Number(raw);
+            if(id&&Number.isFinite(pct)&&pct>0.001)rows.push({id,pct});
+            for(const x of Object.values(value))walk(x);
+          }
+          walk(data);
+          const serving=[...new Map(rows.map(x=>[x.id,x])).values()];
+          if(serving.length!==1||serving[0].id!==candidate||serving[0].pct<99.999){
+            console.error(`ROLLBACK OWNERSHIP LOST: candidate=${candidate} serving=${JSON.stringify(serving)}`);
+            process.exit(1);
+          }
+          console.log(`Rollback ownership confirmed: exact candidate ${candidate} still owns 100% traffic.`);
+          NODE
+          rm -f "$status_json"
+          npx wrangler rollback "${{ steps.deploy_worker.outputs.previous_version_id }}" --name omegav6 --message "OMEGA automatic rollback after live proof failure for $GITHUB_SHA"
+      - name: Refuse rollback to an unproved or known-bad baseline
+        if: failure() && steps.deploy_worker.outputs.previous_version_id != '' && steps.deploy_worker.outputs.rollback_eligible != 'true' && steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        shell: bash
+        run: echo "::warning title=ROLLBACK REFUSED::Post-promotion proof failed, but the previous Worker did not prove usable and cannot regain production authority."
+      - name: Record deployment receipt
+        if: always() && steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        shell: bash
+        run: |
+          {
+            echo "## OMEGA production deployment"
+            echo "- Commit: $GITHUB_SHA"
+            echo "- Candidate: ${OMEGA_CANDIDATE_SHA:-UNAVAILABLE}"
+            echo "- Rollback: ${OMEGA_ROLLBACK_SHA:-UNAVAILABLE}"
+            echo "- Runtime: $OMEGA_PUBLIC_URL"
+            echo "- Private SAI doorway: $OMEGA_SAI_DOOR_URL"
+            echo "- Trigger: ${{ github.event_name }}"
+            echo "- Production deployment concurrency: serialized · no in-progress cancellation"
+            echo "- Verify job: ${{ needs.verify.result }}"
+            echo "- Deployment job: ${{ job.status }}"
+            echo "- Canonical Worker staged proof + promotion: ${{ steps.deploy_worker.outcome }}"
+            echo "- Previous Cloudflare Worker version: ${{ steps.deploy_worker.outputs.previous_version_id || 'UNAVAILABLE' }}"
+            echo "- Candidate Cloudflare Worker version: ${{ steps.deploy_worker.outputs.candidate_version_id || 'UNAVAILABLE' }}"
+            echo "- Candidate semantic/browser proof: ${{ steps.deploy_worker.outputs.staged_proof || 'NOT_PROVEN' }}"
+            echo "- Release mode: ${{ steps.deploy_worker.outputs.release_mode || 'NOT_REACHED' }}"
+            echo "- Previous baseline rollback eligibility: ${{ steps.deploy_worker.outputs.rollback_eligible || 'NOT_PROVEN' }}"
+            echo "- Automatic rollback after post-promotion failure: ${{ steps.rollback_worker.outcome || 'not-needed' }}"
+            echo "- R258 isolated private SAI doorway deployment: ${{ steps.sai_doorway.outcome }}"
+            echo "- R258 private non-disclosure proof: ${{ steps.sai_doorway_hidden.outcome }}"
+            echo "- R163 first-hand canonical core health/public runtime: ${{ steps.live_runtime.outcome }}"
+            echo "- Canonical Hybrid agent bytes/SHA: ${{ steps.hybrid_agent.outcome }}"
+            echo "- Federation + canonical RCWA downloads: ${{ steps.federation_rcwa.outcome }}"
+            echo "- R8 Earth/NOAA + Hybrid V90 contracts: ${{ steps.earth_r8.outcome }}"
+            echo "- R9 Earth ground source hierarchy: ${{ steps.earth_r9.outcome }}"
+            echo "- Workers AI route-before-generation + synthesis: ${{ steps.live_ai.outcome }}"
+            echo "- R200.1 exact promoted-SHA desktop/mobile browser proof: ${{ steps.browser_r200.outcome }}"
+            echo "- R519 actual visual navigation and native executor desktop/mobile proof: ${{ steps.browser_r519.outcome }}"
+            echo "- R606 original historical Time Mandala live desktop/mobile proof: ${{ steps.browser_r606.outcome }}"
+            echo "- R520 full 44/72/100 source inventory and current executor browser proof: ${{ steps.browser_r520.outcome }}"
+            echo "- R202 operational source-authority live proof: ${{ steps.live_r202.outcome }}"
+            echo "- R237 authenticated Hybrid command authority live proof: ${{ steps.live_r237.outcome }}"
+            echo "- R238 Hybrid host intelligence live proof: ${{ steps.live_r238.outcome }}"
+            echo "- R239 resource governance remains source-gated by verify job; live command surface reports a declared R239 tier."
+            echo "- R240/R322 truth boundary: one canonical ci.yml writer; normal releases use previous@100/candidate@0 exact override proof. If Cloudflare rejects that split specifically for incompatible Durable Object exports and the previous Worker is positively proved to be the application-withholding interlock, R322 permits forward-only candidate@100 export-set recovery followed immediately by the same semantic/browser proof; the broken previous Worker never regains rollback authority. R237/R238 remain independently required after canonical deployment succeeds."
+            echo "- R202 archive residual debt remains explicit: AT09 desktop health check PLANNED; AT10 forensic hash ledger PLANNED"
+            echo "- Browser proof harness: Playwright 1.63.0 pinned; locked application dependency audit enforced at high severity; current run result is reported by the audit step"
+            echo "- R199.1 packaging hygiene: 500 KiB initial-entry budget + clean durable exports + v7 JavaScript actions"
+            echo "- Hybrid native execution: VERIFIED_DEVICE_ONLINE requires a current authenticated non-revoked heartbeat; otherwise DEVICE_PROOF_REQUIRED"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+
+      - name: Record clean supersession retirement
+        if: steps.ownership.outputs.current != 'true' || steps.deploy_worker.outputs.superseded == 'true'
+        shell: bash
+        run: |
+          echo "## OMEGA sequential release retirement" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Run SHA: $GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "- State: SUPERSEDED_CLEANLY_NO_PRODUCTION_AUTHORITY" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Production mutation: forbidden" >> "$GITHUB_STEP_SUMMARY"
+          echo "- GitHub conclusion: success (not a product failure)" >> "$GITHUB_STEP_SUMMARY"
+
+  post-deploy-authority-closure:
+    if: needs.deploy-main.result == 'success' && needs.deploy-main.outputs.release_current == 'true' && needs.deploy-main.outputs.release_superseded_during_stage != 'true'
+    needs: deploy-main
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    outputs:
+      closure: ${{ steps.r223.outputs.closure }}
+    steps:
+      - name: Dispatch and prove exact-SHA R223 post-deployment authority
+        id: r223
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          git_sha="$GITHUB_SHA"
+          # An older release can finish its live deployment after main has advanced.
+          # Never dispatch an R223 run on a newer SHA and misattribute it to this release.
+          current_main="$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)"
+          if [ "$current_main" != "$git_sha" ]; then
+            echo "::notice title=SUPERSEDED POST-DEPLOY CLOSURE::Release $git_sha was superseded by $current_main; newer main owns R223 closure."
+            echo "closure=R223_SUPERSEDED" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/actions/workflows/r223-cloudflare-evolution.yml/dispatches" -f ref=main -f 'inputs[immediate_cycle]=false'
+          run_id=''
+          for attempt in $(seq 1 36); do
+            runs="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow r223-cloudflare-evolution.yml --branch main --event workflow_dispatch --limit 40 --json databaseId,headSha,status,conclusion,url,createdAt)"
+            run_id="$(GIT_SHA="$git_sha" RUNS="$runs" node -e "const rs=JSON.parse(process.env.RUNS||'[]');const r=rs.find(x=>x.headSha===process.env.GIT_SHA);process.stdout.write(String(r?.databaseId||''))")"
+            [ -n "$run_id" ] && break
+            sleep 5
+          done
+          if [ -z "$run_id" ]; then
+            current_main="$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)"
+            if [ "$current_main" != "$git_sha" ]; then
+              echo "::notice title=SUPERSEDED POST-DEPLOY CLOSURE::Main advanced to $current_main before R223 bound to $git_sha; no false authority is claimed."
+              echo "closure=R223_SUPERSEDED" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo '::error title=R223 EXACT-SHA CLOSURE MISSING::No R223 run bound to the deployed main SHA.'
+            exit 1
+          fi
+          gh run watch "$run_id" --repo "$GITHUB_REPOSITORY" --exit-status
+          run="$(gh run view "$run_id" --repo "$GITHUB_REPOSITORY" --json headSha,status,conclusion,event,url)"
+          GIT_SHA="$git_sha" RUN="$run" node -e "const r=JSON.parse(process.env.RUN);if(r.headSha!==process.env.GIT_SHA||r.event!=='workflow_dispatch'||r.status!=='completed'||r.conclusion!=='success')throw new Error('R223 post-deploy authority did not close on exact deployed SHA')"
+          echo "closure=R223_EXACT_SHA_SUCCESS" >> "$GITHUB_OUTPUT"
+          echo "R511 sequential closure PASS · exact deployed SHA $git_sha · R223 run $run_id"
+
+  continue-governed-selfbuild:
+    if: needs.deploy-main.result == 'success' && needs.deploy-main.outputs.release_current == 'true' && needs.deploy-main.outputs.release_superseded_during_stage != 'true' && needs.post-deploy-authority-closure.result == 'success' && needs.post-deploy-authority-closure.outputs.closure == 'R223_EXACT_SHA_SUCCESS'
+    needs: [deploy-main, post-deploy-authority-closure]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - name: Continue governed self-build after exact production success
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          STATE_JSON="$(mktemp)"
+          gh api "repos/$GITHUB_REPOSITORY/contents/public/omega-r170-selfbuild-state.json?ref=$GITHUB_SHA" --jq .content | tr -d '\n' | base64 -d > "$STATE_JSON"
+          STATIC_EXHAUSTED=true
+          while IFS= read -r TARGET; do
+            [ -n "$TARGET" ] || continue
+            if ! gh api "repos/$GITHUB_REPOSITORY/contents/$TARGET?ref=$GITHUB_SHA" >/dev/null 2>&1; then
+              STATIC_EXHAUSTED=false
+              break
+            fi
+          done < <(node - "$STATE_JSON" <<'NODE'
+          const fs=require('fs');
+          const state=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+          for(const row of Array.isArray(state.roadmap)?state.roadmap:[])if(row?.target)console.log(row.target);
+          NODE
+          )
+          rm -f "$STATE_JSON"
+
+          if [ "$STATIC_EXHAUSTED" = true ]; then
+            gh api --method POST "repos/$GITHUB_REPOSITORY/actions/workflows/r223-cloudflare-evolution.yml/dispatches" -f ref=main -f 'inputs[immediate_cycle]=true'
+            echo "R392 event-driven continuation dispatched to CLOUD-01/R388 after canonical production proof for $GITHUB_SHA; SG001–SG005 source targets are all present."
+          else
+            gh api --method POST "repos/$GITHUB_REPOSITORY/actions/workflows/r170-governed-selfbuild.yml/dispatches" -f ref=main
+            echo "R330 event-driven continuation dispatched to R170 after canonical production proof for $GITHUB_SHA; bounded static roadmap remains incomplete."
+          fi
+) { throw 'Missing native SHA-256 evidence digest' }
+          Write-Host "R895 Windows-hosted CI smoke PASS: $($receipt.status); receipt integrity present; no target-PC, installer or GPU proof claimed."
+
   cloudflare-auth-probe:
     if: github.event_name == 'pull_request'
     needs: verify
