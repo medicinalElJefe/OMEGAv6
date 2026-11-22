@@ -55,6 +55,22 @@ try {
     if ($hubLauncherText -notmatch 'omega_local_hub_r881[.]py' -or $hubLauncherText -notmatch '8765') {
         throw 'Optional Hub launcher does not execute the pinned local Hub endpoint'
     }
+    # The operator launcher must reject a changed or incomplete package.
+    $verifierScript = Join-Path $package 'Verify-OMEGA-Package.ps1'
+    if (-not (Test-Path -LiteralPath $verifierScript -PathType Leaf)) { throw 'Package verifier not bundled' }
+    & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $verifierScript -PackageRoot $package
+    if ($LASTEXITCODE -ne 0) { throw 'Exact packaged file verification failed' }
+    $entryFile = Join-Path (Join-Path $package 'dist') 'index.html'
+    $original = [System.IO.File]::ReadAllBytes($entryFile)
+    try {
+        [System.IO.File]::AppendAllText($entryFile,'OMEGA_R897_INTEGRITY_NEGATIVE_TEST')
+        & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $verifierScript -PackageRoot $package
+        if ($LASTEXITCODE -eq 0) { throw 'Tampered package incorrectly passed verification' }
+    } finally {
+        [System.IO.File]::WriteAllBytes($entryFile,$original)
+    }
+    & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $verifierScript -PackageRoot $package
+    if ($LASTEXITCODE -ne 0) { throw 'Restored complete package integrity check failed' }
     $index = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 10
     if ($index.StatusCode -ne 200 -or $index.Content -notmatch 'OMEGA') { throw 'Local OMEGA index is not served' }
     $nested = Invoke-WebRequest -Uri ($url+'sphere/collective') -UseBasicParsing -TimeoutSec 10
