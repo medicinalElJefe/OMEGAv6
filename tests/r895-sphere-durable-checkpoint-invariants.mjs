@@ -35,7 +35,7 @@ for(const token of ["globalThis.crypto?.subtle","digest('SHA-256'","record.integ
 // R170 WORKFLOW GOVERNOR: R895 must reuse the canonical release controllers,
 // never create an extra active CI authority or raise the governed cap.
 const governedPolicy=JSON.parse(readFileSync('public/omega-r170-self-build-governor.json','utf8')).successorWorkflowPolicy;
-const workflowNames=readdirSync('.github/workflows').filter(name=>/\\.ya?ml$/i.test(name));
+const workflowNames=readdirSync('.github/workflows').filter(name=>/\.ya?ml$/i.test(name));
 const activeAuthorities=workflowNames.filter(name=>name!=='r2461-legacy-ref-cleanup.yml');
 assert.ok(activeAuthorities.length<=governedPolicy.maxActiveWorkflowAuthorities,'R895 exceeded R170 active workflow authority count');
 for(const removed of ['r894-exact-continuity-proof.yml','r895-exact-portable-proof.yml','r895-full-inherited-integration.yml'])
