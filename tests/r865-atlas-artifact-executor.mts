@@ -216,3 +216,22 @@ test('R945 trace address lookup advances to next recorded visit without inventin
  assert.equal(next(5,0),1);
  assert.equal(next(8,0),undefined);
 });
+
+test('R946 Atlas visit index exports actual distinct recorded visits with provenance',()=>{
+ const ui=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
+ const segment=ui.split('const downloadAtlasVisitIndexR946=()=>{')[1]?.split('const downloadSelectedAtlasStepR943=()=>{')[0];
+ assert.ok(segment,'visit index export handler exists');
+ assert.match(ui,/onClick=\{downloadAtlasVisitIndexR946\}>Download address visit index CSV/);
+ assert.match(segment,/for\(const state of localTurnResult\.trace\)/);
+ assert.match(segment,/prior\.count\+\+/);
+ assert.match(segment,/prior\.last=state\.step/);
+ assert.match(segment,/sort\(\(a,b\)=>a\[0\]-b\[0\]\)/);
+ assert.match(segment,/source_trace_sha256,provenance/);
+ assert.match(segment,/offline-model-derived-origin-unverified/);
+ assert.match(segment,/verified-local-executor-artifact/);
+ assert.match(segment,/lines\.join\('\\r\\n'\)/);
+ const trace=[{step:0,address:12},{step:1,address:7},{step:2,address:12},{step:3,address:7},{step:4,address:12}];
+ const visits=new Map<number,{count:number;first:number;last:number}>();
+ for(const state of trace){const prior=visits.get(state.address);if(prior){prior.count++;prior.last=state.step}else visits.set(state.address,{count:1,first:state.step,last:state.step})}
+ assert.deepEqual(Array.from(visits.entries()).sort((a,b)=>a[0]-b[0]),[[7,{count:2,first:1,last:3}],[12,{count:3,first:0,last:4}]]);
+});
