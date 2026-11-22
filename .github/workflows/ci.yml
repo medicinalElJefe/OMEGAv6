@@ -510,6 +510,11 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Locked application dependencies failed to install' }
           npm run build
           if ($LASTEXITCODE -ne 0) { throw 'OMEGA7 production UI build failed' }
+      - name: Prove bounded local Ollama inference and refusal without network dependencies
+        shell: pwsh
+        run: |
+          python -m unittest discover -s tests -p test_omega_local_inference_r899.py -v
+          if ($LASTEXITCODE -ne 0) { throw 'R899 local inference source and loopback refusal failed' }
       - name: Compile real standalone Windows local worker executable
         shell: pwsh
         run: |
@@ -518,8 +523,9 @@ jobs:
           $folder = Join-Path $env:RUNNER_TEMP 'OMEGA-Windows-Portable'
           New-Item -ItemType Directory -Path $folder -Force | Out-Null
           $verifier = (Resolve-Path -LiteralPath '.\tools\omega_absolute_truth_verifier_r884.py').Path
+          $inference = (Resolve-Path -LiteralPath '.\tools\omega_local_inference_r899.py').Path
           $hubSource = (Resolve-Path -LiteralPath '.\tools\omega_local_hub_r881.py').Path
-          python -m PyInstaller --onedir --clean --noconfirm --log-level WARN --name OMEGA-Local-Hub --distpath $folder --workpath (Join-Path $env:RUNNER_TEMP 'omega-pyinstaller-work') --specpath (Join-Path $env:RUNNER_TEMP 'omega-pyinstaller-spec') --add-data "$verifier;." $hubSource
+          python -m PyInstaller --onedir --clean --noconfirm --log-level WARN --name OMEGA-Local-Hub --distpath $folder --workpath (Join-Path $env:RUNNER_TEMP 'omega-pyinstaller-work') --specpath (Join-Path $env:RUNNER_TEMP 'omega-pyinstaller-spec') --add-data "$verifier;." --add-data "$inference;." $hubSource
           if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath (Join-Path $folder 'OMEGA-Local-Hub\OMEGA-Local-Hub.exe'))) { throw 'Native Windows local Hub compilation failed' }
       - name: Assemble dependency-free operator launch package
         shell: pwsh
@@ -534,6 +540,7 @@ jobs:
           Copy-Item -LiteralPath '.\install\Start-OMEGA-Integrated.ps1' -Destination (Join-Path $folder 'Start-OMEGA-Integrated.ps1')
           Copy-Item -LiteralPath '.\tools\omega_local_hub_r881.py' -Destination (Join-Path $folder 'omega_local_hub_r881.py')
           Copy-Item -LiteralPath '.\tools\omega_absolute_truth_verifier_r884.py' -Destination (Join-Path $folder 'omega_absolute_truth_verifier_r884.py')
+          Copy-Item -LiteralPath '.\tools\omega_local_inference_r899.py' -Destination (Join-Path $folder 'omega_local_inference_r899.py')
           Copy-Item -LiteralPath '.\install\Verify-OMEGA-Package.ps1' -Destination (Join-Path $folder 'Verify-OMEGA-Package.ps1')
           if (-not (Test-Path (Join-Path $folder 'dist\index.html'))) { throw 'Packaged OMEGA entry not found' }
           [System.IO.File]::WriteAllText((Join-Path $folder 'READ-ME-FIRST.txt'),
