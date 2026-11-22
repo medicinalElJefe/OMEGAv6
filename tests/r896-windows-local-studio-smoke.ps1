@@ -51,7 +51,7 @@ try {
         (Get-FileHash -LiteralPath $verifierSource -Algorithm SHA256).Hash) {
         throw 'Packaged R884 verifier bytes differ from the canonical source'
     }
-    $workerExe = Join-Path $package 'OMEGA-Local-Hub.exe'
+    $workerExe = Join-Path $package 'OMEGA-Local-Hub\OMEGA-Local-Hub.exe'
     if (-not (Test-Path -LiteralPath $workerExe -PathType Leaf)) { throw 'Native local Hub executable not packaged' }
     $combined = Join-Path $package 'OPEN-OMEGA-INTEGRATED.cmd'
     if (-not (Test-Path -LiteralPath $combined -PathType Leaf)) { throw 'Unified OMEGA7 launch entry missing' }
