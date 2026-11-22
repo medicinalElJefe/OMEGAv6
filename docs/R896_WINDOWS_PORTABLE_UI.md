@@ -37,31 +37,32 @@ The application may still contain features that make outbound calls when
 the user explicitly uses them; this build does **not** certify the entire
 application as disconnected or offline-sovereign.
 
-## Optional authenticated local worker (R897)
+## Integrated Windows local worker executable (R898)
 
-The same portable package now also contains `OPEN-OMEGA-HUB.cmd` and the
-unchanged, governed Python standard-library worker `omega_local_hub_r881.py`,
-plus its required canonical `omega_absolute_truth_verifier_r884.py` for pinned
-ten-ledger verification.
-The normal `OPEN-OMEGA.cmd` UI still needs no Python, Node, Git or administrator
-rights. The optional worker requires Python 3.12+ already installed and an
-**existing approved non-system project directory** supplied by the operator.
-The launcher never silently creates a new project root or installs a runtime.
+The same portable package now includes a **standalone Windows executable**
+`OMEGA-Local-Hub.exe` compiled from the existing governed R881 Python Hub.
+The R884 ten-ledger verifier is bundled in that executable for the Hub's
+`VERIFY_LEDGER_SET` operation. The source scripts remain included for audit
+and byte-identity checks. The normal UI and the compiled Hub require **no
+Python, Node, Git, package manager, or administrator installation** on the
+operator's Windows machine.
 
-To use local jobs, double-click `OPEN-OMEGA-HUB.cmd`, select the existing
-approved root, and leave its window open. In the OMEGA7 Local / Edge Hub panel,
-enter the token located at `.omega/hub-r881.token` inside that root. The
-worker binds only `127.0.0.1:8765`. The token must remain private. The browser
-panel uses ephemeral credentials in memory only. Each operation is restricted
-to the approved root; R195 residual restore remains HELD. Jobs may be queued,
-replayed and audited by receipt; arbitrary shell commands are not available.
+Double-click `OPEN-OMEGA.cmd` to open the local OMEGA7 interface.
+For bounded local jobs, double-click `OPEN-OMEGA-HUB.cmd`, supply an existing
+approved non-system project folder, and keep its window open. In the UI's
+Local / Edge Hub, enter the access token from that root's private
+`.omega/hub-r881.token` file. The worker uses only
+`127.0.0.1:8765`. Approved operations include bounded file hashing,
+CSV statistics, manifest export, ten-ledger verification and recorded
+copy operations; arbitrary shell commands remain unavailable.
 
-R896's dynamic browser port is now accepted by the Hub only for exact HTTP
-loopback origins; each actual API request still requires the private token and
-correct Host header. The Windows packaging proof compares the included Python
-worker and verifier SHA-256 values with their canonical checked-out sources. This is *local bounded
-automation*, not native GPU acceleration, authenticated Hybrid Link R141 host
-return, unattended installation, model inference, or production acceptance.
+The GitHub Windows CI package job actually starts the compiled EXE,
+authenticates over HTTP, proves missing/incorrect-token refusal and an
+ephemeral loopback origin, completes a bounded HASH_TREE task, and checks its
+returned SHA-256 receipt. The EXE compilation and runner tests do **not**
+prove Hybrid Link pairing on the operator's PC, a native GPU workload,
+cloud authority, a signed installer lifecycle or full offline AI inference.
+That separate authority remains governed by R125/R141/R146/R147/R237.
 
 ## R897 full-package integrity guard
 
