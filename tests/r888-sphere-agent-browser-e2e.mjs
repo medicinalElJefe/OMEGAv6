@@ -383,6 +383,22 @@ async function prove(browser,label,viewport){
   assert.match(await durableLab.locator('[data-r895-field-result]').innerText(),/Analyzed 248,832 logical values across 12 agents/);
   const fieldBeforeChange=await durableLab.locator('[data-r895-field-result]').innerText();
   assert.match(fieldBeforeChange,/variance [0-9.]+/);
+  // R895 RELATIONAL BROWSER: real operator matrix and exported 66 pairs
+  // remain read-only; changing a state invalidates both result surfaces.
+  const matrix=durableLab.getByRole('table',{name:'Complete agent relationship matrix'});
+  assert.equal(await matrix.locator('tbody tr').count(),12);
+  assert.equal(await matrix.locator('tbody tr').first().locator('td').count(),12);
+  const [relationsDownload]=await Promise.all([
+    page.waitForEvent('download',{timeout:15000}),
+    durableLab.getByRole('button',{name:'Export complete pairwise relations CSV'}).click()
+  ]);
+  assert.equal(relationsDownload.suggestedFilename(),'omega-r895-agent-relations.csv');
+  const relationCSV=readFileSync(await relationsDownload.path(),'utf8');
+  const records=relationCSV.trim().split(/\\r?\\n/);
+  assert.equal(records.length,67,'CSV must include one header and exactly 66 pairs');
+  assert.match(records[0],/^agent_a,agent_b,shared_inner_coordinates,covariance,pearson_correlation/);
+  assert.ok(records.slice(1).every(line=>line.split(',')[2]==='20736'),'each pair must compare all 20,736 coordinates');
+  console.log('R895 RELATIONAL BROWSER '+label.toUpperCase()+' PASS: accessible 12×12 relation matrix and all 66 complete-coordinate CSV pairs.');
   await durableLab.getByRole('button',{name:'Local update'}).click();
   await durableLab.locator('[data-r895-field-status]').waitFor({state:'visible',timeout:8000});
   assert.equal(await durableLab.locator('[data-r895-field-result]').count(),0,'read-only field result must not masquerade as fresh after state mutation');
