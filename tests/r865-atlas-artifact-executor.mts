@@ -381,7 +381,7 @@ test('R957 exports complete recorded transition series as provenance-bearing JSO
  assert.match(handler,/physicalMeasurement:false,canonAdmission:false/);
  assert.match(handler,/transitionCount:transitions.length,transitions/);
  assert.match(handler,/coordinates:current.coordinates.map/);
- assert.ok(handler.includes(String.raw`JSON.stringify(payload,null,2)+'\\n'`),'JSON uses newline escape rather than literal backslash characters');
+ assert.ok(handler.includes(String.raw`JSON.stringify(payload,null,2)+'\n'`),'JSON uses newline escape rather than literal backslash characters');
  assert.match(ui,/onClick={downloadAllTransitionsR957}>Download all transitions JSON/);
  assert.doesNotMatch(handler,/fetch\(|executeLocalTurns\(/);
  const trace=[{step:0,address:3,coordinates:[1,1,1,4]},{step:1,address:3,coordinates:[1,1,1,4]},{step:2,address:8,coordinates:[1,1,1,9]},{step:3,address:8,coordinates:[1,1,1,9]},{step:4,address:2,coordinates:[1,1,1,3]}];
