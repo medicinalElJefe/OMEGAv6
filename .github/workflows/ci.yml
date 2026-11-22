@@ -528,12 +528,13 @@ jobs:
           Copy-Item -LiteralPath '.\install\OPEN-OMEGA.cmd' -Destination (Join-Path $folder 'OPEN-OMEGA.cmd')
           Copy-Item -LiteralPath '.\install\Start-OMEGA-Local.ps1' -Destination (Join-Path $folder 'Start-OMEGA-Local.ps1')
           Copy-Item -LiteralPath '.\install\OPEN-OMEGA-HUB.cmd' -Destination (Join-Path $folder 'OPEN-OMEGA-HUB.cmd')
+          Copy-Item -LiteralPath '.\install\OPEN-OMEGA-INTEGRATED.cmd' -Destination (Join-Path $folder 'OPEN-OMEGA-INTEGRATED.cmd')
           Copy-Item -LiteralPath '.\tools\omega_local_hub_r881.py' -Destination (Join-Path $folder 'omega_local_hub_r881.py')
           Copy-Item -LiteralPath '.\tools\omega_absolute_truth_verifier_r884.py' -Destination (Join-Path $folder 'omega_absolute_truth_verifier_r884.py')
           Copy-Item -LiteralPath '.\install\Verify-OMEGA-Package.ps1' -Destination (Join-Path $folder 'Verify-OMEGA-Package.ps1')
           if (-not (Test-Path (Join-Path $folder 'dist\index.html'))) { throw 'Packaged OMEGA entry not found' }
           [System.IO.File]::WriteAllText((Join-Path $folder 'READ-ME-FIRST.txt'),
-            "Double-click OPEN-OMEGA.cmd for the local OMEGA7 interface without Python or Node. For optional bounded local file automation, double-click OPEN-OMEGA-HUB.cmd (Python not required), select an existing approved non-system root, and authenticate in OMEGA Local / Edge Hub using its private token. Cloud Worker, Hybrid Link native agent, GPU execution, full installer lifecycle, and production promotion remain separate and NOT proven by this package.",[System.Text.Encoding]::UTF8)
+            "Double-click OPEN-OMEGA-INTEGRATED.cmd for the existing verified OMEGA7 interface plus authenticated local worker, or OPEN-OMEGA.cmd for the UI alone. For optional bounded local file automation, double-click OPEN-OMEGA-HUB.cmd (Python not required), select an existing approved non-system root, and authenticate in OMEGA Local / Edge Hub using its private token. Cloud Worker, Hybrid Link native agent, GPU execution, full installer lifecycle, and production promotion remain separate and NOT proven by this package.",[System.Text.Encoding]::UTF8)
           # File hashes detect package drift. The manifest is not a cryptographic signature.
           $files = @(Get-ChildItem -LiteralPath $folder -Recurse -File -Force | Sort-Object FullName | ForEach-Object {
             @{
