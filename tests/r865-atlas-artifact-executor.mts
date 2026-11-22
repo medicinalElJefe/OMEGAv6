@@ -185,3 +185,15 @@ test('R943 selected Atlas step exports inspectable model-state JSON with provena
  assert.match(segment,/physicalMeasurement:false,canonAdmission:false/);
  assert.match(ui,/onClick=\{downloadSelectedAtlasStepR943\}>Download selected step JSON/);
 });
+
+test('R944 selected-step download is valid JSON with a real newline terminator',()=>{
+ const ui=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
+ const segment=ui.split('const downloadSelectedAtlasStepR943=()=>{')[1]?.split('const downloadLocalTurnJson=()=>{')[0];
+ assert.ok(segment,'selected-step exporter must exist');
+ assert.ok(segment.includes("JSON.stringify(payload,null,2)+'\\n'"),'export must append a real newline escape');
+ assert.ok(!segment.includes("JSON.stringify(payload,null,2)+'\\\\n'"),'literal backslash-n would invalidate downloaded JSON');
+ const example={schema:'OMEGA_ATLAS_SELECTED_STEP_R943_V1',step:1,address:11498};
+ const serialized=JSON.stringify(example,null,2)+'\n';
+ assert.deepEqual(JSON.parse(serialized),example);
+ assert.equal(serialized.charCodeAt(serialized.length-1),10);
+});
