@@ -542,12 +542,11 @@ jobs:
           Compress-Archive -LiteralPath $folder -DestinationPath $zip -Force -CompressionLevel Optimal
           $length = (Get-Item -LiteralPath $zip).Length
           if ($length -gt 160MB) { throw "R896 portable package exceeds the 160 MiB download limit: $length bytes" }
-          Copy-Item -LiteralPath $zip -Destination (Join-Path $PWD 'OMEGA-Windows-Portable-R896.zip')
           Write-Host "R896 tested Windows ZIP built, $length bytes, exact source $env:GITHUB_SHA."
       - uses: actions/upload-artifact@v4
         with:
           name: OMEGA-Windows-Portable-R896
-          path: OMEGA-Windows-Portable-R896.zip
+          path: ${{ runner.temp }}/OMEGA-Windows-Portable/
           if-no-files-found: error
           retention-days: 7
 
