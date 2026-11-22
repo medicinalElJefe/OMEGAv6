@@ -31,6 +31,25 @@ for(const badStatus of ['COMPLETE_BUT_NOT_REAL','',42,null,'RUNNING\\nCANON_APPR
  assert.throws(()=>restoreMissionJournalR894(JSON.stringify({schema:R894_SCHEMA,single:{...single,status:badStatus},collective:null})),/Untrusted cloud mission status/);
  assert.throws(()=>restoreMissionJournalR894(JSON.stringify({schema:R894_SCHEMA,single:null,collective:{...collective,status:badStatus}})),/Untrusted cloud mission status/);
 }
+// R894 STRICT IDENTITY: the restored journal must fail closed when any address,
+// root membership, or mission identifier is altered independently of its status.
+for(const candidate of [
+  {...single,originShell:4},
+  {...single,originInner:20736},
+  {...single,originOuter:20736},
+  {...single,originAgent:id+1},
+  {...single,missionId:'x'.repeat(129)},
+  {...single,truthClass:'CANON_ADMITTED'}
+])assert.throws(()=>restoreMissionJournalR894(JSON.stringify({schema:R894_SCHEMA,single:candidate,collective:null})),/Untrusted/);
+for(const candidate of [
+  {...collective,members:[id+1,id+2]},
+  {...collective,members:[id,-1]},
+  {...collective,members:Array.from({length:13},(_,i)=>id+i)},
+  {...collective,rootAgent:-1},
+  {...collective,inner:20736},
+  {...collective,missionId:'../forged'},
+  {...collective,localMutation:true}
+])assert.throws(()=>restoreMissionJournalR894(JSON.stringify({schema:R894_SCHEMA,single:null,collective:candidate})),/Untrusted/);
 assert.throws(()=>restoreMissionJournalR894(JSON.stringify({schema:R894_SCHEMA})),/Invalid/);
 const ui=readFileSync('src/SphereAgentInstrumentR887.tsx','utf8');
 for(const token of ['R894_STORAGE_KEY','serializeMissionJournalR894','restoreMissionJournalR894','shouldWatchMissionR894','Watch individual cloud mission read-only','Watch collective cloud mission read-only','5000','api.get<any>','window.localStorage.setItem(R894_STORAGE_KEY'])assert.ok(ui.includes(token),'R894 UI contract missing '+token);
