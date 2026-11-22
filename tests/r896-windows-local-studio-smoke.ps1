@@ -62,7 +62,7 @@ try {
     $supervisorFile = Join-Path $package 'Start-OMEGA-Integrated.ps1'
     if (-not (Test-Path -LiteralPath $supervisorFile -PathType Leaf)) { throw 'Integrated supervisor missing' }
     $supervisorText = Get-Content -LiteralPath $supervisorFile -Raw
-    foreach ($guard in @('Verify-OMEGA-Package.ps1','OMEGA-Local-Hub.exe','Start-OMEGA-Local.ps1','SystemDrive','Stop-Process','-SelfTest')) {
+    foreach ($guard in @('Verify-OMEGA-Package.ps1','OMEGA-Local-Hub.exe','Start-OMEGA-Local.ps1','SystemDrive','Stop-Process','$SelfTest')) {
         if (-not $supervisorText.Contains($guard)) { throw ('Unified OMEGA7 supervision guard missing: ' + $guard) }
     }
     $hubLauncherText = Get-Content -LiteralPath $hubLauncher -Raw
