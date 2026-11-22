@@ -43,3 +43,40 @@ export function analyzeCollectiveFieldR895(fabric,members){
   memberCount:members.length,innerValuesPerAgent:SIZE,modifiedValues:members.reduce((s,id)=>s+(fabric.active.get(id)?.values.size||0),0),
   ...finish(global),agents,canonMutated:false,cloudDispatch:false,fullScan:true};
 }
+
+// R895 pairwise relational analysis: compare the same 20,736 inner coordinates
+// across each selected agent. Pearson correlation is a synthetic field statistic,
+// not a physical causal relation or a trained model's inference. Zero-variance
+// comparisons are undefined (null), never represented as artificial agreement.
+export function analyzeCollectiveRelationsR895(fabric,members){
+ if(!fabric||!(fabric.active instanceof Map)||!Array.isArray(members)||members.length<1||members.length>R895_FIELD_MAX_AGENTS)
+  throw new RangeError('Pairwise field analysis requires 1–12 logical agents');
+ const seen=new Set();
+ for(const id of members){
+  if(!Number.isSafeInteger(id)||id<0||id>=AGENTS||seen.has(id))throw new RangeError('Invalid or duplicate logical agent');
+  seen.add(id);
+ }
+ const pairs=[];
+ for(let a=0;a<members.length;a++)for(let b=a+1;b<members.length;b++){
+  const agentA=members[a],agentB=members[b];
+  let meanA=0,meanB=0,m2A=0,m2B,cross=0;
+  // Bivariate Welford update avoids unstable E[XY]-E[X]E[Y] subtraction.
+  for(let inner=0;inner<SIZE;inner++){
+   const x=stateValue(fabric,agentA,inner),y=stateValue(fabric,agentB,inner);
+   if(!Number.isFinite(x)||x<0||x>1||!Number.isFinite(y)||y<0||y>1)
+    throw new Error('Invalid paired logical state');
+   const n=inner+1,dx=x-meanA,dy=y-meanB;
+   meanA+=dx/n;meanB+=dy/n;
+   m2A+=dx*(x-meanA);m2B+=dy*(y-meanB);
+   cross+=dx*(y-meanB);
+  }
+  const varA=Math.max(0,m2A/SIZE),varB=Math.max(0,m2B/SIZE);
+  const covariance=cross/SIZE;
+  const correlation=varA===0||varB===0?null:Math.max(-1,Math.min(1,covariance/Math.sqrt(varA*varB)));
+  pairs.push({agentA,agentB,sharedCoordinates:SIZE,covariance,correlation,varianceA:varA,varianceB:varB,
+   undefinedReason:correlation===null?'ZERO_VARIANCE':null});
+ }
+ return {schema:'OMEGA_SPHERE_FIELD_RELATIONS_R895',evidence:R895_FIELD_EVIDENCE,memberCount:members.length,
+  sharedInnerCoordinates:SIZE,pairCount:pairs.length,pairs,canonMutated:false,cloudDispatch:false,
+  learnedModel:false,physicalCausalityClaimed:false};
+}
