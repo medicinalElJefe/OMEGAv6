@@ -5,7 +5,7 @@ param([Parameter(Mandatory=$true)][string]$PackageRoot)
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $package = (Resolve-Path -LiteralPath $PackageRoot).Path
-$worker = Join-Path $package 'OMEGA-Local-Hub.exe'
+$worker = Join-Path $package 'OMEGA-Local-Hub\OMEGA-Local-Hub.exe'
 if (-not (Test-Path -LiteralPath $worker -PathType Leaf)) { throw 'Packaged local worker missing' }
 $root = Join-Path $env:RUNNER_TEMP ('omega-r897-hub-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $root -Force | Out-Null
