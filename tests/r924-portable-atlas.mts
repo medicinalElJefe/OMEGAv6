@@ -125,3 +125,15 @@ test('R962 any recorded Atlas step can execute compiled-field inspection, includ
  assert.match(control,/setExecutionPlaying\(false\);void inspectAtlas\(localTurnResult\.trace\[selectedExecutionStep\]\.address\)/);
  assert.ok(!control.includes('setSelectedExecutionStep('),'inspection does not alter the recorded replay position');
 });
+
+test('R963 offline Atlas cannot offer a verified-host JSON download control',()=>{
+ const ui=readFileSync(new URL('../src7/workspaces/SharedArtifactLibraryR864.tsx',import.meta.url),'utf8');
+ const start=ui.indexOf("onClick={downloadLocalTurnJson}");
+ assert.ok(start>0,'verified execution JSON control exists');
+ const control=ui.slice(ui.lastIndexOf('<button',start),ui.indexOf('</button>',start)+9);
+ assert.match(control,/disabled=\{running\|\|localTurnResult\.artifact\.id==='offline-model-derived'\}/);
+ assert.match(control,/Verified execution JSON unavailable \(offline\)/);
+ assert.match(control,/use Portable Atlas JSON export/);
+ const handler=ui.slice(ui.indexOf('const downloadLocalTurnJson='),ui.indexOf('const downloadPortableAtlasR924='));
+ assert.match(handler,/if\(localTurnResult\.artifact\.id==='offline-model-derived'\)/,'handler retains fail-closed defense');
+});
