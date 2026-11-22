@@ -85,6 +85,22 @@ try {
         $verifyResult.error -notmatch 'LEDGER_SET_EXACT_TEN_LEDGERS_REQUIRED_HELD') {
         throw "R884 verifier was not executed inside packaged Hub: $($verifyResult.state) $($verifyResult.error)"
     }
+    # Prove R899 adapter is executable inside the compiled worker, not merely copied.
+    # Invalid model must be rejected by R899 itself without contacting any model.
+    $inferPayload = '{"operation":"LOCAL_INFER","args":{"model":"invalid model name","prompt":"test"}}'
+    $inferQueued = Invoke-WebRequest -Uri "http://127.0.0.1:$port/api/hub/jobs" -Headers $headers -UseBasicParsing -Method Post -ContentType 'application/json' -Body $inferPayload -TimeoutSec 5
+    $inferJob = ($inferQueued.Content | ConvertFrom-Json).job
+    if (-not $inferJob.id) { throw 'R899 local model adapter did not queue' }
+    $inferResult = $null
+    for ($poll=0;$poll -lt 80;$poll++) {
+        $read = Invoke-WebRequest -Uri ("http://127.0.0.1:$port/api/hub/jobs/" + $inferJob.id) -Headers $headers -UseBasicParsing -TimeoutSec 5
+        $inferResult = ($read.Content | ConvertFrom-Json).job
+        if ($inferResult.state -in @('COMPLETED','FAILED','HELD')) { break }
+        Start-Sleep -Milliseconds 100
+    }
+    if ($null -eq $inferResult -or $inferResult.error -notmatch 'LOCAL_INFER_MODEL_REQUIRED') {
+        throw "R899 local model adapter not executing inside bundled EXE: $($inferResult.state) $($inferResult.error)"
+    }
     Write-Host 'R898 PACKAGED WINDOWS HUB EXE PASS: authenticated compiled worker, SHA-256 HASH_TREE receipt, and actual embedded R884 ledger-verifier fail-closed execution. CI RUNNER ONLY.'
 } finally {
     if ($null -ne $process -and -not $process.HasExited) { Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue }
