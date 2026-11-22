@@ -156,3 +156,17 @@ test('R940 bounds local artifact readbacks in UTF-8 bytes before accepting recov
  }
  assert.doesNotMatch(execution,/saved\.content\.length>131072/);
 });
+
+
+test('R942 selected Atlas playback state can seed the next real local execution',()=>{
+ const ui=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
+ const start=ui.indexOf("aria-label='Use selected Atlas trace address as next start'");
+ assert.ok(start>0,'replay-to-executor action is visible');
+ const button=ui.slice(start-500,start+140);
+ assert.match(button,/localTurnResult\.trace\[Math\.min\(selectedExecutionStep,localTurnResult\.trace\.length-1\)\]/);
+ assert.match(button,/setAtlasAddress\(String\(step\.address\)\)/);
+ assert.match(button,/setExecutionPlaying\(false\)/);
+ assert.match(button,/disabled=\{running\}/);
+ const executor=ui.split('const executeLocalTurns=async()=>{')[1]?.split('const recoverLocalTurns=async(id:string)=>{')[0];
+ assert.ok(executor&&executor.includes('parseAtlasAddressInputR916(atlasAddress)'),'new execution consumes the selected Atlas start address');
+});
