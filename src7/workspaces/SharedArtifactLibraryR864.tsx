@@ -110,7 +110,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
    const previous=trace[i-1],current=trace[i];
    if(current.address!==previous.address)lines.push([previous.step,current.step,previous.address,current.address,localTurnResult.artifact.contentSha256,offline?'offline-model-derived-origin-unverified':'verified-local-executor-artifact'].join(','));
   }
-  const url=URL.createObjectURL(new Blob([lines.join('\\r\\n')+'\\r\\n'],{type:'text/csv;charset=utf-8'}));
+  const url=URL.createObjectURL(new Blob([lines.join('\r\n')+'\r\n'],{type:'text/csv;charset=utf-8'}));
   const link=document.createElement('a');link.href=url;link.download='omega-atlas-transitions-'+(offline?'offline-model':'verified-local')+'.csv';document.body.appendChild(link);link.click();link.remove();window.setTimeout(()=>URL.revokeObjectURL(url),1000);
   setExecutionStatus('Exported '+(lines.length-1)+' recorded address transitions across '+trace.length+' states. '+(offline?'Offline origin remains unverified.':'Local artifact provenance retained.')+' Model transitions are not physical measurements.');
  };
