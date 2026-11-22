@@ -71,7 +71,7 @@ try {
     Write-Host 'Local Hub authenticated on 127.0.0.1:8765. No native GPU or paired-PC claim.'
     Write-Host 'Select Local / Edge Hub in OMEGA7 and load your private token file.'
     if ($SelfTest) {
-        $readyFile = Join-Path $env:TEMP ('omega-r898-integrated-' + [guid]::NewGuid().ToString('N') + '.txt')
+        $readyFile = Join-Path (Join-Path $root '.omega') ('omega-r898-integrated-' + [guid]::NewGuid().ToString('N') + '.txt')
         $args = @('-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass',
                   '-File',('"' + $server + '"'),'-NoBrowser','-ReadyFile',('"' + $readyFile + '"'))
         $uiProcess = Start-Process -FilePath 'powershell.exe' -ArgumentList $args -PassThru -WindowStyle Hidden
