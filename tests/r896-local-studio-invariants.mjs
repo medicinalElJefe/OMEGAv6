@@ -11,6 +11,11 @@ for(const key of [
 ])assert.ok(server.includes(key),'R896 local server contract missing: '+key);
 assert.ok(!server.includes('0.0.0.0'),'R896 must not accept public TCP binding');
 assert.ok(!server.includes('HttpListener'),'R896 should not require administrator URLACL');
+assert.ok(server.includes("HTTP/1\\.[01]$')"),'R896 request parser regex must retain its literal closing dollar and quote');
+assert.ok(server.includes('$rawPath = ($requestMatch.Groups[2].Value'),'R896 request parser must preserve exact captured path');
+assert.equal(server.split('try { $decoded = [System.Uri]::UnescapeDataString').length,2,'R896 must contain exactly one intact URI decode block');
+assert.equal(server.split('$requestMatch = [System.Text.RegularExpressions.Regex]::Match').length,2,'R896 must contain exactly one intact HTTP request parser');
+
 assert.ok(launch.includes('Start-OMEGA-Local.ps1'),'R896 must be double-click launchable');
 for(const key of ['Invoke-WebRequest','Start-Process','127','api/health','StatusCode -eq 503','StatusCode -eq 404','Stop-Process'])
  assert.ok(smoke.includes(key),'R896 Windows smoke contract missing: '+key);
