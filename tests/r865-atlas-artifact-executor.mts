@@ -339,6 +339,10 @@ test('R953 exports a selected actual transition with explicit provenance and ref
  assert.match(handler,/physicalMeasurement:false,canonAdmission:false/);
  assert.match(handler,/from:\{step:previous\.step,address:previous\.address,coordinates:previous\.coordinates\}/);
  assert.match(handler,/to:\{step:current\.step,address:current\.address,coordinates:current\.coordinates\}/);
+ assert.match(handler,/delta:\{address:current\.address-previous\.address,coordinates:current\.coordinates\.map\(\(value,i\)=>value-previous\.coordinates\[i\]\)\}/);
+ const fromCoordinates=[1,11,5,0],toCoordinates=[3,0,5,9];
+ const delta={address:8-3,coordinates:toCoordinates.map((value,i)=>value-fromCoordinates[i])};
+ assert.deepEqual(JSON.parse(JSON.stringify(delta)),{address:5,coordinates:[2,-11,0,9]});
  assert.ok(handler.includes(String.raw`JSON.stringify(payload,null,2)+'\n'`),'JSON export uses a real newline escape');
  assert.match(ui,/onClick={downloadSelectedTransitionR953}>Download selected transition JSON/);
  const trace=[{step:0,address:3},{step:1,address:3},{step:2,address:8},{step:3,address:8}];
