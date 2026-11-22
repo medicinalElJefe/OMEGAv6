@@ -28,6 +28,12 @@ assert.ok(!verify.includes(".Replace('"+windowsSlash+windowsSlash+"','/')"),'R89
 for(const key of ['OMEGA_WINDOWS_PACKAGE_FILES_SHA256_R897','Get-FileHash','SHA256','ReparsePoint','Package file count differs','Duplicate package manifest path'])
  assert.ok(verify.includes(key),'R897 manifest integrity guard missing: '+key);
 const workflow=readFileSync('.github/workflows/ci.yml','utf8');
+// PyInstaller cannot discover imports from the R884/R899 runtime-loaded
+// sibling source modules unless the compiled worker lists them explicitly.
+for(const dep of ['xml.etree.ElementTree','zipfile','urllib.request','urllib.error'])
+ assert.ok(workflow.includes('--hidden-import '+dep),
+  'R899 Windows EXE missing dynamically-loaded runtime dependency: '+dep);
+
 for(const key of ['hash_schema = \'OMEGA_WINDOWS_PACKAGE_FILES_SHA256_R897\'','Verify-OMEGA-Package.ps1','hash_authentication_signature = $false'])
  assert.ok(workflow.includes(key),'R897 package assembly and evidence contract missing: '+key);
 
