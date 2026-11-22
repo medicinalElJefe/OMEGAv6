@@ -74,3 +74,17 @@ test('R929 failed verified-host JSON recovery cannot retain a stale trace',()=>{
  assert.ok(clear>=0&&reset>=0&&validation>clear&&validation>reset,'clear prior trace and cursor before parsing');
  assert.ok(display>validation,'only display a validated trace');
 });
+
+
+test('R959 selecting a recorded transition inspects its compiled destination address',()=>{
+ const ui=readFileSync(new URL('../src7/workspaces/SharedArtifactLibraryR864.tsx',import.meta.url),'utf8');
+ const start=ui.indexOf("aria-label='Recorded Atlas address transitions'");
+ const end=ui.indexOf("aria-label='Selected Atlas transition coordinate deltas'",start);
+ assert.ok(start>=0&&end>start,'recorded transition selector and coordinate display exist');
+ const selector=ui.slice(start,end);
+ assert.match(selector,/state\.address!==localTurnResult\.trace\[i\]\.address/,'only real changes are selectable');
+ assert.match(selector,/setExecutionPlaying\(false\);setSelectedExecutionStep\(state\.step\);void inspectAtlas\(state\.address\)/,'transition selection pauses playback and inspects the compiled destination');
+ const inspect=ui.slice(ui.indexOf('const inspectAtlas=async('),ui.indexOf('const exportCompleteAtlas='));
+ assert.match(inspect,/inspectAtlasAddressR897\(field,address\)/,'inspection executes against the compiled model');
+ assert.match(inspect,/setInspectedAddress\(address\);setInspectedValues\(values\)/,'inspection produces visible field values');
+});
