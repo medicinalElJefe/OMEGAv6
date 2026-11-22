@@ -388,3 +388,23 @@ test('R957 exports complete recorded transition series as provenance-bearing JSO
  const transitions=trace.slice(1).flatMap((current,i)=>{const previous=trace[i];return current.address===previous.address?[]:[{from:previous.step,to:current.step,delta:current.coordinates.map((value,j)=>value-previous.coordinates[j])}];});
  assert.deepEqual(transitions,[{from:1,to:2,delta:[0,0,0,5]},{from:3,to:4,delta:[0,0,0,-6]}]);
 });
+
+test('R958 exports only actual address changes with signed coordinate deltas and provenance',()=>{
+ const ui=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
+ const start=ui.indexOf('const downloadTransitionDeltasR958=()=>');
+ const end=ui.indexOf('const downloadAllTransitionsR957=()=>',start);
+ assert.ok(start>=0&&end>start,'transition delta CSV handler exists');
+ const handler=ui.slice(start,end);
+ assert.match(handler,/current.address===previous.address\)continue/);
+ assert.match(handler,/current.coordinates.map\(\(value,j\)=>value-previous.coordinates\[j\]\)/);
+ assert.match(handler,/delta_D,delta_P,delta_R,delta_L/);
+ assert.match(handler,/source_trace_sha256,provenance/);
+ assert.match(handler,/localTurnResult.artifact.contentSha256/);
+ assert.ok(handler.includes(String.raw`rows.join('\\r\\n')+'\\r\\n'`),'CSV uses actual CRLF escape sequences');
+ assert.match(handler,/offline-model-derived-origin-unverified/);
+ assert.match(ui,/onClick={downloadTransitionDeltasR958}>Download transition deltas CSV/);
+ assert.doesNotMatch(handler,/fetch\(|executeLocalTurns\(/);
+ const trace=[{step:0,address:7,coordinates:[0,0,0,7]},{step:1,address:7,coordinates:[0,0,0,7]},{step:2,address:2,coordinates:[0,0,0,2]}];
+ const deltas=trace.slice(1).flatMap((current,i)=>{const previous=trace[i];return current.address===previous.address?[]:[current.coordinates.map((v,j)=>v-previous.coordinates[j])];});
+ assert.deepEqual(deltas,[[0,0,0,-5]]);
+});
