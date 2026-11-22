@@ -53,6 +53,12 @@ try {
     }
     $workerExe = Join-Path $package 'OMEGA-Local-Hub.exe'
     if (-not (Test-Path -LiteralPath $workerExe -PathType Leaf)) { throw 'Native local Hub executable not packaged' }
+    $combined = Join-Path $package 'OPEN-OMEGA-INTEGRATED.cmd'
+    if (-not (Test-Path -LiteralPath $combined -PathType Leaf)) { throw 'Unified OMEGA7 launch entry missing' }
+    $combinedText = Get-Content -LiteralPath $combined -Raw
+    foreach ($guard in @('Verify-OMEGA-Package.ps1','OMEGA-Local-Hub.exe','OPEN-OMEGA.cmd','SystemDrive')) {
+        if (-not $combinedText.Contains($guard)) { throw ('Unified OMEGA7 launch path missing: ' + $guard) }
+    }
     $hubLauncherText = Get-Content -LiteralPath $hubLauncher -Raw
     if ($hubLauncherText -notmatch 'OMEGA-Local-Hub[.]exe' -or $hubLauncherText -notmatch '8765') {
         throw 'Optional Hub launcher does not execute the pinned local Hub endpoint'
