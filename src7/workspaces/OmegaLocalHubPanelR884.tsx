@@ -27,6 +27,7 @@ export default function OmegaLocalHubPanelR884(){
  const [operation,setOperation]=useState<Operation>('HASH_TREE'),[source,setSource]=useState('.'),[destination,setDestination]=useState('exports/omega-artifact.json');
  const [delay,setDelay]=useState('0'),[eventName,setEventName]=useState(''),[jobs,setJobs]=useState<HubJob[]>([]);
  const [model,setModel]=useState(''),[prompt,setPrompt]=useState(''),[maxTokens,setMaxTokens]=useState('256');
+ const [installedModels,setInstalledModels]=useState<string[]>([]);
  const [selected,setSelected]=useState<string|null>(null),[info,setInfo]=useState('Local daemon is not connected.');
  const [busy,setBusy]=useState(false),[connectedAt,setConnectedAt]=useState<number|null>(null);
  const tokenRef=useRef<HTMLInputElement|null>(null);
@@ -55,6 +56,23 @@ export default function OmegaLocalHubPanelR884(){
    if(status.schema!=='OMEGA_LOCAL_EDGE_HUB_R881'||status.physicalPcAccepted!==false)throw Error('Unexpected local schema or asserted PC acceptance.');
    setState('LOOPBACK_AUTHENTICATED');setConnectedAt(Date.now());setJobs(Array.isArray(list.jobs)?list.jobs as HubJob[]:[]);
    setInfo('Authenticated loopback response verified. This is NOT device, GPU, native execution, or federation acceptance.');
+  });
+ };
+ const discoverModels=async()=>{
+  if(!token){setInfo('Authenticate the local Hub before listing installed models.');return;}
+  await act(async()=>{
+   try{
+    const r=await requestHub(token,'/api/hub/models');
+    if(r.schema!=='OMEGA_LOCAL_MODELS_R899'||!Array.isArray(r.models))throw Error('Unexpected local model inventory schema.');
+    const names=(r.models as unknown[]).filter((n):n is string=>typeof n==='string'&&/^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,127}$/.test(n));
+    if(names.length!==r.models.length)throw Error('Invalid local model inventory.');
+    setInstalledModels(names);
+    if(names.length===1)setModel(names[0]);
+    setInfo(names.length?'Installed local models loaded from authenticated loopback. No downloads.':'No local models installed; inference remains unavailable.');
+   }catch(error){
+    setInstalledModels([]);
+    setInfo(error instanceof Error?error.message:'Local model service unavailable; no response fabricated.');
+   }
   });
  };
  const queue=async()=>{
@@ -114,7 +132,10 @@ export default function OmegaLocalHubPanelR884(){
      <label>{operation==='HASH_TREE'?'Project folder':operation==='EXPORT_MANIFEST'?'Source files (one per line)':'Source relative file'}<textarea style={field} rows={2} value={source} onChange={e=>setSource(e.target.value)} spellCheck={false}/></label>
      {(operation==='COPY_ARTIFACT'||operation==='EXPORT_MANIFEST')&&<label>New destination path<input style={field} value={destination} onChange={e=>setDestination(e.target.value)} spellCheck={false}/></label>}
      {operation==='LOCAL_INFER'&&<>
-      <label>Installed local model name<input style={field} value={model} onChange={e=>setModel(e.target.value)} placeholder='e.g. llama3.2' maxLength={128}/></label>
+      <label>Installed local model name<input style={field} value={model} onChange={e=>setModel(e.target.value)} placeholder='e.g. llama3.2' maxLength={128}/>
+       <button type='button' style={{...button,marginTop:6}} disabled={busy||state!=='LOOPBACK_AUTHENTICATED'} onClick={discoverModels}>Find installed local models</button>
+       {installedModels.length>0&&<select aria-label='Choose installed Ollama model' style={{...field,marginTop:6}} value={installedModels.includes(model)?model:''} onChange={e=>setModel(e.target.value)}><option value=''>Choose a local model</option>{installedModels.map(name=><option key={name} value={name}>{name}</option>)}</select>}
+      </label>
       <label>Local model prompt<textarea style={field} rows={4} maxLength={8192} value={prompt} onChange={e=>setPrompt(e.target.value)} spellCheck={false}/></label>
       <label>Maximum generated tokens (1–512)<input style={field} type='number' min={1} max={512} step={1} value={maxTokens} onChange={e=>setMaxTokens(e.target.value)}/></label>
      </>}
