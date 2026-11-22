@@ -2,12 +2,13 @@
 # No Node, Python, Git, admin rights, installation, or cloud pairing required on the end-user PC.
 [CmdletBinding()]
 param(
-    [string] $SiteRoot = (Join-Path $PSScriptRoot 'dist'),
+    [string] $SiteRoot,
     [switch] $NoBrowser,
     [string] $ReadyFile
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+if (-not $SiteRoot) { $SiteRoot = Join-Path $PSScriptRoot 'dist' }
 
 if (-not (Test-Path -LiteralPath $SiteRoot -PathType Container)) {
     throw 'OMEGA application files are missing. Extract the complete portable ZIP before launching.'
