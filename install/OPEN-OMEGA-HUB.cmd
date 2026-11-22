@@ -14,9 +14,8 @@ if not defined OMEGA_ROOT (
 )
 if not defined OMEGA_ROOT goto :invalid
 if not exist "%OMEGA_ROOT%\." goto :invalid
-if /I "%OMEGA_ROOT%"=="C:\" goto :invalid
-if /I "%OMEGA_ROOT%"=="C:" goto :invalid
-if /I "%OMEGA_ROOT%"=="%SystemRoot%" goto :invalid
+for %%I in ("%OMEGA_ROOT%") do set "OMEGA_FULL_ROOT=%%~fI"
+if /I "%OMEGA_FULL_ROOT:~0,2%"=="%SystemDrive%" goto :invalid
 echo.
 echo Your local Hub stores its private access token within this approved folder.
 echo Never publish the token or paste it into cloud chats.
@@ -32,8 +31,11 @@ if not defined OMEGA_PYTHON (
   echo Python was not found. The UI still works with OPEN-OMEGA.cmd.
   goto :failure
 )
-%OMEGA_PYTHON% --version
-if errorlevel 1 goto :failure
+%OMEGA_PYTHON% -c "import sys; sys.exit(0 if sys.version_info >= (3,12) else 1)"
+if errorlevel 1 (
+  echo Python 3.12 or newer is required for the optional local Hub.
+  goto :failure
+)
 echo.
 echo Starting token-protected Hub on 127.0.0.1:8765.
 echo Open OMEGA7 and select Local / Edge Automation Hub, then enter
