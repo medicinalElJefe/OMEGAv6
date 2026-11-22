@@ -18,8 +18,8 @@ try {
     foreach ($entry in $manifest.files) {
         $rel = [string]$entry.path
         if ($rel -notmatch '^[A-Za-z0-9_.\\/-]+$' -or
-            $rel.StartsWith('/') -or $rel.Contains('\\') -or
-            $rel -match '(^|/)\\.\\.?(/|$)' -or $rel.Contains(':') -or
+            $rel.StartsWith('/') -or $rel.Contains('\') -or
+            $rel -match '(^|/)\.\.?(/|$)' -or $rel.Contains(':') -or
             $rel -eq 'OMEGA-PACKAGE-EVIDENCE.json' -or
             $rel -notmatch '[^/]') {
             throw 'Unsafe package manifest path'
