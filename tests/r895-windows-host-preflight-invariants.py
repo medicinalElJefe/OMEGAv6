@@ -40,6 +40,9 @@ def run():
     assert receipt["status"] == "HOLD", "synthetic Linux fixture must never certify a host"
     assert receipt["held_conditions"] == ["windows_observed", "gpu_device_observed"]
     assert receipt["source"]["files"]["base"]["sha256"] == host.BASE_SHA256
+    assert receipt["source"]["files"]["base"]["git_blob_sha256"] == host.BASE_SHA256
+    assert receipt["source"]["files"]["base"]["checkout_matches_git_blob"] is True
+
     assert receipt["source"]["actual_commit"] == COMMIT
     assert receipt["conditions"]["exact_source_commit"] is True
     assert receipt["native_gpu_workload_proven"] is False
@@ -73,6 +76,8 @@ def run():
                                        observed_at="2026-01-01T00:00:00+00:00")
         assert no_source["status"] == "HOLD"
         assert not no_source["source"]["files"]["base"]["available"]
+        assert no_source["source"]["files"]["base"]["git_blob_sha256"] is None
+
         assert not no_source["source"]["files"]["wrapper"]["available"]
         assert host.verify_receipt(no_source)
     try:
