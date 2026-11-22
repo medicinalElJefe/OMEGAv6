@@ -51,8 +51,10 @@ try {
         (Get-FileHash -LiteralPath $verifierSource -Algorithm SHA256).Hash) {
         throw 'Packaged R884 verifier bytes differ from the canonical source'
     }
+    $workerExe = Join-Path $package 'OMEGA-Local-Hub.exe'
+    if (-not (Test-Path -LiteralPath $workerExe -PathType Leaf)) { throw 'Native local Hub executable not packaged' }
     $hubLauncherText = Get-Content -LiteralPath $hubLauncher -Raw
-    if ($hubLauncherText -notmatch 'omega_local_hub_r881[.]py' -or $hubLauncherText -notmatch '8765') {
+    if ($hubLauncherText -notmatch 'OMEGA-Local-Hub[.]exe' -or $hubLauncherText -notmatch '8765') {
         throw 'Optional Hub launcher does not execute the pinned local Hub endpoint'
     }
     # The operator launcher must reject a changed or incomplete package.
