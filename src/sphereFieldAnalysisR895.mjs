@@ -59,7 +59,7 @@ export function analyzeCollectiveRelationsR895(fabric,members){
  const pairs=[];
  for(let a=0;a<members.length;a++)for(let b=a+1;b<members.length;b++){
   const agentA=members[a],agentB=members[b];
-  let meanA=0,meanB=0,m2A=0,m2B,cross=0;
+  let meanA=0,meanB=0,m2A=0,m2B=0,cross=0;
   // Bivariate Welford update avoids unstable E[XY]-E[X]E[Y] subtraction.
   for(let inner=0;inner<SIZE;inner++){
    const x=stateValue(fabric,agentA,inner),y=stateValue(fabric,agentB,inner);
