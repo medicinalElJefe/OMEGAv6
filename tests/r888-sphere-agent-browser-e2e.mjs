@@ -362,7 +362,7 @@ async function prove(browser,label,viewport){
   const jump=durableLab.getByLabel('Global nested address');
   await jump.fill('5159780351');
   await durableLab.getByRole('button',{name:'Go to exact nested address'}).click();
-  await page.waitForFunction(()=>document.querySelector('[data-r895-global-address]')?.textContent?.includes('5,159,780,351'),null,{timeout:10000});
+  await page.waitForFunction(()=>document.querySelector('[data-r895-global-address]')?.textContent?.trim().startsWith('Global nested address: 5,159,780,351 /'),null,{timeout:10000});
   assert.match(await durableLab.locator('.r887-side h3').innerText(),/Agent 248,831/);
   assert.match(await durableLab.getByText('Shell 12 · outer 20736 · 20,736 independent inner values').innerText(),/Shell 12/);
   assert.equal(await durableLab.getByLabel('Exact inner state address').inputValue(),'20736');
