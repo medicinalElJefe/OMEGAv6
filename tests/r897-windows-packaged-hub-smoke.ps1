@@ -66,7 +66,26 @@ try {
         -not $finished.result_sha256 -or $finished.result.nativePcAccepted -ne $false) {
         throw "Packaged Hub did not execute and receipt-bound the actual local hash job: $($finished.state) $($finished.error)"
     }
-    Write-Host 'R898 PACKAGED WINDOWS HUB EXE PASS: authenticated compiled worker, ephemeral loopback origin, private token refusal, completed local HASH_TREE and SHA-256 receipt. CI RUNNER ONLY.'
+    # Prove the R884 verifier is bundled *inside* the executable at runtime,
+    # rather than passing HASH_TREE while VERIFY_LEDGER_SET remains broken.
+    $invalidManifest = Join-Path $root 'invalid-ledgers.json'
+    [System.IO.File]::WriteAllText($invalidManifest,'{"schema":"OMEGA_TEN_LEDGER_INPUT_R884","ledgers":[]}')
+    $verifyPayload = '{"operation":"VERIFY_LEDGER_SET","args":{"source":"invalid-ledgers.json"}}'
+    $verifyQueued = Invoke-WebRequest -Uri "http://127.0.0.1:$port/api/hub/jobs" -Headers $headers -UseBasicParsing -Method Post -ContentType 'application/json' -Body $verifyPayload -TimeoutSec 5
+    $verifyJob = ($verifyQueued.Content | ConvertFrom-Json).job
+    if (-not $verifyJob.id) { throw 'Bundled ledger verification did not queue' }
+    $verifyResult = $null
+    for ($poll=0;$poll -lt 80;$poll++) {
+        $read = Invoke-WebRequest -Uri ("http://127.0.0.1:$port/api/hub/jobs/" + $verifyJob.id) -Headers $headers -UseBasicParsing -TimeoutSec 5
+        $verifyResult = ($read.Content | ConvertFrom-Json).job
+        if ($verifyResult.state -in @('COMPLETED','FAILED','HELD')) { break }
+        Start-Sleep -Milliseconds 100
+    }
+    if ($null -eq $verifyResult -or $verifyResult.state -ne 'HELD' -or
+        $verifyResult.error -notmatch 'LEDGER_SET_EXACT_TEN_LEDGERS_REQUIRED_HELD') {
+        throw "R884 verifier was not executed inside packaged Hub: $($verifyResult.state) $($verifyResult.error)"
+    }
+    Write-Host 'R898 PACKAGED WINDOWS HUB EXE PASS: authenticated compiled worker, SHA-256 HASH_TREE receipt, and actual embedded R884 ledger-verifier fail-closed execution. CI RUNNER ONLY.'
 } finally {
     if ($null -ne $process -and -not $process.HasExited) { Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue }
     if (Test-Path -LiteralPath $root) { Remove-Item -LiteralPath $root -Recurse -Force -ErrorAction SilentlyContinue }
