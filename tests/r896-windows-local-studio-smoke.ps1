@@ -65,6 +65,13 @@ try {
     foreach ($guard in @('Verify-OMEGA-Package.ps1','OMEGA-Local-Hub.exe','Start-OMEGA-Local.ps1','SystemDrive','Stop-Process','$SelfTest')) {
         if (-not $supervisorText.Contains($guard)) { throw ('Unified OMEGA7 supervision guard missing: ' + $guard) }
     }
+    $inference = Join-Path $package 'omega_local_inference_r899.py'
+    $inferenceSource = Join-Path (Get-Location).Path 'tools/omega_local_inference_r899.py'
+    if (-not (Test-Path -LiteralPath $inference -PathType Leaf)) { throw 'R899 offline inference adapter missing' }
+    if ((Get-FileHash -LiteralPath $inference -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $inferenceSource -Algorithm SHA256).Hash) {
+        throw 'R899 packaged inference adapter bytes differ from checked-out source'
+    }
     $hubLauncherText = Get-Content -LiteralPath $hubLauncher -Raw
     if ($hubLauncherText -notmatch 'OMEGA-Local-Hub[.]exe' -or $hubLauncherText -notmatch '8765') {
         throw 'Optional Hub launcher does not execute the pinned local Hub endpoint'
