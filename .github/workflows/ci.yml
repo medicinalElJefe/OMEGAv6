@@ -533,7 +533,7 @@ jobs:
           Copy-Item -LiteralPath '.\install\Verify-OMEGA-Package.ps1' -Destination (Join-Path $folder 'Verify-OMEGA-Package.ps1')
           if (-not (Test-Path (Join-Path $folder 'dist\index.html'))) { throw 'Packaged OMEGA entry not found' }
           [System.IO.File]::WriteAllText((Join-Path $folder 'READ-ME-FIRST.txt'),
-            "Double-click OPEN-OMEGA.cmd for the local OMEGA7 interface without Python or Node. For optional bounded local file automation, install Python 3.12+, then double-click OPEN-OMEGA-HUB.cmd, select an existing approved non-system root, and authenticate in OMEGA Local / Edge Hub using its private token. Cloud Worker, Hybrid Link native agent, GPU execution, full installer lifecycle, and production promotion remain separate and NOT proven by this package.",[System.Text.Encoding]::UTF8)
+            "Double-click OPEN-OMEGA.cmd for the local OMEGA7 interface without Python or Node. For optional bounded local file automation, double-click OPEN-OMEGA-HUB.cmd (Python not required), select an existing approved non-system root, and authenticate in OMEGA Local / Edge Hub using its private token. Cloud Worker, Hybrid Link native agent, GPU execution, full installer lifecycle, and production promotion remain separate and NOT proven by this package.",[System.Text.Encoding]::UTF8)
           # File hashes detect package drift. The manifest is not a cryptographic signature.
           $files = @(Get-ChildItem -LiteralPath $folder -Recurse -File -Force | Sort-Object FullName | ForEach-Object {
             @{
@@ -551,7 +551,8 @@ jobs:
             local_ui = $true
             cloud_worker_embedded = $false
             optional_local_hub_source_embedded = $true
-            optional_local_hub_requires_python = $true
+            optional_local_hub_requires_python = $false
+            compiled_local_hub_executable_embedded = $true
             local_hub_authentication_required = $true
             native_gpu_executor_embedded = $false
             installer_lifecycle_proven = $false
