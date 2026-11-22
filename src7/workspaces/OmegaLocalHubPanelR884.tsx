@@ -3,7 +3,7 @@ import {useRef,useState,type CSSProperties} from 'react';
 type HubJob={id:string;operation:string;state:string;scheduled_ms:number;created_ms:number;updated_ms:number;error?:string|null;result_sha256?:string|null;result?:unknown;history?:{event:string;at_ms:number;details:string}[]};
 type Json=Record<string,unknown>;
 const BASE='http://127.0.0.1:8765';
-const OPS=['HASH_TREE','CSV_STATS','COPY_ARTIFACT','EXPORT_MANIFEST','VERIFY_LEDGER_SPLIT','VERIFY_LEDGER_SET','RESIDUAL_RESTORE'] as const;
+const OPS=['HASH_TREE','CSV_STATS','COPY_ARTIFACT','EXPORT_MANIFEST','VERIFY_LEDGER_SPLIT','VERIFY_LEDGER_SET','LOCAL_INFER','RESIDUAL_RESTORE'] as const;
 type Operation=typeof OPS[number];
 const surface:CSSProperties={padding:16,borderRadius:12,border:'1px solid #436079',background:'#0d1d2d',color:'#eff6fc',margin:'14px 0'};
 const field:CSSProperties={background:'#152f47',color:'#eaf5ff',border:'1px solid #607e98',padding:9,borderRadius:7,width:'100%',boxSizing:'border-box'};
@@ -26,6 +26,7 @@ export default function OmegaLocalHubPanelR884(){
  const [token,setToken]=useState(''),[state,setState]=useState<'UNCONNECTED'|'LOOPBACK_AUTHENTICATED'|'HELD'>('UNCONNECTED');
  const [operation,setOperation]=useState<Operation>('HASH_TREE'),[source,setSource]=useState('.'),[destination,setDestination]=useState('exports/omega-artifact.json');
  const [delay,setDelay]=useState('0'),[eventName,setEventName]=useState(''),[jobs,setJobs]=useState<HubJob[]>([]);
+ const [model,setModel]=useState(''),[prompt,setPrompt]=useState(''),[maxTokens,setMaxTokens]=useState('256');
  const [selected,setSelected]=useState<string|null>(null),[info,setInfo]=useState('Local daemon is not connected.');
  const [busy,setBusy]=useState(false),[connectedAt,setConnectedAt]=useState<number|null>(null);
  const tokenRef=useRef<HTMLInputElement|null>(null);
@@ -63,6 +64,13 @@ export default function OmegaLocalHubPanelR884(){
    if(!Number.isFinite(n)||n<0||n>604800)throw Error('Delay must be between 0 and 604800 seconds.');
    const args:Record<string,unknown>={};
    if(operation==='HASH_TREE')args.path=source||'.';
+   if(operation==='LOCAL_INFER'){
+    if(!/^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,127}$/.test(model)||!prompt.trim()||prompt.length>8192)
+      throw Error('Select an installed local model and a 1–8192 character prompt.');
+    const nTokens=Number(maxTokens);
+    if(!Number.isInteger(nTokens)||nTokens<1||nTokens>512)throw Error('Local inference token limit is 1–512.');
+    args.model=model;args.prompt=prompt;args.num_predict=nTokens;
+   }
    if(['CSV_STATS','VERIFY_LEDGER_SPLIT','VERIFY_LEDGER_SET','COPY_ARTIFACT'].includes(operation))args.source=source;
    if(operation==='COPY_ARTIFACT'||operation==='EXPORT_MANIFEST')args.destination=destination;
    if(operation==='EXPORT_MANIFEST')args.sources=source.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
@@ -105,9 +113,15 @@ export default function OmegaLocalHubPanelR884(){
      <label>Operation<select style={field} value={operation} onChange={e=>setOperation(e.target.value as Operation)}>{OPS.map(x=><option key={x} value={x}>{x.replaceAll('_',' ')}</option>)}</select></label>
      <label>{operation==='HASH_TREE'?'Project folder':operation==='EXPORT_MANIFEST'?'Source files (one per line)':'Source relative file'}<textarea style={field} rows={2} value={source} onChange={e=>setSource(e.target.value)} spellCheck={false}/></label>
      {(operation==='COPY_ARTIFACT'||operation==='EXPORT_MANIFEST')&&<label>New destination path<input style={field} value={destination} onChange={e=>setDestination(e.target.value)} spellCheck={false}/></label>}
+     {operation==='LOCAL_INFER'&&<>
+      <label>Installed local model name<input style={field} value={model} onChange={e=>setModel(e.target.value)} placeholder='e.g. llama3.2' maxLength={128}/></label>
+      <label>Local model prompt<textarea style={field} rows={4} maxLength={8192} value={prompt} onChange={e=>setPrompt(e.target.value)} spellCheck={false}/></label>
+      <label>Maximum generated tokens (1–512)<input style={field} type='number' min={1} max={512} step={1} value={maxTokens} onChange={e=>setMaxTokens(e.target.value)}/></label>
+     </>}
      <label>Delay (seconds, maximum one week)<input style={field} type='number' min='0' max='604800' step='1' value={delay} onChange={e=>setDelay(e.target.value)}/></label>
      <label>Optional event gate<input style={field} value={eventName} onChange={e=>setEventName(e.target.value)} placeholder='example: new_asset'/></label>
     </div>
+    {operation==='LOCAL_INFER'&&<p><small>Requires an already installed and running Ollama model at 127.0.0.1:11434. OMEGA never downloads a model, chooses a remote endpoint, or fabricates output. A failed connection is HELD. Results are durable local job receipts, not independent model accuracy or GPU proof.</small></p>}
     <p><small>For VERIFY LEDGER SET, provide the relative path to the pinned ten-ledger manifest. All file paths are relative to the approved local project directory. Internal daemon files, parent traversal and shell execution are blocked. R195 restoration stays HELD until source authority is proven.</small></p>
     <div style={{display:'flex',gap:8,flexWrap:'wrap'}}><button type='button' style={button} disabled={busy||state!=='LOOPBACK_AUTHENTICATED'} onClick={queue}>Submit persistent job</button><button type='button' style={button} disabled={busy||state!=='LOOPBACK_AUTHENTICATED'} onClick={emit}>Release event-matched jobs</button></div>
    </div>
