@@ -101,3 +101,15 @@ test('R960 Atlas inspection clears stale address and values before compiling ano
  assert.ok(clear>=0&&execute>clear&&display>execute,'clear stale inspection before compilation; display only computed values');
  assert.match(body,/catch\(e\)\{setError\('Atlas inspection rejected:/,'failed compilation must surface an error');
 });
+
+test('R961 execution and recovery clear stale compiled inspection from a previous trace',()=>{
+ const ui=readFileSync(new URL('../src7/workspaces/SharedArtifactLibraryR864.tsx',import.meta.url),'utf8');
+ for(const name of ['executeLocalTurns','recoverLocalTurns','importPortableAtlasR924','restoreOfflineAtlasR926']){
+  const start=ui.indexOf('const '+name+'=async');
+  assert.ok(start>=0,name+' exists');
+  const body=ui.slice(start,start+900);
+  const reset=body.indexOf('setLocalTurnResult(null);setSelectedExecutionStep(0);');
+  assert.ok(reset>=0,name+' resets trace');
+  assert.ok(body.indexOf('setInspectedAddress(null);setInspectedValues([]);',reset)>reset,name+' invalidates old computed values');
+ }
+});
