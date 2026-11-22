@@ -83,8 +83,13 @@ try {
             if ($headersRead -gt 16384) { continue }
             $requestMatch = [System.Text.RegularExpressions.Regex]::Match($requestLine,'^(GET|HEAD) (/[^ ]*) HTTP/1\.[01]
             try { $decoded = [System.Uri]::UnescapeDataString($rawPath) } catch { $decoded = '' }
-            if (-not $decoded.StartsWith('/') -or $decoded.Contains('\') -or $decoded.Contains([char]0) -or
-                $decoded -match '(^|/)\.\.?(/|$)' -or $decoded -match '[\x00-\x1f:]') {
+            $invalidPath = [string]::IsNullOrEmpty($decoded)
+            if (-not $decoded.StartsWith('/')) { $invalidPath = $true }
+            if ($decoded.IndexOf([char]92) -ge 0) { $invalidPath = $true }
+            if ($decoded.IndexOf([char]0) -ge 0) { $invalidPath = $true }
+            if ([regex]::IsMatch($decoded,'(^|/)\.\.?(/|$)')) { $invalidPath = $true }
+            if ([regex]::IsMatch($decoded,'[\x00-\x1f:]')) { $invalidPath = $true }
+            if ($invalidPath) {
                 Send-OmegaResponse $stream 403 'Forbidden' 'text/plain' ([System.Text.Encoding]::UTF8.GetBytes('Forbidden path')) $isHead
                 continue
             }
