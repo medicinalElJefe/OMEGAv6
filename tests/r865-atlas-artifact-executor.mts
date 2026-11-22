@@ -303,10 +303,10 @@ test('R950 exports only actual address transitions as parseable provenance-beari
  assert.match(handler,/source_trace_sha256,provenance/);
  assert.match(handler,/offline-model-derived-origin-unverified/);
  assert.match(handler,/verified-local-executor-artifact/);
- assert.ok(handler.includes(String.raw`lines.join('\\r\\n')+'\\r\\n'`),'CSV uses real CRLF escapes, not literal backslash sequences');
+ assert.ok(handler.includes(String.raw`lines.join('\r\n')+'\r\n'`),'CSV uses real CRLF escapes, not literal backslash sequences');
  assert.match(ui,/onClick={downloadAtlasTransitionsR950}>Download address transitions CSV/);
  const trace=[{step:0,address:10},{step:1,address:10},{step:2,address:11},{step:3,address:11},{step:4,address:10}];
  const rows=trace.slice(1).flatMap((state,i)=>state.address===trace[i].address?[]:[[trace[i].step,state.step,trace[i].address,state.address].join(',')]);
  assert.deepEqual(rows,['1,2,10,11','3,4,11,10']);
- assert.equal(rows.join('\\r\\n').split('\\r\\n').length,2);
+ assert.equal(rows.join('\r\n').split('\r\n').length,2);
 });
