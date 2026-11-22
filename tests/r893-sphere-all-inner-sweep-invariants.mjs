@@ -34,4 +34,32 @@ assert.throws(()=>restoreSweepContinuationR893(fabricCheckpoint,savedContinuatio
 assert.throws(()=>restoreSweepContinuationR893(fabricCheckpoint,'not-json'),/JSON invalid/);
 const ui=readFileSync('src/SphereAgentInstrumentR887.tsx','utf8');
 for(const token of ['autonomousSweepR893','Autonomous inner-state schedule','Sweep all 20,736 inner states','Autonomous steps per cycle','data-r893-sweep-progress','fullSweepCursor','serializeSweepContinuationR893','restoreSweepContinuationR893','SWEEP_KEY'])assert.ok(ui.includes(token),'Missing R893 UI '+token);
+// R893 EXHAUSTIVE 12x20736: prove every member/inner pair appears exactly once
+// across a full logical cycle, including first/last and cursor wrap.
+// Address-mapping proof only; this does not assert 248,832 executor ticks completed.
+const twelve=collectiveMembersR890(root,12);
+assert.equal(twelve.length,12,'full collective must contain twelve distinct agents');
+const cycleLength=twelve.length*SIZE;
+assert.equal(cycleLength,248832);
+const pairCoverage=new Uint8Array(cycleLength);
+for(let cursor=0;cursor<cycleLength;cursor++){
+ const coordinate=sweepCoordinateR893(twelve,cursor);
+ assert.equal(coordinate.cycleLength,cycleLength);
+ assert.equal(coordinate.completedCycles,0);
+ assert.equal(coordinate.cycleProgress,cursor);
+ assert.equal(coordinate.member,twelve[cursor%12]);
+ assert.equal(coordinate.inner,Math.floor(cursor/12));
+ const flat=coordinate.inner*12+coordinate.memberIndex;
+ assert.equal(pairCoverage[flat],0,'duplicate agent/inner address in complete cycle');
+ pairCoverage[flat]=1;
+}
+assert.equal(pairCoverage.reduce((sum,v)=>sum+v,0),cycleLength);
+const wrapped=sweepCoordinateR893(twelve,cycleLength);
+assert.equal(wrapped.inner,0);
+assert.equal(wrapped.member,twelve[0]);
+assert.equal(wrapped.cycleProgress,0);
+assert.equal(wrapped.completedCycles,1);
+assert.equal(sweepCoordinateR893(twelve,cycleLength-1).inner,SIZE-1);
+assert.equal(sweepCoordinateR893(twelve,cycleLength-1).member,twelve[11]);
+console.log('R893 EXHAUSTIVE 12x20736 PASS: all 248,832 unique logical coordinates and exact cycle boundary (not executor ticks).');
 console.log('R893 PASS: 960 independently addressed state operations, dimension wrap at 20,736, priority, capacity atomicity, bounded 1–64 batch and zero cloud calls.');
