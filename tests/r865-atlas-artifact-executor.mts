@@ -257,3 +257,22 @@ test('R947 Atlas playback can navigate backward through actual address visits wi
  assert.equal(previous(5,0),1);
  assert.equal(previous(8,0),undefined);
 });
+
+test('R948 playback jumps to next actual address transition and refuses an absent transition',()=>{
+ const ui=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
+ const start=ui.indexOf('Find previous visit</button>');
+ const end=ui.indexOf('Next address change</button>',start);
+ assert.ok(start>=0&&end>start,'transition navigation is available alongside address visit search');
+ const segment=ui.slice(start,end);
+ assert.match(segment,/localTurnResult\.trace\.find\(x=>x\.step>selectedExecutionStep&&x\.address!==current\)/);
+ assert.match(segment,/setExecutionPlaying\(false\)/);
+ assert.match(segment,/setSelectedExecutionStep\(changed\.step\)/);
+ assert.match(segment,/No later address change/);
+ const trace=[{step:0,address:7},{step:1,address:7},{step:2,address:9},{step:3,address:9},{step:4,address:7}];
+ const nextChange=(step:number)=>trace.find(x=>x.step>step&&x.address!==trace[step].address)?.step;
+ assert.equal(nextChange(0),2);
+ assert.equal(nextChange(1),2);
+ assert.equal(nextChange(2),4);
+ assert.equal(nextChange(3),4);
+ assert.equal(nextChange(4),undefined);
+});
