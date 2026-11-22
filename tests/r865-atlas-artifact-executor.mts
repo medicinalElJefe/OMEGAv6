@@ -350,7 +350,7 @@ test('R953 exports a selected actual transition with explicit provenance and ref
 
 test('R954 selected transition exposes computed coordinate deltas in the playback UI without another executor call',()=>{
  const ui=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
- const start=ui.indexOf("aria-label='Selected Atlas transition coordinate deltas'");
+ const start=ui.indexOf('}{selectedExecutionStep>0&&localTurnResult.trace[selectedExecutionStep]');
  const end=ui.indexOf('Download address visit index CSV',start);
  assert.ok(start>0&&end>start,'selected transition deltas are visible beside transition exports');
  const segment=ui.slice(start,end);
