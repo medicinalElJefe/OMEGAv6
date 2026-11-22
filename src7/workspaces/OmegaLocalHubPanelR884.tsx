@@ -35,6 +35,18 @@ export default function OmegaLocalHubPanelR884(){
   try{await fn()}catch(error){setState('HELD');setInfo(error instanceof Error?error.message:'Local worker request failed. No native proof established.')}
   finally{setBusy(false)}
  };
+ const importLocalToken=async(file:File|undefined)=>{
+  if(!file)return;
+  if(file.name!=='hub-r881.token'||file.size<32||file.size>512){
+   setState('HELD');setInfo('Choose only the local hub-r881.token file (32–512 bytes) from your approved root.');return;
+  }
+  try{
+   const text=(await file.text()).trim();
+   if(!/^[A-Za-z0-9_-]{32,256}$/.test(text))throw Error('Invalid local Hub token bytes');
+   setToken(text);setState('UNCONNECTED');setConnectedAt(null);
+   setInfo('Local token read in browser memory. Select Authenticate to connect over loopback. File was not uploaded or stored.');
+  }catch{setState('HELD');setInfo('Token file read refused; no credentials retained.')}
+ };
  const refresh=async()=>{
   if(!token){setState('HELD');setInfo('Enter the private local token from your approved project root.');return}
   await act(async()=>{
@@ -81,7 +93,7 @@ export default function OmegaLocalHubPanelR884(){
  return <section data-r884-local-hub='LOOPBACK_INTEGRATION_ONLY' style={surface}>
    <header><h2>Ω Local / Edge Automation Hub</h2><p>Persistent local jobs and byte receipts. Local daemon runs on your own computer, not in the browser. An authenticated loopback result is not R141 host acceptance.</p></header>
    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(210px,1fr))',gap:14}}>
-    <div><label htmlFor='r884-token'>Private local token</label><input id='r884-token' ref={tokenRef} style={field} type='password' autoComplete='off' value={token} onChange={e=>{setToken(e.target.value);setState('UNCONNECTED')}} placeholder='Read from .omega/hub-r881.token' aria-label='Private local token'/><small>Token stays in this component’s memory and is never saved to storage.</small></div>
+    <div><label htmlFor='r884-token'>Private local token</label><input id='r884-token' ref={tokenRef} style={field} type='password' autoComplete='off' value={token} onChange={e=>{setToken(e.target.value);setState('UNCONNECTED')}} placeholder='Read from .omega/hub-r881.token' aria-label='Private local token'/><small>Token stays in this component’s memory and is never saved to storage.</small><label style={{display:'block',marginTop:8}}>Load local token file<input type='file' accept='.token,.txt' aria-label='Load hub-r881.token from local computer' style={{...field,marginTop:4}} onChange={e=>{const file=e.currentTarget.files?.[0];e.currentTarget.value='';void importLocalToken(file)}}/></label><small>Local file chooser only. Select the private .omega/hub-r881.token file. Nothing is uploaded.</small></div>
     <div><label>Loopback endpoint</label><div style={{...field,opacity:.9}}>{BASE}</div><small>Fixed destination. No arbitrary host or cross-device discovery.</small></div>
    </div>
    <div style={{display:'flex',gap:8,flexWrap:'wrap',margin:'10px 0'}}><button type='button' disabled={busy} onClick={refresh} style={button}>Authenticate & refresh jobs</button><button type='button' disabled={busy} onClick={()=>{setToken('');setJobs([]);setSelected(null);setState('UNCONNECTED');setInfo('Disconnected; token cleared from UI.');tokenRef.current?.focus()}} style={button}>Clear credentials</button></div>
