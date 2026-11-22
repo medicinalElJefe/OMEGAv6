@@ -12,7 +12,7 @@ $ErrorActionPreference = 'Stop'
 if (-not (Test-Path -LiteralPath $SiteRoot -PathType Container)) {
     throw 'OMEGA application files are missing. Extract the complete portable ZIP before launching.'
 }
-$root = [System.IO.Path]::GetFullPath((Resolve-Path -LiteralPath $SiteRoot).Path).TrimEnd([char]'\',[char]'/')
+$root = [System.IO.Path]::GetFullPath((Resolve-Path -LiteralPath $SiteRoot).Path).TrimEnd([char[]]@('\','/'))
 $rootPrefix = $root + [System.IO.Path]::DirectorySeparatorChar
 if (-not (Test-Path -LiteralPath (Join-Path $root 'index.html') -PathType Leaf)) {
     throw 'OMEGA built entry file is missing from dist. Use a complete verified portable package.'
