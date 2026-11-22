@@ -40,6 +40,33 @@ async function integrityDigestR895(record){
  const hash=await globalThis.crypto.subtle.digest('SHA-256',bytes);
  return Array.from(new Uint8Array(hash),n=>n.toString(16).padStart(2,'0')).join('');
 }
+// Portable on-device transfer: map-preserving JSON with bounded size and the same
+// SHA-256 corruption check as IndexedDB. This is not signed/authenticated provenance.
+export const R895_PORTABLE_MAX_BYTES=40*1024*1024;
+const portableMap=(key,value)=>value instanceof Map?{__omega_r895_map__:[...value.entries()]}:value;
+const unportableMap=(key,value)=>{
+ if(value&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).length===1&&Array.isArray(value.__omega_r895_map__))
+  return new Map(value.__omega_r895_map__);
+ return value;
+};
+export async function exportDurablePortableR895(){
+ const saved=await restoreDurableR895();
+ const record={...saved,integrity:await integrityDigestR895(saved)};
+ const data=JSON.stringify(record,portableMap);
+ if(new TextEncoder().encode(data).length>R895_PORTABLE_MAX_BYTES)throw new Error('Portable checkpoint exceeds 40 MiB limit');
+ return data;
+}
+export async function importDurablePortableR895(data){
+ if(typeof data!=='string'||new TextEncoder().encode(data).length>R895_PORTABLE_MAX_BYTES||data.length<20)throw new Error('Portable checkpoint absent or oversized');
+ let candidate;try{candidate=JSON.parse(data,unportableMap)}catch{throw new Error('Portable checkpoint JSON invalid')}
+ if(!candidate||candidate.schema!==R895_SCHEMA)throw new Error('Portable checkpoint schema mismatch');
+ const record=validateDurableR895(candidate.fabric,candidate.session);
+ if(typeof candidate.integrity!=='string'||!/^[a-f0-9]{64}$/.test(candidate.integrity)||candidate.integrity!==await integrityDigestR895(record))
+  throw new Error('Portable checkpoint integrity mismatch; import refused');
+ // Save validates a fresh structured clone and only replaces the stored record in
+ // one IndexedDB transaction after all import checks succeed.
+ return saveDurableR895(record.fabric,record.session);
+}
 function openDatabase(){
  return new Promise((resolve,reject)=>{
   if(typeof indexedDB==='undefined')return reject(new Error('IndexedDB is unavailable on this device'));
