@@ -30,6 +30,22 @@ try {
     if (-not $url -or $url -notmatch '^http://127\.0\.0\.1:[0-9]+/$') {
         throw 'Local server did not start on the loopback address'
     }
+    # The optional Hub must be the exact existing bounded Python implementation,
+    # not a second unaudited worker or a missing-file launcher.
+    $hubLauncher = Join-Path $package 'OPEN-OMEGA-HUB.cmd'
+    $hubScript = Join-Path $package 'omega_local_hub_r881.py'
+    if (-not (Test-Path -LiteralPath $hubLauncher -PathType Leaf) -or -not (Test-Path -LiteralPath $hubScript -PathType Leaf)) {
+        throw 'Optional authenticated local Hub is missing from the portable package'
+    }
+    $sourceHub = Join-Path (Get-Location).Path 'tools/omega_local_hub_r881.py'
+    if ((Get-FileHash -LiteralPath $hubScript -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $sourceHub -Algorithm SHA256).Hash) {
+        throw 'Packaged local Hub bytes diverge from the governed source implementation'
+    }
+    $hubLauncherText = Get-Content -LiteralPath $hubLauncher -Raw
+    if ($hubLauncherText -notmatch 'omega_local_hub_r881[.]py' -or $hubLauncherText -notmatch '8765') {
+        throw 'Optional Hub launcher does not execute the pinned local Hub endpoint'
+    }
     $index = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 10
     if ($index.StatusCode -ne 200 -or $index.Content -notmatch 'OMEGA') { throw 'Local OMEGA index is not served' }
     $nested = Invoke-WebRequest -Uri ($url+'sphere/collective') -UseBasicParsing -TimeoutSec 10
