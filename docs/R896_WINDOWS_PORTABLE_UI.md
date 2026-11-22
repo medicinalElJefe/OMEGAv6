@@ -52,8 +52,12 @@ temporary directory on launch; keep its companion files intact.
 
 For a single entry point to the local studio and bounded worker, double-click
 `OPEN-OMEGA-INTEGRATED.cmd` and supply the existing approved non-system
-project root when prompted. That launcher verifies the entire package,
-starts the bundled `OMEGA-Local-Hub/OMEGA-Local-Hub.exe` on loopback, then starts the existing UI. No
+project root when prompted. That launcher delegates to `Start-OMEGA-Integrated.ps1`, which verifies the
+entire package, refuses system-drive roots and junctions, authenticates the
+compiled Hub's live loopback endpoint with the private local token, and only
+then opens the existing OMEGA7 UI. The supervisor keeps the worker within the
+same session lifecycle and stops it when the supervised studio session ends.
+Windows CI also performs a combined real-HTTP startup self-test. No
 Python/Node install or administrator elevation is needed. Pairing to the
 canonical cloud Hybrid Link still requires the application's explicit
 authenticated connection flow.
