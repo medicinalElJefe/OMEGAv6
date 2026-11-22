@@ -128,6 +128,22 @@ class LocalHubTests(unittest.TestCase):
                 self.assertEqual(body["schema"],hubmod.SCHEMA)
                 self.assertFalse(body["physicalPcAccepted"])
                 self.assertEqual(res.headers["Access-Control-Allow-Origin"],valid["Origin"])
+            # The portable studio uses an ephemeral loopback TCP port.
+            portable={**valid,"Origin":"http://127.0.0.1:49152"}
+            with urllib.request.urlopen(urllib.request.Request(endpoint,headers=portable),timeout=2) as res:
+                self.assertEqual(res.status,200)
+                self.assertEqual(res.headers["Access-Control-Allow-Origin"],portable["Origin"])
+            portable_preflight=urllib.request.Request(endpoint,method="OPTIONS",headers={"Origin":portable["Origin"],"Access-Control-Request-Private-Network":"true"})
+            with urllib.request.urlopen(portable_preflight,timeout=2) as res:
+                self.assertEqual(res.headers["Access-Control-Allow-Private-Network"],"true")
+            for forbidden_origin in ("http://evil.example:49152","https://127.0.0.1:49152",
+                                     "http://127.0.0.1:49152.evil.example","http://127.0.0.1:49152/path",
+                                     "http://127.0.0.1:49152@evil.example", "http://127.0.0.1:0",
+                                     "http://127.0.0.1:99999","null"):
+                with self.subTest(origin=forbidden_origin):
+                    with self.assertRaises(urllib.error.HTTPError) as rejected:
+                        urllib.request.urlopen(urllib.request.Request(endpoint,headers={**valid,"Origin":forbidden_origin}),timeout=2)
+                    self.assertEqual(rejected.exception.code,401)
             spoofed={**valid,"Host":"evil.example"}
             with self.assertRaises(urllib.error.HTTPError) as bad:
                 urllib.request.urlopen(urllib.request.Request(endpoint,headers=spoofed),timeout=2)
