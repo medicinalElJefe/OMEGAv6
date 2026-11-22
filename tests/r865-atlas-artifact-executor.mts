@@ -235,3 +235,25 @@ test('R946 Atlas visit index exports actual distinct recorded visits with proven
  for(const state of trace){const prior=visits.get(state.address);if(prior){prior.count++;prior.last=state.step}else visits.set(state.address,{count:1,first:state.step,last:state.step})}
  assert.deepEqual(Array.from(visits.entries()).sort((a,b)=>a[0]-b[0]),[[7,{count:2,first:1,last:3}],[12,{count:3,first:0,last:4}]]);
 });
+
+test('R947 Atlas playback can navigate backward through actual address visits with wraparound',()=>{
+ const ui=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
+ const start=ui.indexOf('Find next visit</button>');
+ const end=ui.indexOf('Find previous visit</button>',start);
+ assert.ok(start>=0&&end>start,'previous-visit button follows next-visit control');
+ const segment=ui.slice(start,end);
+ assert.match(segment,/traceFindAddress\.trim\(\)/);
+ assert.match(segment,/Number\.isSafeInteger\(address\)/);
+ assert.match(segment,/address>20735/);
+ assert.match(segment,/localTurnResult\.trace\.filter\(x=>x\.address===address\)/);
+ assert.match(segment,/matches\.filter\(x=>x\.step<selectedExecutionStep\)\.at\(-1\)\?\?matches\[matches\.length-1\]/);
+ assert.match(segment,/setExecutionPlaying\(false\);setSelectedExecutionStep\(previous\.step\)/);
+ assert.match(segment,/is not recorded in this/);
+ const trace=[{step:0,address:3},{step:1,address:5},{step:2,address:3},{step:3,address:3}];
+ const previous=(address:number,current:number)=>{const matches=trace.filter(x=>x.address===address);return (matches.filter(x=>x.step<current).at(-1)??matches[matches.length-1])?.step};
+ assert.equal(previous(3,3),2);
+ assert.equal(previous(3,2),0);
+ assert.equal(previous(3,0),3);
+ assert.equal(previous(5,0),1);
+ assert.equal(previous(8,0),undefined);
+});
