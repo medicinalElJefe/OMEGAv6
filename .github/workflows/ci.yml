@@ -517,7 +517,9 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Pinned native Windows worker packager install failed' }
           $folder = Join-Path $env:RUNNER_TEMP 'OMEGA-Windows-Portable'
           New-Item -ItemType Directory -Path $folder -Force | Out-Null
-          python -m PyInstaller --onefile --clean --noconfirm --log-level WARN --name OMEGA-Local-Hub --distpath $folder --workpath (Join-Path $env:RUNNER_TEMP 'omega-pyinstaller-work') --specpath (Join-Path $env:RUNNER_TEMP 'omega-pyinstaller-spec') --add-data 'tools/omega_absolute_truth_verifier_r884.py;.' tools/omega_local_hub_r881.py
+          $verifier = (Resolve-Path -LiteralPath '.\tools\omega_absolute_truth_verifier_r884.py').Path
+          $hubSource = (Resolve-Path -LiteralPath '.\tools\omega_local_hub_r881.py').Path
+          python -m PyInstaller --onefile --clean --noconfirm --log-level WARN --name OMEGA-Local-Hub --distpath $folder --workpath (Join-Path $env:RUNNER_TEMP 'omega-pyinstaller-work') --specpath (Join-Path $env:RUNNER_TEMP 'omega-pyinstaller-spec') --add-data "$verifier;." $hubSource
           if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath (Join-Path $folder 'OMEGA-Local-Hub.exe'))) { throw 'Native Windows local Hub compilation failed' }
       - name: Assemble dependency-free operator launch package
         shell: pwsh
