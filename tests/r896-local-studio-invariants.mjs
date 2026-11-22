@@ -7,7 +7,7 @@ for(const key of [
  '[System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopback,0)',
  'Get-OmegaMime','Send-OmegaResponse','[switch] $NoBrowser','ReadyFile',
  "CLOUD_SERVICE_NOT_AVAILABLE_LOCALLY","'index.html'","Method Not Allowed",
- 'Forbidden path','Not found','GetFullPath','Content-Length','X-Content-Type-Options'
+ 'Forbidden path','Forbidden reparse path','ReparsePoint','Not found','GetFullPath','Content-Length','X-Content-Type-Options'
 ])assert.ok(server.includes(key),'R896 local server contract missing: '+key);
 assert.ok(!server.includes('0.0.0.0'),'R896 must not accept public TCP binding');
 assert.ok(!server.includes('HttpListener'),'R896 should not require administrator URLACL');
@@ -20,6 +20,6 @@ assert.equal(server.split('try { $decoded = [System.Uri]::UnescapeDataString').l
 assert.equal(server.split('$requestMatch = [System.Text.RegularExpressions.Regex]::Match').length,2,'R896 must contain exactly one intact HTTP request parser');
 
 assert.ok(launch.includes('Start-OMEGA-Local.ps1'),'R896 must be double-click launchable');
-for(const key of ['Invoke-WebRequest','Start-Process','127','api/health','StatusCode -eq 503','StatusCode -eq 404','Stop-Process'])
+for(const key of ['Invoke-WebRequest','Start-Process','127','api/health','StatusCode -eq 503','StatusCode -eq 404','ItemType Junction','StatusCode -eq 403','Stop-Process'])
  assert.ok(smoke.includes(key),'R896 Windows smoke contract missing: '+key);
 console.log('R896 LOCAL STUDIO PASS: read-only loopback-only, SPA fallback, unavailable APIs, no-runtime double-click and real Windows smoke contracts.');
