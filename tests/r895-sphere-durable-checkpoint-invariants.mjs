@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,readdirSync} from 'node:fs';
 import {agentId,createFabric,getAgent,baseline,SIZE} from '../src/sphereAgentFabricR887.mjs';
 import {R895_SCHEMA,R895_MAX_VALUES,validateDurableR895} from '../src/sphereDurableCheckpointR895.mjs';
 assert.equal(R895_MAX_VALUES,248832);
@@ -32,4 +32,12 @@ for(const token of ['exportDurablePortableR895','importDurablePortableR895','R89
 for(const token of ['Export portable checkpoint JSON','Import portable checkpoint JSON','exportPortable','importPortable'])assert.ok(ui.includes(token),'Missing R895 portable UI '+token);
 for(const token of ['durableBusy=useRef(false)','if(durableBusy.current)return','finally{durableBusy.current=false;setDurablePending(false)}','disabled={durablePending}'])assert.ok(ui.includes(token),'R895 concurrent checkpoint protection missing: '+token);
 for(const token of ["globalThis.crypto?.subtle","digest('SHA-256'","record.integrity=await integrityDigestR895(record)","Durable checkpoint integrity mismatch; restore refused"])assert.ok(source.includes(token),'Missing checkpoint integrity guarantee '+token);
+// R170 WORKFLOW GOVERNOR: R895 must reuse the canonical release controllers,
+// never create an extra active CI authority or raise the governed cap.
+const governedPolicy=JSON.parse(readFileSync('public/omega-r170-self-build-governor.json','utf8')).successorWorkflowPolicy;
+const workflowNames=readdirSync('.github/workflows').filter(name=>/\\.ya?ml$/i.test(name));
+const activeAuthorities=workflowNames.filter(name=>name!=='r2461-legacy-ref-cleanup.yml');
+assert.ok(activeAuthorities.length<=governedPolicy.maxActiveWorkflowAuthorities,'R895 exceeded R170 active workflow authority count');
+for(const removed of ['r894-exact-continuity-proof.yml','r895-exact-portable-proof.yml','r895-full-inherited-integration.yml'])
+ assert.ok(!workflowNames.includes(removed),'temporary candidate workflow must not survive release candidate: '+removed);
 console.log('R895 PASS: 248,832 exact float64 modified values (12 full 20,736D agents), atomic durable storage contract, fail-closed bounds and restored Map identity.');
