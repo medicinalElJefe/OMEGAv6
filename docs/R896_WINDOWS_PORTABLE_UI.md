@@ -84,8 +84,10 @@ That separate authority remains governed by R125/R141/R146/R147/R237.
 The existing R881 durable Hub exposes an operator-submitted `LOCAL_INFER`
 operation. It makes one bounded request to an **already installed and running**
 Ollama model on `127.0.0.1:11434`. In the OMEGA7 Local / Edge Hub panel,
-select `LOCAL_INFER`, enter an exact installed model name and prompt, then
-submit the job. No arbitrary inference server URL, remote provider, shell
+select `LOCAL_INFER`, authenticate the local Hub, use **Find installed local
+models** to read the current Ollama `GET /api/tags` inventory through the
+same token-protected loopback service, choose a model and prompt, then submit
+the job. No arbitrary inference server URL, remote provider, shell
 operation, model download, or training command is permitted. The request has
 an 8,192-character prompt ceiling, 512 generated-token ceiling, fixed
 45-second network timeout, and 64 KiB response cap. It never follows HTTP
