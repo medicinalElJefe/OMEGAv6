@@ -245,6 +245,18 @@ async function prove(browser,label,viewport){
   await page.waitForFunction(()=>document.querySelector('.r887-side p[role="status"]')?.textContent?.includes('Durable checkpoint restored'),null,{timeout:8000});
   assert.equal((await durableLab.locator('[data-r895-exact-inner-value]').innerText()).split('Exact selected state: ')[1],storedValue,label+' portable imported float64 matches exported snapshot');
   console.log('R895 PORTABLE '+label.toUpperCase()+' PASS: downloaded SHA-256-bound checkpoint, imported and restored exact float64.');
+  // R895 PORTABLE TAMPER: reject a syntactically valid altered export before storage.
+  const tamperedPortable=JSON.parse(portableText);
+  tamperedPortable.session.stepCursor+=1;
+  await durableLab.getByLabel('Import portable checkpoint JSON').setInputFiles({
+    name:'omega-r895-tampered.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(tamperedPortable))
+  });
+  await durableLab.getByRole('alert').getByText(/Portable checkpoint import refused:.*integrity mismatch/).waitFor({state:'visible',timeout:8000});
+  await durableLab.getByRole('button',{name:'Restore full-state durable checkpoint'}).click();
+  await page.waitForFunction(()=>document.querySelector('.r887-side p[role="status"]')?.textContent?.includes('Durable checkpoint restored'),null,{timeout:8000});
+  assert.equal((await durableLab.locator('[data-r895-exact-inner-value]').innerText()).split('Exact selected state: ')[1],storedValue,label+' rejected portable tamper kept last valid stored state');
+  console.log('R895 PORTABLE TAMPER '+label.toUpperCase()+' PASS: metadata modification rejected without replacing durable checkpoint.');
+
   // R895 VALID-VALUE TAMPER: structurally valid numeric alteration must fail SHA-256 verification.
   const beforeNumericTamper=(await durableLab.locator('[data-r895-exact-inner-value]').innerText()).split('Exact selected state: ')[1];
   await page.evaluate(async()=>{
