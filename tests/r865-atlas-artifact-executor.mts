@@ -197,3 +197,22 @@ test('R944 selected-step download is valid JSON with a real newline terminator',
  assert.deepEqual(JSON.parse(serialized),example);
  assert.equal(serialized.charCodeAt(serialized.length-1),10);
 });
+
+test('R945 trace address lookup advances to next recorded visit without inventing execution',()=>{
+ const ui=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
+ assert.match(ui,/Find recorded address/);
+ assert.match(ui,/Find next visit/);
+ assert.match(ui,/traceFindAddress\.trim\(\)/);
+ assert.match(ui,/Number\.isSafeInteger\(address\)/);
+ assert.match(ui,/address>20735/);
+ assert.match(ui,/localTurnResult\.trace\.filter\(x=>x\.address===address\)/);
+ assert.match(ui,/matches\.find\(x=>x\.step>selectedExecutionStep\)\?\?matches\[0\]/);
+ assert.match(ui,/setExecutionPlaying\(false\);setSelectedExecutionStep\(next\.step\)/);
+ assert.match(ui,/is not recorded in this/);
+ const trace=[{step:0,address:3},{step:1,address:5},{step:2,address:3}];
+ const next=(address:number,current:number)=>{const matches=trace.filter(x=>x.address===address);return (matches.find(x=>x.step>current)??matches[0])?.step};
+ assert.equal(next(3,0),2);
+ assert.equal(next(3,2),0);
+ assert.equal(next(5,0),1);
+ assert.equal(next(8,0),undefined);
+});
