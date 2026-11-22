@@ -113,3 +113,15 @@ test('R961 execution and recovery clear stale compiled inspection from a previou
   assert.ok(body.indexOf('setInspectedAddress(null);setInspectedValues([]);',reset)>reset,name+' invalidates old computed values');
  }
 });
+
+
+test('R962 any recorded Atlas step can execute compiled-field inspection, including unchanged addresses',()=>{
+ const ui=readFileSync(new URL('../src7/workspaces/SharedArtifactLibraryR864.tsx',import.meta.url),'utf8');
+ const start=ui.indexOf("aria-label='Inspect selected recorded Atlas state'");
+ const end=ui.indexOf("aria-label='Recorded Atlas address transitions'",start);
+ assert.ok(start>=0&&end>start,'selected-step inspection is available independently of address transitions');
+ const control=ui.slice(start,end);
+ assert.match(control,/disabled={running\|\|!localTurnResult\.trace\[selectedExecutionStep\]}/);
+ assert.match(control,/setExecutionPlaying\(false\);void inspectAtlas\(localTurnResult\.trace\[selectedExecutionStep\]\.address\)/);
+ assert.ok(!control.includes('setSelectedExecutionStep('),'inspection does not alter the recorded replay position');
+});
