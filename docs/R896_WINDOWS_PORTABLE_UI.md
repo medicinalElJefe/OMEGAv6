@@ -40,7 +40,9 @@ application as disconnected or offline-sovereign.
 ## Optional authenticated local worker (R897)
 
 The same portable package now also contains `OPEN-OMEGA-HUB.cmd` and the
-unchanged, governed Python standard-library worker `omega_local_hub_r881.py`.
+unchanged, governed Python standard-library worker `omega_local_hub_r881.py`,
+plus its required canonical `omega_absolute_truth_verifier_r884.py` for pinned
+ten-ledger verification.
 The normal `OPEN-OMEGA.cmd` UI still needs no Python, Node, Git or administrator
 rights. The optional worker requires Python 3.12+ already installed and an
 **existing approved non-system project directory** supplied by the operator.
@@ -57,7 +59,7 @@ replayed and audited by receipt; arbitrary shell commands are not available.
 R896's dynamic browser port is now accepted by the Hub only for exact HTTP
 loopback origins; each actual API request still requires the private token and
 correct Host header. The Windows packaging proof compares the included Python
-worker's SHA-256 with its canonical checked-out source. This is *local bounded
+worker and verifier SHA-256 values with their canonical checked-out sources. This is *local bounded
 automation*, not native GPU acceleration, authenticated Hybrid Link R141 host
 return, unattended installation, model inference, or production acceptance.
 
