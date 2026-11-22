@@ -500,6 +500,9 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 22
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
       - name: Build exact OMEGA7 Windows portable UI candidate
         shell: pwsh
         run: |
@@ -539,6 +542,11 @@ jobs:
         run: |
           & pwsh -NoProfile -NonInteractive -File .\tests\r896-windows-local-studio-smoke.ps1 -PackageRoot (Join-Path $env:RUNNER_TEMP 'OMEGA-Windows-Portable')
           if ($LASTEXITCODE -ne 0) { throw 'R896 packaged OMEGA7 Windows loopback browser service smoke failed' }
+      - name: Prove packaged R881 local automation Hub on Windows with real token and queue
+        shell: pwsh
+        run: |
+          & pwsh -NoProfile -NonInteractive -File .\tests\r897-windows-packaged-hub-smoke.ps1 -PackageRoot (Join-Path $env:RUNNER_TEMP 'OMEGA-Windows-Portable')
+          if ($LASTEXITCODE -ne 0) { throw 'R897 packaged authenticated local worker smoke failed' }
       - name: Zip actual tested portable UI, under 160 MiB
         shell: pwsh
         run: |
