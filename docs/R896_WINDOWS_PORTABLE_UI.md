@@ -3,9 +3,9 @@
 ## Open OMEGA, not just a diagnostic
 
 The download built by the OMEGA Cloud Bridge CI workflow is named
-**OMEGA-Windows-Portable-R896**. Download the workflow artifact ZIP,
-extract `OMEGA-Windows-Portable-R896.zip`, then **double-click
-`OMEGA-Windows-Portable/OPEN-OMEGA.cmd`**.
+**OMEGA-Windows-Portable-R896**. Download the GitHub Actions artifact,
+extract it once to a folder, then **double-click `OPEN-OMEGA.cmd`** in
+that folder. There is no second nested ZIP.
 
 The application opens in the default browser from a local
 `http://127.0.0.1:<temporary-port>/` server. Keep the launcher window
