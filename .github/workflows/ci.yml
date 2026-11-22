@@ -487,6 +487,70 @@ jobs:
           Write-Host 'R895 zero-argument Windows check PASS - no copied SHA, no edits or installer execution.'
 
 
+
+  r896-windows-portable-studio:
+    if: github.event_name == 'pull_request'
+    needs: verify
+    runs-on: windows-latest
+    timeout-minutes: 35
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Build exact OMEGA7 Windows portable UI candidate
+        shell: pwsh
+        run: |
+          npm install --no-fund
+          if ($LASTEXITCODE -ne 0) { throw 'Locked application dependencies failed to install' }
+          npm run build
+          if ($LASTEXITCODE -ne 0) { throw 'OMEGA7 production UI build failed' }
+      - name: Assemble dependency-free operator launch package
+        shell: pwsh
+        run: |
+          $folder = Join-Path $env:RUNNER_TEMP 'OMEGA-Windows-Portable'
+          New-Item -ItemType Directory -Path $folder -Force | Out-Null
+          Copy-Item -LiteralPath '.\dist' -Destination (Join-Path $folder 'dist') -Recurse -Force
+          Copy-Item -LiteralPath '.\install\OPEN-OMEGA.cmd' -Destination (Join-Path $folder 'OPEN-OMEGA.cmd')
+          Copy-Item -LiteralPath '.\install\Start-OMEGA-Local.ps1' -Destination (Join-Path $folder 'Start-OMEGA-Local.ps1')
+          if (-not (Test-Path (Join-Path $folder 'dist\index.html'))) { throw 'Packaged OMEGA entry not found' }
+          $evidence = @{
+            schema = 'OMEGA_WINDOWS_PORTABLE_UI_R896'
+            source_commit = $env:GITHUB_SHA
+            package_role = 'PR_CANDIDATE_NOT_PRODUCTION_PROMOTION'
+            local_ui = $true
+            cloud_worker_embedded = $false
+            native_gpu_executor_embedded = $false
+            installer_lifecycle_proven = $false
+            pairing_automatic = $false
+          } | ConvertTo-Json -Depth 4
+          [System.IO.File]::WriteAllText((Join-Path $folder 'OMEGA-PACKAGE-EVIDENCE.json'),$evidence,[System.Text.Encoding]::UTF8)
+          [System.IO.File]::WriteAllText((Join-Path $folder 'READ-ME-FIRST.txt'),
+            "Double-click OPEN-OMEGA.cmd. This starts OMEGA7 in the default browser from 127.0.0.1. Keep the window open. No Git, Python, Node, administrator setup, or installation is required on the operator PC. Cloud Worker, Hybrid Link, GPU execution, full installer lifecycle, and production promotion are separate and NOT proven by this package.",[System.Text.Encoding]::UTF8)
+      - name: Prove packaged local UI over real Windows loopback HTTP
+        shell: pwsh
+        run: |
+          & pwsh -NoProfile -NonInteractive -File .\tests\r896-windows-local-studio-smoke.ps1 -PackageRoot (Join-Path $env:RUNNER_TEMP 'OMEGA-Windows-Portable')
+          if ($LASTEXITCODE -ne 0) { throw 'R896 packaged OMEGA7 Windows loopback browser service smoke failed' }
+      - name: Zip actual tested portable UI, under 160 MiB
+        shell: pwsh
+        run: |
+          $folder = Join-Path $env:RUNNER_TEMP 'OMEGA-Windows-Portable'
+          $zip = Join-Path $env:RUNNER_TEMP 'OMEGA-Windows-Portable-R896.zip'
+          Compress-Archive -LiteralPath $folder -DestinationPath $zip -Force -CompressionLevel Optimal
+          $length = (Get-Item -LiteralPath $zip).Length
+          if ($length -gt 160MB) { throw "R896 portable package exceeds the 160 MiB download limit: $length bytes" }
+          Copy-Item -LiteralPath $zip -Destination (Join-Path $PWD 'OMEGA-Windows-Portable-R896.zip')
+          Write-Host "R896 tested Windows ZIP built, $length bytes, exact source $env:GITHUB_SHA."
+      - uses: actions/upload-artifact@v4
+        with:
+          name: OMEGA-Windows-Portable-R896
+          path: OMEGA-Windows-Portable-R896.zip
+          if-no-files-found: error
+          retention-days: 7
+
   cloudflare-auth-probe:
     if: github.event_name == 'pull_request'
     needs: verify
