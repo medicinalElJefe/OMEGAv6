@@ -89,8 +89,17 @@ def run():
     assert host.gpu_observation(True, lambda _: (0,"not json"))["state"] == "INVALID_PROBE_OUTPUT"
     assert host.gpu_observation(True, lambda _: (-1,""))["state"] == "PROBE_FAILED"
     launcher = (ROOT / "install" / "run-r895-windows-preflight.ps1").read_text(encoding="utf-8")
-    for guard in ("ValidatePattern", "ExpectedCommit", "--expected-commit", "--output", "$LASTEXITCODE", "exit $LASTEXITCODE"):
-        assert guard in launcher, "Windows launcher lacks a fail-closed argument or exit guard: " + guard
+    for guard in ("ValidatePattern", "ExpectedCommit", "--expected-commit", "--output",
+                  "rev-parse HEAD", "$LASTEXITCODE", "exit $resultCode",
+                  "OMEGA WINDOWS CHECK: READY", "OMEGA WINDOWS CHECK: NEEDS ATTENTION",
+                  "omega-windows-check.json"):
+        assert guard in launcher, "Windows launcher lacks a required usability or fail-closed guard: " + guard
+    assert "[Parameter(Mandatory=$true)]" not in launcher, "Windows check must not require user to type a SHA"
+    click = (ROOT / "install" / "OMEGA-Windows-Check.cmd").read_text(encoding="utf-8")
+    for guard in ("powershell.exe", "-NoProfile", "-File", "run-r895-windows-preflight.ps1",
+                  "%~dp0", "pause", "exit /b %OMEGA_RESULT%"):
+        assert guard in click, "double-click launcher missing expected safety/feedback: " + guard
+    assert "--expected-commit" not in click, "double-click UI must not require a manual commit argument"
     print("R895 NATIVE PREFLIGHT PASS: immutable base SHA, Windows-only observation, exact git identity, deterministic receipt, tamper refusal and no fabricated installer/GPU proof")
 
 
