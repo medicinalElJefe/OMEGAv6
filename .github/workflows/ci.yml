@@ -515,6 +515,8 @@ jobs:
           Copy-Item -LiteralPath '.\dist' -Destination (Join-Path $folder 'dist') -Recurse -Force
           Copy-Item -LiteralPath '.\install\OPEN-OMEGA.cmd' -Destination (Join-Path $folder 'OPEN-OMEGA.cmd')
           Copy-Item -LiteralPath '.\install\Start-OMEGA-Local.ps1' -Destination (Join-Path $folder 'Start-OMEGA-Local.ps1')
+          Copy-Item -LiteralPath '.\install\OPEN-OMEGA-HUB.cmd' -Destination (Join-Path $folder 'OPEN-OMEGA-HUB.cmd')
+          Copy-Item -LiteralPath '.\tools\omega_local_hub_r881.py' -Destination (Join-Path $folder 'omega_local_hub_r881.py')
           if (-not (Test-Path (Join-Path $folder 'dist\index.html'))) { throw 'Packaged OMEGA entry not found' }
           $evidence = @{
             schema = 'OMEGA_WINDOWS_PORTABLE_UI_R896'
@@ -522,13 +524,16 @@ jobs:
             package_role = 'PR_CANDIDATE_NOT_PRODUCTION_PROMOTION'
             local_ui = $true
             cloud_worker_embedded = $false
+            optional_local_hub_source_embedded = $true
+            optional_local_hub_requires_python = $true
+            local_hub_authentication_required = $true
             native_gpu_executor_embedded = $false
             installer_lifecycle_proven = $false
             pairing_automatic = $false
           } | ConvertTo-Json -Depth 4
           [System.IO.File]::WriteAllText((Join-Path $folder 'OMEGA-PACKAGE-EVIDENCE.json'),$evidence,[System.Text.Encoding]::UTF8)
           [System.IO.File]::WriteAllText((Join-Path $folder 'READ-ME-FIRST.txt'),
-            "Double-click OPEN-OMEGA.cmd. This starts OMEGA7 in the default browser from 127.0.0.1. Keep the window open. No Git, Python, Node, administrator setup, or installation is required on the operator PC. Cloud Worker, Hybrid Link, GPU execution, full installer lifecycle, and production promotion are separate and NOT proven by this package.",[System.Text.Encoding]::UTF8)
+            "Double-click OPEN-OMEGA.cmd for the local OMEGA7 interface without Python or Node. For optional bounded local file automation, install Python 3.12+, then double-click OPEN-OMEGA-HUB.cmd, select an existing approved non-system root, and authenticate in OMEGA Local / Edge Hub using its private token. Cloud Worker, Hybrid Link native agent, GPU execution, full installer lifecycle, and production promotion remain separate and NOT proven by this package.",[System.Text.Encoding]::UTF8)
       - name: Prove packaged local UI over real Windows loopback HTTP
         shell: pwsh
         run: |
