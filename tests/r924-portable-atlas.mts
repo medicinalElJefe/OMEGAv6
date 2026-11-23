@@ -178,3 +178,16 @@ test('R974 traversal summary exposes bounded coverage percentage and real trace 
  assert.match(summary,/localTurnResult\.trace\[localTurnResult\.trace\.length-1\]\?\.address/);
  assert.match(summary,/not proof of full 20,736-state coverage/);
 });
+
+
+test('R975 recorded replay can jump to first repeated address without retaining stale inspection',()=>{
+ const ui=readFileSync(new URL('../src7/workspaces/SharedArtifactLibraryR864.tsx',import.meta.url),'utf8');
+ const start=ui.indexOf("aria-label='Jump to first repeated Atlas address'");
+ assert.ok(start>=0,'revisit navigation exists');
+ const control=ui.slice(ui.lastIndexOf('<button',start),ui.indexOf('</button>',start)+9);
+ assert.match(control,/disabled=\{running\|\|!localTurnResult\.trace\.some/);
+ assert.match(control,/trace\.slice\(0,i\)\.some\(previous=>previous\.address===state\.address\)/);
+ assert.match(control,/findIndex\(/);
+ assert.match(control,/if\(index<0\)return/);
+ assert.match(control,/setExecutionPlaying\(false\);setSelectedExecutionStep\(index\);setInspectedAddress\(null\);setInspectedValues\(\[\]\)/);
+});
