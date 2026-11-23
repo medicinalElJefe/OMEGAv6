@@ -114,7 +114,7 @@ class LocalHubTests(unittest.TestCase):
         original=path.read_bytes()
         try:
             # Alter only one mass while preserving the total number of rows.
-            changed=original.replace(b",256\\n",b",257\\n",1)
+            changed=original.replace(b",256\n",b",257\n",1)
             if changed==original:
                 changed=original.replace(b",",b",0",1)
             path.write_bytes(changed)
