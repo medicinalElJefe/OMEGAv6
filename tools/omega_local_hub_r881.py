@@ -53,7 +53,7 @@ def load_local_inference_adapter_r899():
     return adapter
 
 READ_ONLY_REPLAY = frozenset({"HASH_TREE", "CSV_STATS", "VERIFY_LEDGER_SPLIT"})
-OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "LOCAL_INFER", "RESIDUAL_RESTORE"})
+OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "LOCAL_INFER", "SPHERE_TENSOR_STEP", "RESIDUAL_RESTORE"})
 STATUS = frozenset({"QUEUED", "WAIT_EVENT", "RUNNING", "COMPLETED", "FAILED", "HELD", "CANCELLED"})
 def utc_ms(): return int(time.time() * 1000)
 def sha_file(path: Path) -> str:
@@ -147,6 +147,14 @@ class Hub:
         if operation=="RESIDUAL_RESTORE": raise ValueError("R195_RESIDUAL_SOURCE_AND_AUTHORITY_REQUIRED")
         if operation=="LOCAL_INFER":
             return load_local_inference_adapter_r899().infer_local_r899(args)
+        if operation=="SPHERE_TENSOR_STEP":
+            import importlib.util
+            module_path=Path(__file__).resolve().with_name("omega_sparse_tensor_r902.py")
+            if not module_path.is_file(): raise ValueError("R902_SPARSE_TENSOR_MODULE_REQUIRED")
+            spec=importlib.util.spec_from_file_location("_omega_sparse_tensor_r902",module_path)
+            module=importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            return module.sparse_tensor_run_r902(args)
         if operation=="VERIFY_LEDGER_SET":
             import importlib.util
             spec_path=Path(__file__).resolve().with_name("omega_absolute_truth_verifier_r884.py")
