@@ -85,6 +85,9 @@ assert.ok(workflow.includes('omega_sparse_projection_r907.py')&&workflow.include
  'R907 authentic projection must be shipped in Windows EXE and tested before building');
 const sparseTensor=readFileSync('tools/omega_sparse_tensor_r902.py','utf8');
 const sparseHub=readFileSync('tools/omega_local_hub_r881.py','utf8');
+for(const marker of ['verified_csv_artifact','R910_CSV_DOWNLOAD_BOUND_HELD','R910_CSV_DOWNLOAD_DRIFT_HELD','/api/hub/artifacts/csv/','text/csv; charset=utf-8']){
+ assert.ok(sparseHub.includes(marker),'R910 original complete SHA-verified checkpoint endpoint missing: '+marker);
+}
 for(const marker of ['verified_svg_artifact','R909_RENDER_RECEIPT_DRIFT_HELD','R909_SVG_ARTIFACT_INTEGRITY_HELD','/api/hub/artifacts/','image/svg+xml; charset=utf-8','X-Omega-Artifact-Sha256','Content-Disposition','nosniff']){
  assert.ok(sparseHub.includes(marker),'R909 authenticated original-job verified SVG download missing: '+marker);
 }
@@ -106,6 +109,9 @@ for(const needle of ['SPHERE_TENSOR_EXPORT','sparse_tensor_rows_r904','COMPLETE_
  assert.ok(sparseHub.includes(needle),'R904 complete sparse tensor CSV export missing: '+needle);
 for(const needle of ['SPHERE_TENSOR_RENDER','OMEGA_SPARSE_PROJECTION_ARTIFACT_R907','sourceFullStateSha256','R907_PROJECTION_TARGET_EXISTS_HELD'])
  assert.ok(sparseHub.includes(needle),'R907 authenticated SVG projection missing: '+needle);
+for(const needle of ['/api/hub/artifacts/csv/','r910-','R910 compiled Windows protected CSV bytes differ from original export receipt']){
+ assert.ok(sparseWindows.includes(needle),'R910 compiled Windows full-state checkpoint download refusal missing: '+needle);
+}
 for(const needle of ['/api/hub/artifacts/','r909-download.svg','X-Omega-Artifact-Sha256','R909 served SVG after its SHA-256 receipt diverged']){
  assert.ok(sparseWindows.includes(needle),'R909 actual Windows SVG download/refusal proof missing: '+needle);
 }
@@ -138,7 +144,7 @@ for(const line of ['127.0.0.1','11434','/api/tags','/api/generate','R899_EXECUTI
 assert.ok(workflow.includes('r899-windows-compiled-inference-smoke.ps1'),
  'R899 native Windows end-to-end inference test must run in release CI');
 const localHubPanel=readFileSync('src7/workspaces/OmegaLocalHubPanelR884.tsx','utf8');
-for(const marker of ['SPHERE_TENSOR_STEP','SPHERE_TENSOR_EXPORT','SPHERE_TENSOR_VERIFY','SPHERE_TENSOR_CONTINUE','SPHERE_TENSOR_RENDER','exportJobId','tensorExport','tensorResult','conservationExact','fullStateSha256','tensorPreview','projectionCanvasRef','putImageData','projectionGrid','executeR908GpuProjection','Run real WebGPU projection parity on this device','Download exact verified SVG','fetchVerifiedSvgR909','crypto.subtle.digest'])
+for(const marker of ['SPHERE_TENSOR_STEP','SPHERE_TENSOR_EXPORT','SPHERE_TENSOR_VERIFY','SPHERE_TENSOR_CONTINUE','SPHERE_TENSOR_RENDER','exportJobId','tensorExport','tensorResult','conservationExact','fullStateSha256','tensorPreview','projectionCanvasRef','putImageData','projectionGrid','executeR908GpuProjection','Run real WebGPU projection parity on this device','Download exact verified SVG','fetchVerifiedSvgR909','Download complete verified CSV checkpoint','fetchVerifiedCsvR910','crypto.subtle.digest'])
  assert.ok(localHubPanel.includes(marker),'R902 interactive tensor operator or state receipt inspector missing: '+marker);
 
 for(const marker of ['importLocalToken','file.name!==\'hub-r881.token\'','file.size>512','file.text()','setToken(text)','Load local token file','Nothing is uploaded'])
