@@ -101,8 +101,7 @@ try {
     if ($null -eq $inferResult -or $inferResult.error -notmatch 'LOCAL_INFER_MODEL_REQUIRED') {
         throw "R899 local model adapter not executing inside bundled EXE: $($inferResult.state) $($inferResult.error)"
     }
-    # R902: actual 20,736 x 20,736 implicit state-space computation must run
-    # *inside* the compiled worker, persist a real SHA-256 receipt and conserve.
+    # R902: actual nested-state computation executed by the compiled worker.
     $tensorPayload = '{"operation":"SPHERE_TENSOR_STEP","args":{"seeds":[{"cell":0,"lane":0,"mass":4096}],"steps":4,"cell_axis":0,"lane_axis":1}}'
     $tensorQueued = Invoke-WebRequest -Uri "http://127.0.0.1:$port/api/hub/jobs" -Headers $headers -UseBasicParsing -Method Post -ContentType 'application/json' -Body $tensorPayload -TimeoutSec 5
     $tensorId = ($tensorQueued.Content | ConvertFrom-Json).job.id
@@ -122,26 +121,16 @@ try {
         $tensorResult.result.conservationExact -ne $true -or
         $tensorResult.result.denseTensorAllocated -ne $false -or
         $tensorResult.result.gpuComputeProven -ne $false -or
-        $tensorResult.result.fullStateSha256 -notmatch '^[a-f0-9]{64} authenticated compiled worker, SHA-256 HASH_TREE receipt, and actual embedded R884 ledger-verifier fail-closed execution. CI RUNNER ONLY.'
-} finally {
-    if ($null -ne $process -and -not $process.HasExited) { Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue }
-    if (Test-Path -LiteralPath $root) { Remove-Item -LiteralPath $root -Recurse -Force -ErrorAction SilentlyContinue }
-}
- -or
-        $tensorResult.result_sha256 -notmatch '^[a-f0-9]{64} authenticated compiled worker, SHA-256 HASH_TREE receipt, and actual embedded R884 ledger-verifier fail-closed execution. CI RUNNER ONLY.'
-} finally {
-    if ($null -ne $process -and -not $process.HasExited) { Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue }
-    if (Test-Path -LiteralPath $root) { Remove-Item -LiteralPath $root -Recurse -Force -ErrorAction SilentlyContinue }
-}
-) {
-        throw "R902 compiled sparse tensor execution or durable SHA receipt failed: $($tensorResult.state) $($tensorResult.error)"
+        $tensorResult.result.fullStateSha256 -notmatch '^[a-f0-9]{64}$' -or
+        $tensorResult.result_sha256 -notmatch '^[a-f0-9]{64}$') {
+        throw "R902 compiled tensor execution or receipt failed: $($tensorResult.state) $($tensorResult.error)"
     }
-    $tensorReplay = Invoke-WebRequest -Uri ("http://127.0.0.1:$port/api/hub/replay/" + $tensorId) -Headers $headers -UseBasicParsing -Method Post -ContentType 'application/json' -Body '{}' -TimeoutSec 8
-    $tensorReplayReceipt = $tensorReplay.Content | ConvertFrom-Json
-    if ($tensorReplayReceipt.state -ne 'MATCH' -or $tensorReplayReceipt.ok -ne $true) {
-        throw 'R902 packaged tensor replay did not reproduce its original complete state SHA receipt'
+    $replayResponse = Invoke-WebRequest -Uri ("http://127.0.0.1:$port/api/hub/replay/" + $tensorId) -Headers $headers -UseBasicParsing -Method Post -ContentType 'application/json' -Body '{}' -TimeoutSec 8
+    $replayReceipt = $replayResponse.Content | ConvertFrom-Json
+    if ($replayReceipt.state -ne 'MATCH' -or $replayReceipt.ok -ne $true) {
+        throw 'R902 packaged tensor replay did not reproduce its full state receipt'
     }
-    Write-Host 'R898 PACKAGED WINDOWS HUB EXE PASS: authenticated compiled worker, SHA-256 HASH_TREE receipt, and actual embedded R884 ledger-verifier fail-closed execution. CI RUNNER ONLY.'
+    Write-Host 'R902 PACKAGED WINDOWS HUB EXE PASS: authenticated bounded tensor execution, exact mass conservation, full-state SHA-256, replay MATCH. CI RUNNER ONLY.'
 } finally {
     if ($null -ne $process -and -not $process.HasExited) { Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue }
     if (Test-Path -LiteralPath $root) { Remove-Item -LiteralPath $root -Recurse -Force -ErrorAction SilentlyContinue }
