@@ -1,4 +1,5 @@
 import {useEffect,useRef,useState,type CSSProperties} from 'react';
+import {executeR908GpuProjection} from './omegaR908GpuProjection';
 
 type HubJob={id:string;operation:string;state:string;scheduled_ms:number;created_ms:number;updated_ms:number;error?:string|null;result_sha256?:string|null;result?:unknown;history?:{event:string;at_ms:number;details:string}[]};
 type Json=Record<string,unknown>;
@@ -35,6 +36,7 @@ export default function OmegaLocalHubPanelR884(){
  const [busy,setBusy]=useState(false),[connectedAt,setConnectedAt]=useState<number|null>(null);
  const tokenRef=useRef<HTMLInputElement|null>(null);
  const projectionCanvasRef=useRef<HTMLCanvasElement|null>(null);
+ const [gpuResult,setGpuResult]=useState<Record<string,unknown>|null>(null);
  const act=async(fn:()=>Promise<void>)=>{
   if(busy)return;
   setBusy(true);
@@ -143,7 +145,7 @@ export default function OmegaLocalHubPanelR884(){
   });
  };
  const loadSelectedJob=async(id:string)=>{
-  setSelected(id);setSelectedJobDetail(null);
+  setSelected(id);setSelectedJobDetail(null);setGpuResult(null);
   try{
    const result=await requestHub(token,'/api/hub/jobs/'+encodeURIComponent(id));
    const job=result.job as HubJob|undefined;
@@ -243,6 +245,8 @@ export default function OmegaLocalHubPanelR884(){
      {projectionData&&projectionData.schema==='OMEGA_SPARSE_CELL_PROJECTION_R907'&&<div style={{...surface,margin:'8px 0'}}>
       <h4>R907 verified state projection — 144 × 144 cells</h4>
       {projectionGrid&&<canvas ref={projectionCanvasRef} width={144} height={144} role='img' aria-label='Derived 20,736-cell verified state intensity preview' style={{display:'block',width:'min(100%,432px)',height:'auto',aspectRatio:'1',imageRendering:'pixelated',border:'1px solid #607e98'}}/>}
+      <button type='button' style={button} disabled={!projectionGrid||busy} onClick={()=>{if(!projectionGrid)return;void act(async()=>{const result=await executeR908GpuProjection(projectionGrid);setGpuResult(result as Record<string,unknown>);setInfo('R908 browser GPU: '+String(result.state)+'; native PC pairing remains unverified.');});}}>Run real WebGPU projection parity on this device</button>
+      {gpuResult&&<p><strong>R908:</strong> {String(gpuResult.state)} · Readback parity: {gpuResult.deviceExecutionProved===true?'MATCH':'NOT PROVEN'} · Source: this browser only, not native PC / Hybrid Link acceptance. {typeof gpuResult.error==='string'&&<small>{gpuResult.error}</small>}</p>}
       <p><strong>{String(projectionData.activeCells)}</strong> active cells · <strong>{String(projectionData.nonzeroComponents)}</strong> nonzero components · conserved mass <strong>{String(projectionData.totalMass)}</strong></p>
       <p><small>Source full-state SHA-256: <code style={{overflowWrap:'anywhere'}}>{String(projectionReceipt?.sourceFullStateSha256)}</code></small></p>
       <p><small>SVG artifact: <code>{String((projectionReceipt?.artifact as {path?:string}|undefined)?.path||'unavailable')}</code> · SHA-256: <code style={{overflowWrap:'anywhere'}}>{String((projectionReceipt?.artifact as {sha256?:string}|undefined)?.sha256||'unavailable')}</code></small></p>
