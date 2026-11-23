@@ -538,6 +538,10 @@ jobs:
           Copy-Item -LiteralPath '.\install\OPEN-OMEGA-HUB.cmd' -Destination (Join-Path $folder 'OPEN-OMEGA-HUB.cmd')
           Copy-Item -LiteralPath '.\install\OPEN-OMEGA-INTEGRATED.cmd' -Destination (Join-Path $folder 'OPEN-OMEGA-INTEGRATED.cmd')
           Copy-Item -LiteralPath '.\install\Start-OMEGA-Integrated.ps1' -Destination (Join-Path $folder 'Start-OMEGA-Integrated.ps1')
+          Copy-Item -LiteralPath '.\install\INSTALL-OMEGA.cmd' -Destination (Join-Path $folder 'INSTALL-OMEGA.cmd')
+          Copy-Item -LiteralPath '.\install\UNINSTALL-OMEGA.cmd' -Destination (Join-Path $folder 'UNINSTALL-OMEGA.cmd')
+          Copy-Item -LiteralPath '.\install\Install-OMEGA-Windows.ps1' -Destination (Join-Path $folder 'Install-OMEGA-Windows.ps1')
+          Copy-Item -LiteralPath '.\install\Uninstall-OMEGA-Windows.ps1' -Destination (Join-Path $folder 'Uninstall-OMEGA-Windows.ps1')
           Copy-Item -LiteralPath '.\tools\omega_local_hub_r881.py' -Destination (Join-Path $folder 'omega_local_hub_r881.py')
           Copy-Item -LiteralPath '.\tools\omega_absolute_truth_verifier_r884.py' -Destination (Join-Path $folder 'omega_absolute_truth_verifier_r884.py')
           Copy-Item -LiteralPath '.\tools\omega_local_inference_r899.py' -Destination (Join-Path $folder 'omega_local_inference_r899.py')
@@ -568,6 +572,8 @@ jobs:
             local_hub_authentication_required = $true
             native_gpu_executor_embedded = $false
             installer_lifecycle_proven = $false
+            installer_lifecycle_ci_test_required = $true
+            managed_per_user_installer_embedded = $true
             pairing_automatic = $false
             hash_authentication_signature = $false
           } | ConvertTo-Json -Depth 8
@@ -598,6 +604,11 @@ jobs:
           } finally {
             if (Test-Path -LiteralPath $root) { Remove-Item -LiteralPath $root -Recurse -Force -ErrorAction SilentlyContinue }
           }
+      - name: Prove managed Windows install, upgrade, tamper refusal and uninstall
+        shell: pwsh
+        run: |
+          & pwsh -NoProfile -NonInteractive -File .\tests\r900-windows-install-lifecycle-smoke.ps1 -PackageRoot (Join-Path $env:RUNNER_TEMP 'OMEGA-Windows-Portable')
+          if ($LASTEXITCODE -ne 0) { throw 'R900 managed Windows installer lifecycle is not proven' }
       - name: Zip actual tested portable UI, under 160 MiB
         shell: pwsh
         run: |
