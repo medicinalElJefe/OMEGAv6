@@ -81,6 +81,10 @@ assert.ok(sparseWindows.trimEnd().endsWith('}'),
 
 for(const needle of ['DIMENSIONS = AXIS**4','TOTAL_POSSIBLE = DIMENSIONS**2','MAX_NONZERO','conservationExact','fullStateSha256','denseTensorAllocated','gpuComputeProven'])
  assert.ok(sparseTensor.includes(needle),'R902 implicit 20,736 per-cell operator missing: '+needle);
+for(const needle of ['SPHERE_TENSOR_EXPORT','sparse_tensor_rows_r904','COMPLETE_SPARSE_STATE_CSV_EXPORTED','R904_EXPORT_TARGET_EXISTS_HELD'])
+ assert.ok(sparseHub.includes(needle),'R904 complete sparse tensor CSV export missing: '+needle);
+for(const needle of ['SPHERE_TENSOR_EXPORT','complete-tensor.csv','exportedRows','R904_EXPORT_TARGET_EXISTS_HELD'])
+ assert.ok(sparseWindows.includes(needle),'R904 compiled Windows full-state artifact verification missing: '+needle);
 for(const needle of ['SPHERE_TENSOR_STEP','omega_sparse_tensor_r902.py'])
  assert.ok(sparseHub.includes(needle),'R902 local durable Hub state operator unwired: '+needle);
 for(const needle of ['SPHERE_TENSOR_STEP','429981696','conservationExact','fullStateSha256'])
@@ -98,7 +102,7 @@ for(const line of ['127.0.0.1','11434','/api/tags','/api/generate','R899_EXECUTI
 assert.ok(workflow.includes('r899-windows-compiled-inference-smoke.ps1'),
  'R899 native Windows end-to-end inference test must run in release CI');
 const localHubPanel=readFileSync('src7/workspaces/OmegaLocalHubPanelR884.tsx','utf8');
-for(const marker of ['SPHERE_TENSOR_STEP','tensorResult','conservationExact','fullStateSha256','tensorPreview'])
+for(const marker of ['SPHERE_TENSOR_STEP','SPHERE_TENSOR_EXPORT','tensorExport','tensorResult','conservationExact','fullStateSha256','tensorPreview'])
  assert.ok(localHubPanel.includes(marker),'R902 interactive tensor operator or state receipt inspector missing: '+marker);
 
 for(const marker of ['importLocalToken','file.name!==\'hub-r881.token\'','file.size>512','file.text()','setToken(text)','Load local token file','Nothing is uploaded'])
