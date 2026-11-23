@@ -129,6 +129,28 @@ class LocalHubTests(unittest.TestCase):
         restored=self.hub.enqueue("SPHERE_TENSOR_VERIFY",{"export_job_id":export_job["id"]})
         self.assertEqual(self.hub.run_one()["state"],"COMPLETED")
 
+    def test_r910_verified_original_complete_csv_download(self):
+        export=self.hub.enqueue("SPHERE_TENSOR_EXPORT",{
+            "seeds":[{"cell":0,"lane":0,"mass":4096}],"steps":4,
+            "cell_axis":0,"lane_axis":1,"destination":"states/r910.csv"})
+        exported=self.hub.run_one()
+        self.assertEqual(exported["state"],"COMPLETED")
+        original,digest=self.hub.verified_csv_artifact(export["id"])
+        self.assertEqual(digest,exported["result"]["artifact"]["sha256"])
+        self.assertTrue(original.startswith(b"cell,lane,mass\n"))
+        self.assertEqual(len(original.splitlines()),exported["result"]["exportedRows"]+1)
+        for bad in ("../escape","f"*32):
+            with self.subTest(job=bad),self.assertRaises(ValueError):
+                self.hub.verified_csv_artifact(bad)
+        file=self.root/"states"/"r910.csv"
+        source=file.read_bytes()
+        try:
+            file.write_bytes(source+b"X")
+            with self.assertRaisesRegex(ValueError,"R905_"):
+                self.hub.verified_csv_artifact(export["id"])
+        finally:file.write_bytes(source)
+        self.assertEqual(self.hub.verified_csv_artifact(export["id"])[1],digest)
+
     def test_r909_authenticated_artifact_contract_original_svg_only(self):
         original=self.hub.enqueue("SPHERE_TENSOR_EXPORT",{
             "seeds":[{"cell":0,"lane":0,"mass":4096}],"steps":4,
