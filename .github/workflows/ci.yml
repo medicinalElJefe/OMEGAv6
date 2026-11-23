@@ -542,6 +542,8 @@ jobs:
           Copy-Item -LiteralPath '.\install\UNINSTALL-OMEGA.cmd' -Destination (Join-Path $folder 'UNINSTALL-OMEGA.cmd')
           Copy-Item -LiteralPath '.\install\Install-OMEGA-Windows.ps1' -Destination (Join-Path $folder 'Install-OMEGA-Windows.ps1')
           Copy-Item -LiteralPath '.\install\Uninstall-OMEGA-Windows.ps1' -Destination (Join-Path $folder 'Uninstall-OMEGA-Windows.ps1')
+          Copy-Item -LiteralPath '.\install\Check-OMEGA-Windows.ps1' -Destination (Join-Path $folder 'Check-OMEGA-Windows.ps1')
+          Copy-Item -LiteralPath '.\install\CHECK-OMEGA-PC.cmd' -Destination (Join-Path $folder 'CHECK-OMEGA-PC.cmd')
           Copy-Item -LiteralPath '.\tools\omega_local_hub_r881.py' -Destination (Join-Path $folder 'omega_local_hub_r881.py')
           Copy-Item -LiteralPath '.\tools\omega_absolute_truth_verifier_r884.py' -Destination (Join-Path $folder 'omega_absolute_truth_verifier_r884.py')
           Copy-Item -LiteralPath '.\tools\omega_local_inference_r899.py' -Destination (Join-Path $folder 'omega_local_inference_r899.py')
@@ -609,6 +611,11 @@ jobs:
         run: |
           & pwsh -NoProfile -NonInteractive -File .\tests\r900-windows-install-lifecycle-smoke.ps1 -PackageRoot (Join-Path $env:RUNNER_TEMP 'OMEGA-Windows-Portable')
           if ($LASTEXITCODE -ne 0) { throw 'R900 managed Windows installer lifecycle is not proven' }
+      - name: Prove Windows local observation receipt with actual running UI and no GPU/PC proof inflation
+        shell: pwsh
+        run: |
+          & pwsh -NoProfile -NonInteractive -File .\tests\r901-windows-host-observation-smoke.ps1 -PackageRoot (Join-Path $env:RUNNER_TEMP 'OMEGA-Windows-Portable')
+          if ($LASTEXITCODE -ne 0) { throw 'R901 actual Windows observation evidence check failed' }
       - name: Zip actual tested portable UI, under 160 MiB
         shell: pwsh
         run: |
