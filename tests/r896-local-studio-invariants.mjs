@@ -39,6 +39,17 @@ for(const key of ['hash_schema = \'OMEGA_WINDOWS_PACKAGE_FILES_SHA256_R897\'','V
 
 for(const key of ['Invoke-WebRequest','Start-Process','127','api/health','StatusCode -eq 503','StatusCode -eq 404','ItemType Junction','StatusCode -eq 403','Stop-Process'])
  assert.ok(smoke.includes(key),'R896 Windows smoke contract missing: '+key);
+const installerR900=readFileSync('install/Install-OMEGA-Windows.ps1','utf8');
+const uninstallerR900=readFileSync('install/Uninstall-OMEGA-Windows.ps1','utf8');
+const installSmokeR900=readFileSync('tests/r900-windows-install-lifecycle-smoke.ps1','utf8');
+for(const key of ['Verify-OMEGA-Package.ps1','.omega-install.json','rollback-','Copy-Item','ReparsePoint','NoShortcut'])
+ assert.ok(installerR900.includes(key),'R900 verified managed install implementation missing: '+key);
+for(const key of ['ConfirmRemove','Verify-OMEGA-Package.ps1','.omega-install.json','ReparsePoint'])
+ assert.ok(uninstallerR900.includes(key),'R900 verified uninstall refusal missing: '+key);
+for(const key of ['R900_TAMPER_PROOF','R900_UNMANAGED_FILE','PROJECT_DATA_MUST_SURVIVE_R900','ConfirmRemove'])
+ assert.ok(installSmokeR900.includes(key),'R900 install lifecycle proof incomplete: '+key);
+assert.ok(workflow.includes('r900-windows-install-lifecycle-smoke.ps1'),
+ 'R900 Windows installer lifecycle must be verified by release CI');
 const modelSmoke=readFileSync('tests/r899-windows-compiled-inference-smoke.ps1','utf8');
 const modelFixture=readFileSync('tests/r899-windows-ollama-fixture.py','utf8');
 for(const line of ['OMEGA-Local-Hub.exe','/api/hub/models','LOCAL_INFER','result_sha256','R899_COMPILED_WORKER_RETURNED_ACTUAL_LOCAL_HTTP_RESPONSE','gpuProven']){
