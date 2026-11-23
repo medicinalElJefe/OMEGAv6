@@ -294,6 +294,33 @@ try {
        $repeatJob.error -notmatch 'R907_PROJECTION_TARGET_EXISTS_HELD'){
         throw 'R907 compiled SVG projection overwrote existing artwork'
     }
+    # R909 original R907 SVG bytes must be downloadable only by an
+    # authenticated loopback token, bound to the exact durable job receipt.
+    $svgUri="http://127.0.0.1:$port/api/hub/artifacts/$renderId"
+    $downloaded=Join-Path $root 'r909-download.svg'
+    $downloadResponse=Invoke-WebRequest -Uri $svgUri -Headers $headers -UseBasicParsing -OutFile $downloaded -PassThru -TimeoutSec 5
+    if($downloadResponse.StatusCode -ne 200 -or
+       $downloadResponse.Headers['Content-Type'] -notmatch '^image/svg\+xml' -or
+       $downloadResponse.Headers['X-Content-Type-Options'] -ne 'nosniff' -or
+       $downloadResponse.Headers['Content-Disposition'] -notmatch 'attachment' -or
+       $downloadResponse.Headers['X-Omega-Artifact-Sha256'] -ne $renderResult.result.artifact.sha256 -or
+       (Get-FileHash -LiteralPath $downloaded -Algorithm SHA256).Hash.ToLowerInvariant() -ne $renderResult.result.artifact.sha256){
+       throw 'R909 packaged Hub returned unverified or unsafe SVG download'
+    }
+    $deniedNoToken=$false
+    try{$null=Invoke-WebRequest -Uri $svgUri -Headers @{'Origin'=$headers['Origin']} -UseBasicParsing -TimeoutSec 5}
+    catch{if($null -ne $_.Exception.Response -and [int]$_.Exception.Response.StatusCode -eq 401){$deniedNoToken=$true}}
+    if(-not $deniedNoToken){throw 'R909 served protected SVG without authentication'}
+    $deniedUnrelated=$false
+    try{$null=Invoke-WebRequest -Uri ("http://127.0.0.1:$port/api/hub/artifacts/"+$exportId) -Headers $headers -UseBasicParsing -TimeoutSec 5}
+    catch{if($null -ne $_.Exception.Response -and [int]$_.Exception.Response.StatusCode -eq 403){$deniedUnrelated=$true}}
+    if(-not $deniedUnrelated){throw 'R909 disclosed unrelated source CSV via artifact route'}
+    # Mutation of the exact original SVG must immediately refuse retrieval.
+    [System.IO.File]::AppendAllText($svgFile,'X')
+    $deniedChanged=$false
+    try{$null=Invoke-WebRequest -Uri $svgUri -Headers $headers -UseBasicParsing -TimeoutSec 5}
+    catch{if($null -ne $_.Exception.Response -and [int]$_.Exception.Response.StatusCode -eq 403){$deniedChanged=$true}}
+    if(-not $deniedChanged){throw 'R909 served SVG after its SHA-256 receipt diverged'}
     # A one-byte change must HELD, without overwriting the first export.
     [System.IO.File]::AppendAllText($exportFile, 'X')
     $tamperQueued = Invoke-WebRequest -Uri "http://127.0.0.1:$port/api/hub/jobs" -Headers $headers -UseBasicParsing -Method Post -ContentType 'application/json' -Body $verifyPayload -TimeoutSec 5
