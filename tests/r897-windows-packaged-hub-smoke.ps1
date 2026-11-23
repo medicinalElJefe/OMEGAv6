@@ -136,6 +136,11 @@ try {
 ) {
         throw "R902 compiled sparse tensor execution or durable SHA receipt failed: $($tensorResult.state) $($tensorResult.error)"
     }
+    $tensorReplay = Invoke-WebRequest -Uri ("http://127.0.0.1:$port/api/hub/replay/" + $tensorId) -Headers $headers -UseBasicParsing -Method Post -ContentType 'application/json' -Body '{}' -TimeoutSec 8
+    $tensorReplayReceipt = $tensorReplay.Content | ConvertFrom-Json
+    if ($tensorReplayReceipt.state -ne 'MATCH' -or $tensorReplayReceipt.ok -ne $true) {
+        throw 'R902 packaged tensor replay did not reproduce its original complete state SHA receipt'
+    }
     Write-Host 'R898 PACKAGED WINDOWS HUB EXE PASS: authenticated compiled worker, SHA-256 HASH_TREE receipt, and actual embedded R884 ledger-verifier fail-closed execution. CI RUNNER ONLY.'
 } finally {
     if ($null -ne $process -and -not $process.HasExited) { Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue }
