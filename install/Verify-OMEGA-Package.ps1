@@ -1,11 +1,23 @@
 # R897 portable OMEGA7 package integrity check. Detects accidental package drift.
 # SHA-256 manifest is not a signature or external source-authentication proof.
 [CmdletBinding()]
-param([string]$PackageRoot = $PSScriptRoot)
+param([string]$PackageRoot)
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 try {
+    # A PowerShell param() default is evaluated before $PSScriptRoot is
+    # reliably available in the operator's powershell.exe -File context.
+    # Resolve the actual script directory only after param binding.
+    if ([string]::IsNullOrWhiteSpace($PackageRoot)) {
+        $PackageRoot = $PSScriptRoot
+    }
+    if ([string]::IsNullOrWhiteSpace($PackageRoot)) {
+        throw 'Cannot resolve package script directory'
+    }
     $root = (Resolve-Path -LiteralPath $PackageRoot -ErrorAction Stop).Path.TrimEnd([char[]]@('\','/'))
+    if ([string]::IsNullOrWhiteSpace($root)) {
+        throw 'Package path resolved to an empty root'
+    }
     $manifestPath = Join-Path $root 'OMEGA-PACKAGE-EVIDENCE.json'
     if (-not (Test-Path -LiteralPath $manifestPath -PathType Leaf)) { throw 'Package evidence manifest missing' }
     $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
