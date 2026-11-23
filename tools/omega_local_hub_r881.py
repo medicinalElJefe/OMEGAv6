@@ -390,6 +390,24 @@ class Hub:
             target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(json_bytes(obj))
             return {"manifest":receipt(target,self.root),"sourceCount":len(entries),"state":"HASHED_MANIFEST_WRITTEN"}
         raise ValueError("UNSUPPORTED_OPERATION")
+    def verified_csv_artifact(self,job_id):
+        """Retrieve only an original, fully verified R904/R906 checkpoint.
+
+        This download has an additional 8 MiB in-memory transport bound;
+        the local file remains available at its original approved path.
+        """
+        prior,validated=self.verified_sparse_export(job_id)
+        source=prior["result"]["artifact"]
+        path=safe_under(self.root,source["path"],True)
+        if not path.is_file() or path.stat().st_size>8*1024*1024:
+            raise ValueError("R910_CSV_DOWNLOAD_BOUND_HELD")
+        data=path.read_bytes()
+        digest=sha_bytes(data)
+        if (digest!=validated["fileSha256"] or len(data)!=source["byteSize"]
+            or not data.startswith(b"cell,lane,mass\n")):
+            raise ValueError("R910_CSV_DOWNLOAD_DRIFT_HELD")
+        return data,digest
+
     def verified_svg_artifact(self,job_id):
         """Return only exact, complete R907 art bytes from an original job.
 
@@ -484,6 +502,21 @@ def serve(hub,token,port):
         def do_OPTIONS(self):
             if not self._valid_host() or not allowed_browser_origin(self.headers.get("Origin","")):self._send({"ok":False,"state":"ORIGIN_OR_HOST_HELD"},403)
             else:self._send({"ok":True,"state":"PREFLIGHT_ONLY"})
+        def _send_csv(self,data,digest):
+            self.send_response(200)
+            self.send_header("Content-Type","text/csv; charset=utf-8")
+            self.send_header("Content-Disposition",'attachment; filename="omega-complete-verified-state.csv"')
+            self.send_header("X-Content-Type-Options","nosniff")
+            self.send_header("Cache-Control","no-store")
+            self.send_header("X-Omega-Artifact-Sha256",digest)
+            origin=self.headers.get("Origin","")
+            if allowed_browser_origin(origin):
+                self.send_header("Access-Control-Allow-Origin",origin)
+                self.send_header("Vary","Origin")
+                self.send_header("Access-Control-Expose-Headers","X-Omega-Artifact-Sha256")
+            self.send_header("Content-Length",str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
         def _send_svg(self,svg,digest):
             self.send_response(200)
             self.send_header("Content-Type","image/svg+xml; charset=utf-8")
@@ -503,6 +536,13 @@ def serve(hub,token,port):
         def do_GET(self):
             if not self._authorized():return self._send({"ok":False,"state":"AUTH_REQUIRED"},401)
             path=urlsplit(self.path).path
+            if path.startswith("/api/hub/artifacts/csv/"):
+                job_id=path.rsplit("/",1)[-1]
+                try:
+                    data,digest=hub.verified_csv_artifact(job_id)
+                    return self._send_csv(data,digest)
+                except ValueError as exc:
+                    return self._send({"ok":False,"state":"CSV_ARTIFACT_HELD","reason":str(exc)},403)
             if path.startswith("/api/hub/artifacts/"):
                 job_id=path.rsplit("/",1)[-1]
                 try:
