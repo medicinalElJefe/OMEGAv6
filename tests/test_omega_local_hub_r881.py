@@ -90,6 +90,56 @@ class LocalHubTests(unittest.TestCase):
         self.assertEqual(len(job["result_sha256"]),64)
         self.assertFalse(receipt["gpuComputeProven"])
 
+    def test_r905_exact_round_trip_and_tamper_refusal(self):
+        export_args={"seeds":[{"cell":143,"lane":1727,"mass":4096}],
+                     "steps":4,"cell_axis":2,"lane_axis":3,
+                     "destination":"exports/r905-complete.csv"}
+        export_job=self.hub.enqueue("SPHERE_TENSOR_EXPORT",export_args)
+        exported=self.hub.run_one()
+        self.assertEqual(exported["state"],"COMPLETED")
+        verify_job=self.hub.enqueue("SPHERE_TENSOR_VERIFY",{"export_job_id":export_job["id"]})
+        validated=self.hub.run_one()
+        self.assertEqual(validated["id"],verify_job["id"])
+        self.assertEqual(validated["state"],"COMPLETED")
+        proof=validated["result"]
+        self.assertEqual(proof["schema"],"OMEGA_SPARSE_EXPORT_ROUNDTRIP_R905")
+        self.assertEqual(proof["state"],"EXACT_EXPORTED_STATE_MATCH")
+        self.assertEqual(proof["exportedRows"],exported["result"]["exportedRows"])
+        self.assertEqual(proof["totalMass"],4096)
+        self.assertEqual(proof["fullStateSha256"],exported["result"]["canonicalFullStateSha256"])
+        self.assertEqual(proof["fileSha256"],exported["result"]["artifact"]["sha256"])
+        self.assertEqual(proof["originalExportReceiptSha256"],exported["result_sha256"])
+        self.assertFalse(proof["signedProvenance"])
+        path=self.root/"exports"/"r905-complete.csv"
+        original=path.read_bytes()
+        try:
+            # Alter only one mass while preserving the total number of rows.
+            changed=original.replace(b",256\\n",b",257\\n",1)
+            if changed==original:
+                changed=original.replace(b",",b",0",1)
+            path.write_bytes(changed)
+            tamper=self.hub.enqueue("SPHERE_TENSOR_VERIFY",{"export_job_id":export_job["id"]})
+            held=self.hub.run_one()
+            self.assertEqual(held["id"],tamper["id"])
+            self.assertEqual(held["state"],"HELD")
+            self.assertIn("R905_",held["error"])
+        finally:
+            path.write_bytes(original)
+        restored=self.hub.enqueue("SPHERE_TENSOR_VERIFY",{"export_job_id":export_job["id"]})
+        self.assertEqual(self.hub.run_one()["state"],"COMPLETED")
+
+    def test_r905_refuses_arbitrary_reference_and_unrelated_job(self):
+        for value in ("../escape",None,"g"*32):
+            job=self.hub.enqueue("SPHERE_TENSOR_VERIFY",{"export_job_id":value})
+            result=self.hub.run_one()
+            self.assertEqual(result["state"],"HELD")
+        plain=self.hub.enqueue("HASH_TREE",{"path":"data"})
+        self.hub.run_one()
+        job=self.hub.enqueue("SPHERE_TENSOR_VERIFY",{"export_job_id":plain["id"]})
+        held=self.hub.run_one()
+        self.assertEqual(held["state"],"HELD")
+        self.assertIn("R905_COMPLETED_ORIGINAL_EXPORT_REQUIRED_HELD",held["error"])
+
     def test_r904_cannot_overwrite_or_escape_root(self):
         args={"seeds":[{"cell":0,"lane":0,"mass":16}],"steps":2}
         for name in (".omega/secret.csv","../outside.csv","data/one.csv"):
