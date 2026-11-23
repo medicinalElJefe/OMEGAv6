@@ -110,6 +110,7 @@ class LocalHubTests(unittest.TestCase):
         self.assertEqual(proof["fileSha256"],exported["result"]["artifact"]["sha256"])
         self.assertEqual(proof["originalExportReceiptSha256"],exported["result_sha256"])
         self.assertFalse(proof["signedProvenance"])
+        self.assertEqual(self.hub.replay(verify_job["id"])["state"],"MATCH")
         path=self.root/"exports"/"r905-complete.csv"
         original=path.read_bytes()
         try:
