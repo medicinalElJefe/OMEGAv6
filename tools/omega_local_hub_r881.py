@@ -53,7 +53,7 @@ def load_local_inference_adapter_r899():
     return adapter
 
 READ_ONLY_REPLAY = frozenset({"HASH_TREE", "CSV_STATS", "VERIFY_LEDGER_SPLIT", "SPHERE_TENSOR_STEP"})
-OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "LOCAL_INFER", "SPHERE_TENSOR_STEP", "RESIDUAL_RESTORE"})
+OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "LOCAL_INFER", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_EXPORT", "RESIDUAL_RESTORE"})
 STATUS = frozenset({"QUEUED", "WAIT_EVENT", "RUNNING", "COMPLETED", "FAILED", "HELD", "CANCELLED"})
 def utc_ms(): return int(time.time() * 1000)
 def sha_file(path: Path) -> str:
@@ -153,6 +153,40 @@ class Hub:
         if operation=="RESIDUAL_RESTORE": raise ValueError("R195_RESIDUAL_SOURCE_AND_AUTHORITY_REQUIRED")
         if operation=="LOCAL_INFER":
             return load_local_inference_adapter_r899().infer_local_r899(args)
+        if operation=="SPHERE_TENSOR_EXPORT":
+            import importlib.util
+            module_path=Path(__file__).resolve().with_name("omega_sparse_tensor_r902.py")
+            if not module_path.is_file(): raise ValueError("R902_SPARSE_TENSOR_MODULE_REQUIRED")
+            spec=importlib.util.spec_from_file_location("_omega_sparse_tensor_r902",module_path)
+            module=importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            destination=args.get("destination")
+            if not isinstance(destination,str) or not destination.lower().endswith(".csv"):
+                raise ValueError("R904_NEW_CSV_DESTINATION_REQUIRED_HELD")
+            # All R902 inputs are validated by the same pure operator; no
+            # new dimension or transition rules are introduced by export.
+            compute_args={k:v for k,v in args.items() if k!="destination"}
+            result, rows=module.sparse_tensor_rows_r904(compute_args)
+            target=safe_under(self.root,destination,False)
+            if target.exists(): raise ValueError("R904_EXPORT_TARGET_EXISTS_HELD")
+            target.parent.mkdir(parents=True,exist_ok=True)
+            try:
+                with target.open("x",newline="",encoding="utf-8") as stream:
+                    writer=csv.writer(stream,lineterminator="\\n")
+                    writer.writerow(("cell","lane","mass"))
+                    for cell,lane,mass in rows: writer.writerow((cell,lane,mass))
+                file_receipt=receipt(target,self.root)
+            except BaseException:
+                try: target.unlink(missing_ok=True)
+                except OSError: pass
+                raise
+            return {"schema":"OMEGA_SPARSE_TENSOR_EXPORT_R904",
+                "state":"COMPLETE_SPARSE_STATE_CSV_EXPORTED",
+                "tensor":result,
+                "artifact":file_receipt,
+                "exportedRows":len(rows),
+                "canonicalFullStateSha256":result["fullStateSha256"],
+                "physicalPcAccepted":False,"gpuComputeProven":False}
         if operation=="SPHERE_TENSOR_STEP":
             import importlib.util
             module_path=Path(__file__).resolve().with_name("omega_sparse_tensor_r902.py")
