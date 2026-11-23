@@ -36,6 +36,30 @@ class LocalHubTests(unittest.TestCase):
     def test_hub_db_location_must_be_private(self):
         with self.assertRaisesRegex(ValueError,"DB_MUST_RESIDE_IN_PRIVATE_HUB_DIR"):
             hubmod.Hub(self.root,self.root/"data"/"database.sqlite")
+    def test_r902_real_sparse_tensor_execution_and_durable_receipt(self):
+        request={"seeds":[{"cell":20735,"lane":20735,"mass":4096}],
+                 "steps":4,"cell_axis":0,"lane_axis":1}
+        job=self.hub.enqueue("SPHERE_TENSOR_STEP",request)
+        result=self.hub.run_one()
+        self.assertEqual(result["id"],job["id"])
+        self.assertEqual(result["state"],"COMPLETED")
+        self.assertEqual(result["result"]["schema"],"OMEGA_IMPLICIT_CELL_LANE_TENSOR_R902")
+        self.assertEqual(result["result"]["implicitComponents"],429981696)
+        self.assertEqual(result["result"]["totalMassAfter"],4096)
+        self.assertTrue(result["result"]["conservationExact"])
+        self.assertEqual(len(result["result_sha256"]),64)
+        self.assertFalse(result["result"]["gpuComputeProven"])
+        self.assertFalse(result["result"]["independentAiModelsTrained"])
+        self.assertEqual(self.hub.replay(job["id"])["state"],"REPLAY_NOT_ADMISSIBLE")
+
+    def test_r902_invalid_mass_refuses_without_result_promotion(self):
+        job=self.hub.enqueue("SPHERE_TENSOR_STEP",
+                 {"seeds":[{"cell":0,"lane":0,"mass":5}],"steps":2})
+        result=self.hub.run_one()
+        self.assertEqual(result["state"],"HELD")
+        self.assertIn("R902_INTEGER_CONSERVATION_BOUND_HELD",result["error"])
+        self.assertNotEqual(result["result"]["state"],"DETERMINISTIC_SPARSE_TENSOR_EXECUTED")
+
     def test_hash_and_replay(self):
         job = self.hub.enqueue("HASH_TREE", {"path":"data"})
         done = self.hub.run_one()
