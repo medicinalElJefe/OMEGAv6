@@ -426,3 +426,22 @@ test('R965 exports inspected Atlas fields as provenance-labelled CSV',()=>{
  assert.ok(ui.includes("aria-label='Download inspected Atlas fields CSV' disabled={running||inspectedAddress===null||inspectedValues.length===0}"));
  assert.ok(!handler.includes('fetch(')&&!handler.includes('executeLocalTurns('));
 });
+
+
+test('R967 clipboard exposes actual computed inspection values with explicit permission refusal',()=>{
+ const ui=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
+ const start=ui.indexOf('const copyInspectedAtlasFieldsR967=async()=>');
+ const end=ui.indexOf('const exportCompleteAtlas=async()=>',start);
+ assert.ok(start>=0&&end>start,'clipboard handler exists');
+ const handler=ui.slice(start,end);
+ assert.match(handler,/inspectedAddress===null\\|\\|inspectedValues.length===0/);
+ assert.match(handler,/navigator\\.clipboard\\?\\.writeText/);
+ assert.match(handler,/await navigator\\.clipboard\\.writeText\\(text\\)/);
+ assert.match(handler,/BROWSER_LOCAL_COMPUTED/);
+ assert.ok(handler.includes(String.raw`join('\\t')`),'tab-delimited values');
+ assert.ok(handler.includes(String.raw`join('\\n')+'\\n'`),'newline-delimited rows');
+ assert.match(handler,/catch\\(e\\)\\{setError\\('Atlas clipboard copy rejected:/);
+ assert.doesNotMatch(handler,/fetch\\(|executeLocalTurns\\(/);
+ assert.ok(ui.includes("aria-label='Copy inspected Atlas fields' disabled={running||inspectedAddress===null||inspectedValues.length===0}"));
+ assert.ok(ui.includes('onClick={()=>{void copyInspectedAtlasFieldsR967()}}>Copy inspected fields'));
+});
