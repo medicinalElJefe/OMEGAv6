@@ -153,3 +153,15 @@ test('R964 selected Atlas inspection produces downloadable computed fields with 
  assert.match(control,/disabled=\{running\|\|inspectedAddress===null\|\|inspectedValues\.length===0\|\|\(localTurnResult!==null&&localTurnResult\.trace\[selectedExecutionStep\]\?\.address!==inspectedAddress\)\}/,'JSON export must refuse stale inspection for another selected replay address');
  assert.match(control,/onClick=\{downloadInspectedAtlasJsonR964\}/);
 });
+
+
+test('R973 recorded traversal visibly distinguishes unique addresses, changes, and revisits from full coverage',()=>{
+ const ui=readFileSync(new URL('../src7/workspaces/SharedArtifactLibraryR864.tsx',import.meta.url),'utf8');
+ const start=ui.indexOf("aria-label='Recorded Atlas traversal summary'");
+ assert.ok(start>=0,'recorded traversal summary is rendered in the Atlas replay');
+ const summary=ui.slice(start,start+850);
+ assert.match(summary,/new Set\(localTurnResult\.trace\.map\(state=>state\.address\)\)\.size/,'distinct addresses use actual trace values');
+ assert.match(summary,/state\.address!==localTurnResult\.trace\[i\]\.address/,'address changes compare consecutive states');
+ assert.match(summary,/localTurnResult\.trace\.length-new Set/,'revisits count repeated visits');
+ assert.match(summary,/not proof of full 20,736-state coverage/,'model trace does not claim full atlas coverage');
+});
