@@ -43,6 +43,26 @@ async function fetchVerifiedSvgR909(token:string,jobId:string,expectedHash:strin
   return new Blob([bytes],{type:'image/svg+xml'});
  }finally{window.clearTimeout(timeout)}
 }
+async function fetchVerifiedCsvR910(token:string,jobId:string,expectedHash:string):Promise<Blob>{
+ if(!/^[a-f0-9]{32}$/.test(jobId))throw Error('R910 requires a completed checkpoint job ID.');
+ if(!/^[a-f0-9]{64}$/.test(expectedHash))throw Error('R910 original CSV receipt SHA-256 required.');
+ const controller=new AbortController(),timeout=window.setTimeout(()=>controller.abort(),15000);
+ try{
+  const response=await fetch(BASE+'/api/hub/artifacts/csv/'+jobId,{
+   method:'GET',headers:{'X-Omega-Local-Token':token},cache:'no-store',
+   redirect:'error',credentials:'omit',signal:controller.signal
+  });
+  if(!response.ok||!response.headers.get('content-type')?.startsWith('text/csv'))
+   throw Error('R910 CSV download refused: '+response.status);
+  const bytes=await response.arrayBuffer();
+  if(bytes.byteLength<16||bytes.byteLength>8*1024*1024)throw Error('R910 CSV download size held.');
+  const advertised=response.headers.get('X-Omega-Artifact-Sha256');
+  if(advertised!==expectedHash)throw Error('R910 CSV download differs from selected durable artifact receipt.');
+  const actual=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))).map(n=>n.toString(16).padStart(2,'0')).join('');
+  if(actual!==expectedHash)throw Error('R910 CSV bytes failed independent browser SHA-256.');
+  return new Blob([bytes],{type:'text/csv;charset=utf-8'});
+ }finally{window.clearTimeout(timeout)}
+}
 export default function OmegaLocalHubPanelR884(){
  const [token,setToken]=useState(''),[state,setState]=useState<'UNCONNECTED'|'LOOPBACK_AUTHENTICATED'|'HELD'>('UNCONNECTED');
  const [operation,setOperation]=useState<Operation>('HASH_TREE'),[source,setSource]=useState('.'),[destination,setDestination]=useState('exports/omega-artifact.json');
@@ -164,6 +184,19 @@ export default function OmegaLocalHubPanelR884(){
    const list=await requestHub(token,'/api/hub/jobs');setJobs(Array.isArray(list.jobs)?list.jobs as HubJob[]:[]);
   });
  };
+ const downloadCsv=async(jobId:string,expectedHash:string)=>{
+  await act(async()=>{
+   if(state!=='LOOPBACK_AUTHENTICATED')throw Error('Authenticate the local Hub before downloading checkpoint.');
+   const csv=await fetchVerifiedCsvR910(token,jobId,expectedHash);
+   const uri=URL.createObjectURL(csv);
+   try{
+    const link=document.createElement('a');
+    link.href=uri;link.download='omega-r910-'+jobId.slice(0,12)+'.csv';
+    document.body.append(link);link.click();link.remove();
+    setInfo('R910 exported complete SHA-verified CSV checkpoint '+jobId+'.');
+   }finally{window.setTimeout(()=>URL.revokeObjectURL(uri),30000)}
+  });
+ };
  const downloadSvg=async(jobId:string,expectedHash:string)=>{
   await act(async()=>{
    if(state!=='LOOPBACK_AUTHENTICATED')throw Error('Authenticate the local Hub before downloading the SVG.');
@@ -272,6 +305,10 @@ export default function OmegaLocalHubPanelR884(){
     {chosen&&<div style={{marginTop:10}}>
      <strong>Selected job: {chosen.id}</strong>
      {(chosen.operation==='SPHERE_TENSOR_EXPORT'||chosen.operation==='SPHERE_TENSOR_CONTINUE')&&chosen.state==='COMPLETED'&&<button type='button' style={{...button,margin:'8px 0'}} onClick={()=>{setExportJobId(chosen.id);setOperation('SPHERE_TENSOR_VERIFY');setInfo('R905 round-trip verification configured against '+chosen.id)}}>Verify complete CSV against this export receipt</button>}
+     {(chosen.operation==='SPHERE_TENSOR_EXPORT'||chosen.operation==='SPHERE_TENSOR_CONTINUE')&&chosen.state==='COMPLETED'&&
+      <button type='button' disabled={busy||state!=='LOOPBACK_AUTHENTICATED'} style={{...button,margin:'8px 0'}} onClick={()=>{const a=(chosen.result as {artifact?:{sha256?:string}}|undefined)?.artifact;void downloadCsv(chosen.id,String(a?.sha256||''))}}>
+       Download complete verified CSV checkpoint
+      </button>}
      <div style={{display:'flex',gap:8,margin:'8px 0'}}><button type='button' disabled={busy||!['QUEUED','WAIT_EVENT'].includes(chosen.state)} onClick={()=>action('cancel',chosen.id)} style={button}>Cancel pending</button><button type='button' disabled={busy||chosen.state!=='COMPLETED'} onClick={()=>action('replay',chosen.id)} style={button}>Verify replay</button></div>
      {(chosen.operation==='SPHERE_TENSOR_EXPORT'||chosen.operation==='SPHERE_TENSOR_CONTINUE')&&chosen.state==='COMPLETED'&&<button type='button' style={{...button,margin:'8px 0'}} onClick={()=>{setExportJobId(chosen.id);setOperation('SPHERE_TENSOR_CONTINUE');setDestination('exports/omega-tensor-next.csv');setInfo('R906 continuation configured from checkpoint '+chosen.id)}}>Continue this verified state into a new CSV</button>}
      {(chosen.operation==='SPHERE_TENSOR_EXPORT'||chosen.operation==='SPHERE_TENSOR_CONTINUE')&&chosen.state==='COMPLETED'&&<button type='button' style={{...button,margin:'8px 0'}} onClick={()=>{setExportJobId(chosen.id);setOperation('SPHERE_TENSOR_RENDER');setDestination('art/omega-verified-projection.svg');setInfo('R907 SVG projection configured from verified checkpoint '+chosen.id)}}>Render verified 20,736-cell state to SVG</button>}
