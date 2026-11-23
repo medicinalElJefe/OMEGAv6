@@ -461,3 +461,18 @@ test('R968 refuses stale inspection exports after replay address changes',()=>{
  assert.equal(canExport(9,8),false);
  assert.equal(canExport(8,null),false);
 });
+
+test('R971 inspection TSV export provides a spreadsheet artifact with provenance and replay-address protection',()=>{
+ const ui=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
+ const handler=ui.split('const downloadInspectedAtlasTsvR971=()=>{')[1]?.split('const copyInspectedAtlasFieldsR967=')[0];
+ assert.ok(handler,'TSV download handler exists');
+ assert.match(handler,/inspectedValues\.length===0/);
+ assert.match(handler,/localTurnResult\.trace\[selectedExecutionStep\]\?\.address!==inspectedAddress/);
+ assert.match(handler,/text\/tab-separated-values/);
+ assert.match(handler,/\.replace\(\/\[\\t\\r\\n\]\/g,' '\)/);
+ assert.match(handler,/BROWSER_LOCAL_COMPUTED/);
+ assert.match(handler,/omega-atlas-inspection-/);
+ assert.match(handler,/\.tsv/);
+ assert.match(ui,/aria-label='Download inspected Atlas fields TSV' disabled=\{running\|\|inspectedAddress===null\|\|inspectedValues\.length===0\|\|\(localTurnResult!==null&&localTurnResult\.trace\[selectedExecutionStep\]\?\.address!==inspectedAddress\)\}/);
+ assert.match(ui,/onClick=\{downloadInspectedAtlasTsvR971\}/);
+});
