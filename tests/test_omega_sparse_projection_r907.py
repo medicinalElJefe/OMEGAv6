@@ -26,6 +26,12 @@ class ProjectionR907Tests(unittest.TestCase):
         self.assertEqual(result["totalMass"],32)
         self.assertEqual(result["zeroMassCells"],20733)
         self.assertEqual(result["sourceFullStateSha256"],digest)
+        self.assertEqual(len(result["projectionGrid"]),20736)
+        self.assertEqual(result["projectionGrid"].count("A"),20733)
+        self.assertNotEqual(result["projectionGrid"][0],"A")
+        self.assertNotEqual(result["projectionGrid"][1],"A")
+        self.assertNotEqual(result["projectionGrid"][12*144],"A")
+        self.assertEqual(result["projectionGridEncoding"],"BASE64_ALPHABET_QUANTIZED_MASS_INTENSITY_R907")
         self.assertFalse(result["gpuComputeProven"])
         root=ET.fromstring(svg)
         shapes=[el for el in root.iter() if el.tag.endswith("rect") and el.get("fill")=="#5edac5"]
