@@ -27,10 +27,18 @@ assert.ok(verify.includes(".Replace('"+windowsSlash+"','/')"),'R897 must normali
 assert.ok(!verify.includes(".Replace('"+windowsSlash+windowsSlash+"','/')"),'R897 must not require doubled Windows backslashes');
 for(const key of ['OMEGA_WINDOWS_PACKAGE_FILES_SHA256_R897','Get-FileHash','SHA256','ReparsePoint','Package file count differs','Duplicate package manifest path'])
  assert.ok(verify.includes(key),'R897 manifest integrity guard missing: '+key);
+const operatorSmoke=readFileSync('tests/r911-windows-double-click-operator-smoke.ps1','utf8');
+assert.ok(verify.includes('param([string]$PackageRoot)'),'R911 must not bind PSScriptRoot before PowerShell parameter binding');
+assert.ok(verify.includes('if ([string]::IsNullOrWhiteSpace($PackageRoot))'),'R911 must default script directory at runtime');
+assert.ok(launch.includes('-PackageRoot "%~dp0."'),'R911 double-click cmd must pass its extracted folder explicitly');
+for(const marker of ['OMEGA Operator Extracted With Spaces','OPEN-OMEGA.cmd','no-argument package verifier','OMEGA_OPERATOR_SMOKE','OM EGA'.replace(' ','')]){
+ assert.ok(operatorSmoke.includes(marker),'R911 real extracted operator test missing: '+marker);
+}
 const workflow=readFileSync('.github/workflows/ci.yml','utf8');
 const powershellSyntaxGate=readFileSync('tests/r903-windows-powershell-syntax.ps1','utf8');
-for(const filename of ['Verify-OMEGA-Package.ps1','Start-OMEGA-Integrated.ps1','Install-OMEGA-Windows.ps1','Uninstall-OMEGA-Windows.ps1','r897-windows-packaged-hub-smoke.ps1'])
+for(const filename of ['r911-windows-double-click-operator-smoke.ps1','Verify-OMEGA-Package.ps1','Start-OMEGA-Integrated.ps1','Install-OMEGA-Windows.ps1','Uninstall-OMEGA-Windows.ps1','r897-windows-packaged-hub-smoke.ps1'])
  assert.ok(powershellSyntaxGate.includes(filename),'R903 missing Windows PowerShell AST syntax gate for: '+filename);
+assert.ok(workflow.includes('r911-windows-double-click-operator-smoke.ps1'),'R911 double-click extraction must be exercised before Windows packaging acceptance');
 assert.ok(workflow.includes('r903-windows-powershell-syntax.ps1'),
  'R903 parser gate must run before building the native Windows package');
 
