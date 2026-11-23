@@ -33,6 +33,7 @@ try {
     $hub=Start-Process -FilePath $worker -ArgumentList @('--root',('"' + $root + '"'),'--port','8765') -PassThru -WindowStyle Hidden -RedirectStandardOutput (Join-Path $root 'hub-out.txt') -RedirectStandardError (Join-Path $root 'hub-err.txt')
     $tokenPath=Join-Path $root '.omega\hub-r881.token'
     $token=$null
+    $status=$null
     for($n=0;$n -lt 100;$n++){
         if($hub.HasExited){throw 'Compiled Hub exited before local model acceptance'}
         if(Test-Path -LiteralPath $tokenPath -PathType Leaf){
