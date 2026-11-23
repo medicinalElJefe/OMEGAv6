@@ -38,6 +38,10 @@ try {
     }
     $marker = $full + '.omega-install.json'
     if (Test-Path -LiteralPath $full) {
+        $existing = Get-Item -LiteralPath $full -Force
+        if (($existing.Attributes -band [System.IO.FileAttributes]::ReparsePoint) -ne 0) {
+            throw 'Existing install target is a junction or symbolic link'
+        }
         if (-not (Test-Path -LiteralPath $marker -PathType Leaf)) {
             throw 'Existing unmanaged target refuses overwrite'
         }
@@ -73,15 +77,19 @@ try {
     [System.IO.File]::WriteAllText($marker,$metadata,[System.Text.Encoding]::UTF8)
     if ($backup) { Remove-Item -LiteralPath $backup -Recurse -Force -ErrorAction Stop; $backup = $null }
     if (-not $NoShortcut) {
-        $programs = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs'
-        if (Test-Path -LiteralPath $programs -PathType Container) {
-            $shortcut = Join-Path $programs 'OMEGA7 Local Studio.lnk'
-            $shell = New-Object -ComObject WScript.Shell
-            $link = $shell.CreateShortcut($shortcut)
-            $link.TargetPath = Join-Path $full 'OPEN-OMEGA-INTEGRATED.cmd'
-            $link.WorkingDirectory = $full
-            $link.Description = 'OMEGA7 verified local studio and bounded worker'
-            $link.Save()
+        try {
+            $programs = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs'
+            if (Test-Path -LiteralPath $programs -PathType Container) {
+                $shortcut = Join-Path $programs 'OMEGA7 Local Studio.lnk'
+                $shell = New-Object -ComObject WScript.Shell
+                $link = $shell.CreateShortcut($shortcut)
+                $link.TargetPath = Join-Path $full 'OPEN-OMEGA-INTEGRATED.cmd'
+                $link.WorkingDirectory = $full
+                $link.Description = 'OMEGA7 verified local studio and bounded worker'
+                $link.Save()
+            }
+        } catch {
+            Write-Warning 'Managed install succeeded; optional Start Menu shortcut was not created.'
         }
     }
     Write-Host ('R900 OMEGA7 MANAGED INSTALL PASS: '+$full+'; exact packaged bytes verified. Native device proof NOT asserted.')
