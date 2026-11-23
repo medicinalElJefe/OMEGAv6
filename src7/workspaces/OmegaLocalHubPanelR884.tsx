@@ -124,7 +124,11 @@ export default function OmegaLocalHubPanelR884(){
   });
  };
  const chosen=jobs.find(x=>x.id===selected);
- const tensorResult=chosen?.operation==='SPHERE_TENSOR_STEP'&&chosen.state==='COMPLETED'&&chosen.result&&typeof chosen.result==='object'
+ const tensorExport=chosen?.operation==='SPHERE_TENSOR_EXPORT'&&chosen.state==='COMPLETED'&&chosen.result&&typeof chosen.result==='object'
+  ?chosen.result as Record<string,unknown>:null;
+ const tensorResult=tensorExport&&tensorExport.tensor&&typeof tensorExport.tensor==='object'
+  ?tensorExport.tensor as Record<string,unknown>
+  :chosen?.operation==='SPHERE_TENSOR_STEP'&&chosen.state==='COMPLETED'&&chosen.result&&typeof chosen.result==='object'
   ?chosen.result as Record<string,unknown>:null;
  const tensorPreview=Array.isArray(tensorResult?.preview)?(tensorResult.preview as {cell:number;lane:number;mass:number}[]).slice(0,32):[];
  return <section data-r884-local-hub='LOOPBACK_INTEGRATION_ONLY' style={surface}>
@@ -177,6 +181,7 @@ export default function OmegaLocalHubPanelR884(){
      <div style={{display:'flex',gap:8,margin:'8px 0'}}><button type='button' disabled={busy||!['QUEUED','WAIT_EVENT'].includes(chosen.state)} onClick={()=>action('cancel',chosen.id)} style={button}>Cancel pending</button><button type='button' disabled={busy||chosen.state!=='COMPLETED'} onClick={()=>action('replay',chosen.id)} style={button}>Verify replay</button></div>
      {tensorResult&&tensorResult.schema==='OMEGA_IMPLICIT_CELL_LANE_TENSOR_R902'&&<div style={{...surface,margin:'8px 0'}}>
       <h4>R902 nested-state execution receipt</h4>
+      {tensorExport&&<p><strong>Complete CSV export:</strong> <code>{String((tensorExport.artifact as {path?:string}|undefined)?.path||'No file')}</code> · {String(tensorExport.exportedRows)} complete nonzero rows · File SHA-256: <code style={{overflowWrap:'anywhere'}}>{String((tensorExport.artifact as {sha256?:string}|undefined)?.sha256||'unavailable')}</code></p>}
       <p><strong>20,736 cells × 20,736 lanes</strong> · {String(tensorResult.activeComponents)} nonzero components · {String(tensorResult.steps)} transitions</p>
       <p>Conserved integer mass: <strong>{String(tensorResult.totalMassBefore)} → {String(tensorResult.totalMassAfter)}</strong> · {tensorResult.conservationExact===true?'EXACT MATCH':'NOT VERIFIED'}</p>
       <p><small>Full sparse-state SHA-256: <code style={{overflowWrap:'anywhere'}}>{String(tensorResult.fullStateSha256)}</code></small></p>
