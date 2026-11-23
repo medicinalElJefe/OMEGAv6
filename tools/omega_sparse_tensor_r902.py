@@ -33,7 +33,7 @@ def shift_axis(index: int, digit: int, delta: int = 1) -> int:
     return index + (((value + delta) % AXIS) - value) * base
 
 
-def sparse_tensor_run_r902(args: dict) -> dict:
+def _compute_sparse_r902(args: dict):
     if not isinstance(args, dict) or set(args) - {"seeds", "steps", "cell_axis", "lane_axis"}:
         raise ValueError("R902_ARGUMENT_SCHEMA_HELD")
     steps = args.get("steps", 1)
@@ -94,7 +94,7 @@ def sparse_tensor_run_r902(args: dict) -> dict:
     for cell,lane,mass in ordered:
         full_digest.update(f"{cell}:{lane}:{mass}\n".encode("ascii"))
         cell_mass[cell] = cell_mass.get(cell,0) + mass
-    return {
+    result = {
         "schema":"OMEGA_IMPLICIT_CELL_LANE_TENSOR_R902",
         "state":"DETERMINISTIC_SPARSE_TENSOR_EXECUTED",
         "cellCount":DIMENSIONS,
@@ -119,6 +119,21 @@ def sparse_tensor_run_r902(args: dict) -> dict:
         "gpuComputeProven":False,
         "empiricalTruthProven":False
     }
+    return result, ordered
+
+
+def sparse_tensor_run_r902(args: dict) -> dict:
+    result, _ = _compute_sparse_r902(args)
+    return result
+
+
+def sparse_tensor_rows_r904(args: dict):
+    """Return exact R902 receipt plus every sorted nonzero component.
+
+    This is an internal export seam. The authenticated Hub alone determines
+    destination authority and durable artifact persistence.
+    """
+    return _compute_sparse_r902(args)
 
 
 if __name__ == "__main__":
