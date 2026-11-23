@@ -22,10 +22,11 @@ assert.equal(server.split('$requestMatch = [System.Text.RegularExpressions.Regex
 assert.ok(launch.includes('Start-OMEGA-Local.ps1'),'R896 must be double-click launchable');
 assert.ok(launch.includes('Verify-OMEGA-Package.ps1')&&launch.includes('if errorlevel 1'),'R897 startup must fail closed when package integrity is not verified');
 const verify=readFileSync('install/Verify-OMEGA-Package.ps1','utf8');
+assert.ok(!verify.includes('Get-FileHash -LiteralPath'),'R911 verifier must work without optional PowerShell module discovery from CMD');
 const windowsSlash=String.fromCharCode(92);
 assert.ok(verify.includes(".Replace('"+windowsSlash+"','/')"),'R897 must normalize a single Windows path separator');
 assert.ok(!verify.includes(".Replace('"+windowsSlash+windowsSlash+"','/')"),'R897 must not require doubled Windows backslashes');
-for(const key of ['OMEGA_WINDOWS_PACKAGE_FILES_SHA256_R897','Get-FileHash','SHA256','ReparsePoint','Package file count differs','Duplicate package manifest path'])
+for(const key of ['OMEGA_WINDOWS_PACKAGE_FILES_SHA256_R897','[System.Security.Cryptography.SHA256]::Create()','ComputeHash($stream)','SHA256','ReparsePoint','Package file count differs','Duplicate package manifest path'])
  assert.ok(verify.includes(key),'R897 manifest integrity guard missing: '+key);
 const operatorSmoke=readFileSync('tests/r911-windows-double-click-operator-smoke.ps1','utf8');
 assert.ok(verify.includes('param([string]$PackageRoot)'),'R911 must not bind PSScriptRoot before PowerShell parameter binding');
