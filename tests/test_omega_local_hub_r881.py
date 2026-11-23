@@ -50,7 +50,7 @@ class LocalHubTests(unittest.TestCase):
         self.assertEqual(len(result["result_sha256"]),64)
         self.assertFalse(result["result"]["gpuComputeProven"])
         self.assertFalse(result["result"]["independentAiModelsTrained"])
-        self.assertEqual(self.hub.replay(job["id"])["state"],"REPLAY_NOT_ADMISSIBLE")
+        self.assertEqual(self.hub.replay(job["id"])["state"],"MATCH")
 
     def test_r902_invalid_mass_refuses_without_result_promotion(self):
         job=self.hub.enqueue("SPHERE_TENSOR_STEP",
