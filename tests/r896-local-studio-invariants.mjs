@@ -39,6 +39,16 @@ for(const key of ['hash_schema = \'OMEGA_WINDOWS_PACKAGE_FILES_SHA256_R897\'','V
 
 for(const key of ['Invoke-WebRequest','Start-Process','127','api/health','StatusCode -eq 503','StatusCode -eq 404','ItemType Junction','StatusCode -eq 403','Stop-Process'])
  assert.ok(smoke.includes(key),'R896 Windows smoke contract missing: '+key);
+const localProbeR901=readFileSync('install/Check-OMEGA-Windows.ps1','utf8');
+const localProbeSmokeR901=readFileSync('tests/r901-windows-host-observation-smoke.ps1','utf8');
+for(const marker of ['Verify-OMEGA-Package.ps1','Start-OMEGA-Local.ps1','Get-CimInstance','gpuAdapterInventoryState','nativeGpuWorkloadProven','physicalPcAccepted','UNSIGNED_OPERATOR_LOCAL_OBSERVATIONS_NOT_R141_R237']){
+ assert.ok(localProbeR901.includes(marker),'R901 physical Windows observations improperly omitted: '+marker);
+}
+for(const marker of ['EXACT_SHA256_PACKAGE_VERIFIED','localUi.responded','nativeGpuWorkloadProven','authenticatedHybridLinkPcAccepted','PRESERVE_PROJECT_DATA_R901']){
+ assert.ok(localProbeSmokeR901.includes(marker),'R901 local evidence regression missing: '+marker);
+}
+assert.ok(workflow.includes('r901-windows-host-observation-smoke.ps1'),
+ 'R901 must run actual Windows observation evidence in packaging CI');
 const installerR900=readFileSync('install/Install-OMEGA-Windows.ps1','utf8');
 const uninstallerR900=readFileSync('install/Uninstall-OMEGA-Windows.ps1','utf8');
 const installSmokeR900=readFileSync('tests/r900-windows-install-lifecycle-smoke.ps1','utf8');
