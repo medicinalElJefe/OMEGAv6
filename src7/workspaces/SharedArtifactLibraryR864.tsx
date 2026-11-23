@@ -369,7 +369,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
   const uniqueAddresses=new Set(trace.map(state=>state.address)).size;
   const addressChanges=trace.slice(1).filter((state,i)=>state.address!==trace[i].address).length;
   const payload={schema:'OMEGA_ATLAS_RECORDED_TRAVERSAL_SUMMARY_R977_V1',provenance:'RECORDED_MODEL_TRACE',modelOnly:true,modelAddressCount:20736,recordedStates:trace.length,distinctAddresses:uniqueAddresses,addressChanges,revisits:trace.length-uniqueAddresses,coveragePercent:Number((100*uniqueAddresses/20736).toFixed(3)),firstAddress:trace[0].address,lastAddress:trace[trace.length-1].address,limitation:'Recorded trace only; not proof of full 20,736-state coverage or physical measurement.'};
-  const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)+'\\n'],{type:'application/json;charset=utf-8'}));
+  const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)+'\n'],{type:'application/json;charset=utf-8'}));
   const link=document.createElement('a');link.href=url;link.download='omega-atlas-recorded-traversal-summary.json';document.body.appendChild(link);link.click();link.remove();window.setTimeout(()=>URL.revokeObjectURL(url),1000);
   setExecutionStatus('Downloaded recorded model traversal summary (not complete Atlas coverage).');
  };
