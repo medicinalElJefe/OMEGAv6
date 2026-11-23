@@ -15,6 +15,8 @@ SIDE = 144
 DIMENSIONS = SIDE * SIDE
 MAX_ROWS = 100000
 MAX_MASS = 10**15
+GRID_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
+
 
 
 def address_xy_r907(cell: int):
@@ -53,6 +55,15 @@ def project_verified_rows_r907(rows, source_state_sha256: str):
     max_cell_mass = max(cell_mass.values())
     # Use pure numeric SVG attributes: no scripts, external assets or text
     # interpolated from an untrusted file.
+    # A 20,736-character quantized preview accompanies the complete SVG.
+    # This is derived display data, never a substitute for exact file/state
+    # hashes or the authenticated full checkpoint.
+    grid = [GRID_ALPHABET[0]] * DIMENSIONS
+    for cell, value in cell_mass.items():
+        x, y = address_xy_r907(cell)
+        alpha = 0.20 + 0.80 * math.log1p(value) / math.log1p(max_cell_mass)
+        level = min(63, max(1, round(alpha * 63)))
+        grid[y * SIDE + x] = GRID_ALPHABET[level]
     fragments = [
         '<svg xmlns="http://www.w3.org/2000/svg" width="800" height="860" viewBox="0 0 800 860" role="img" aria-label="R907 complete verified sparse-state cell mass projection">',
         '<title>OMEGA verified 20,736-cell state projection</title>',
@@ -96,6 +107,8 @@ def project_verified_rows_r907(rows, source_state_sha256: str):
         "sourceFullStateSha256": source_state_sha256,
         "maxCellMass": max_cell_mass,
         "zeroMassCells": DIMENSIONS - len(cell_mass),
+        "projectionGridEncoding": "BASE64_ALPHABET_QUANTIZED_MASS_INTENSITY_R907",
+        "projectionGrid": "".join(grid),
         "denseTensorAllocated": False,
         "gpuComputeProven": False,
         "physicalPcAccepted": False,
