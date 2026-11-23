@@ -14,6 +14,7 @@ echo.
 powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "%~dp0Verify-OMEGA-Package.ps1" -PackageRoot "%~dp0."
 if errorlevel 1 (
   echo OMEGA package integrity verification failed. Do not use a modified or incomplete package.
+  if "%OMEGA_OPERATOR_SMOKE%"=="1" exit /b 1
   pause
   exit /b 1
 )
@@ -31,6 +32,7 @@ if not "%OMEGA_EXIT%"=="0" (
   echo.
   echo Local studio could not start. Check the message above.
   echo Be sure you extracted the full OMEGA portable package.
+  if "%OMEGA_OPERATOR_SMOKE%"=="1" exit /b %OMEGA_EXIT%
   pause
 )
 exit /b %OMEGA_EXIT%
