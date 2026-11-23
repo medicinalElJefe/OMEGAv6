@@ -104,6 +104,18 @@ fabricated result. Operator prompts and returned text are kept in the
 approved root's local job database; do not submit sensitive information
 unless that local persistence is intended.
 
+### R899 compiled-Windows end-to-end model proof
+
+Windows Cloud Bridge CI now starts the actual packaged `OMEGA-Local-Hub.exe`
+and a deterministic **test-only** Ollama-shaped HTTP fixture bound to
+`127.0.0.1:11434`. Using the Hub's authenticated loopback API, the test
+discovers the installed fixture model, submits a `LOCAL_INFER` job, waits
+for its completed SQLite receipt and SHA-256, and verifies that the response
+text is the exact data returned over HTTP by the fixture. Both processes are
+stopped in the test cleanup. This proves that the compiled executable includes
+and executes the actual adapter and durable job path; it does **not** prove
+model quality, target-machine inference performance or native GPU use.
+
 ## R897 full-package integrity guard
 
 `OPEN-OMEGA.cmd` now runs `Verify-OMEGA-Package.ps1` before opening the
