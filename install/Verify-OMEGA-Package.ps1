@@ -60,7 +60,19 @@ try {
         if ($rel -cne [string]$entry.path -or $file.Length -ne [long]$entry.bytes) {
             throw ('Package file name/length mismatch: ' + $rel)
         }
-        if ((Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant() -cne [string]$entry.sha256) {
+        # SHA256.Create / FileStream are built into Windows .NET. They do
+        # not depend on PSModulePath, Get-FileHash module discovery, network
+        # access, profile scripts, or a separately installed runtime.
+        $sha = [System.Security.Cryptography.SHA256]::Create()
+        $stream = $null
+        try {
+            $stream = [System.IO.File]::OpenRead($file.FullName)
+            $digest = [System.BitConverter]::ToString($sha.ComputeHash($stream)).Replace('-', '').ToLowerInvariant()
+        } finally {
+            if ($null -ne $stream) { $stream.Dispose() }
+            $sha.Dispose()
+        }
+        if ($digest -cne [string]$entry.sha256) {
             throw ('Package file SHA-256 mismatch: ' + $rel)
         }
     }
