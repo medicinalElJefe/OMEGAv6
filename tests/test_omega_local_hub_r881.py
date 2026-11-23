@@ -75,7 +75,7 @@ class LocalHubTests(unittest.TestCase):
         self.assertEqual(receipt["tensor"]["totalMassAfter"],4096)
         exported=self.root/"exports"/"full-state.csv"
         data=exported.read_bytes()
-        self.assertTrue(data.startswith(b"cell,lane,mass\\n"))
+        self.assertTrue(data.startswith(b"cell,lane,mass\n"))
         self.assertEqual(len(data.splitlines()),receipt["exportedRows"]+1)
         self.assertEqual(hashlib.sha256(data).hexdigest(),receipt["artifact"]["sha256"])
         state_hash=hashlib.sha256()
@@ -83,7 +83,7 @@ class LocalHubTests(unittest.TestCase):
         for line in data.decode("utf-8").splitlines()[1:]:
             cell,lane,weight=(int(x) for x in line.split(","))
             mass+=weight
-            state_hash.update(f"{cell}:{lane}:{weight}\\n".encode("ascii"))
+            state_hash.update(f"{cell}:{lane}:{weight}\n".encode("ascii"))
         self.assertEqual(mass,4096)
         self.assertEqual(state_hash.hexdigest(),receipt["canonicalFullStateSha256"])
         self.assertEqual(receipt["canonicalFullStateSha256"],receipt["tensor"]["fullStateSha256"])
