@@ -165,3 +165,16 @@ test('R973 recorded traversal visibly distinguishes unique addresses, changes, a
  assert.match(summary,/localTurnResult\.trace\.length-new Set/,'revisits count repeated visits');
  assert.match(summary,/not proof of full 20,736-state coverage/,'model trace does not claim full atlas coverage');
 });
+
+
+test('R974 traversal summary exposes bounded coverage percentage and real trace endpoints',()=>{
+ const ui=readFileSync(new URL('../src7/workspaces/SharedArtifactLibraryR864.tsx',import.meta.url),'utf8');
+ const start=ui.indexOf("aria-label='Recorded Atlas traversal summary'");
+ const summary=ui.slice(start,start+1150);
+ assert.ok(start>=0);
+ assert.match(summary,/100\*new Set\(localTurnResult\.trace\.map\(state=>state\.address\)\)\.size\/20736/);
+ assert.match(summary,/\.toFixed\(3\)/);
+ assert.match(summary,/localTurnResult\.trace\[0\]\?\.address/);
+ assert.match(summary,/localTurnResult\.trace\[localTurnResult\.trace\.length-1\]\?\.address/);
+ assert.match(summary,/not proof of full 20,736-state coverage/);
+});
