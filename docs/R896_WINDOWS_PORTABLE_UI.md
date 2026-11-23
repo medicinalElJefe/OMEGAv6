@@ -163,6 +163,35 @@ adapter. Real target-PC execution must occur on that PC; a CI runner cannot
 satisfy it. The Windows pipeline tests the diagnostic and its refusal
 boundaries but cannot create actual customer-device evidence.
 
+## R902 executable 20,736 × 20,736 nested state space
+
+The authentic OMEGA Local / Edge Hub now provides `SPHERE_TENSOR_STEP`.
+It executes a deterministic integer-conserving operator on a **sparse,
+implicit matrix** with 20,736 addressable cells, each with 20,736 state lanes
+(`12^4 × 12^4 = 429,981,696` possible components). Every cell's state
+can differ. Each update retains one-half of a component's mass, shifts
+one-quarter to its neighboring cell along one base-12 axis, and shifts
+one-quarter into the neighboring local state lane. Axis shifts wrap within
+their own base-12 digit, never carry into adjacent coordinates.
+
+The operator does **real local work** from explicit operator-provided
+integer seeds. Exact conservation is checked after every step. Its complete
+nonzero final state is canonically hashed into `fullStateSha256`; only the
+first 32 sorted components are displayed, preventing unbounded output.
+Run limits: no more than 128 seeds, 8 steps, 100,000 nonzero components and
+1 quadrillion integer-mass units. To ensure integer conservation, every
+seed's mass must be divisible by `4^steps`. All failures refuse rather
+than silently approximate. Successful computation is stored in the original
+authenticated R881 SQLite job ledger with its own overall SHA-256 receipt.
+
+The runtime does **not** allocate 429,981,696 dense elements, and does
+not claim that each cell is a separately trained AI model, nor that GPU
+hardware executed the job. Those remain separate engineering requirements.
+The CI Windows executable actually submits an R902 job and verifies its
+conservation and receipt; independent CPU unit tests cover boundary wrapping,
+repeatability, and invalid requests. It is a functional foundation for
+nested-state computation, not calibrated physical simulation.
+
 ## R897 full-package integrity guard
 
 `OPEN-OMEGA.cmd` now runs `Verify-OMEGA-Package.ps1` before opening the
