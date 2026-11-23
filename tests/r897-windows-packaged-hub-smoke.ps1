@@ -262,11 +262,19 @@ try {
        $renderResult.result.schema -ne 'OMEGA_SPARSE_PROJECTION_ARTIFACT_R907' -or
        $renderResult.result.projection.addressableCells -ne 20736 -or
        $renderResult.result.projection.totalMass -ne 4096 -or
+       $renderResult.result.projection.projectionGrid.Length -ne 20736 -or
        $renderResult.result.sourceExportJobId -ne $continueId -or
        $renderResult.result.sourceFullStateSha256 -ne $continueResult.result.canonicalFullStateSha256 -or
        -not(Test-Path -LiteralPath $svgFile -PathType Leaf) -or
        $renderResult.result.artifact.sha256 -ne (Get-FileHash -LiteralPath $svgFile -Algorithm SHA256).Hash.ToLowerInvariant()){
         throw "R907 compiled Windows projection integrity failed: $($renderResult.state) $($renderResult.error)"
+    }
+    $historyResponse = Invoke-WebRequest -Uri "http://127.0.0.1:$port/api/hub/jobs" -Headers $headers -UseBasicParsing -TimeoutSec 5
+    $historyJob = @((($historyResponse.Content | ConvertFrom-Json).jobs) | Where-Object { $_.id -eq $renderId })
+    if ($historyJob.Count -ne 1 -or
+        $historyJob[0].result.projection.projectionGridOmittedFromJobList -ne $true -or
+        $null -ne $historyJob[0].result.projection.projectionGrid) {
+        throw 'R907 full visual preview incorrectly expanded in bulk job history'
     }
     [xml]$svgDocument=Get-Content -LiteralPath $svgFile -Raw
     if($svgDocument.DocumentElement.LocalName -ne 'svg'){
