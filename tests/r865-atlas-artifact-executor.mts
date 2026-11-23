@@ -418,7 +418,7 @@ test('R965 exports inspected Atlas fields as provenance-labelled CSV',()=>{
  const handler=ui.slice(start,end);
  assert.ok(handler.includes('inspectedAddress===null||inspectedValues.length===0'));
  assert.ok(handler.includes(String.raw`replace(/"/g,'""')`));
- assert.ok(handler.includes(String.raw`join('\\r\\n')+'\\r\\n'`),'CSV emits CRLF');
+ assert.ok(handler.includes(String.raw`join('\r\n')+'\r\n'`),'CSV emits CRLF');
  assert.ok(handler.includes('BROWSER_LOCAL_COMPUTED'));
  assert.ok(handler.includes('model_only'));
  assert.ok(handler.includes('text/csv'));
