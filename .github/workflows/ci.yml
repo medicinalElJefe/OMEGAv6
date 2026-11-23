@@ -610,6 +610,11 @@ jobs:
             hash_authentication_signature = $false
           } | ConvertTo-Json -Depth 8
           [System.IO.File]::WriteAllText((Join-Path $folder 'OMEGA-PACKAGE-EVIDENCE.json'),$evidence,[System.Text.Encoding]::UTF8)
+      - name: R911 prove original double-click launch with no-argument verifier in folder with spaces
+        shell: pwsh
+        run: |
+          & pwsh -NoProfile -NonInteractive -File .\tests\r911-windows-double-click-operator-smoke.ps1 -PackageRoot (Join-Path $env:RUNNER_TEMP 'OMEGA-Windows-Portable')
+          if ($LASTEXITCODE -ne 0) { throw 'R911 original Windows double-click startup or package path binding held' }
       - name: Prove packaged local UI over real Windows loopback HTTP
         shell: pwsh
         run: |
