@@ -23,6 +23,25 @@ async function requestHub(token:string,path:string,method:'GET'|'POST'='GET',bod
   return result;
  }finally{window.clearTimeout(timeout)}
 }
+async function fetchVerifiedSvgR909(token:string,jobId:string):Promise<Blob>{
+ if(!/^[a-f0-9]{32}$/.test(jobId))throw Error('R909 requires a completed verified render job ID.');
+ const controller=new AbortController(),timeout=window.setTimeout(()=>controller.abort(),12000);
+ try{
+  const response=await fetch(BASE+'/api/hub/artifacts/'+jobId,{
+   method:'GET',headers:{'X-Omega-Local-Token':token},cache:'no-store',
+   redirect:'error',credentials:'omit',signal:controller.signal
+  });
+  if(!response.ok||!response.headers.get('content-type')?.startsWith('image/svg+xml'))
+   throw Error('R909 SVG download refused: '+response.status);
+  const bytes=await response.arrayBuffer();
+  if(bytes.byteLength<64||bytes.byteLength>4*1024*1024)throw Error('R909 SVG artifact size held.');
+  const advertised=response.headers.get('X-Omega-Artifact-Sha256');
+  if(!advertised||!/^[a-f0-9]{64}$/.test(advertised))throw Error('R909 verified artifact hash missing.');
+  const calculated=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))).map(n=>n.toString(16).padStart(2,'0')).join('');
+  if(calculated!==advertised)throw Error('R909 downloaded SVG bytes differ from receipt.');
+  return new Blob([bytes],{type:'image/svg+xml'});
+ }finally{window.clearTimeout(timeout)}
+}
 export default function OmegaLocalHubPanelR884(){
  const [token,setToken]=useState(''),[state,setState]=useState<'UNCONNECTED'|'LOOPBACK_AUTHENTICATED'|'HELD'>('UNCONNECTED');
  const [operation,setOperation]=useState<Operation>('HASH_TREE'),[source,setSource]=useState('.'),[destination,setDestination]=useState('exports/omega-artifact.json');
@@ -144,6 +163,19 @@ export default function OmegaLocalHubPanelR884(){
    const list=await requestHub(token,'/api/hub/jobs');setJobs(Array.isArray(list.jobs)?list.jobs as HubJob[]:[]);
   });
  };
+ const downloadSvg=async(jobId:string)=>{
+  await act(async()=>{
+   if(state!=='LOOPBACK_AUTHENTICATED')throw Error('Authenticate the local Hub before downloading the SVG.');
+   const svg=await fetchVerifiedSvgR909(token,jobId);
+   const uri=URL.createObjectURL(svg);
+   try{
+    const link=document.createElement('a');
+    link.href=uri;link.download='omega-r907-'+jobId.slice(0,12)+'.svg';
+    document.body.append(link);link.click();link.remove();
+    setInfo('R909 downloaded the original fully SHA-verified SVG from authenticated Hub receipt '+jobId+'.');
+   }finally{window.setTimeout(()=>URL.revokeObjectURL(uri),30000)}
+  });
+ };
  const loadSelectedJob=async(id:string)=>{
   setSelected(id);setSelectedJobDetail(null);setGpuResult(null);
   try{
@@ -242,6 +274,10 @@ export default function OmegaLocalHubPanelR884(){
      <div style={{display:'flex',gap:8,margin:'8px 0'}}><button type='button' disabled={busy||!['QUEUED','WAIT_EVENT'].includes(chosen.state)} onClick={()=>action('cancel',chosen.id)} style={button}>Cancel pending</button><button type='button' disabled={busy||chosen.state!=='COMPLETED'} onClick={()=>action('replay',chosen.id)} style={button}>Verify replay</button></div>
      {(chosen.operation==='SPHERE_TENSOR_EXPORT'||chosen.operation==='SPHERE_TENSOR_CONTINUE')&&chosen.state==='COMPLETED'&&<button type='button' style={{...button,margin:'8px 0'}} onClick={()=>{setExportJobId(chosen.id);setOperation('SPHERE_TENSOR_CONTINUE');setDestination('exports/omega-tensor-next.csv');setInfo('R906 continuation configured from checkpoint '+chosen.id)}}>Continue this verified state into a new CSV</button>}
      {(chosen.operation==='SPHERE_TENSOR_EXPORT'||chosen.operation==='SPHERE_TENSOR_CONTINUE')&&chosen.state==='COMPLETED'&&<button type='button' style={{...button,margin:'8px 0'}} onClick={()=>{setExportJobId(chosen.id);setOperation('SPHERE_TENSOR_RENDER');setDestination('art/omega-verified-projection.svg');setInfo('R907 SVG projection configured from verified checkpoint '+chosen.id)}}>Render verified 20,736-cell state to SVG</button>}
+     {chosen.operation==='SPHERE_TENSOR_RENDER'&&chosen.state==='COMPLETED'&&
+      <button type='button' disabled={busy||state!=='LOOPBACK_AUTHENTICATED'} style={{...button,margin:'8px 0'}} onClick={()=>{void downloadSvg(chosen.id)}}>
+       Download exact verified SVG
+      </button>}
      {projectionData&&projectionData.schema==='OMEGA_SPARSE_CELL_PROJECTION_R907'&&<div style={{...surface,margin:'8px 0'}}>
       <h4>R907 verified state projection — 144 × 144 cells</h4>
       {projectionGrid&&<canvas ref={projectionCanvasRef} width={144} height={144} role='img' aria-label='Derived 20,736-cell verified state intensity preview' style={{display:'block',width:'min(100%,432px)',height:'auto',aspectRatio:'1',imageRendering:'pixelated',border:'1px solid #607e98'}}/>}
