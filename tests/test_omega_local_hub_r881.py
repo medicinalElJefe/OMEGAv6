@@ -151,6 +151,12 @@ class LocalHubTests(unittest.TestCase):
         svg=self.root/"art"/"reality.svg"
         ET.parse(svg)
         self.assertEqual(hubmod.sha_file(svg),result["artifact"]["sha256"])
+        full_detail=self.hub.get(rendering["id"])
+        self.assertEqual(len(full_detail["result"]["projection"]["projectionGrid"]),20736)
+        listed=next(j for j in self.hub.list() if j["id"]==rendering["id"])
+        self.assertNotIn("projectionGrid",listed["result"]["projection"])
+        self.assertTrue(listed["result"]["projection"]["projectionGridOmittedFromJobList"])
+        self.assertEqual(listed["result_sha256"],full_detail["result_sha256"])
         overwrite=self.hub.enqueue("SPHERE_TENSOR_RENDER",args)
         denied=self.hub.run_one()
         self.assertEqual(denied["state"],"HELD")
