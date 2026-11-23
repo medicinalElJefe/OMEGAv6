@@ -210,6 +210,31 @@ The packaged Windows EXE test now submits a real export job, checks the
 full file SHA, component count and mass against the separately run R902
 result, and verifies that a second export to the same destination is held.
 
+## R905 complete tensor CSV round-trip and tamper refusal
+
+The original Local / Edge Hub now offers `SPHERE_TENSOR_VERIFY`. Select
+an earlier **completed** `SPHERE_TENSOR_EXPORT` job from the history and
+choose **Verify complete CSV against this export receipt**. The verification
+operation accepts only the original 32-character local job ID, retrieves
+the completed export and its original SHA-256 result from the same SQLite
+ledger, and refuses arbitrary filenames, uncompleted or unrelated jobs,
+and drifted durable receipt bytes.
+
+The checker reopens the exact exported file through the approved-root path
+guard and validates the strict canonical CSV header, LF line endings,
+increasing (cell,lane) address order, positive integer masses, up to
+100,000 nonzero rows, 20,736 address/lane bounds, total mass, export row
+count, complete-state SHA-256, original file SHA-256 and byte count. No
+dense 429,981,696-component array is allocated. Missing, modified,
+truncated, reordered, extra-row or noncanonical files are HELD. A valid
+round trip produces a second durable receipt, clearly scoped to the
+recorded file and internal state; it is not a digital signature or proof
+of semantic correctness or native GPU execution.
+
+Windows CI now proves this operation by running it through the compiled
+Hub against an earlier exported file, checking exact hash agreement and
+then appending a byte to ensure the same verifier refuses the changed file.
+
 ## R897 full-package integrity guard
 
 `OPEN-OMEGA.cmd` now runs `Verify-OMEGA-Package.ps1` before opening the
