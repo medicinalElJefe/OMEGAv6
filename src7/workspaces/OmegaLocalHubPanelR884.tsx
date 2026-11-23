@@ -31,6 +31,7 @@ export default function OmegaLocalHubPanelR884(){
  const [exportJobId,setExportJobId]=useState('');
  const [installedModels,setInstalledModels]=useState<string[]>([]);
  const [selected,setSelected]=useState<string|null>(null),[info,setInfo]=useState('Local daemon is not connected.');
+ const [selectedJobDetail,setSelectedJobDetail]=useState<HubJob|null>(null);
  const [busy,setBusy]=useState(false),[connectedAt,setConnectedAt]=useState<number|null>(null);
  const tokenRef=useRef<HTMLInputElement|null>(null);
  const projectionCanvasRef=useRef<HTMLCanvasElement|null>(null);
@@ -141,7 +142,16 @@ export default function OmegaLocalHubPanelR884(){
    const list=await requestHub(token,'/api/hub/jobs');setJobs(Array.isArray(list.jobs)?list.jobs as HubJob[]:[]);
   });
  };
- const chosen=jobs.find(x=>x.id===selected);
+ const loadSelectedJob=async(id:string)=>{
+  setSelected(id);setSelectedJobDetail(null);
+  try{
+   const result=await requestHub(token,'/api/hub/jobs/'+encodeURIComponent(id));
+   const job=result.job as HubJob|undefined;
+   if(job?.id===id)setSelectedJobDetail(job);
+   else setInfo('Selected job detail was unavailable; history summary remains visible.');
+  }catch(error){setInfo(error instanceof Error?error.message:'Could not load selected job detail.')}
+ };
+ const chosen=selectedJobDetail?.id===selected?selectedJobDetail:jobs.find(x=>x.id===selected);
  const tensorExport=chosen&&(chosen.operation==='SPHERE_TENSOR_EXPORT'||chosen.operation==='SPHERE_TENSOR_CONTINUE')&&chosen.state==='COMPLETED'&&chosen.result&&typeof chosen.result==='object'
   ?chosen.result as Record<string,unknown>:null;
  const tensorResult=tensorExport&&tensorExport.tensor&&typeof tensorExport.tensor==='object'
@@ -220,7 +230,7 @@ export default function OmegaLocalHubPanelR884(){
    <div style={{...surface,marginTop:12}}>
     <h3>Job history ({jobs.length})</h3>
     {jobs.length===0?<p>Nothing reported by the local daemon.</p>:<div style={{display:'grid',gap:6,maxHeight:260,overflowY:'auto'}}>
-     {jobs.map(j=><button type='button' key={j.id} onClick={()=>setSelected(j.id)} style={{...button,textAlign:'left',background:j.id===selected?'#215363':'#142c3f'}}>
+     {jobs.map(j=><button type='button' key={j.id} onClick={()=>{void loadSelectedJob(j.id)}} style={{...button,textAlign:'left',background:j.id===selected?'#215363':'#142c3f'}}>
       <strong>{j.operation}</strong> · {j.state} · <code>{j.id.slice(0,12)}</code> {j.error?'· '+j.error:''}
      </button>)}
     </div>}
