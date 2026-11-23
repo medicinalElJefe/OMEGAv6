@@ -16,7 +16,8 @@ $required = @(
   'tests/r897-windows-packaged-hub-smoke.ps1',
   'tests/r899-windows-compiled-inference-smoke.ps1',
   'tests/r900-windows-install-lifecycle-smoke.ps1',
-  'tests/r901-windows-host-observation-smoke.ps1'
+  'tests/r901-windows-host-observation-smoke.ps1',
+  'tests/r911-windows-double-click-operator-smoke.ps1'
 )
 foreach($relative in $required) {
   $path = Join-Path $root $relative
