@@ -53,7 +53,7 @@ def load_local_inference_adapter_r899():
     return adapter
 
 READ_ONLY_REPLAY = frozenset({"HASH_TREE", "CSV_STATS", "VERIFY_LEDGER_SPLIT", "SPHERE_TENSOR_STEP"})
-OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "LOCAL_INFER", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_EXPORT", "RESIDUAL_RESTORE"})
+OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "LOCAL_INFER", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_EXPORT", "SPHERE_TENSOR_VERIFY", "RESIDUAL_RESTORE"})
 STATUS = frozenset({"QUEUED", "WAIT_EVENT", "RUNNING", "COMPLETED", "FAILED", "HELD", "CANCELLED"})
 def utc_ms(): return int(time.time() * 1000)
 def sha_file(path: Path) -> str:
@@ -153,6 +153,38 @@ class Hub:
         if operation=="RESIDUAL_RESTORE": raise ValueError("R195_RESIDUAL_SOURCE_AND_AUTHORITY_REQUIRED")
         if operation=="LOCAL_INFER":
             return load_local_inference_adapter_r899().infer_local_r899(args)
+        if operation=="SPHERE_TENSOR_VERIFY":
+            import importlib.util
+            if not isinstance(args,dict) or set(args)!={"export_job_id"}:
+                raise ValueError("R905_EXPORT_JOB_ID_REQUIRED_HELD")
+            export_id=args.get("export_job_id")
+            if not isinstance(export_id,str) or len(export_id)!=32 or any(c not in "0123456789abcdef" for c in export_id):
+                raise ValueError("R905_EXPORT_JOB_ID_INVALID_HELD")
+            prior=self.get(export_id)
+            if not prior or prior.get("state")!="COMPLETED" or prior.get("operation")!="SPHERE_TENSOR_EXPORT":
+                raise ValueError("R905_COMPLETED_ORIGINAL_EXPORT_REQUIRED_HELD")
+            original=prior.get("result")
+            if not isinstance(original,dict) or original.get("schema")!="OMEGA_SPARSE_TENSOR_EXPORT_R904":
+                raise ValueError("R905_ORIGINAL_EXPORT_RECEIPT_REQUIRED_HELD")
+            # Bind to the exact stored result in the local SQLite ledger,
+            # not to a user-provided hash, path or reconstructed preview.
+            stored=prior.get("result_sha256")
+            if not isinstance(stored,str) or stored!=sha_bytes(json_bytes(original)):
+                raise ValueError("R905_DURABLE_RECEIPT_DRIFT_HELD")
+            artifact=original.get("artifact")
+            if not isinstance(artifact,dict):
+                raise ValueError("R905_ARTIFACT_RECEIPT_REQUIRED_HELD")
+            relative=artifact.get("path")
+            target=safe_under(self.root,relative,True)
+            module_path=Path(__file__).resolve().with_name("omega_sparse_verify_r905.py")
+            if not module_path.is_file(): raise ValueError("R905_ROUNDTRIP_VERIFIER_REQUIRED_HELD")
+            spec=importlib.util.spec_from_file_location("_omega_sparse_verify_r905",module_path)
+            module=importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            validated=module.verify_sparse_export_r905(target,original)
+            return {**validated,"exportJobId":export_id,
+                    "originalExportReceiptSha256":stored,
+                    "artifactPath":relative}
         if operation=="SPHERE_TENSOR_EXPORT":
             import importlib.util
             module_path=Path(__file__).resolve().with_name("omega_sparse_tensor_r902.py")
