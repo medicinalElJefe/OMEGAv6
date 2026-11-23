@@ -109,7 +109,7 @@ for(const needle of ['SPHERE_TENSOR_EXPORT','sparse_tensor_rows_r904','COMPLETE_
  assert.ok(sparseHub.includes(needle),'R904 complete sparse tensor CSV export missing: '+needle);
 for(const needle of ['SPHERE_TENSOR_RENDER','OMEGA_SPARSE_PROJECTION_ARTIFACT_R907','sourceFullStateSha256','R907_PROJECTION_TARGET_EXISTS_HELD'])
  assert.ok(sparseHub.includes(needle),'R907 authenticated SVG projection missing: '+needle);
-for(const needle of ['/api/hub/artifacts/csv/','r910-','R910 compiled Windows protected CSV bytes differ from original export receipt']){
+for(const needle of ['/api/hub/artifacts/csv/','r910-','R910 compiled Windows protected CSV bytes differ from original export receipt','R910 served a modified complete CSV checkpoint after source SHA drift']){
  assert.ok(sparseWindows.includes(needle),'R910 compiled Windows full-state checkpoint download refusal missing: '+needle);
 }
 for(const needle of ['/api/hub/artifacts/','r909-download.svg','X-Omega-Artifact-Sha256','R909 served SVG after its SHA-256 receipt diverged']){
