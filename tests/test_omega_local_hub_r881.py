@@ -129,6 +129,40 @@ class LocalHubTests(unittest.TestCase):
         restored=self.hub.enqueue("SPHERE_TENSOR_VERIFY",{"export_job_id":export_job["id"]})
         self.assertEqual(self.hub.run_one()["state"],"COMPLETED")
 
+    def test_r907_projection_from_verified_checkpoint_and_tamper_hold(self):
+        import xml.etree.ElementTree as ET
+        export=self.hub.enqueue("SPHERE_TENSOR_EXPORT",{
+            "seeds":[{"cell":0,"lane":0,"mass":4096}],"steps":4,
+            "cell_axis":0,"lane_axis":1,"destination":"projection-source.csv"})
+        done=self.hub.run_one()
+        self.assertEqual(done["state"],"COMPLETED")
+        args={"export_job_id":export["id"],"destination":"art/reality.svg"}
+        rendering=self.hub.enqueue("SPHERE_TENSOR_RENDER",args)
+        visual=self.hub.run_one()
+        self.assertEqual(visual["id"],rendering["id"])
+        self.assertEqual(visual["state"],"COMPLETED")
+        result=visual["result"]
+        self.assertEqual(result["schema"],"OMEGA_SPARSE_PROJECTION_ARTIFACT_R907")
+        self.assertEqual(result["sourceExportJobId"],export["id"])
+        self.assertEqual(result["sourceExportReceiptSha256"],done["result_sha256"])
+        self.assertEqual(result["sourceFullStateSha256"],done["result"]["canonicalFullStateSha256"])
+        self.assertEqual(result["projection"]["totalMass"],4096)
+        self.assertEqual(result["projection"]["addressableCells"],20736)
+        svg=self.root/"art"/"reality.svg"
+        ET.parse(svg)
+        self.assertEqual(hubmod.sha_file(svg),result["artifact"]["sha256"])
+        overwrite=self.hub.enqueue("SPHERE_TENSOR_RENDER",args)
+        denied=self.hub.run_one()
+        self.assertEqual(denied["state"],"HELD")
+        self.assertIn("R907_PROJECTION_TARGET_EXISTS_HELD",denied["error"])
+        with (self.root/"projection-source.csv").open("ab") as stream: stream.write(b"X")
+        changed=self.hub.enqueue("SPHERE_TENSOR_RENDER",{
+            **args,"destination":"art/not-created.svg"})
+        held=self.hub.run_one()
+        self.assertEqual(held["state"],"HELD")
+        self.assertIn("R905_",held["error"])
+        self.assertFalse((self.root/"art"/"not-created.svg").exists())
+
     def test_r906_verified_sparse_checkpoint_continuation_and_lineage(self):
         original=self.hub.enqueue("SPHERE_TENSOR_EXPORT",{
             "seeds":[{"cell":0,"lane":0,"mass":4096}],"steps":4,
