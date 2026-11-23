@@ -519,6 +519,8 @@ jobs:
         shell: pwsh
         run: |
           python -m unittest discover -s tests -p test_omega_sparse_tensor_r902.py -v
+          if ($LASTEXITCODE -ne 0) { throw 'R902 sparse state math unit tests failed' }
+          python -m unittest discover -s tests -p test_omega_local_hub_r881.py -v
           if ($LASTEXITCODE -ne 0) { throw 'R902 sparse per-cell tensor algebra or conservation failed' }
       - name: Compile real standalone Windows local worker executable
         shell: pwsh
