@@ -449,11 +449,11 @@ test('R967 clipboard exposes actual computed inspection values with explicit per
 test('R968 refuses stale inspection exports after replay address changes',()=>{
  const ui=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
  const mismatch='localTurnResult!==null&&localTurnResult.trace[selectedExecutionStep]?.address!==inspectedAddress';
- for(const start of ['const downloadInspectedAtlasJsonR964=()=>','const downloadInspectedAtlasCsvR965=()=>','const copyInspectedAtlasFieldsR967=async()=>']){
+ for(const start of ['const downloadInspectedAtlasJsonR964=()=>','const downloadInspectedAtlasCsvR965=()=>','const downloadInspectedAtlasTsvR971=()=>','const copyInspectedAtlasFieldsR967=async()=>']){
   const handler=ui.slice(ui.indexOf(start),ui.indexOf('};',ui.indexOf(start))+2);
   assert.ok(handler.includes(mismatch),start+' refuses mismatched replay address');
  }
- assert.equal(ui.split('disabled={running||inspectedAddress===null||inspectedValues.length===0||('+mismatch+')}').length-1,3);
+ assert.equal(ui.split('disabled={running||inspectedAddress===null||inspectedValues.length===0||('+mismatch+')}').length-1,4);
  assert.match(ui,/aria-label='Atlas inspection address mismatch'/);
  assert.match(ui,/Select Inspect selected state before exporting or copying these fields/);
  const canExport=(selected:number,inspected:number|null)=>inspected!==null&&selected===inspected;
