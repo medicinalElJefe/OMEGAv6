@@ -293,6 +293,36 @@ checks source lineage, total mass and artifact SHA-256, and verifies
 no-overwrite refusal. The underlying base-12 address mapping is separately
 unit-tested as a full 20,736-address bijection.
 
+## R908 optional real WebGPU projection execution and parity
+
+The R907 verified-state canvas now includes **Run real WebGPU projection
+parity on this device**. This deliberately reuses the genuine R352
+WebGPU dispatch/readback pattern, but operates on R907's authenticated
+20,736-address quantized visualization grid rather than on an invented
+dense 429,981,696-component array. A compute shader issues exactly 324
+workgroups of 64 threads, reads the complete 144×144 intensity grid,
+and produces one packed RGBA pixel per cell. A separate CPU integer
+reference executes the same formulas, and the read-back output is
+compared over every cell for **exact** integer correspondence.
+
+The UI only returns `GPU_PROJECTION_READBACK_MATCH` and
+`deviceExecutionProved=true` after an actual browser WebGPU device,
+shader dispatch, memory copy, asynchronous GPU readback and complete
+CPU/GPU comparison. If the local browser lacks WebGPU, the result is
+`GPU_UNAVAILABLE`; adapter, shader, timing or readback failure yields
+`GPU_COMPUTE_HELD`; divergent values yield
+`GPU_PROJECTION_DIVERGED`. The operation is bounded and frees device
+buffers in every outcome. Windows CI proves the CPU reference,
+address count, shader code and unavailable-device refusal; it cannot
+certify another person's actual GPU.
+
+A successful browser-level execution is evidence only about **that
+browser's GPU device and its projection workload**. It does not
+prove native app GPU compute, independently trained state-cell models,
+semantic correctness, R141 authenticated Hybrid Link target-PC
+acceptance or permission for R237 production promotion. Existing R352
+source remains intact.
+
 ## R897 full-package integrity guard
 
 `OPEN-OMEGA.cmd` now runs `Verify-OMEGA-Package.ps1` before opening the
