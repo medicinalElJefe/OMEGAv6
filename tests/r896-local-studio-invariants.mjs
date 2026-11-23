@@ -60,6 +60,17 @@ for(const key of ['R900_TAMPER_PROOF','R900_UNMANAGED_FILE','PROJECT_DATA_MUST_S
  assert.ok(installSmokeR900.includes(key),'R900 install lifecycle proof incomplete: '+key);
 assert.ok(workflow.includes('r900-windows-install-lifecycle-smoke.ps1'),
  'R900 Windows installer lifecycle must be verified by release CI');
+const sparseTensor=readFileSync('tools/omega_sparse_tensor_r902.py','utf8');
+const sparseHub=readFileSync('tools/omega_local_hub_r881.py','utf8');
+const sparseWindows=readFileSync('tests/r897-windows-packaged-hub-smoke.ps1','utf8');
+for(const needle of ['DIMENSIONS = AXIS**4','TOTAL_POSSIBLE = DIMENSIONS**2','MAX_NONZERO','conservationExact','fullStateSha256','denseTensorAllocated','gpuComputeProven'])
+ assert.ok(sparseTensor.includes(needle),'R902 implicit 20,736 per-cell operator missing: '+needle);
+for(const needle of ['SPHERE_TENSOR_STEP','omega_sparse_tensor_r902.py'])
+ assert.ok(sparseHub.includes(needle),'R902 local durable Hub state operator unwired: '+needle);
+for(const needle of ['SPHERE_TENSOR_STEP','429981696','conservationExact','fullStateSha256'])
+ assert.ok(sparseWindows.includes(needle),'R902 real packaged Windows compute proof missing: '+needle);
+for(const needle of ['omega_sparse_tensor_r902.py','test_omega_sparse_tensor_r902.py'])
+ assert.ok(workflow.includes(needle),'R902 packaging/test gate missing: '+needle);
 const modelSmoke=readFileSync('tests/r899-windows-compiled-inference-smoke.ps1','utf8');
 const modelFixture=readFileSync('tests/r899-windows-ollama-fixture.py','utf8');
 for(const line of ['OMEGA-Local-Hub.exe','/api/hub/models','LOCAL_INFER','result_sha256','R899_COMPILED_WORKER_RETURNED_ACTUAL_LOCAL_HTTP_RESPONSE','gpuProven']){
