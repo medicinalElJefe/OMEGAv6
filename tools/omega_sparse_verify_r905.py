@@ -89,7 +89,7 @@ def verify_sparse_export_r905(path: Path, original: dict, *, include_rows: bool 
     if type(artifact.get("byteSize")) is not int or byte_count != artifact["byteSize"]:
         raise ValueError("R905_FILE_SIZE_DRIFT_HELD")
     result = {
-        "schema": "OMEGA_SPARSE_EXPORT_ROUNDTRIP_R905"
+        "schema": "OMEGA_SPARSE_EXPORT_ROUNDTRIP_R905",
         "state": "EXACT_EXPORTED_STATE_MATCH",
         "exportedRows": seen,
         "totalMass": total,
