@@ -381,7 +381,7 @@ export function SharedArtifactLibraryR864({onNavigate}:{onNavigate:(route:string
  };
  const copyInspectedAtlasFieldsR967=async()=>{
   if(inspectedAddress===null||inspectedValues.length===0||executionLease.current)return;
-  const text=['address\\tfield\\tcomputed_value\\tprovenance',...inspectedValues.map(item=>[inspectedAddress,item.name,item.value,'BROWSER_LOCAL_COMPUTED'].join('\\t'))].join('\\n')+'\\n';
+  const text=['address\tfield\tcomputed_value\tprovenance',...inspectedValues.map(item=>[inspectedAddress,item.name,item.value,'BROWSER_LOCAL_COMPUTED'].join('\t'))].join('\n')+'\n';
   try{
    if(!navigator.clipboard?.writeText)throw Error('Clipboard permission or secure context unavailable');
    await navigator.clipboard.writeText(text);
