@@ -193,6 +193,55 @@ try {
         $roundtrip.result.originalExportReceiptSha256 -ne $exportResult.result_sha256) {
         throw "R905 compiled verifier failed complete CSV receipt match: $($roundtrip.state) $($roundtrip.error)"
     }
+    # R906 live continuation of the verified full sparse checkpoint, with
+    # a new immutable artifact and lineage to its original SQLite receipt.
+    $continuePayload = @{operation='SPHERE_TENSOR_CONTINUE';args=@{
+        export_job_id=$exportId;destination='tensor-next.csv';
+        steps=1;cell_axis=0;lane_axis=1
+    }} | ConvertTo-Json -Compress -Depth 5
+    $continueQueued = Invoke-WebRequest -Uri "http://127.0.0.1:$port/api/hub/jobs" -Headers $headers -UseBasicParsing -Method Post -ContentType 'application/json' -Body $continuePayload -TimeoutSec 5
+    $continueId = ($continueQueued.Content | ConvertFrom-Json).job.id
+    if (-not $continueId) { throw 'R906 native Windows checkpoint continuation not queued' }
+    $continueResult = $null
+    for ($poll=0;$poll -lt 100;$poll++) {
+        $read = Invoke-WebRequest -Uri ("http://127.0.0.1:$port/api/hub/jobs/" + $continueId) -Headers $headers -UseBasicParsing -TimeoutSec 5
+        $continueResult = ($read.Content | ConvertFrom-Json).job
+        if ($continueResult.state -in @('COMPLETED','FAILED','HELD')) { break }
+        Start-Sleep -Milliseconds 100
+    }
+    $continueFile=Join-Path $root 'tensor-next.csv'
+    if ($null -eq $continueResult -or $continueResult.state -ne 'COMPLETED' -or
+        $continueResult.result.schema -ne 'OMEGA_SPARSE_TENSOR_CONTINUATION_R906' -or
+        $continueResult.result.sourceExportJobId -ne $exportId -or
+        $continueResult.result.sourceExportReceiptSha256 -ne $exportResult.result_sha256 -or
+        $continueResult.result.sourceStateSha256 -ne $exportResult.result.canonicalFullStateSha256 -or
+        $continueResult.result.tensor.totalMassAfter -ne 4096 -or
+        $continueResult.result.tensor.steps -ne 1 -or
+        -not (Test-Path -LiteralPath $continueFile -PathType Leaf) -or
+        $continueResult.result.artifact.sha256 -ne (Get-FileHash -LiteralPath $continueFile -Algorithm SHA256).Hash.ToLowerInvariant()) {
+        throw "R906 packaged native checkpoint continuation/lineage failed: $($continueResult.state) $($continueResult.error)"
+    }
+    $continueRows=@(Import-Csv -LiteralPath $continueFile)
+    $continueMass=0L
+    foreach ($entry in $continueRows) { $continueMass += [long]$entry.mass }
+    if ($continueRows.Count -ne $continueResult.result.exportedRows -or $continueMass -ne 4096) {
+        throw 'R906 continued state CSV rows do not conserve original total mass'
+    }
+    # A continuation is itself a checkpoint accepted by the roundtrip verifier.
+    $nextVerifyPayload=@{operation='SPHERE_TENSOR_VERIFY';args=@{export_job_id=$continueId}} | ConvertTo-Json -Compress -Depth 4
+    $nextQueued=Invoke-WebRequest -Uri "http://127.0.0.1:$port/api/hub/jobs" -Headers $headers -UseBasicParsing -Method Post -ContentType 'application/json' -Body $nextVerifyPayload -TimeoutSec 5
+    $nextId=($nextQueued.Content|ConvertFrom-Json).job.id
+    $nextResult=$null
+    for($poll=0;$poll -lt 100;$poll++){
+        $read=Invoke-WebRequest -Uri ("http://127.0.0.1:$port/api/hub/jobs/" + $nextId) -Headers $headers -UseBasicParsing -TimeoutSec 5
+        $nextResult=($read.Content|ConvertFrom-Json).job
+        if($nextResult.state -in @('COMPLETED','FAILED','HELD')){break}
+        Start-Sleep -Milliseconds 100
+    }
+    if($null -eq $nextResult -or $nextResult.state -ne 'COMPLETED' -or
+       $nextResult.result.fullStateSha256 -ne $continueResult.result.canonicalFullStateSha256){
+        throw 'R906 continued native checkpoint could not be independently roundtrip verified'
+    }
     # A one-byte change must HELD, without overwriting the first export.
     [System.IO.File]::AppendAllText($exportFile, 'X')
     $tamperQueued = Invoke-WebRequest -Uri "http://127.0.0.1:$port/api/hub/jobs" -Headers $headers -UseBasicParsing -Method Post -ContentType 'application/json' -Body $verifyPayload -TimeoutSec 5
