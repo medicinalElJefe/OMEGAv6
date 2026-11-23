@@ -136,7 +136,7 @@ export default function OmegaLocalHubPanelR884(){
   });
  };
  const chosen=jobs.find(x=>x.id===selected);
- const tensorExport=(chosen?.operation==='SPHERE_TENSOR_EXPORT'||chosen?.operation==='SPHERE_TENSOR_CONTINUE')&&chosen.state==='COMPLETED'&&chosen.result&&typeof chosen.result==='object'
+ const tensorExport=chosen&&(chosen.operation==='SPHERE_TENSOR_EXPORT'||chosen.operation==='SPHERE_TENSOR_CONTINUE')&&chosen.state==='COMPLETED'&&chosen.result&&typeof chosen.result==='object'
   ?chosen.result as Record<string,unknown>:null;
  const tensorResult=tensorExport&&tensorExport.tensor&&typeof tensorExport.tensor==='object'
   ?tensorExport.tensor as Record<string,unknown>
