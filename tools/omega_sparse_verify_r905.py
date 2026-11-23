@@ -17,8 +17,8 @@ ROW_R905 = re.compile(rb"(0|[1-9][0-9]*),(0|[1-9][0-9]*),([1-9][0-9]*)\n\Z")
 SHA_R905 = re.compile(r"^[0-9a-f]{64}$")
 
 
-def verify_sparse_export_r905(path: Path, original: dict) -> dict:
-    if not isinstance(original, dict) or original.get("schema") != "OMEGA_SPARSE_TENSOR_EXPORT_R904":
+def verify_sparse_export_r905(path: Path, original: dict, *, include_rows: bool = False):
+    if not isinstance(original, dict) or original.get("schema") not in ("OMEGA_SPARSE_TENSOR_EXPORT_R904", "OMEGA_SPARSE_TENSOR_CONTINUATION_R906"):
         raise ValueError("R905_ORIGINAL_EXPORT_RECEIPT_REQUIRED_HELD")
     artifact = original.get("artifact")
     tensor = original.get("tensor")
@@ -50,6 +50,7 @@ def verify_sparse_export_r905(path: Path, original: dict) -> dict:
     seen = 0
     total = 0
     previous = None
+    rows = [] if include_rows else None
     byte_count = 0
     with path.open("rb") as stream:
         while True:
@@ -75,6 +76,7 @@ def verify_sparse_export_r905(path: Path, original: dict) -> dict:
             if total > mass:
                 raise ValueError("R905_MASS_CONSERVATION_HELD")
             state_hash.update(f"{cell}:{lane}:{weight}\n".encode("ascii"))
+            if rows is not None: rows.append((cell,lane,weight))
             seen += 1
             if seen > MAX_ROWS_R905:
                 raise ValueError("R905_ROW_LIMIT_HELD")
@@ -86,8 +88,8 @@ def verify_sparse_export_r905(path: Path, original: dict) -> dict:
         raise ValueError("R905_STATE_SHA_DRIFT_HELD")
     if type(artifact.get("byteSize")) is not int or byte_count != artifact["byteSize"]:
         raise ValueError("R905_FILE_SIZE_DRIFT_HELD")
-    return {
-        "schema": "OMEGA_SPARSE_EXPORT_ROUNDTRIP_R905",
+    result = {
+        "schema": "OMEGA_SPARSE_EXPORT_ROUNDTRIP_R905"
         "state": "EXACT_EXPORTED_STATE_MATCH",
         "exportedRows": seen,
         "totalMass": total,
@@ -102,3 +104,4 @@ def verify_sparse_export_r905(path: Path, original: dict) -> dict:
         "gpuComputeProven": False,
         "physicalTruthProven": False,
     }
+    return (result, rows) if rows is not None else result
