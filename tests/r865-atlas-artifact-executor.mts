@@ -408,3 +408,21 @@ test('R958 exports only actual address changes with signed coordinate deltas and
  const deltas=trace.slice(1).flatMap((current,i)=>{const previous=trace[i];return current.address===previous.address?[]:[current.coordinates.map((v,j)=>v-previous.coordinates[j])];});
  assert.deepEqual(deltas,[[0,0,0,-5]]);
 });
+
+
+test('R965 exports inspected Atlas fields as provenance-labelled RFC4180-style CSV',()=>{
+ const ui=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
+ const start=ui.indexOf('const downloadInspectedAtlasCsvR965=()=>');
+ const end=ui.indexOf('const exportCompleteAtlas=async()=>',start);
+ assert.ok(start>=0&&end>start,'inspected fields CSV handler exists');
+ const handler=ui.slice(start,end);
+ assert.match(handler,/inspectedAddress===null\\|\\|inspectedValues.length===0/);
+ assert.match(handler,/replace\\(\\/"\\/g,'""'\\)/);
+ assert.ok(handler.includes(String.raw`join('\\r\\n')+'\\r\\n'`),'CSV emits CRLF');
+ assert.match(handler,/BROWSER_LOCAL_COMPUTED/);
+ assert.match(handler,/model_only/);
+ assert.match(handler,/text\\/csv/);
+ assert.match(ui,/onClick={downloadInspectedAtlasCsvR965}>Download inspected fields CSV/);
+ assert.match(ui,/aria-label='Download inspected Atlas fields CSV' disabled={running\\|\\|inspectedAddress===null\\|\\|inspectedValues.length===0}/);
+ assert.doesNotMatch(handler,/fetch\\(|executeLocalTurns\\(/);
+});
