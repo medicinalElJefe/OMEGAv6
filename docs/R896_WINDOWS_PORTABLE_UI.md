@@ -116,6 +116,30 @@ stopped in the test cleanup. This proves that the compiled executable includes
 and executes the actual adapter and durable job path; it does **not** prove
 model quality, target-machine inference performance or native GPU use.
 
+## R900 managed per-user Windows installation
+
+The tested portable ZIP also includes `INSTALL-OMEGA.cmd`,
+`UNINSTALL-OMEGA.cmd`, `Install-OMEGA-Windows.ps1` and
+`Uninstall-OMEGA-Windows.ps1`. The installer verifies the source ZIP
+contents against the full SHA-256 manifest, copies them into a fresh staging
+directory, verifies the staged bytes, and replaces only an existing installation
+that carries a matching managed ownership marker. Existing managed versions
+are renamed to a rollback directory before cutover. No administrator access
+or Python/Node installation is needed. Default installation is under the
+current user's `LOCALAPPDATA/OMEGA7` with an optional Start Menu entry.
+
+The uninstaller asks for explicit confirmation, checks its management marker
+and the installed file manifest, then deletes **only** the OMEGA7 application
+folder and its management marker. Unknown files or changes block automatic
+removal; the separate approved project/SQLite/model root is not removed.
+Reparse points and junctions in install/uninstall paths are refused.
+
+Windows CI exercises the fresh installation, verified managed upgrade,
+unrecognized-target refusal, tampered-target uninstall refusal, and successful
+uninstall while proving adjacent project files survive. It is a **CI runner**
+installer lifecycle proof, not certification on the user's actual Windows 10
+host, not Hybrid Link acceptance, and not production release authorization.
+
 ## R897 full-package integrity guard
 
 `OPEN-OMEGA.cmd` now runs `Verify-OMEGA-Package.ps1` before opening the
