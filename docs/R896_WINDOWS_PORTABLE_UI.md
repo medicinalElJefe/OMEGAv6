@@ -192,6 +192,24 @@ conservation and receipt; independent CPU unit tests cover boundary wrapping,
 repeatability, and invalid requests. It is a functional foundation for
 nested-state computation, not calibrated physical simulation.
 
+## R904 export the complete computed 20,736D nested-state slice
+
+Choose `SPHERE_TENSOR_EXPORT` in the Local / Edge Hub, supply the same
+bounded cell, lane, mass, and step inputs as R902, and give a **new relative
+.csv path inside the approved project directory**. The existing
+authenticated R881 Hub computes the exact sparse state, writes all resulting
+nonzero cell/lane/mass rows in sorted order, and returns an observed file
+receipt with SHA-256, row count, the R902 complete-state digest and an
+independent durable job receipt. The full CSV is not clipped to the UI's
+32-component preview. A preexisting file, private `.omega` path, traversal,
+invalid tensor or failed filesystem write is held; the Hub does not
+overwrite previous exports. This is an inspectable sparse-state computation,
+not a 429,981,696-row dense materialization or evidence of GPU calculation.
+
+The packaged Windows EXE test now submits a real export job, checks the
+full file SHA, component count and mass against the separately run R902
+result, and verifies that a second export to the same destination is held.
+
 ## R897 full-package integrity guard
 
 `OPEN-OMEGA.cmd` now runs `Verify-OMEGA-Package.ps1` before opening the
