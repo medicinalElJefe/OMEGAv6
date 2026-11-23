@@ -1,4 +1,4 @@
-import {useRef,useState,type CSSProperties} from 'react';
+import {useEffect,useRef,useState,type CSSProperties} from 'react';
 
 type HubJob={id:string;operation:string;state:string;scheduled_ms:number;created_ms:number;updated_ms:number;error?:string|null;result_sha256?:string|null;result?:unknown;history?:{event:string;at_ms:number;details:string}[]};
 type Json=Record<string,unknown>;
@@ -33,6 +33,7 @@ export default function OmegaLocalHubPanelR884(){
  const [selected,setSelected]=useState<string|null>(null),[info,setInfo]=useState('Local daemon is not connected.');
  const [busy,setBusy]=useState(false),[connectedAt,setConnectedAt]=useState<number|null>(null);
  const tokenRef=useRef<HTMLInputElement|null>(null);
+ const projectionCanvasRef=useRef<HTMLCanvasElement|null>(null);
  const act=async(fn:()=>Promise<void>)=>{
   if(busy)return;
   setBusy(true);
@@ -148,6 +149,31 @@ export default function OmegaLocalHubPanelR884(){
   :chosen?.operation==='SPHERE_TENSOR_STEP'&&chosen.state==='COMPLETED'&&chosen.result&&typeof chosen.result==='object'
   ?chosen.result as Record<string,unknown>:null;
  const tensorPreview=Array.isArray(tensorResult?.preview)?(tensorResult.preview as {cell:number;lane:number;mass:number}[]).slice(0,32):[];
+ const projectionReceipt=chosen?.operation==='SPHERE_TENSOR_RENDER'&&chosen.state==='COMPLETED'&&chosen.result&&typeof chosen.result==='object'
+  ?chosen.result as Record<string,unknown>:null;
+ const projectionData=projectionReceipt?.projection&&typeof projectionReceipt.projection==='object'
+  ?projectionReceipt.projection as Record<string,unknown>:null;
+ const projectionGrid=typeof projectionData?.projectionGrid==='string'&&projectionData.projectionGrid.length===20736
+  ?projectionData.projectionGrid:null;
+ useEffect(()=>{
+  const canvas=projectionCanvasRef.current;
+  if(!canvas||!projectionGrid)return;
+  const context=canvas.getContext('2d');if(!context)return;
+  const alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+  const pixels=context.createImageData(144,144);
+  for(let i=0;i<20736;i++){
+   const n=alphabet.indexOf(projectionGrid[i]);
+   if(n<0)return;
+   const offset=i*4;
+   const alpha=n===0?0:Math.min(255,Math.round(255*n/63));
+   // Composite on the opaque #162a3b background, just as in the SVG.
+   pixels.data[offset]=Math.round((22*(255-alpha)+94*alpha)/255);
+   pixels.data[offset+1]=Math.round((42*(255-alpha)+218*alpha)/255);
+   pixels.data[offset+2]=Math.round((59*(255-alpha)+197*alpha)/255);
+   pixels.data[offset+3]=255;
+  }
+  context.putImageData(pixels,0,0);
+ },[projectionGrid]);
  return <section data-r884-local-hub='LOOPBACK_INTEGRATION_ONLY' style={surface}>
    <header><h2>Ω Local / Edge Automation Hub</h2><p>Persistent local jobs and byte receipts. Local daemon runs on your own computer, not in the browser. An authenticated loopback result is not R141 host acceptance.</p></header>
    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(210px,1fr))',gap:14}}>
@@ -202,8 +228,16 @@ export default function OmegaLocalHubPanelR884(){
      <strong>Selected job: {chosen.id}</strong>
      {(chosen.operation==='SPHERE_TENSOR_EXPORT'||chosen.operation==='SPHERE_TENSOR_CONTINUE')&&chosen.state==='COMPLETED'&&<button type='button' style={{...button,margin:'8px 0'}} onClick={()=>{setExportJobId(chosen.id);setOperation('SPHERE_TENSOR_VERIFY');setInfo('R905 round-trip verification configured against '+chosen.id)}}>Verify complete CSV against this export receipt</button>}
      <div style={{display:'flex',gap:8,margin:'8px 0'}}><button type='button' disabled={busy||!['QUEUED','WAIT_EVENT'].includes(chosen.state)} onClick={()=>action('cancel',chosen.id)} style={button}>Cancel pending</button><button type='button' disabled={busy||chosen.state!=='COMPLETED'} onClick={()=>action('replay',chosen.id)} style={button}>Verify replay</button></div>
-     {(chosen.operation==='SPHERE_TENSOR_EXPORT'||chosen.operation==='SPHERE_TENSOR_CONTINUE')&&chosen.state==='COMPLETED'&&<button type='button' style={{...button,margin:'8px 0'}} onClick={()=>{setExportJobId(chosen.id);setOperation('SPHERE_TENSOR_CONTINUE');setDestination('exports/omega-tensor-next.csv');setInfo('R906 continuation configured from checkpoint '+chosen.id)}}>Continue this verified state into a new CSV</button>
+     {(chosen.operation==='SPHERE_TENSOR_EXPORT'||chosen.operation==='SPHERE_TENSOR_CONTINUE')&&chosen.state==='COMPLETED'&&<button type='button' style={{...button,margin:'8px 0'}} onClick={()=>{setExportJobId(chosen.id);setOperation('SPHERE_TENSOR_CONTINUE');setDestination('exports/omega-tensor-next.csv');setInfo('R906 continuation configured from checkpoint '+chosen.id)}}>Continue this verified state into a new CSV</button>}
      {(chosen.operation==='SPHERE_TENSOR_EXPORT'||chosen.operation==='SPHERE_TENSOR_CONTINUE')&&chosen.state==='COMPLETED'&&<button type='button' style={{...button,margin:'8px 0'}} onClick={()=>{setExportJobId(chosen.id);setOperation('SPHERE_TENSOR_RENDER');setDestination('art/omega-verified-projection.svg');setInfo('R907 SVG projection configured from verified checkpoint '+chosen.id)}}>Render verified 20,736-cell state to SVG</button>}
+     {projectionData&&projectionData.schema==='OMEGA_SPARSE_CELL_PROJECTION_R907'&&<div style={{...surface,margin:'8px 0'}}>
+      <h4>R907 verified state projection — 144 × 144 cells</h4>
+      {projectionGrid&&<canvas ref={projectionCanvasRef} width={144} height={144} role='img' aria-label='Derived 20,736-cell verified state intensity preview' style={{display:'block',width:'min(100%,432px)',height:'auto',aspectRatio:'1',imageRendering:'pixelated',border:'1px solid #607e98'}}/>}
+      <p><strong>{String(projectionData.activeCells)}</strong> active cells · <strong>{String(projectionData.nonzeroComponents)}</strong> nonzero components · conserved mass <strong>{String(projectionData.totalMass)}</strong></p>
+      <p><small>Source full-state SHA-256: <code style={{overflowWrap:'anywhere'}}>{String(projectionReceipt?.sourceFullStateSha256)}</code></small></p>
+      <p><small>SVG artifact: <code>{String((projectionReceipt?.artifact as {path?:string}|undefined)?.path||'unavailable')}</code> · SHA-256: <code style={{overflowWrap:'anywhere'}}>{String((projectionReceipt?.artifact as {sha256?:string}|undefined)?.sha256||'unavailable')}</code></small></p>
+      <p><small>Derived from verified complete state; no claims about physical simulation or GPU computation.</small></p>
+     </div>}
      {tensorResult&&tensorResult.schema==='OMEGA_IMPLICIT_CELL_LANE_TENSOR_R902'&&<div style={{...surface,margin:'8px 0'}}>
       <h4>R902 nested-state execution receipt</h4>
       {tensorExport&&<p><strong>Complete CSV export:</strong> <code>{String((tensorExport.artifact as {path?:string}|undefined)?.path||'No file')}</code> · {String(tensorExport.exportedRows)} complete nonzero rows · File SHA-256: <code style={{overflowWrap:'anywhere'}}>{String((tensorExport.artifact as {sha256?:string}|undefined)?.sha256||'unavailable')}</code></p>}
