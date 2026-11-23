@@ -39,6 +39,19 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Managed reinstall/upgrade failed' }
     & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File (Join-Path $install 'Verify-OMEGA-Package.ps1') -PackageRoot $install
     if ($LASTEXITCODE -ne 0) { throw 'Managed upgrade did not preserve exact package' }
+    # A managed marker does NOT authorize replacing modified old bytes.
+    $alteredUpgrade=Join-Path $install 'dist\index.html'
+    $beforeUpgrade=[System.IO.File]::ReadAllBytes($alteredUpgrade)
+    try {
+        [System.IO.File]::AppendAllText($alteredUpgrade,'R900_CHANGED_OLD_PACKAGE')
+        & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $installer -InstallRoot $install -NoShortcut 2>$null
+        if ($LASTEXITCODE -eq 0 -or -not (Test-Path -LiteralPath $alteredUpgrade) -or
+            -not (Test-Path -LiteralPath $marker)) {
+            throw 'Managed upgrade erased unverified prior data'
+        }
+    } finally {
+        [System.IO.File]::WriteAllBytes($alteredUpgrade,$beforeUpgrade)
+    }
     $tampered=Join-Path $install 'dist\index.html'
     $bytes=[System.IO.File]::ReadAllBytes($tampered)
     try {
