@@ -520,6 +520,11 @@ jobs:
         run: |
           & pwsh -NoProfile -NonInteractive -File .\tests\r903-windows-powershell-syntax.ps1
           if ($LASTEXITCODE -ne 0) { throw 'R903 Windows packaged PowerShell syntax held' }
+      - name: Prove every dynamically loaded native Python module compiles
+        shell: pwsh
+        run: |
+          python -m py_compile tools/omega_local_hub_r881.py tools/omega_absolute_truth_verifier_r884.py tools/omega_local_inference_r899.py tools/omega_sparse_tensor_r902.py tools/omega_sparse_verify_r905.py
+          if ($LASTEXITCODE -ne 0) { throw 'Native Windows dynamically loaded module syntax held' }
       - name: Prove exact 20,736 by 20,736 sparse tensor execution and refusal
         shell: pwsh
         run: |
