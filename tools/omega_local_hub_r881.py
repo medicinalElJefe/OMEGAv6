@@ -390,6 +390,36 @@ class Hub:
             target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(json_bytes(obj))
             return {"manifest":receipt(target,self.root),"sourceCount":len(entries),"state":"HASHED_MANIFEST_WRITTEN"}
         raise ValueError("UNSUPPORTED_OPERATION")
+    def verified_svg_artifact(self,job_id):
+        """Return only exact, complete R907 art bytes from an original job.
+
+        No arbitrary path is accepted by the HTTP route.  The immutable
+        original artifact and completed SQLite result are both hashed.
+        """
+        if not isinstance(job_id,str) or len(job_id)!=32 or any(c not in "0123456789abcdef" for c in job_id):
+            raise ValueError("R909_ARTIFACT_JOB_ID_HELD")
+        job=self.get(job_id)
+        if not job or job.get("state")!="COMPLETED" or job.get("operation")!="SPHERE_TENSOR_RENDER":
+            raise ValueError("R909_COMPLETED_RENDER_JOB_REQUIRED_HELD")
+        result=job.get("result")
+        if not isinstance(result,dict) or result.get("schema")!="OMEGA_SPARSE_PROJECTION_ARTIFACT_R907":
+            raise ValueError("R909_ORIGINAL_RENDER_RECEIPT_REQUIRED_HELD")
+        if not isinstance(job.get("result_sha256"),str) or job["result_sha256"]!=sha_bytes(json_bytes(result)):
+            raise ValueError("R909_RENDER_RECEIPT_DRIFT_HELD")
+        artifact=result.get("artifact")
+        if not isinstance(artifact,dict) or not isinstance(artifact.get("path"),str) or not artifact["path"].lower().endswith(".svg"):
+            raise ValueError("R909_SVG_ARTIFACT_REQUIRED_HELD")
+        path=safe_under(self.root,artifact["path"],True)
+        if not path.is_file() or path.stat().st_size>4*1024*1024:
+            raise ValueError("R909_SVG_ARTIFACT_SIZE_HELD")
+        data=path.read_bytes()
+        digest=sha_bytes(data)
+        if (digest!=artifact.get("sha256") or len(data)!=artifact.get("byteSize")
+            or not data.startswith(b'<svg xmlns="http://www.w3.org/2000/svg"')
+            or b"<script" in data.lower() or b"<!doctype" in data.lower()):
+            raise ValueError("R909_SVG_ARTIFACT_INTEGRITY_HELD")
+        return data,digest
+
     def run_one(self):
         with self.connection() as c:
             c.execute("BEGIN IMMEDIATE")
@@ -454,9 +484,32 @@ def serve(hub,token,port):
         def do_OPTIONS(self):
             if not self._valid_host() or not allowed_browser_origin(self.headers.get("Origin","")):self._send({"ok":False,"state":"ORIGIN_OR_HOST_HELD"},403)
             else:self._send({"ok":True,"state":"PREFLIGHT_ONLY"})
+        def _send_svg(self,svg,digest):
+            self.send_response(200)
+            self.send_header("Content-Type","image/svg+xml; charset=utf-8")
+            self.send_header("Content-Disposition",'attachment; filename="omega-verified-r907.svg"')
+            self.send_header("Content-Security-Policy","sandbox; default-src 'none'; style-src 'none'")
+            self.send_header("X-Content-Type-Options","nosniff")
+            self.send_header("Cache-Control","no-store")
+            self.send_header("X-Omega-Artifact-Sha256",digest)
+            origin=self.headers.get("Origin","")
+            if allowed_browser_origin(origin):
+                self.send_header("Access-Control-Allow-Origin",origin)
+                self.send_header("Vary","Origin")
+                self.send_header("Access-Control-Expose-Headers","X-Omega-Artifact-Sha256")
+            self.send_header("Content-Length",str(len(svg)))
+            self.end_headers()
+            self.wfile.write(svg)
         def do_GET(self):
             if not self._authorized():return self._send({"ok":False,"state":"AUTH_REQUIRED"},401)
             path=urlsplit(self.path).path
+            if path.startswith("/api/hub/artifacts/"):
+                job_id=path.rsplit("/",1)[-1]
+                try:
+                    svg,digest=hub.verified_svg_artifact(job_id)
+                    return self._send_svg(svg,digest)
+                except ValueError as exc:
+                    return self._send({"ok":False,"state":"ARTIFACT_HELD","reason":str(exc)},403)
             if path=="/api/hub/status":return self._send({"ok":True,"schema":SCHEMA,"jobs":len(hub.list()),"edgeAccepted":False,"physicalPcAccepted":False,"scope":"LOCAL_LOOPBACK_ONLY","R195":"HELD_SOURCE_REQUIRED"})
             if path=="/api/hub/models":
                 try:
