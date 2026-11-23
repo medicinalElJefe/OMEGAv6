@@ -3,7 +3,7 @@ import {useRef,useState,type CSSProperties} from 'react';
 type HubJob={id:string;operation:string;state:string;scheduled_ms:number;created_ms:number;updated_ms:number;error?:string|null;result_sha256?:string|null;result?:unknown;history?:{event:string;at_ms:number;details:string}[]};
 type Json=Record<string,unknown>;
 const BASE='http://127.0.0.1:8765';
-const OPS=['HASH_TREE','CSV_STATS','COPY_ARTIFACT','EXPORT_MANIFEST','VERIFY_LEDGER_SPLIT','VERIFY_LEDGER_SET','LOCAL_INFER','RESIDUAL_RESTORE'] as const;
+const OPS=['HASH_TREE','CSV_STATS','COPY_ARTIFACT','EXPORT_MANIFEST','VERIFY_LEDGER_SPLIT','VERIFY_LEDGER_SET','LOCAL_INFER','SPHERE_TENSOR_STEP','RESIDUAL_RESTORE'] as const;
 type Operation=typeof OPS[number];
 const surface:CSSProperties={padding:16,borderRadius:12,border:'1px solid #436079',background:'#0d1d2d',color:'#eff6fc',margin:'14px 0'};
 const field:CSSProperties={background:'#152f47',color:'#eaf5ff',border:'1px solid #607e98',padding:9,borderRadius:7,width:'100%',boxSizing:'border-box'};
@@ -27,6 +27,7 @@ export default function OmegaLocalHubPanelR884(){
  const [operation,setOperation]=useState<Operation>('HASH_TREE'),[source,setSource]=useState('.'),[destination,setDestination]=useState('exports/omega-artifact.json');
  const [delay,setDelay]=useState('0'),[eventName,setEventName]=useState(''),[jobs,setJobs]=useState<HubJob[]>([]);
  const [model,setModel]=useState(''),[prompt,setPrompt]=useState(''),[maxTokens,setMaxTokens]=useState('256');
+ const [tensorCell,setTensorCell]=useState('0'),[tensorLane,setTensorLane]=useState('0'),[tensorMass,setTensorMass]=useState('4096'),[tensorSteps,setTensorSteps]=useState('4');
  const [installedModels,setInstalledModels]=useState<string[]>([]);
  const [selected,setSelected]=useState<string|null>(null),[info,setInfo]=useState('Local daemon is not connected.');
  const [busy,setBusy]=useState(false),[connectedAt,setConnectedAt]=useState<number|null>(null);
@@ -81,6 +82,12 @@ export default function OmegaLocalHubPanelR884(){
    const n=Number(delay);
    if(!Number.isFinite(n)||n<0||n>604800)throw Error('Delay must be between 0 and 604800 seconds.');
    const args:Record<string,unknown>={};
+   if(operation==='SPHERE_TENSOR_STEP'){
+    const cell=Number(tensorCell),lane=Number(tensorLane),mass=Number(tensorMass),steps=Number(tensorSteps);
+    if(![cell,lane,mass,steps].every(Number.isSafeInteger)||cell<0||cell>=20736||lane<0||lane>=20736||steps<0||steps>8||mass<=0||mass>1e15||mass%(4**steps)!==0)
+     throw Error('R902 requires 0–20735 cell/lane, 0–8 steps and positive integer mass divisible by 4^steps.');
+    args.seeds=[{cell,lane,mass}];args.steps=steps;args.cell_axis=0;args.lane_axis=1;
+   }
    if(operation==='HASH_TREE')args.path=source||'.';
    if(operation==='LOCAL_INFER'){
     if(!/^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,127}$/.test(model)||!prompt.trim()||prompt.length>8192)
@@ -129,7 +136,13 @@ export default function OmegaLocalHubPanelR884(){
     <h3>Queue bounded work</h3>
     <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:12}}>
      <label>Operation<select style={field} value={operation} onChange={e=>setOperation(e.target.value as Operation)}>{OPS.map(x=><option key={x} value={x}>{x.replaceAll('_',' ')}</option>)}</select></label>
-     <label>{operation==='HASH_TREE'?'Project folder':operation==='EXPORT_MANIFEST'?'Source files (one per line)':'Source relative file'}<textarea style={field} rows={2} value={source} onChange={e=>setSource(e.target.value)} spellCheck={false}/></label>
+     {operation!=='LOCAL_INFER'&&operation!=='SPHERE_TENSOR_STEP'&&<label>{operation==='HASH_TREE'?'Project folder':operation==='EXPORT_MANIFEST'?'Source files (one per line)':'Source relative file'}<textarea style={field} rows={2} value={source} onChange={e=>setSource(e.target.value)} spellCheck={false}/></label>}
+     {operation==='SPHERE_TENSOR_STEP'&&<>
+      <label>Cell address (0–20735)<input style={field} type='number' min={0} max={20735} step={1} value={tensorCell} onChange={e=>setTensorCell(e.target.value)}/></label>
+      <label>Local state lane (0–20735)<input style={field} type='number' min={0} max={20735} step={1} value={tensorLane} onChange={e=>setTensorLane(e.target.value)}/></label>
+      <label>Discrete mass (integer)<input style={field} type='number' min={1} step={1} value={tensorMass} onChange={e=>setTensorMass(e.target.value)}/></label>
+      <label>Transition steps (0–8)<input style={field} type='number' min={0} max={8} step={1} value={tensorSteps} onChange={e=>setTensorSteps(e.target.value)}/></label>
+     </>}
      {(operation==='COPY_ARTIFACT'||operation==='EXPORT_MANIFEST')&&<label>New destination path<input style={field} value={destination} onChange={e=>setDestination(e.target.value)} spellCheck={false}/></label>}
      {operation==='LOCAL_INFER'&&<>
       <label>Installed local model name<input style={field} value={model} onChange={e=>setModel(e.target.value)} placeholder='e.g. llama3.2' maxLength={128}/>
@@ -142,6 +155,7 @@ export default function OmegaLocalHubPanelR884(){
      <label>Delay (seconds, maximum one week)<input style={field} type='number' min='0' max='604800' step='1' value={delay} onChange={e=>setDelay(e.target.value)}/></label>
      <label>Optional event gate<input style={field} value={eventName} onChange={e=>setEventName(e.target.value)} placeholder='example: new_asset'/></label>
     </div>
+    {operation==='SPHERE_TENSOR_STEP'&&<p><small>R902 executes a real deterministic sparse operator over 20,736 address cells × 20,736 state lanes. A per-cell 20,736D state is implicit, only nonzero components are computed. Exact integer mass conservation and the SHA-256 of every resulting nonzero component are recorded in the local job receipt. This is not 20,736 separately trained AI models or a GPU workload.</small></p>}
     {operation==='LOCAL_INFER'&&<p><small>Requires an already installed and running Ollama model at 127.0.0.1:11434. OMEGA never downloads a model, chooses a remote endpoint, or fabricates output. A failed connection is HELD. Results are durable local job receipts, not independent model accuracy or GPU proof.</small></p>}
     <p><small>For VERIFY LEDGER SET, provide the relative path to the pinned ten-ledger manifest. All file paths are relative to the approved local project directory. Internal daemon files, parent traversal and shell execution are blocked. R195 restoration stays HELD until source authority is proven.</small></p>
     <div style={{display:'flex',gap:8,flexWrap:'wrap'}}><button type='button' style={button} disabled={busy||state!=='LOOPBACK_AUTHENTICATED'} onClick={queue}>Submit persistent job</button><button type='button' style={button} disabled={busy||state!=='LOOPBACK_AUTHENTICATED'} onClick={emit}>Release event-matched jobs</button></div>
