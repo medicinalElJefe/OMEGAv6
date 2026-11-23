@@ -3,7 +3,7 @@ import {useRef,useState,type CSSProperties} from 'react';
 type HubJob={id:string;operation:string;state:string;scheduled_ms:number;created_ms:number;updated_ms:number;error?:string|null;result_sha256?:string|null;result?:unknown;history?:{event:string;at_ms:number;details:string}[]};
 type Json=Record<string,unknown>;
 const BASE='http://127.0.0.1:8765';
-const OPS=['HASH_TREE','CSV_STATS','COPY_ARTIFACT','EXPORT_MANIFEST','VERIFY_LEDGER_SPLIT','VERIFY_LEDGER_SET','LOCAL_INFER','SPHERE_TENSOR_STEP','SPHERE_TENSOR_EXPORT','RESIDUAL_RESTORE'] as const;
+const OPS=['HASH_TREE','CSV_STATS','COPY_ARTIFACT','EXPORT_MANIFEST','VERIFY_LEDGER_SPLIT','VERIFY_LEDGER_SET','LOCAL_INFER','SPHERE_TENSOR_STEP','SPHERE_TENSOR_EXPORT','SPHERE_TENSOR_VERIFY','RESIDUAL_RESTORE'] as const;
 type Operation=typeof OPS[number];
 const surface:CSSProperties={padding:16,borderRadius:12,border:'1px solid #436079',background:'#0d1d2d',color:'#eff6fc',margin:'14px 0'};
 const field:CSSProperties={background:'#152f47',color:'#eaf5ff',border:'1px solid #607e98',padding:9,borderRadius:7,width:'100%',boxSizing:'border-box'};
@@ -28,6 +28,7 @@ export default function OmegaLocalHubPanelR884(){
  const [delay,setDelay]=useState('0'),[eventName,setEventName]=useState(''),[jobs,setJobs]=useState<HubJob[]>([]);
  const [model,setModel]=useState(''),[prompt,setPrompt]=useState(''),[maxTokens,setMaxTokens]=useState('256');
  const [tensorCell,setTensorCell]=useState('0'),[tensorLane,setTensorLane]=useState('0'),[tensorMass,setTensorMass]=useState('4096'),[tensorSteps,setTensorSteps]=useState('4');
+ const [exportJobId,setExportJobId]=useState('');
  const [installedModels,setInstalledModels]=useState<string[]>([]);
  const [selected,setSelected]=useState<string|null>(null),[info,setInfo]=useState('Local daemon is not connected.');
  const [busy,setBusy]=useState(false),[connectedAt,setConnectedAt]=useState<number|null>(null);
@@ -82,6 +83,10 @@ export default function OmegaLocalHubPanelR884(){
    const n=Number(delay);
    if(!Number.isFinite(n)||n<0||n>604800)throw Error('Delay must be between 0 and 604800 seconds.');
    const args:Record<string,unknown>={};
+   if(operation==='SPHERE_TENSOR_VERIFY'){
+    if(!/^[a-f0-9]{32}$/.test(exportJobId))throw Error('Choose a completed tensor export job ID (32 lowercase hexadecimal characters).');
+    args.export_job_id=exportJobId;
+   }
    if(operation==='SPHERE_TENSOR_STEP'||operation==='SPHERE_TENSOR_EXPORT'){
     const cell=Number(tensorCell),lane=Number(tensorLane),mass=Number(tensorMass),steps=Number(tensorSteps);
     if(![cell,lane,mass,steps].every(Number.isSafeInteger)||cell<0||cell>=20736||lane<0||lane>=20736||steps<0||steps>8||mass<=0||mass>1e15||mass%(4**steps)!==0)
@@ -144,7 +149,8 @@ export default function OmegaLocalHubPanelR884(){
     <h3>Queue bounded work</h3>
     <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:12}}>
      <label>Operation<select style={field} value={operation} onChange={e=>setOperation(e.target.value as Operation)}>{OPS.map(x=><option key={x} value={x}>{x.replaceAll('_',' ')}</option>)}</select></label>
-     {operation!=='LOCAL_INFER'&&operation!=='SPHERE_TENSOR_STEP'&&operation!=='SPHERE_TENSOR_EXPORT'&&<label>{operation==='HASH_TREE'?'Project folder':operation==='EXPORT_MANIFEST'?'Source files (one per line)':'Source relative file'}<textarea style={field} rows={2} value={source} onChange={e=>setSource(e.target.value)} spellCheck={false}/></label>}
+     {operation!=='LOCAL_INFER'&&operation!=='SPHERE_TENSOR_STEP'&&operation!=='SPHERE_TENSOR_EXPORT'&&operation!=='SPHERE_TENSOR_VERIFY'&&<label>{operation==='HASH_TREE'?'Project folder':operation==='EXPORT_MANIFEST'?'Source files (one per line)':'Source relative file'}<textarea style={field} rows={2} value={source} onChange={e=>setSource(e.target.value)} spellCheck={false}/></label>}
+     {operation==='SPHERE_TENSOR_VERIFY'&&<label>Original completed export job ID<input style={field} value={exportJobId} onChange={e=>setExportJobId(e.target.value.trim())} maxLength={32} placeholder='Select a completed export job below'/></label>}
      {(operation==='SPHERE_TENSOR_STEP'||operation==='SPHERE_TENSOR_EXPORT')&&<>
       <label>Cell address (0–20735)<input style={field} type='number' min={0} max={20735} step={1} value={tensorCell} onChange={e=>setTensorCell(e.target.value)}/></label>
       <label>Local state lane (0–20735)<input style={field} type='number' min={0} max={20735} step={1} value={tensorLane} onChange={e=>setTensorLane(e.target.value)}/></label>
@@ -164,6 +170,7 @@ export default function OmegaLocalHubPanelR884(){
      <label>Optional event gate<input style={field} value={eventName} onChange={e=>setEventName(e.target.value)} placeholder='example: new_asset'/></label>
     </div>
     {(operation==='SPHERE_TENSOR_STEP'||operation==='SPHERE_TENSOR_EXPORT')&&<p><small>R902 executes a real deterministic sparse operator over 20,736 address cells × 20,736 state lanes. A per-cell 20,736D state is implicit, only nonzero components are computed. Exact integer mass conservation and the SHA-256 of every resulting nonzero component are recorded in the local job receipt. This is not 20,736 separately trained AI models or a GPU workload.</small></p>}
+    {operation==='SPHERE_TENSOR_VERIFY'&&<p><small>R905 reopens an earlier complete CSV export and compares every row and both hashes against that job's original persistent SQLite receipt. It refuses changed, reordered, truncated or missing files. This is an internal byte/state integrity verification, not a signature or native device proof.</small></p>}
     {operation==='SPHERE_TENSOR_EXPORT'&&<p><small>Export all nonzero state entries to a new CSV in the approved project root. The CSV is hashed, never overwrites an existing file, and records the matching complete-state digest in the durable receipt.</small></p>}
     {operation==='LOCAL_INFER'&&<p><small>Requires an already installed and running Ollama model at 127.0.0.1:11434. OMEGA never downloads a model, chooses a remote endpoint, or fabricates output. A failed connection is HELD. Results are durable local job receipts, not independent model accuracy or GPU proof.</small></p>}
     <p><small>For VERIFY LEDGER SET, provide the relative path to the pinned ten-ledger manifest. All file paths are relative to the approved local project directory. Internal daemon files, parent traversal and shell execution are blocked. R195 restoration stays HELD until source authority is proven.</small></p>
@@ -178,6 +185,7 @@ export default function OmegaLocalHubPanelR884(){
     </div>}
     {chosen&&<div style={{marginTop:10}}>
      <strong>Selected job: {chosen.id}</strong>
+     {chosen.operation==='SPHERE_TENSOR_EXPORT'&&chosen.state==='COMPLETED'&&<button type='button' style={{...button,margin:'8px 0'}} onClick={()=>{setExportJobId(chosen.id);setOperation('SPHERE_TENSOR_VERIFY');setInfo('R905 round-trip verification configured against '+chosen.id)}}>Verify complete CSV against this export receipt</button>}
      <div style={{display:'flex',gap:8,margin:'8px 0'}}><button type='button' disabled={busy||!['QUEUED','WAIT_EVENT'].includes(chosen.state)} onClick={()=>action('cancel',chosen.id)} style={button}>Cancel pending</button><button type='button' disabled={busy||chosen.state!=='COMPLETED'} onClick={()=>action('replay',chosen.id)} style={button}>Verify replay</button></div>
      {tensorResult&&tensorResult.schema==='OMEGA_IMPLICIT_CELL_LANE_TENSOR_R902'&&<div style={{...surface,margin:'8px 0'}}>
       <h4>R902 nested-state execution receipt</h4>
