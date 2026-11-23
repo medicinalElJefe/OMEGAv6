@@ -323,6 +323,36 @@ semantic correctness, R141 authenticated Hybrid Link target-PC
 acceptance or permission for R237 production promotion. Existing R352
 source remains intact.
 
+## R909 download the original verified SVG from the Studio
+
+After a completed `SPHERE_TENSOR_RENDER` job, the Local / Edge Hub
+shows **Download exact verified SVG**. The button fetches original
+binary SVG bytes from the authenticated loopback endpoint
+`GET /api/hub/artifacts/<render-job-id>`. The endpoint accepts **only**
+the exact 32-hex ID of a completed R907 render job; it retrieves the
+original SQLite result and SHA-256, checks the approved-root
+artifact path and strictly bounded file size, reads the file bytes
+once and checks them against the original artifact's SHA-256 and
+byte count. An arbitrary relative path, source CSV, uncompleted
+job or modified SVG is never accepted. All requests enforce the
+original token, Host and Origin controls.
+
+The response is a bounded `image/svg+xml` download with
+`Content-Disposition: attachment`, `Cache-Control: no-store`,
+`X-Content-Type-Options: nosniff`, and a restrictive sandbox CSP.
+The header `X-Omega-Artifact-Sha256` is exposed only to authorized
+origins. The browser independently recomputes SHA-256 from downloaded
+bytes and only initiates the file save if the digest matches. The
+SVG remains a true rendered projection of the previously verified
+R902–R907 state; downloading it does not modify the original
+checkpoint or indicate GPU/physical-PC acceptance.
+
+The Windows compiled-Hub CI exercises live authenticated byte
+retrieval and verifies exact SHA-256, missing-token and unrelated-ID
+refusals, then modifies the original SVG and requires a 403
+fail-closed response. This provides a usable, data-bound artwork
+export path rather than asking the operator to locate internal files.
+
 ## R897 full-package integrity guard
 
 `OPEN-OMEGA.cmd` now runs `Verify-OMEGA-Package.ps1` before opening the
