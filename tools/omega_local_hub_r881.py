@@ -141,7 +141,25 @@ class Hub:
     def list(self, limit=100):
         with self.connection() as c:
             ids=[r["id"] for r in c.execute("SELECT id FROM jobs ORDER BY created_ms DESC LIMIT ?",(min(max(1,limit),200),))]
-        return [self.get(i) for i in ids]
+        items=[]
+        for i in ids:
+            item=self.get(i)
+            # R907's complete 144x144 display data is requested explicitly
+            # through GET /api/hub/jobs/<id>, never multiplied across all
+            # 100 historical jobs. This is a read-only transport projection;
+            # original durable result/sha256 remains intact.
+            if item and item["operation"]=="SPHERE_TENSOR_RENDER":
+                result=item.get("result")
+                if isinstance(result,dict) and isinstance(result.get("projection"),dict):
+                    result=dict(result)
+                    projection=dict(result["projection"])
+                    if "projectionGrid" in projection:
+                        projection.pop("projectionGrid")
+                        projection["projectionGridOmittedFromJobList"]=True
+                    result["projection"]=projection
+                    item={**item,"result":result}
+            items.append(item)
+        return items
     def emit_event(self, event_name):
         if not isinstance(event_name,str) or not event_name.isidentifier(): raise ValueError("INVALID_EVENT")
         with self.connection() as c:
