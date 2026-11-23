@@ -85,7 +85,7 @@ try {
     $localModel='UNTESTED'
     try{
         $uri='http://127.0.0.1:11434/api/tags'
-        $response=Invoke-WebRequest -UseBasicParsing -Uri $uri -TimeoutSec 2 -ErrorAction Stop
+        $response=Invoke-WebRequest -UseBasicParsing -Uri $uri -TimeoutSec 2 -MaximumRedirection 0 -ErrorAction Stop
         if($response.StatusCode -eq 200){$localModel='LOCAL_MODEL_TAGS_HTTP_200'}
         else{$localModel='LOCAL_MODEL_TAGS_REFUSED'}
     }catch{$localModel='LOCAL_MODEL_BACKEND_UNAVAILABLE'}
