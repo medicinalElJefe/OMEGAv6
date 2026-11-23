@@ -88,6 +88,12 @@ for(const needle of ['DIMENSIONS = AXIS**4','TOTAL_POSSIBLE = DIMENSIONS**2','MA
  assert.ok(sparseTensor.includes(needle),'R902 implicit 20,736 per-cell operator missing: '+needle);
 for(const needle of ['SPHERE_TENSOR_EXPORT','sparse_tensor_rows_r904','COMPLETE_SPARSE_STATE_CSV_EXPORTED','R904_EXPORT_TARGET_EXISTS_HELD'])
  assert.ok(sparseHub.includes(needle),'R904 complete sparse tensor CSV export missing: '+needle);
+for(const needle of ['SPHERE_TENSOR_CONTINUE','OMEGA_SPARSE_TENSOR_CONTINUATION_R906','sourceExportReceiptSha256','VERIFIED_CHECKPOINT_CONTINUATION_EXPORTED'])
+ assert.ok(sparseHub.includes(needle),'R906 complete verified checkpoint continuation missing: '+needle);
+for(const needle of ['SPHERE_TENSOR_CONTINUE','tensor-next.csv','sourceExportReceiptSha256','OMEGA_SPARSE_TENSOR_CONTINUATION_R906'])
+ assert.ok(sparseWindows.includes(needle),'R906 native Windows continued-state proof missing: '+needle);
+assert.ok(workflow.includes('omega_sparse_verify_r905.py'),
+ 'R906 Python syntax and exact checkpoint verifier must run before packaged Windows build');
 for(const needle of ['SPHERE_TENSOR_VERIFY','OMEGA_SPARSE_EXPORT_ROUNDTRIP_R905','originalExportReceiptSha256','R905_'])
  assert.ok(sparseWindows.includes(needle),'R905 native Windows roundtrip/tamper proof missing: '+needle);
 for(const needle of ['SPHERE_TENSOR_EXPORT','complete-tensor.csv','exportedRows','R904_EXPORT_TARGET_EXISTS_HELD'])
@@ -109,7 +115,7 @@ for(const line of ['127.0.0.1','11434','/api/tags','/api/generate','R899_EXECUTI
 assert.ok(workflow.includes('r899-windows-compiled-inference-smoke.ps1'),
  'R899 native Windows end-to-end inference test must run in release CI');
 const localHubPanel=readFileSync('src7/workspaces/OmegaLocalHubPanelR884.tsx','utf8');
-for(const marker of ['SPHERE_TENSOR_STEP','SPHERE_TENSOR_EXPORT','SPHERE_TENSOR_VERIFY','exportJobId','tensorExport','tensorResult','conservationExact','fullStateSha256','tensorPreview'])
+for(const marker of ['SPHERE_TENSOR_STEP','SPHERE_TENSOR_EXPORT','SPHERE_TENSOR_VERIFY','SPHERE_TENSOR_CONTINUE','exportJobId','tensorExport','tensorResult','conservationExact','fullStateSha256','tensorPreview'])
  assert.ok(localHubPanel.includes(marker),'R902 interactive tensor operator or state receipt inspector missing: '+marker);
 
 for(const marker of ['importLocalToken','file.name!==\'hub-r881.token\'','file.size>512','file.text()','setToken(text)','Load local token file','Nothing is uploaded'])
