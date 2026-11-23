@@ -353,6 +353,32 @@ refusals, then modifies the original SVG and requires a 403
 fail-closed response. This provides a usable, data-bound artwork
 export path rather than asking the operator to locate internal files.
 
+## R910 download complete verified 20,736D CSV state
+
+The Local / Edge Hub also exposes **Download complete verified CSV
+checkpoint** on a completed `SPHERE_TENSOR_EXPORT` (R904) or
+`SPHERE_TENSOR_CONTINUE` (R906) job. The download uses the original
+R905 full-state round-trip verification and requires only the original
+completed local job ID, not an operator-selected filesystem path.
+`GET /api/hub/artifacts/csv/<checkpoint-job-id>` is protected by the
+original loopback Host, Origin, and private token constraints.
+
+The server verifies the entire canonical CSV, original result SHA-256,
+complete sparse-state SHA-256, row count, conserved mass, file SHA-256,
+and byte count. It refuses unrelated jobs, changed data, unsafe paths,
+and downloads larger than 8 MiB (without deleting their original local
+files). It then returns only the exact verified bytes as an attachment
+with `text/csv`, `nosniff`, no-store and the observed file SHA-256.
+The browser separately compares this response to the hash from the
+selected completed SQLite job receipt and recalculates the byte digest
+using Web Crypto before saving.
+
+The compiled Windows worker test downloads the initial R904 and
+continued R906 checkpoints, compares actual bytes and hashes, and
+tests missing-token and unrelated-job refusals. This adds practical
+export of the full computed state alongside the R909 original SVG
+download, without asserting native GPU/physical-PC acceptance.
+
 ## R897 full-package integrity guard
 
 `OPEN-OMEGA.cmd` now runs `Verify-OMEGA-Package.ps1` before opening the
