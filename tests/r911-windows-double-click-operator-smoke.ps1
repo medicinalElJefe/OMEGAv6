@@ -46,7 +46,10 @@ try {
         Start-Sleep -Milliseconds 250
     }
     if(-not $url -or $url -notmatch '^http://127\.0\.0\.1:[0-9]+/$'){
-        throw 'R911 original OPEN-OMEGA.cmd did not start an HTTP loopback UI'
+        $errorText=if(Test-Path -LiteralPath $stderr){Get-Content -LiteralPath $stderr -Raw}else{'(no stderr log)'}
+        $outText=if(Test-Path -LiteralPath $stdout){Get-Content -LiteralPath $stdout -Raw}else{'(no stdout log)'}
+        $hasExited=if($null -ne $process){$process.HasExited}else{$true}
+        throw ("R911 original OPEN-OMEGA.cmd did not start HTTP loopback; cmdExited="+$hasExited+" stdout="+$outText+" stderr="+$errorText)
     }
     $response=Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 10
     if($response.StatusCode -ne 200 -or $response.Content -notmatch 'OMEGA'){
