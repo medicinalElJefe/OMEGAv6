@@ -140,6 +140,29 @@ uninstall while proving adjacent project files survive. It is a **CI runner**
 installer lifecycle proof, not certification on the user's actual Windows 10
 host, not Hybrid Link acceptance, and not production release authorization.
 
+## R901 actual Windows local observation receipt
+
+The package includes `CHECK-OMEGA-PC.cmd` and
+`Check-OMEGA-Windows.ps1`. Running it **on the operator's Windows computer**
+rechecks the entire SHA-256 package, starts and requests the actual
+`127.0.0.1` OMEGA7 UI, checks whether the compiled Hub EXE is present,
+and queries the local Windows video-adapter inventory via CIM. It also
+probes the installed Ollama model listing only at fixed
+`127.0.0.1:11434`, rejecting redirects. The resulting JSON observation
+receipt is written outside the package to the current user's
+`LOCALAPPDATA/OMEGA7-Evidence` directory; it does not alter any project
+root or install. Evidence includes source commit, local HTTP result,
+visible adapter descriptions and driver versions, and non-promoted
+acceptance flags.
+
+This is **not** authenticated R141/R237 native-host acceptance, a GPU
+compute workload benchmark, proof that local AI inference completed, or a
+digital signature. In particular, `nativeGpuWorkloadProven=false` and
+`physicalPcAccepted=false` are fixed even when Windows exposes a video
+adapter. Real target-PC execution must occur on that PC; a CI runner cannot
+satisfy it. The Windows pipeline tests the diagnostic and its refusal
+boundaries but cannot create actual customer-device evidence.
+
 ## R897 full-package integrity guard
 
 `OPEN-OMEGA.cmd` now runs `Verify-OMEGA-Package.ps1` before opening the
