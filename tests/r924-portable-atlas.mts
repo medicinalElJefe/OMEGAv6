@@ -191,3 +191,17 @@ test('R975 recorded replay can jump to first repeated address without retaining 
  assert.match(control,/if\(index<0\)return/);
  assert.match(control,/setExecutionPlaying\(false\);setSelectedExecutionStep\(index\);setInspectedAddress\(null\);setInspectedValues\(\[\]\)/);
 });
+
+
+test('R976 last recorded revisit navigation selects the final repeated address and invalidates inspection',()=>{
+ const ui=readFileSync(new URL('../src7/workspaces/SharedArtifactLibraryR864.tsx',import.meta.url),'utf8');
+ const start=ui.indexOf("aria-label='Jump to last repeated Atlas address'");
+ assert.ok(start>=0,'last revisit control exists');
+ const control=ui.slice(ui.lastIndexOf('<button',start),ui.indexOf('</button>',start)+9);
+ assert.match(control,/disabled=\{running\|\|!localTurnResult\.trace\.some/);
+ assert.match(control,/\.reduce\(\(last,state,i\)=>/);
+ assert.match(control,/previous\.address===state\.address/);
+ assert.match(control,/\?i:last,-1/);
+ assert.match(control,/if\(index<0\)return/);
+ assert.match(control,/setExecutionPlaying\(false\);setSelectedExecutionStep\(index\);setInspectedAddress\(null\);setInspectedValues\(\[\]\)/);
+});
