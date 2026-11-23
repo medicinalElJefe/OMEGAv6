@@ -172,6 +172,42 @@ try {
         $secondResult.error -notmatch 'R904_EXPORT_TARGET_EXISTS_HELD') {
         throw 'R904 permitted overwriting complete sparse state artifact'
     }
+    # R905 verify every exported CSV component against its originating
+    # immutable completed export job and durable original result SHA.
+    $verifyPayload = @{operation='SPHERE_TENSOR_VERIFY';args=@{export_job_id=$exportId}} | ConvertTo-Json -Compress -Depth 4
+    $roundtripQueued = Invoke-WebRequest -Uri "http://127.0.0.1:$port/api/hub/jobs" -Headers $headers -UseBasicParsing -Method Post -ContentType 'application/json' -Body $verifyPayload -TimeoutSec 5
+    $roundtripId = ($roundtripQueued.Content | ConvertFrom-Json).job.id
+    if (-not $roundtripId) { throw 'R905 round-trip job did not queue' }
+    $roundtrip = $null
+    for ($poll=0;$poll -lt 100;$poll++) {
+        $read = Invoke-WebRequest -Uri ("http://127.0.0.1:$port/api/hub/jobs/" + $roundtripId) -Headers $headers -UseBasicParsing -TimeoutSec 5
+        $roundtrip = ($read.Content | ConvertFrom-Json).job
+        if ($roundtrip.state -in @('COMPLETED','FAILED','HELD')) { break }
+        Start-Sleep -Milliseconds 100
+    }
+    if ($null -eq $roundtrip -or $roundtrip.state -ne 'COMPLETED' -or
+        $roundtrip.result.schema -ne 'OMEGA_SPARSE_EXPORT_ROUNDTRIP_R905' -or
+        $roundtrip.result.exactStateMatched -ne $true -or
+        $roundtrip.result.exactFileBytesMatched -ne $true -or
+        $roundtrip.result.fullStateSha256 -ne $tensorResult.result.fullStateSha256 -or
+        $roundtrip.result.originalExportReceiptSha256 -ne $exportResult.result_sha256) {
+        throw "R905 compiled verifier failed complete CSV receipt match: $($roundtrip.state) $($roundtrip.error)"
+    }
+    # A one-byte change must HELD, without overwriting the first export.
+    [System.IO.File]::AppendAllText($exportFile, 'X')
+    $tamperQueued = Invoke-WebRequest -Uri "http://127.0.0.1:$port/api/hub/jobs" -Headers $headers -UseBasicParsing -Method Post -ContentType 'application/json' -Body $verifyPayload -TimeoutSec 5
+    $tamperId = ($tamperQueued.Content | ConvertFrom-Json).job.id
+    $tamperResult = $null
+    for ($poll=0;$poll -lt 100;$poll++) {
+        $read = Invoke-WebRequest -Uri ("http://127.0.0.1:$port/api/hub/jobs/" + $tamperId) -Headers $headers -UseBasicParsing -TimeoutSec 5
+        $tamperResult = ($read.Content | ConvertFrom-Json).job
+        if ($tamperResult.state -in @('COMPLETED','FAILED','HELD')) { break }
+        Start-Sleep -Milliseconds 100
+    }
+    if ($null -eq $tamperResult -or $tamperResult.state -ne 'HELD' -or
+        $tamperResult.error -notmatch 'R905_') {
+        throw 'R905 compiled verifier did not refuse modified full state CSV'
+    }
     Write-Host 'R902 PACKAGED WINDOWS HUB EXE PASS: authenticated bounded tensor execution, exact mass conservation, full-state SHA-256, replay MATCH. CI RUNNER ONLY.'
 } finally {
     if ($null -ne $process -and -not $process.HasExited) { Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue }
