@@ -11,7 +11,7 @@ echo Opening OMEGA7 in your browser from this computer.
 echo No installation, Node, Python, Git or administrator setup required.
 echo Keep this window open while using the local studio.
 echo.
-powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "%~dp0Verify-OMEGA-Package.ps1" -PackageRoot "%~dp0"
+powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "%~dp0Verify-OMEGA-Package.ps1" -PackageRoot "%~dp0."
 if errorlevel 1 (
   echo OMEGA package integrity verification failed. Do not use a modified or incomplete package.
   pause
