@@ -38,6 +38,7 @@ try {
     }
     $marker = $full + '.omega-install.json'
     if (Test-Path -LiteralPath $full) {
+        if (-not (Test-Path -LiteralPath $full -PathType Container)) { throw 'Existing install target is not a directory' }
         $existing = Get-Item -LiteralPath $full -Force
         if (($existing.Attributes -band [System.IO.FileAttributes]::ReparsePoint) -ne 0) {
             throw 'Existing install target is a junction or symbolic link'
