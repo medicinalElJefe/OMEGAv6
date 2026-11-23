@@ -60,6 +60,46 @@ class LocalHubTests(unittest.TestCase):
         self.assertFalse(result["result"]["independentAiModelsTrained"])
         self.assertEqual(self.hub.replay(job["id"])["state"],"MATCH")
 
+    def test_r904_complete_sparse_export_exact_content_and_receipts(self):
+        import hashlib
+        seeds=[{"cell":0,"lane":0,"mass":4096}]
+        args={"seeds":seeds,"steps":4,"cell_axis":0,"lane_axis":1,
+              "destination":"exports/full-state.csv"}
+        queued=self.hub.enqueue("SPHERE_TENSOR_EXPORT",args)
+        job=self.hub.run_one()
+        self.assertEqual(job["id"],queued["id"])
+        self.assertEqual(job["state"],"COMPLETED")
+        receipt=job["result"]
+        self.assertEqual(receipt["schema"],"OMEGA_SPARSE_TENSOR_EXPORT_R904")
+        self.assertEqual(receipt["exportedRows"],receipt["tensor"]["activeComponents"])
+        self.assertEqual(receipt["tensor"]["totalMassAfter"],4096)
+        exported=self.root/"exports"/"full-state.csv"
+        data=exported.read_bytes()
+        self.assertTrue(data.startswith(b"cell,lane,mass\\n"))
+        self.assertEqual(len(data.splitlines()),receipt["exportedRows"]+1)
+        self.assertEqual(hashlib.sha256(data).hexdigest(),receipt["artifact"]["sha256"])
+        state_hash=hashlib.sha256()
+        mass=0
+        for line in data.decode("utf-8").splitlines()[1:]:
+            cell,lane,weight=(int(x) for x in line.split(","))
+            mass+=weight
+            state_hash.update(f"{cell}:{lane}:{weight}\\n".encode("ascii"))
+        self.assertEqual(mass,4096)
+        self.assertEqual(state_hash.hexdigest(),receipt["canonicalFullStateSha256"])
+        self.assertEqual(receipt["canonicalFullStateSha256"],receipt["tensor"]["fullStateSha256"])
+        self.assertEqual(len(job["result_sha256"]),64)
+        self.assertFalse(receipt["gpuComputeProven"])
+
+    def test_r904_cannot_overwrite_or_escape_root(self):
+        args={"seeds":[{"cell":0,"lane":0,"mass":16}],"steps":2}
+        for name in (".omega/secret.csv","../outside.csv","data/one.csv"):
+            queued=self.hub.enqueue("SPHERE_TENSOR_EXPORT",{**args,"destination":name})
+            result=self.hub.run_one()
+            self.assertEqual(result["id"],queued["id"])
+            self.assertEqual(result["state"],"HELD")
+        self.assertTrue((self.root/"data"/"one.csv").exists())
+        self.assertFalse((self.root/".omega"/"secret.csv").exists())
+
     def test_r902_invalid_mass_refuses_without_result_promotion(self):
         job=self.hub.enqueue("SPHERE_TENSOR_STEP",
                  {"seeds":[{"cell":0,"lane":0,"mass":5}],"steps":2})
