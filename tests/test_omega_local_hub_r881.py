@@ -129,6 +129,64 @@ class LocalHubTests(unittest.TestCase):
         restored=self.hub.enqueue("SPHERE_TENSOR_VERIFY",{"export_job_id":export_job["id"]})
         self.assertEqual(self.hub.run_one()["state"],"COMPLETED")
 
+    def test_r906_verified_sparse_checkpoint_continuation_and_lineage(self):
+        original=self.hub.enqueue("SPHERE_TENSOR_EXPORT",{
+            "seeds":[{"cell":0,"lane":0,"mass":4096}],"steps":4,
+            "cell_axis":0,"lane_axis":1,"destination":"history/first.csv"})
+        first=self.hub.run_one()
+        self.assertEqual(first["state"],"COMPLETED")
+        resumed=self.hub.enqueue("SPHERE_TENSOR_CONTINUE",{
+            "export_job_id":original["id"],"destination":"history/second.csv",
+            "steps":1,"cell_axis":0,"lane_axis":1})
+        second=self.hub.run_one()
+        self.assertEqual(second["state"],"COMPLETED")
+        receipt=second["result"]
+        self.assertEqual(receipt["schema"],"OMEGA_SPARSE_TENSOR_CONTINUATION_R906")
+        self.assertEqual(receipt["sourceExportJobId"],original["id"])
+        self.assertEqual(receipt["sourceExportReceiptSha256"],first["result_sha256"])
+        self.assertEqual(receipt["sourceStateSha256"],first["result"]["canonicalFullStateSha256"])
+        self.assertEqual(receipt["tensor"]["totalMassAfter"],4096)
+        self.assertEqual(receipt["tensor"]["steps"],1)
+        self.assertNotEqual(receipt["canonicalFullStateSha256"],receipt["sourceStateSha256"])
+        self.assertFalse(receipt["gpuComputeProven"])
+        self.assertTrue((self.root/"history"/"second.csv").exists())
+        verify=self.hub.enqueue("SPHERE_TENSOR_VERIFY",{"export_job_id":resumed["id"]})
+        checked=self.hub.run_one()
+        self.assertEqual(checked["state"],"COMPLETED")
+        self.assertEqual(checked["result"]["fullStateSha256"],receipt["canonicalFullStateSha256"])
+        chained=self.hub.enqueue("SPHERE_TENSOR_CONTINUE",{
+            "export_job_id":resumed["id"],"destination":"history/third.csv",
+            "steps":1,"cell_axis":0,"lane_axis":1})
+        third=self.hub.run_one()
+        self.assertEqual(third["state"],"COMPLETED")
+        self.assertEqual(third["result"]["sourceExportJobId"],resumed["id"])
+        self.assertEqual(third["result"]["tensor"]["totalMassAfter"],4096)
+
+    def test_r906_nonintegral_checkpoint_and_tamper_refused(self):
+        source=self.hub.enqueue("SPHERE_TENSOR_EXPORT",{
+            "seeds":[{"cell":0,"lane":0,"mass":4}],"steps":1,
+            "cell_axis":0,"lane_axis":1,"destination":"small.csv"})
+        self.assertEqual(self.hub.run_one()["state"],"COMPLETED")
+        args={"export_job_id":source["id"],"destination":"no-output.csv",
+              "steps":1,"cell_axis":0,"lane_axis":1}
+        refused=self.hub.enqueue("SPHERE_TENSOR_CONTINUE",args)
+        held=self.hub.run_one()
+        self.assertEqual(held["state"],"HELD")
+        self.assertIn("R902_INTEGER_CONSERVATION_BOUND_HELD",held["error"])
+        self.assertFalse((self.root/"no-output.csv").exists())
+        file=self.root/"small.csv"
+        original=file.read_bytes()
+        try:
+            file.write_bytes(original+b"X")
+            tamper=self.hub.enqueue("SPHERE_TENSOR_CONTINUE",{
+                **args,"destination":"tampered-output.csv"})
+            held=self.hub.run_one()
+            self.assertEqual(held["state"],"HELD")
+            self.assertIn("R905_",held["error"])
+            self.assertFalse((self.root/"tampered-output.csv").exists())
+        finally:
+            file.write_bytes(original)
+
     def test_r905_refuses_arbitrary_reference_and_unrelated_job(self):
         for value in ("../escape",None,"g"*32):
             job=self.hub.enqueue("SPHERE_TENSOR_VERIFY",{"export_job_id":value})
