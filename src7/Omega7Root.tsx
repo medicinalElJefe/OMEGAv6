@@ -162,6 +162,13 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
   </aside>
 
   <main className='o7-main' data-native-route={state.selectedRoute&&isOmega7NativeRoute(state.selectedRoute)?state.selectedRoute:''}>
+  <section aria-label='All menu destinations' className='o7-route-directory-host' style={{margin:'8px 0',border:'1px solid rgba(180,205,240,.22)',borderRadius:10}}> 
+   <div className='o7-route-directory o7-route-directory-r913' aria-label='All tools in selected menu' style={{overflowY:'auto',maxHeight:'min(46vh,480px)',padding:'8px 10px',borderTop:'1px solid rgba(180,205,240,.22)'}}>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:8,padding:'4px 8px'}}><strong style={{fontSize:12}}>All {DOMAIN_LABEL[state.domain]} tools</strong><small>{domainCaps.length}</small></div>
+    {domainCaps.map(cap=><button key={cap.id} type='button' data-r912-menu-route={cap.legacyRoute} aria-current={state.selectedRoute===cap.legacyRoute?'page':undefined} onClick={()=>open(cap.legacyRoute)} style={{display:'flex',width:'100%',textAlign:'left',alignItems:'center',justifyContent:'space-between',gap:8,padding:'7px 9px',borderRadius:7,border:'none',background:state.selectedRoute===cap.legacyRoute?'rgba(80,180,190,.24)':'transparent',color:'inherit',cursor:'pointer'}}><span style={{fontSize:12,overflowWrap:'anywhere'}}>{cap.label}</span><small title={cap.availability==='READY'?'Source/runtime classified ready':'Capability requires additional proof'} style={{opacity:.72,fontSize:10}}>{cap.availability==='READY'?'Open':cap.availability==='HELD'?'Held':'Limited'}</small></button>)}
+   </div>
+  </section>
+
    <WorkflowSurfaceR538 onNavigate={open}/>
    <OmegaUserJourneyR536 route={state.selectedRoute} onOpen={open}/>
    {state.selectedRoute&&isOmega7NativeRoute(state.selectedRoute)?

@@ -35,7 +35,7 @@ const assets=[...closure].sort().map(file=>{
 const payload={
  schema:'OMEGA_BRIDGE_CONTINUITY_R499',
  state:process.env.GITHUB_ACTIONS==='true'?'EXACT_BUILD_GRAPH':'LOCAL_BUILD_GRAPH',
- sourceSha:String(process.env.GITHUB_SHA||'UNAVAILABLE'),
+ sourceSha:String(process.env.OMEGA_DESKTOP_SOURCE_SHA||process.env.GITHUB_SHA||'UNAVAILABLE'),
  promotedSha:String(process.env.OMEGA_PROMOTED_SHA||process.env.GITHUB_SHA||'UNAVAILABLE'),
  sequence:[
   'CANONICAL_OMEGA7',

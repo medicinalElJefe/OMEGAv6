@@ -48,7 +48,8 @@ test('R870 export reads persisted artifacts at click time, not a stale component
 
 test('R871 computed trace has visible bounded on-screen preview and retains full CSV download',()=>{
  assert.match(lib,/aria-label='Computed Atlas trace preview'/);
- assert.match(lib,/latestCsv\.csv\.split\(\/\\r\?\\n\/\)\.slice\(0,6\)\.join\('\\n'\)/);
+ assert.match(lib,/aria-label='Selected computed Atlas trace row'/);
+ assert.match(lib,/latestCsv\.csv\.split\(\/\\r\?\\n\/\)\[traceRow\]/);
  assert.match(lib,/Download computed trace CSV/);
  assert.match(lib,/new Blob\(\[latestCsv\.csv\]/);
 });
@@ -59,4 +60,103 @@ test('R877 user-selected traversal length is bounded before execution and contro
  assert.match(lib,/atlasLength\.trim\(\)===''\|\|!Number\.isInteger\(length\)\|\|length<2\|\|length>64/);
  assert.match(lib,/executeAtlasArtifactR865\(field,address,length\)/);
  assert.doesNotMatch(lib,/executeAtlasArtifactR865\(field,address,32\)/);
+});
+
+
+test('R885 overlapping Atlas compute/replay are refused synchronously before React state updates',()=>{
+ const source=fs.readFileSync('src7/workspaces/SharedArtifactLibraryR864.tsx','utf8');
+ assert.match(source,/const executionLease=useRef\(false\)/);
+ for(const handler of ['computeAndSave','recoverSavedTrace']){
+  const start=source.indexOf('const '+handler+'=async');
+  assert.ok(start>=0,handler+' exists');
+  const body=source.slice(start,source.indexOf('};',start)+2);
+  assert.match(body,/if\(executionLease\.current\)return;\s*executionLease\.current=true;setRunning\(true\)/);
+  assert.match(body,/finally\{executionLease\.current=false;setRunning\(false\)\}/);
+ }
+});
+
+
+test('R886 computed Atlas CSV supports bounded interactive row inspection across the full trace',()=>{
+ assert.match(lib,/const \[traceRow,setTraceRow\]=useState\(1\)/);
+ assert.match(lib,/id='r886-trace-row' type='number' min=\{1\} max=\{latestCsv\.rows\}/);
+ assert.match(lib,/Number\.isInteger\(value\)&&value>=1&&value<=latestCsv\.rows/);
+ assert.match(lib,/setTraceRow\(1\);setLatestCsv\(/);
+ assert.match(lib,/aria-label='Selected computed Atlas trace row'/);
+ assert.match(lib,/Download computed trace CSV/);
+});
+
+test('R888 Atlas SVG persistence uses bounded local-host POST and verified readback, retaining browser artifacts on failure',()=>{
+ assert.match(lib,/const persistToLocalHost=async\(saved:OmegaArtifactR862\)/);
+ assert.match(lib,/if\(executionLease\.current\)return/);
+ assert.match(lib,/new TextEncoder\(\)\.encode\(saved\.payload\)\.length>32768/);
+ assert.match(lib,/fetch\('\/__omega_local\/artifacts',\{method:'POST'/);
+ assert.match(lib,/fetch\('\/__omega_local\/artifacts\/'\+encodeURIComponent\(receipt\.id\)\)/);
+ assert.match(lib,/record\.content!==saved\.payload\|\|record\.contentSha256!==receipt\.contentSha256/);
+ assert.match(lib,/Browser artifact remains available/);
+ assert.match(lib,/finally\{executionLease\.current=false;setRunning\(false\)\}/);
+ assert.match(lib,/Persist SVG to local host/);
+});
+
+test('R889 saved host SVG can be recovered by receipt UUID with independent SHA-256 validation and bounded preview',()=>{
+ assert.match(lib,/const recoverHostArtifact=async\(selectedId\?:string\)=>/);
+ assert.match(lib,/fetch\('\/__omega_local\/artifacts\/'\+encodeURIComponent\(id\)\)/);
+ assert.match(lib,/record\.id!==id\|\|record\.kind!=='atlas_svg'/);
+ assert.match(lib,/crypto\.subtle\.digest\('SHA-256',new TextEncoder\(\)\.encode\(record\.content\)\)/);
+ assert.match(lib,/hash!==record\.contentSha256/);
+ assert.match(lib,/setRecoveredHostSvg\(\{id,content:record\.content\}\)/);
+ assert.match(lib,/aria-label='Recovered verified host SVG'/);
+ assert.match(lib,/Download recovered host SVG/);
+ assert.match(lib,/finally\{executionLease\.current=false;setRunning\(false\)\}/);
+});
+
+test('R890 persistence receipt must independently match SHA-256 of the actual submitted SVG',()=>{
+ assert.match(lib,/const localSha256=Array\.from\(new Uint8Array\(await crypto\.subtle\.digest\('SHA-256',new TextEncoder\(\)\.encode\(saved\.payload\)\)\)\)/);
+ assert.match(lib,/if\(localSha256!==receipt\.contentSha256\)throw Error\('Host persistence receipt does not match independently hashed SVG'\)/);
+});
+
+test('R892 saved host SVGs are recoverable in one click and persistence refreshes the discoverable index',()=>{
+ assert.match(lib,/const discoverHostArtifacts=async\(\)=>/);
+ assert.match(lib,/fetch\('\/__omega_local\/artifacts'\)/);
+ assert.match(lib,/setHostIndex\(items\)/);
+ assert.match(lib,/void discoverHostArtifacts\(\);setHostPersistence/);
+ assert.match(lib,/item\.kind==='atlas_csv'/);
+ assert.match(lib,/void recoverHostTrace\(item\.id\)/);
+ assert.match(lib,/void recoverHostArtifact\(item\.id\)/);
+ assert.match(lib,/const id=\(selectedId\?\?hostArtifactId\)\.trim\(\)\.toLowerCase\(\)/);
+});
+
+
+test('R894 local host artifact discovery restores both CSV and SVG with kind-specific verified recovery',()=>{
+ assert.match(lib,/item\.kind==='atlas_svg'\|\|item\.kind==='atlas_csv'/);
+ assert.match(lib,/setHostTraceId\(item\.id\);void recoverHostTrace\(item\.id\)/);
+ assert.match(lib,/setHostArtifactId\(item\.id\);void recoverHostArtifact\(item\.id\)/);
+ assert.match(lib,/void discoverHostArtifacts\(\);setHostTraceStatus/);
+ assert.match(lib,/hash!==record\.contentSha256/);
+});
+
+
+test('R905 executed route CSV is bounded, persisted to local host, read back and independently hashed',()=>{
+ assert.match(lib,/const persistRouteCsv=async\(\)=>/);
+ assert.match(lib,/exportAtlasRouteCsvR900\(field,routeTrace\)/);
+ assert.match(lib,/bytes\.length>32768/);
+ assert.match(lib,/kind:'atlas_csv',content:csv/);
+ assert.match(lib,/fetch\('\/__omega_local\/artifacts\/'\+encodeURIComponent\(receipt\.id\)\)/);
+ assert.match(lib,/crypto\.subtle\.digest\('SHA-256',bytes\)/);
+ assert.match(lib,/record\.id!==receipt\.id\|\|record\.kind!=='atlas_csv'\|\|record\.content!==csv\|\|record\.contentSha256!==digest\|\|receipt\.contentSha256!==digest/);
+ assert.match(lib,/Save route CSV to local host and verify/);
+ assert.match(lib,/setSavedRouteReceipt\(receipt\.id\)/);
+ assert.match(lib,/finally\{executionLease\.current=false;setRunning\(false\)\}/);
+});
+
+test('R908 computed route projection exports a standalone bounded DER SVG from executed route addresses',()=>{
+ assert.match(lib,/const downloadRouteProjectionSvg=\(\)=>/);
+ assert.match(lib,/addresses\.length<1\|\|addresses\.length>256/);
+ assert.match(lib,/addresses\.some\(a=>!Number\.isInteger\(a\)\|\|a<0\|\|a>=20736\)/);
+ assert.match(lib,/const points=addresses\.map/);
+ assert.match(lib,/const dots=addresses\.map/);
+ assert.match(lib,/xmlns="http:\/\/www\.w3\.org\/2000\/svg"/);
+ assert.match(lib,/DER model-derived address-phase projection/);
+ assert.match(lib,/new Blob\(\[svg\],\{type:'image\/svg\+xml;charset=utf-8'\}\)/);
+ assert.match(lib,/onClick=\{downloadRouteProjectionSvg\}/);
+ assert.match(lib,/Download deterministic route projection SVG/);
 });
