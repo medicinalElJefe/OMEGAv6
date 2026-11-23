@@ -28,6 +28,12 @@ assert.ok(!verify.includes(".Replace('"+windowsSlash+windowsSlash+"','/')"),'R89
 for(const key of ['OMEGA_WINDOWS_PACKAGE_FILES_SHA256_R897','Get-FileHash','SHA256','ReparsePoint','Package file count differs','Duplicate package manifest path'])
  assert.ok(verify.includes(key),'R897 manifest integrity guard missing: '+key);
 const workflow=readFileSync('.github/workflows/ci.yml','utf8');
+const powershellSyntaxGate=readFileSync('tests/r903-windows-powershell-syntax.ps1','utf8');
+for(const filename of ['Verify-OMEGA-Package.ps1','Start-OMEGA-Integrated.ps1','Install-OMEGA-Windows.ps1','Uninstall-OMEGA-Windows.ps1','r897-windows-packaged-hub-smoke.ps1'])
+ assert.ok(powershellSyntaxGate.includes(filename),'R903 missing Windows PowerShell AST syntax gate for: '+filename);
+assert.ok(workflow.includes('r903-windows-powershell-syntax.ps1'),
+ 'R903 parser gate must run before building the native Windows package');
+
 // PyInstaller cannot discover imports from the R884/R899 runtime-loaded
 // sibling source modules unless the compiled worker lists them explicitly.
 for(const dep of ['xml.etree.ElementTree','zipfile','urllib.request','urllib.error'])
