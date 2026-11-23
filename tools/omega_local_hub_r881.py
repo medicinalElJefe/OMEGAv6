@@ -172,7 +172,7 @@ class Hub:
             target.parent.mkdir(parents=True,exist_ok=True)
             try:
                 with target.open("x",newline="",encoding="utf-8") as stream:
-                    writer=csv.writer(stream,lineterminator="\\n")
+                    writer=csv.writer(stream,lineterminator="\n")
                     writer.writerow(("cell","lane","mass"))
                     for cell,lane,mass in rows: writer.writerow((cell,lane,mass))
                 file_receipt=receipt(target,self.root)
