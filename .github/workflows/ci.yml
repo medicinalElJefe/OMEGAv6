@@ -582,6 +582,11 @@ jobs:
         run: |
           & pwsh -NoProfile -NonInteractive -File .\tests\r897-windows-packaged-hub-smoke.ps1 -PackageRoot (Join-Path $env:RUNNER_TEMP 'OMEGA-Windows-Portable')
           if ($LASTEXITCODE -ne 0) { throw 'R897 packaged authenticated local worker smoke failed' }
+      - name: Prove compiled Windows EXE live local AI transport and durable receipt
+        shell: pwsh
+        run: |
+          & pwsh -NoProfile -NonInteractive -File .\tests\r899-windows-compiled-inference-smoke.ps1 -PackageRoot (Join-Path $env:RUNNER_TEMP 'OMEGA-Windows-Portable')
+          if ($LASTEXITCODE -ne 0) { throw 'R899 actual compiled Windows model inference and persisted receipt failed' }
       - name: Prove complete integrated Windows Studio plus compiled Hub lifecycle
         shell: pwsh
         run: |
