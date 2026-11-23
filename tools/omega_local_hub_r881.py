@@ -69,9 +69,15 @@ def safe_under(root: Path, relative: str, existing: bool = False) -> Path:
     if relative.startswith("/") or relative.startswith("\\") or ":" in relative or "\\" in relative: raise ValueError("ABSOLUTE_OR_WINDOWS_PATH_HELD")
     part = PurePosixPath(relative)
     if ".." in part.parts or part.is_absolute(): raise ValueError("PARENT_TRAVERSAL_HELD")
-    dest = (root / str(part)).resolve()
-    if not dest.is_relative_to(root): raise ValueError("OUTSIDE_APPROVED_ROOT_HELD")
-    if dest.is_relative_to(root / '.omega'): raise ValueError("HUB_INTERNAL_STATE_HELD")
+    # Reject the daemon's private namespace before filesystem resolution.
+    # On Windows the supplied root may have different path casing or an
+    # alternate canonical representation; never let that change the error
+    # class for a direct attempt to read .omega credentials/state.
+    if part.parts and part.parts[0] == ".omega": raise ValueError("HUB_INTERNAL_STATE_HELD")
+    canonical_root = root.resolve()
+    dest = (canonical_root / str(part)).resolve()
+    if not dest.is_relative_to(canonical_root): raise ValueError("OUTSIDE_APPROVED_ROOT_HELD")
+    if dest.is_relative_to(canonical_root / ".omega"): raise ValueError("HUB_INTERNAL_STATE_HELD")
     if existing and not dest.is_file(): raise ValueError("SOURCE_FILE_REQUIRED")
     return dest
 def receipt(path: Path, root: Path):
