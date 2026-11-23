@@ -33,7 +33,7 @@ def shift_axis(index: int, digit: int, delta: int = 1) -> int:
     return index + (((value + delta) % AXIS) - value) * base
 
 
-def _compute_sparse_r902(args: dict):
+def _compute_sparse_r902(args: dict, *, max_seeds: int = MAX_SEEDS):
     if not isinstance(args, dict) or set(args) - {"seeds", "steps", "cell_axis", "lane_axis"}:
         raise ValueError("R902_ARGUMENT_SCHEMA_HELD")
     steps = args.get("steps", 1)
@@ -44,7 +44,7 @@ def _compute_sparse_r902(args: dict):
         raise ValueError("R902_STEP_BOUND_HELD")
     if type(cell_axis) is not int or type(lane_axis) is not int or not 0 <= cell_axis < 4 or not 0 <= lane_axis < 4:
         raise ValueError("R902_AXIS_BOUND_HELD")
-    if not isinstance(seeds, list) or not 1 <= len(seeds) <= MAX_SEEDS:
+    if not isinstance(seeds, list) or not 1 <= len(seeds) <= max_seeds:
         raise ValueError("R902_SEEDS_REQUIRED_OR_LIMIT_HELD")
     initial = {}
     modulus = 4**steps
@@ -127,13 +127,13 @@ def sparse_tensor_run_r902(args: dict) -> dict:
     return result
 
 
-def sparse_tensor_rows_r904(args: dict):
+def sparse_tensor_rows_r904(args: dict, *, max_seeds: int = MAX_SEEDS):
     """Return exact R902 receipt plus every sorted nonzero component.
 
     This is an internal export seam. The authenticated Hub alone determines
     destination authority and durable artifact persistence.
     """
-    return _compute_sparse_r902(args)
+    return _compute_sparse_r902(args, max_seeds=max_seeds)
 
 
 if __name__ == "__main__":
