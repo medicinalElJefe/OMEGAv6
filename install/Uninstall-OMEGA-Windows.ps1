@@ -14,6 +14,23 @@ $drive=[System.IO.Path]::GetPathRoot($root)
 if (-not $drive -or $root -eq $drive.TrimEnd([char[]]@('\','/')) -or $root.StartsWith('\\')) {
     throw 'Uninstall refused for a drive root or network path'
 }
+# Refuse junctions in either the managed target or any parent path.
+$ancestor=Split-Path -Path $root -Parent
+while ($ancestor) {
+    $node=Get-Item -LiteralPath $ancestor -Force
+    if (($node.Attributes -band [System.IO.FileAttributes]::ReparsePoint) -ne 0) {
+        throw 'Uninstall path crosses a junction or symbolic link'
+    }
+    $next=Split-Path -Path $ancestor -Parent
+    if ($next -eq $ancestor) { break }
+    $ancestor=$next
+}
+if (Test-Path -LiteralPath $root) {
+    $target=Get-Item -LiteralPath $root -Force
+    if (($target.Attributes -band [System.IO.FileAttributes]::ReparsePoint) -ne 0) {
+        throw 'Uninstall target is a junction or symbolic link'
+    }
+}
 $marker=$root+'.omega-install.json'
 if (-not (Test-Path -LiteralPath $marker -PathType Leaf) -or
     -not (Test-Path -LiteralPath $root -PathType Container)) { throw 'No managed OMEGA7 installation at requested path' }
