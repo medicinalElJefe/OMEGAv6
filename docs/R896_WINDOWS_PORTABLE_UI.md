@@ -235,6 +235,37 @@ Windows CI now proves this operation by running it through the compiled
 Hub against an earlier exported file, checking exact hash agreement and
 then appending a byte to ensure the same verifier refuses the changed file.
 
+## R906 continue an exact sparse-state checkpoint
+
+A completed R904 export or an earlier R906 continuation can now be chosen
+from the original OMEGA7 Local / Edge Hub job history. Choose
+**Continue this verified state into a new CSV**. The Hub first revalidates
+the source's original durable SQLite receipt and **every row** of its
+complete CSV using R905, then uses all nonzero source components—not merely
+the UI preview—as input to the same R902 deterministic transition kernel.
+The new `SPHERE_TENSOR_CONTINUE` job accepts a source export job ID, a new
+relative CSV destination, 1–8 further steps and the declared base-12
+cell/lane axes. It computes, records and exports the full resulting sparse
+state, exact integer mass conservation, new full-state SHA-256 and file
+SHA-256. The receipt also pins the source job ID, original SQLite result
+SHA-256 and complete previous state SHA-256. The output can itself be
+verified through R905 and used in another continuation, preserving a
+machine-readable chain of local state transitions.
+
+All existing bounds remain: 20,736 cell and lane addresses, ≤100,000
+active nonzero components, positive integer-mass inputs ≤10^15 total,
+and no dense tensor allocation. Every loaded source component must be
+divisible by `4^additional_steps`; an unrepresentable fractional
+transition is **HELD**, never truncated or rounded. A tampered, missing or
+unverified source export, invalid job reference, unsafe destination,
+or preexisting file is refused before writing a new checkpoint. This
+continues an abstract deterministic state, not trained per-cell AI models,
+physical simulations, GPU work or R141 target-PC proof.
+
+Windows CI now executes a compiled worker checkpoint continuation,
+compares the next CSV hash and original source lineage, checks conservation
+and verifies the new checkpoint through the same R905 roundtrip reader.
+
 ## R897 full-package integrity guard
 
 `OPEN-OMEGA.cmd` now runs `Verify-OMEGA-Package.ps1` before opening the
