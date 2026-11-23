@@ -294,6 +294,31 @@ try {
        $repeatJob.error -notmatch 'R907_PROJECTION_TARGET_EXISTS_HELD'){
         throw 'R907 compiled SVG projection overwrote existing artwork'
     }
+    # R910 retrieve full R904 and chained R906 CSV bytes by exact original
+    # job receipt; unrelated jobs and missing token must fail closed.
+    foreach($row in @(
+        @{id=$exportId;file=$exportFile;hash=$exportResult.result.artifact.sha256},
+        @{id=$continueId;file=$continueFile;hash=$continueResult.result.artifact.sha256}
+    )){
+        $csvUri="http://127.0.0.1:$port/api/hub/artifacts/csv/$($row.id)"
+        $csvDownload=Join-Path $root ("r910-"+$row.id+".csv")
+        $csvResponse=Invoke-WebRequest -Uri $csvUri -Headers $headers -UseBasicParsing -OutFile $csvDownload -PassThru -TimeoutSec 5
+        if($csvResponse.StatusCode -ne 200 -or
+           $csvResponse.Headers['Content-Type'] -notmatch '^text/csv' -or
+           $csvResponse.Headers['X-Omega-Artifact-Sha256'] -ne $row.hash -or
+           $csvResponse.Headers['X-Content-Type-Options'] -ne 'nosniff' -or
+           (Get-FileHash -LiteralPath $csvDownload -Algorithm SHA256).Hash.ToLowerInvariant() -ne $row.hash){
+           throw 'R910 compiled Windows protected CSV bytes differ from original export receipt'
+        }
+        $noToken=$false
+        try{$null=Invoke-WebRequest -Uri $csvUri -UseBasicParsing -TimeoutSec 5}
+        catch{if($null -ne $_.Exception.Response -and [int]$_.Exception.Response.StatusCode -eq 401){$noToken=$true}}
+        if(-not $noToken){throw 'R910 exposed a full checkpoint without loopback authentication'}
+    }
+    $badCsv=$false
+    try{$null=Invoke-WebRequest -Uri "http://127.0.0.1:$port/api/hub/artifacts/csv/$renderId" -Headers $headers -UseBasicParsing -TimeoutSec 5}
+    catch{if($null -ne $_.Exception.Response -and [int]$_.Exception.Response.StatusCode -eq 403){$badCsv=$true}}
+    if(-not $badCsv){throw 'R910 incorrectly served an SVG job as CSV checkpoint'}
     # R909 original R907 SVG bytes must be downloadable only by an
     # authenticated loopback token, bound to the exact durable job receipt.
     $svgUri="http://127.0.0.1:$port/api/hub/artifacts/$renderId"
