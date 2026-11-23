@@ -348,6 +348,11 @@ try {
     if(-not $deniedChanged){throw 'R909 served SVG after its SHA-256 receipt diverged'}
     # A one-byte change must HELD, without overwriting the first export.
     [System.IO.File]::AppendAllText($exportFile, 'X')
+    $csvTamperDenied=$false
+    try{$null=Invoke-WebRequest -Uri ("http://127.0.0.1:$port/api/hub/artifacts/csv/"+$exportId) -Headers $headers -UseBasicParsing -TimeoutSec 5}
+    catch{if($null -ne $_.Exception.Response -and [int]$_.Exception.Response.StatusCode -eq 403){$csvTamperDenied=$true}}
+    if(-not $csvTamperDenied){throw 'R910 served a modified complete CSV checkpoint after source SHA drift'}
+
     $tamperQueued = Invoke-WebRequest -Uri "http://127.0.0.1:$port/api/hub/jobs" -Headers $headers -UseBasicParsing -Method Post -ContentType 'application/json' -Body $verifyPayload -TimeoutSec 5
     $tamperId = ($tamperQueued.Content | ConvertFrom-Json).job.id
     $tamperResult = $null
