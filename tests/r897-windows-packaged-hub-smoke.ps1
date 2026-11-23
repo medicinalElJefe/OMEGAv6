@@ -130,6 +130,48 @@ try {
     if ($replayReceipt.state -ne 'MATCH' -or $replayReceipt.ok -ne $true) {
         throw 'R902 packaged tensor replay did not reproduce its full state receipt'
     }
+    # R904 full sparse state CSV must be written by the *compiled* EXE,
+    # with both exact canonical full-state and independent artifact hashes.
+    $exportPayload = '{"operation":"SPHERE_TENSOR_EXPORT","args":{"seeds":[{"cell":0,"lane":0,"mass":4096}],"steps":4,"cell_axis":0,"lane_axis":1,"destination":"complete-tensor.csv"}}'
+    $exportQueued = Invoke-WebRequest -Uri "http://127.0.0.1:$port/api/hub/jobs" -Headers $headers -UseBasicParsing -Method Post -ContentType 'application/json' -Body $exportPayload -TimeoutSec 5
+    $exportId = ($exportQueued.Content | ConvertFrom-Json).job.id
+    if (-not $exportId) { throw 'R904 packaged full-state CSV export did not queue' }
+    $exportResult = $null
+    for ($poll=0;$poll -lt 100;$poll++) {
+        $read = Invoke-WebRequest -Uri ("http://127.0.0.1:$port/api/hub/jobs/" + $exportId) -Headers $headers -UseBasicParsing -TimeoutSec 5
+        $exportResult = ($read.Content | ConvertFrom-Json).job
+        if ($exportResult.state -in @('COMPLETED','FAILED','HELD')) { break }
+        Start-Sleep -Milliseconds 100
+    }
+    $exportFile = Join-Path $root 'complete-tensor.csv'
+    if ($null -eq $exportResult -or $exportResult.state -ne 'COMPLETED' -or
+        $exportResult.result.schema -ne 'OMEGA_SPARSE_TENSOR_EXPORT_R904' -or
+        $exportResult.result.canonicalFullStateSha256 -ne $tensorResult.result.fullStateSha256 -or
+        $exportResult.result.exportedRows -ne $tensorResult.result.activeComponents -or
+        -not (Test-Path -LiteralPath $exportFile -PathType Leaf) -or
+        $exportResult.result.artifact.sha256 -ne (Get-FileHash -LiteralPath $exportFile -Algorithm SHA256).Hash.ToLowerInvariant()) {
+        throw "R904 packaged complete CSV state or file SHA receipt failed: $($exportResult.state) $($exportResult.error)"
+    }
+    $csvRows = @(Import-Csv -LiteralPath $exportFile)
+    $sumMass = 0L
+    foreach ($entry in $csvRows) { $sumMass += [long]$entry.mass }
+    if ($csvRows.Count -ne $tensorResult.result.activeComponents -or $sumMass -ne 4096) {
+        throw 'R904 packaged CSV does not contain the complete conserved tensor state'
+    }
+    # Fail-close: no replacement of an existing full-state artifact.
+    $second = Invoke-WebRequest -Uri "http://127.0.0.1:$port/api/hub/jobs" -Headers $headers -UseBasicParsing -Method Post -ContentType 'application/json' -Body $exportPayload -TimeoutSec 5
+    $secondId = ($second.Content | ConvertFrom-Json).job.id
+    $secondResult = $null
+    for ($poll=0;$poll -lt 100;$poll++) {
+        $read = Invoke-WebRequest -Uri ("http://127.0.0.1:$port/api/hub/jobs/" + $secondId) -Headers $headers -UseBasicParsing -TimeoutSec 5
+        $secondResult = ($read.Content | ConvertFrom-Json).job
+        if ($secondResult.state -in @('COMPLETED','FAILED','HELD')) { break }
+        Start-Sleep -Milliseconds 100
+    }
+    if ($null -eq $secondResult -or $secondResult.state -ne 'HELD' -or
+        $secondResult.error -notmatch 'R904_EXPORT_TARGET_EXISTS_HELD') {
+        throw 'R904 permitted overwriting complete sparse state artifact'
+    }
     Write-Host 'R902 PACKAGED WINDOWS HUB EXE PASS: authenticated bounded tensor execution, exact mass conservation, full-state SHA-256, replay MATCH. CI RUNNER ONLY.'
 } finally {
     if ($null -ne $process -and -not $process.HasExited) { Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue }
