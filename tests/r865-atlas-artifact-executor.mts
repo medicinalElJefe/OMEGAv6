@@ -423,7 +423,7 @@ test('R965 exports inspected Atlas fields as provenance-labelled CSV',()=>{
  assert.ok(handler.includes('model_only'));
  assert.ok(handler.includes('text/csv'));
  assert.ok(ui.includes('onClick={downloadInspectedAtlasCsvR965}>Download inspected fields CSV'));
- assert.ok(ui.includes("aria-label='Download inspected Atlas fields CSV' disabled={running||inspectedAddress===null||inspectedValues.length===0}"));
+ assert.ok(ui.includes("aria-label='Download inspected Atlas fields CSV' disabled={running||inspectedAddress===null||inspectedValues.length===0||(localTurnResult!==null&&localTurnResult.trace[selectedExecutionStep]?.address!==inspectedAddress)}"));
  assert.ok(!handler.includes('fetch(')&&!handler.includes('executeLocalTurns('));
 });
 
@@ -442,7 +442,7 @@ test('R967 clipboard exposes actual computed inspection values with explicit per
  assert.ok(handler.includes(String.raw`join('\n')+'\n'`),'newline-delimited rows');
  assert.match(handler,/catch\(e\)\{setError\('Atlas clipboard copy rejected:/);
  assert.doesNotMatch(handler,/fetch\(|executeLocalTurns\(/);
- assert.ok(ui.includes("aria-label='Copy inspected Atlas fields' disabled={running||inspectedAddress===null||inspectedValues.length===0}"));
+ assert.ok(ui.includes("aria-label='Copy inspected Atlas fields' disabled={running||inspectedAddress===null||inspectedValues.length===0||(localTurnResult!==null&&localTurnResult.trace[selectedExecutionStep]?.address!==inspectedAddress)}"));
  assert.ok(ui.includes('onClick={()=>{void copyInspectedAtlasFieldsR967()}}>Copy inspected fields'));
 });
 
