@@ -53,7 +53,7 @@ def load_local_inference_adapter_r899():
     return adapter
 
 READ_ONLY_REPLAY = frozenset({"HASH_TREE", "CSV_STATS", "VERIFY_LEDGER_SPLIT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_VERIFY"})
-OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "LOCAL_INFER", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_EXPORT", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_CONTINUE", "RESIDUAL_RESTORE"})
+OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "LOCAL_INFER", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_EXPORT", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_CONTINUE", "SPHERE_TENSOR_RENDER", "RESIDUAL_RESTORE"})
 STATUS = frozenset({"QUEUED", "WAIT_EVENT", "RUNNING", "COMPLETED", "FAILED", "HELD", "CANCELLED"})
 def utc_ms(): return int(time.time() * 1000)
 def sha_file(path: Path) -> str:
@@ -181,6 +181,40 @@ class Hub:
         if operation=="RESIDUAL_RESTORE": raise ValueError("R195_RESIDUAL_SOURCE_AND_AUTHORITY_REQUIRED")
         if operation=="LOCAL_INFER":
             return load_local_inference_adapter_r899().infer_local_r899(args)
+        if operation=="SPHERE_TENSOR_RENDER":
+            import importlib.util
+            if not isinstance(args,dict) or set(args)!={"export_job_id","destination"}:
+                raise ValueError("R907_PROJECTION_ARGUMENT_SCHEMA_HELD")
+            destination=args.get("destination")
+            if not isinstance(destination,str) or not destination.lower().endswith(".svg"):
+                raise ValueError("R907_NEW_SVG_DESTINATION_REQUIRED_HELD")
+            prior, verified_rows=self.verified_sparse_export(args.get("export_job_id"),include_rows=True)
+            verified, rows=verified_rows
+            module_path=Path(__file__).resolve().with_name("omega_sparse_projection_r907.py")
+            if not module_path.is_file(): raise ValueError("R907_PROJECTION_MODULE_REQUIRED_HELD")
+            spec=importlib.util.spec_from_file_location("_omega_sparse_projection_r907",module_path)
+            module=importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            svg,projected=module.project_verified_rows_r907(rows,verified["fullStateSha256"])
+            if projected["totalMass"]!=verified["totalMass"]:
+                raise ValueError("R907_MASS_CONSERVATION_HELD")
+            target=safe_under(self.root,destination,False)
+            if target.exists(): raise ValueError("R907_PROJECTION_TARGET_EXISTS_HELD")
+            target.parent.mkdir(parents=True,exist_ok=True)
+            try:
+                with target.open("xb") as stream:stream.write(svg)
+                file_receipt=receipt(target,self.root)
+            except BaseException:
+                try: target.unlink(missing_ok=True)
+                except OSError: pass
+                raise
+            return {"schema":"OMEGA_SPARSE_PROJECTION_ARTIFACT_R907",
+                    "state":"EXACT_VERIFIED_CELL_PROJECTION_SAVED",
+                    "projection":projected,"artifact":file_receipt,
+                    "sourceExportJobId":prior["id"],
+                    "sourceExportReceiptSha256":prior["result_sha256"],
+                    "sourceFullStateSha256":verified["fullStateSha256"],
+                    "physicalPcAccepted":False,"gpuComputeProven":False}
         if operation=="SPHERE_TENSOR_VERIFY":
             if not isinstance(args,dict) or set(args)!={"export_job_id"}:
                 raise ValueError("R905_EXPORT_JOB_ID_REQUIRED_HELD")
