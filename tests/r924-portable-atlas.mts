@@ -150,6 +150,6 @@ test('R964 selected Atlas inspection produces downloadable computed fields with 
  assert.match(body,/JSON\.stringify\(payload,null,2\)/);
  assert.match(body,/link\.click\(\)/);
  const control=ui.slice(ui.indexOf("aria-label='Download inspected Atlas fields JSON'")-25);
- assert.match(control,/disabled=\{running\|\|inspectedAddress===null\|\|inspectedValues\.length===0\}/);
+ assert.match(control,/disabled=\{running\|\|inspectedAddress===null\|\|inspectedValues\.length===0\|\|\(localTurnResult!==null&&localTurnResult\.trace\[selectedExecutionStep\]\?\.address!==inspectedAddress\)\}/,'JSON export must refuse stale inspection for another selected replay address');
  assert.match(control,/onClick=\{downloadInspectedAtlasJsonR964\}/);
 });
