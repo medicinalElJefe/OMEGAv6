@@ -129,6 +129,31 @@ class LocalHubTests(unittest.TestCase):
         restored=self.hub.enqueue("SPHERE_TENSOR_VERIFY",{"export_job_id":export_job["id"]})
         self.assertEqual(self.hub.run_one()["state"],"COMPLETED")
 
+    def test_r909_authenticated_artifact_contract_original_svg_only(self):
+        original=self.hub.enqueue("SPHERE_TENSOR_EXPORT",{
+            "seeds":[{"cell":0,"lane":0,"mass":4096}],"steps":4,
+            "cell_axis":0,"lane_axis":1,"destination":"r909-source.csv"})
+        self.assertEqual(self.hub.run_one()["state"],"COMPLETED")
+        rendering=self.hub.enqueue("SPHERE_TENSOR_RENDER",{
+            "export_job_id":original["id"],"destination":"art/r909.svg"})
+        rendered=self.hub.run_one()
+        self.assertEqual(rendered["state"],"COMPLETED")
+        raw,digest=self.hub.verified_svg_artifact(rendering["id"])
+        self.assertTrue(raw.startswith(b'<svg xmlns="http://www.w3.org/2000/svg"'))
+        self.assertEqual(digest,rendered["result"]["artifact"]["sha256"])
+        self.assertEqual(hubmod.sha_bytes(raw),digest)
+        for invalid in (original["id"],"f"*32,"garbage","../r909.svg"):
+            with self.subTest(job=invalid),self.assertRaisesRegex(ValueError,"R909_"):
+                self.hub.verified_svg_artifact(invalid)
+        art=self.root/"art"/"r909.svg"
+        original_bytes=art.read_bytes()
+        try:
+            art.write_bytes(original_bytes+b'X')
+            with self.assertRaisesRegex(ValueError,"R909_SVG_ARTIFACT_INTEGRITY_HELD"):
+                self.hub.verified_svg_artifact(rendering["id"])
+        finally:art.write_bytes(original_bytes)
+        self.assertEqual(self.hub.verified_svg_artifact(rendering["id"])[1],digest)
+
     def test_r907_projection_from_verified_checkpoint_and_tamper_hold(self):
         import xml.etree.ElementTree as ET
         export=self.hub.enqueue("SPHERE_TENSOR_EXPORT",{
