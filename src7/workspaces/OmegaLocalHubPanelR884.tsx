@@ -123,6 +123,9 @@ export default function OmegaLocalHubPanelR884(){
   });
  };
  const chosen=jobs.find(x=>x.id===selected);
+ const tensorResult=chosen?.operation==='SPHERE_TENSOR_STEP'&&chosen.state==='COMPLETED'&&chosen.result&&typeof chosen.result==='object'
+  ?chosen.result as Record<string,unknown>:null;
+ const tensorPreview=Array.isArray(tensorResult?.preview)?(tensorResult.preview as {cell:number;lane:number;mass:number}[]).slice(0,32):[];
  return <section data-r884-local-hub='LOOPBACK_INTEGRATION_ONLY' style={surface}>
    <header><h2>Ω Local / Edge Automation Hub</h2><p>Persistent local jobs and byte receipts. Local daemon runs on your own computer, not in the browser. An authenticated loopback result is not R141 host acceptance.</p></header>
    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(210px,1fr))',gap:14}}>
@@ -170,6 +173,19 @@ export default function OmegaLocalHubPanelR884(){
     {chosen&&<div style={{marginTop:10}}>
      <strong>Selected job: {chosen.id}</strong>
      <div style={{display:'flex',gap:8,margin:'8px 0'}}><button type='button' disabled={busy||!['QUEUED','WAIT_EVENT'].includes(chosen.state)} onClick={()=>action('cancel',chosen.id)} style={button}>Cancel pending</button><button type='button' disabled={busy||chosen.state!=='COMPLETED'} onClick={()=>action('replay',chosen.id)} style={button}>Verify replay</button></div>
+     {tensorResult&&tensorResult.schema==='OMEGA_IMPLICIT_CELL_LANE_TENSOR_R902'&&<div style={{...surface,margin:'8px 0'}}>
+      <h4>R902 nested-state execution receipt</h4>
+      <p><strong>20,736 cells × 20,736 lanes</strong> · {String(tensorResult.activeComponents)} nonzero components · {String(tensorResult.steps)} transitions</p>
+      <p>Conserved integer mass: <strong>{String(tensorResult.totalMassBefore)} → {String(tensorResult.totalMassAfter)}</strong> · {tensorResult.conservationExact===true?'EXACT MATCH':'NOT VERIFIED'}</p>
+      <p><small>Full sparse-state SHA-256: <code style={{overflowWrap:'anywhere'}}>{String(tensorResult.fullStateSha256)}</code></small></p>
+      <div style={{overflowX:'auto',maxHeight:220,overflowY:'auto'}}>
+       <table style={{width:'100%',borderCollapse:'collapse',fontVariantNumeric:'tabular-nums'}}><thead><tr><th style={{textAlign:'left'}}>Cell</th><th style={{textAlign:'left'}}>State lane</th><th style={{textAlign:'right'}}>Mass</th></tr></thead>
+        <tbody>{tensorPreview.map((entry,i)=><tr key={i}><td>{entry.cell}</td><td>{entry.lane}</td><td style={{textAlign:'right'}}>{entry.mass}</td></tr>)}</tbody>
+       </table>
+      </div>
+      {tensorResult.previewTruncated===true&&<small>Only 32 sorted components are shown; SHA-256 covers every nonzero component.</small>}
+      <p><small>Implicit sparse computation, not 20,736 trained AI models or verified GPU work.</small></p>
+     </div>}
      <details><summary>Source result / history</summary><pre style={{maxHeight:320,overflow:'auto',fontSize:12}}>{JSON.stringify(chosen,null,2)}</pre></details>
     </div>}
    </div>
