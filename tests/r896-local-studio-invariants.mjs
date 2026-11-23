@@ -63,6 +63,16 @@ assert.ok(workflow.includes('r900-windows-install-lifecycle-smoke.ps1'),
 const sparseTensor=readFileSync('tools/omega_sparse_tensor_r902.py','utf8');
 const sparseHub=readFileSync('tools/omega_local_hub_r881.py','utf8');
 const sparseWindows=readFileSync('tests/r897-windows-packaged-hub-smoke.ps1','utf8');
+// The R902 Windows smoke uses PowerShell regexes ending in a literal '$'.
+// Keep that literal intact; a broken quote/parenthesis can otherwise make
+// a queued Windows release job fail before any worker exercise.
+assert.ok(sparseWindows.includes("'^[a-f0-9]{64}$'"),
+ 'R902 Windows SHA-256 anchored match must not lose its literal dollar anchor');
+assert.equal(sparseWindows.split('} finally {').length-1,1,
+ 'R902 Windows smoke must keep one complete process-cleanup finally block');
+assert.ok(sparseWindows.trimEnd().endsWith('}'),
+ 'R902 Windows smoke missing final cleanup closure');
+
 for(const needle of ['DIMENSIONS = AXIS**4','TOTAL_POSSIBLE = DIMENSIONS**2','MAX_NONZERO','conservationExact','fullStateSha256','denseTensorAllocated','gpuComputeProven'])
  assert.ok(sparseTensor.includes(needle),'R902 implicit 20,736 per-cell operator missing: '+needle);
 for(const needle of ['SPHERE_TENSOR_STEP','omega_sparse_tensor_r902.py'])
