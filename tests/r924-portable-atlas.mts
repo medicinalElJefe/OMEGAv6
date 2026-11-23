@@ -137,3 +137,19 @@ test('R963 offline Atlas cannot offer a verified-host JSON download control',()=
  const handler=ui.slice(ui.indexOf('const downloadLocalTurnJson='),ui.indexOf('const downloadPortableAtlasR924='));
  assert.match(handler,/if\(localTurnResult\.artifact\.id==='offline-model-derived'\)/,'handler retains fail-closed defense');
 });
+
+test('R964 selected Atlas inspection produces downloadable computed fields with model-only provenance',()=>{
+ const ui=readFileSync(new URL('../src7/workspaces/SharedArtifactLibraryR864.tsx',import.meta.url),'utf8');
+ const start=ui.indexOf('const downloadInspectedAtlasJsonR964=');
+ const end=ui.indexOf('const exportCompleteAtlas=',start);
+ assert.ok(start>=0&&end>start,'inspection export handler exists');
+ const body=ui.slice(start,end);
+ assert.match(body,/inspectedAddress===null\|\|inspectedValues\.length===0/);
+ assert.match(body,/schema:'OMEGA_ATLAS_INSPECTED_FIELDS_R964_V1'/);
+ assert.match(body,/provenance:'BROWSER_LOCAL_COMPUTED',modelOnly:true,address:inspectedAddress,fields:inspectedValues/);
+ assert.match(body,/JSON\.stringify\(payload,null,2\)/);
+ assert.match(body,/link\.click\(\)/);
+ const control=ui.slice(ui.indexOf("aria-label='Download inspected Atlas fields JSON'")-25);
+ assert.match(control,/disabled=\{running\|\|inspectedAddress===null\|\|inspectedValues\.length===0\}/);
+ assert.match(control,/onClick=\{downloadInspectedAtlasJsonR964\}/);
+});
