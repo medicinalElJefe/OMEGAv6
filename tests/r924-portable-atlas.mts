@@ -205,3 +205,22 @@ test('R976 last recorded revisit navigation selects the final repeated address a
  assert.match(control,/if\(index<0\)return/);
  assert.match(control,/setExecutionPlaying\(false\);setSelectedExecutionStep\(index\);setInspectedAddress\(null\);setInspectedValues\(\[\]\)/);
 });
+
+test('R977 recorded traversal summary JSON exports actual counts and explicit model-only provenance',()=>{
+ const ui=readFileSync(new URL('../src7/workspaces/SharedArtifactLibraryR864.tsx',import.meta.url),'utf8');
+ const start=ui.indexOf('const downloadTraversalSummaryR977=');const end=ui.indexOf('const downloadInspectedAtlasJsonR964=',start);
+ assert.ok(start>=0&&end>start,'summary artifact handler exists');
+ const handler=ui.slice(start,end);
+ assert.match(handler,/if\(executionLease\.current\|\|!localTurnResult\|\|localTurnResult\.trace\.length===0\)return/);
+ assert.match(handler,/new Set\(trace\.map\(state=>state\.address\)\)\.size/);
+ assert.match(handler,/state\.address!==trace\[i\]\.address/);
+ assert.match(handler,/revisits:trace\.length-uniqueAddresses/);
+ assert.match(handler,/coveragePercent:Number\(\(100\*uniqueAddresses\/20736\)\.toFixed\(3\)\)/);
+ assert.match(handler,/schema:'OMEGA_ATLAS_RECORDED_TRAVERSAL_SUMMARY_R977_V1'/);
+ assert.match(handler,/provenance:'RECORDED_MODEL_TRACE',modelOnly:true/);
+ assert.match(handler,/firstAddress:trace\[0\]\.address,lastAddress:trace\[trace\.length-1\]\.address/);
+ assert.match(handler,/not proof of full 20,736-state coverage/);
+ assert.match(handler,/JSON\.stringify\(payload,null,2\)/);
+ assert.match(handler,/link\.click\(\)/);
+ assert.match(ui,/aria-label='Download recorded Atlas traversal summary JSON' disabled=\{running\|\|localTurnResult\.trace\.length===0\} onClick=\{downloadTraversalSummaryR977\}/);
+});
