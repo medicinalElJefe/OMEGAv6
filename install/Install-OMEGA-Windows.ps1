@@ -51,6 +51,16 @@ try {
             -not $previous.root.Equals($full,[System.StringComparison]::OrdinalIgnoreCase)) {
             throw 'Existing target lacks matching managed installation authority'
         }
+        # A management marker alone does not permit deleting added or changed
+        # files during upgrade; validate *all* old package bytes before backup.
+        $oldVerifier = Join-Path $full 'Verify-OMEGA-Package.ps1'
+        if (-not (Test-Path -LiteralPath $oldVerifier -PathType Leaf)) {
+            throw 'Existing managed installation verifier missing'
+        }
+        & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $oldVerifier -PackageRoot $full
+        if ($LASTEXITCODE -ne 0) {
+            throw 'Existing managed installation changed; preserving unknown files instead of replacing'
+        }
     }
     $stage = $full + '.stage-' + [guid]::NewGuid().ToString('N')
     New-Item -ItemType Directory -Path $stage -ErrorAction Stop | Out-Null
