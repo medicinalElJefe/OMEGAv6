@@ -33,6 +33,14 @@ class LocalHubTests(unittest.TestCase):
         self.assertEqual(self.hub.run_one()["state"],"HELD")
         self.assertIsNone((self.root/".omega"/"overwrite.bin").exists() or None)
         self.assertEqual(self.hub.get(copy["id"])["state"],"HELD")
+    def test_private_namespace_rejected_before_windows_path_normalization(self):
+        for target in (".omega", ".omega/hub-r881.token", ".omega/jobs.sqlite"):
+            with self.subTest(target=target), self.assertRaisesRegex(ValueError, "HUB_INTERNAL_STATE_HELD"):
+                hubmod.safe_under(self.root, target, False)
+        alternate_root = self.root / "data" / ".."
+        with self.assertRaisesRegex(ValueError, "HUB_INTERNAL_STATE_HELD"):
+            hubmod.safe_under(alternate_root, ".omega/hub-r881.token", False)
+
     def test_hub_db_location_must_be_private(self):
         with self.assertRaisesRegex(ValueError,"DB_MUST_RESIDE_IN_PRIVATE_HUB_DIR"):
             hubmod.Hub(self.root,self.root/"data"/"database.sqlite")
