@@ -82,6 +82,9 @@ for(const line of ['127.0.0.1','11434','/api/tags','/api/generate','R899_EXECUTI
 assert.ok(workflow.includes('r899-windows-compiled-inference-smoke.ps1'),
  'R899 native Windows end-to-end inference test must run in release CI');
 const localHubPanel=readFileSync('src7/workspaces/OmegaLocalHubPanelR884.tsx','utf8');
+for(const marker of ['SPHERE_TENSOR_STEP','tensorResult','conservationExact','fullStateSha256','tensorPreview'])
+ assert.ok(localHubPanel.includes(marker),'R902 interactive tensor operator or state receipt inspector missing: '+marker);
+
 for(const marker of ['importLocalToken','file.name!==\'hub-r881.token\'','file.size>512','file.text()','setToken(text)','Load local token file','Nothing is uploaded'])
  assert.ok(localHubPanel.includes(marker),'R898 governed local token file intake missing: '+marker);
 assert.ok(!localHubPanel.includes('localStorage.setItem')&&!localHubPanel.includes('sessionStorage.setItem'),
