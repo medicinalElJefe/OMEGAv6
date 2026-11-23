@@ -515,6 +515,11 @@ jobs:
         run: |
           python -m unittest discover -s tests -p test_omega_local_inference_r899.py -v
           if ($LASTEXITCODE -ne 0) { throw 'R899 local inference source and loopback refusal failed' }
+      - name: R903 fail-closed PowerShell syntax for packaged Windows operator paths
+        shell: pwsh
+        run: |
+          & pwsh -NoProfile -NonInteractive -File .\tests\r903-windows-powershell-syntax.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'R903 Windows packaged PowerShell syntax held' }
       - name: Prove exact 20,736 by 20,736 sparse tensor execution and refusal
         shell: pwsh
         run: |
