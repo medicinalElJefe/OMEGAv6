@@ -242,6 +242,50 @@ try {
        $nextResult.result.fullStateSha256 -ne $continueResult.result.canonicalFullStateSha256){
         throw 'R906 continued native checkpoint could not be independently roundtrip verified'
     }
+    # R907 the same compiled Windows Hub must render a genuine SVG from the
+    # independently verified full 20,736D cell-state checkpoint.
+    $renderPayload = @{operation='SPHERE_TENSOR_RENDER';args=@{
+        export_job_id=$continueId;destination='verified-cell-projection.svg'
+    }} | ConvertTo-Json -Compress -Depth 4
+    $renderQueued=Invoke-WebRequest -Uri "http://127.0.0.1:$port/api/hub/jobs" -Headers $headers -UseBasicParsing -Method Post -ContentType 'application/json' -Body $renderPayload -TimeoutSec 5
+    $renderId=($renderQueued.Content|ConvertFrom-Json).job.id
+    if(-not $renderId){throw 'R907 native SVG projection did not queue'}
+    $renderResult=$null
+    for($poll=0;$poll -lt 100;$poll++){
+        $read=Invoke-WebRequest -Uri ("http://127.0.0.1:$port/api/hub/jobs/" + $renderId) -Headers $headers -UseBasicParsing -TimeoutSec 5
+        $renderResult=($read.Content|ConvertFrom-Json).job
+        if($renderResult.state -in @('COMPLETED','FAILED','HELD')){break}
+        Start-Sleep -Milliseconds 100
+    }
+    $svgFile=Join-Path $root 'verified-cell-projection.svg'
+    if($null -eq $renderResult -or $renderResult.state -ne 'COMPLETED' -or
+       $renderResult.result.schema -ne 'OMEGA_SPARSE_PROJECTION_ARTIFACT_R907' -or
+       $renderResult.result.projection.addressableCells -ne 20736 -or
+       $renderResult.result.projection.totalMass -ne 4096 -or
+       $renderResult.result.sourceExportJobId -ne $continueId -or
+       $renderResult.result.sourceFullStateSha256 -ne $continueResult.result.canonicalFullStateSha256 -or
+       -not(Test-Path -LiteralPath $svgFile -PathType Leaf) -or
+       $renderResult.result.artifact.sha256 -ne (Get-FileHash -LiteralPath $svgFile -Algorithm SHA256).Hash.ToLowerInvariant()){
+        throw "R907 compiled Windows projection integrity failed: $($renderResult.state) $($renderResult.error)"
+    }
+    [xml]$svgDocument=Get-Content -LiteralPath $svgFile -Raw
+    if($svgDocument.DocumentElement.LocalName -ne 'svg'){
+        throw 'R907 generated file is not a parseable SVG'
+    }
+    # The same path cannot be overwritten by an export retry.
+    $repeat=Invoke-WebRequest -Uri "http://127.0.0.1:$port/api/hub/jobs" -Headers $headers -UseBasicParsing -Method Post -ContentType 'application/json' -Body $renderPayload -TimeoutSec 5
+    $repeatId=($repeat.Content|ConvertFrom-Json).job.id
+    $repeatJob=$null
+    for($poll=0;$poll -lt 100;$poll++){
+        $read=Invoke-WebRequest -Uri ("http://127.0.0.1:$port/api/hub/jobs/" + $repeatId) -Headers $headers -UseBasicParsing -TimeoutSec 5
+        $repeatJob=($read.Content|ConvertFrom-Json).job
+        if($repeatJob.state -in @('COMPLETED','FAILED','HELD')){break}
+        Start-Sleep -Milliseconds 100
+    }
+    if($null -eq $repeatJob -or $repeatJob.state -ne 'HELD' -or
+       $repeatJob.error -notmatch 'R907_PROJECTION_TARGET_EXISTS_HELD'){
+        throw 'R907 compiled SVG projection overwrote existing artwork'
+    }
     # A one-byte change must HELD, without overwriting the first export.
     [System.IO.File]::AppendAllText($exportFile, 'X')
     $tamperQueued = Invoke-WebRequest -Uri "http://127.0.0.1:$port/api/hub/jobs" -Headers $headers -UseBasicParsing -Method Post -ContentType 'application/json' -Body $verifyPayload -TimeoutSec 5
