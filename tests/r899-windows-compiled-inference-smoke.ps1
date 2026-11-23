@@ -45,7 +45,7 @@ try {
         }
         Start-Sleep -Milliseconds 100
     }
-    if(-not $token -or $status.schema -ne 'OMEGA_LOCAL_EDGE_HUB_R881'){throw 'Compiled Hub authentication failed'}
+    if(-not $token -or $null -eq $status -or $status.schema -ne 'OMEGA_LOCAL_EDGE_HUB_R881'){throw 'Compiled Hub authentication failed'}
     $headers=@{'X-Omega-Local-Token'=$token;'Origin'='http://127.0.0.1:49152'}
     $models=Invoke-RestMethod -Uri ($endpoint+'/api/hub/models') -Headers $headers -TimeoutSec 5 -ErrorAction Stop
     if($models.schema -ne 'OMEGA_LOCAL_MODELS_R899' -or
