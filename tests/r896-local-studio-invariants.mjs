@@ -71,6 +71,12 @@ for(const marker of ['verify_sparse_export_r905','R905_NONCANONICAL_ROW_HELD','R
  assert.ok(roundtripR905.includes(marker),'R905 exact CSV state roundtrip verifier missing: '+marker);
 assert.ok(workflow.includes('omega_sparse_verify_r905.py'),
  'R905 roundtrip verifier missing from compiled Windows worker');
+const projectionGpuR908=readFileSync('src7/workspaces/omegaR908GpuProjection.ts','utf8');
+for(const marker of ['executeR908GpuProjection','cpuProjectionReferenceR908','compareProjectionR908','dispatchWorkgroups(324)','readback.mapAsync','deviceExecutionProved','physicalPcAccepted:false','nativePcAccepted:false','canonicalStateMutated:false']){
+ assert.ok(projectionGpuR908.includes(marker),'R908 real browser GPU compute/readback boundary missing: '+marker);
+}
+assert.ok(workflow.includes('r908-gpu-projection-cpu-parity.mts'),
+ 'R908 exact GPU integer CPU reference and unavailable hardware gate missing from Windows CI');
 const projectionR907=readFileSync('tools/omega_sparse_projection_r907.py','utf8');
 for(const marker of ['address_xy_r907','project_verified_rows_r907','BIJECTIVE_BASE12_D0_D1_D2_D3_144X144','totalMass','sourceFullStateSha256','gpuComputeProven','projectionGrid','GRID_ALPHABET'])
  assert.ok(projectionR907.includes(marker),'R907 verified 20736-cell true address projection missing: '+marker);
@@ -125,7 +131,7 @@ for(const line of ['127.0.0.1','11434','/api/tags','/api/generate','R899_EXECUTI
 assert.ok(workflow.includes('r899-windows-compiled-inference-smoke.ps1'),
  'R899 native Windows end-to-end inference test must run in release CI');
 const localHubPanel=readFileSync('src7/workspaces/OmegaLocalHubPanelR884.tsx','utf8');
-for(const marker of ['SPHERE_TENSOR_STEP','SPHERE_TENSOR_EXPORT','SPHERE_TENSOR_VERIFY','SPHERE_TENSOR_CONTINUE','SPHERE_TENSOR_RENDER','exportJobId','tensorExport','tensorResult','conservationExact','fullStateSha256','tensorPreview','projectionCanvasRef','putImageData','projectionGrid'])
+for(const marker of ['SPHERE_TENSOR_STEP','SPHERE_TENSOR_EXPORT','SPHERE_TENSOR_VERIFY','SPHERE_TENSOR_CONTINUE','SPHERE_TENSOR_RENDER','exportJobId','tensorExport','tensorResult','conservationExact','fullStateSha256','tensorPreview','projectionCanvasRef','putImageData','projectionGrid','executeR908GpuProjection','Run real WebGPU projection parity on this device'])
  assert.ok(localHubPanel.includes(marker),'R902 interactive tensor operator or state receipt inspector missing: '+marker);
 
 for(const marker of ['importLocalToken','file.name!==\'hub-r881.token\'','file.size>512','file.text()','setToken(text)','Load local token file','Nothing is uploaded'])
