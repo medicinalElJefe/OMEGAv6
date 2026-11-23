@@ -266,6 +266,33 @@ Windows CI now executes a compiled worker checkpoint continuation,
 compares the next CSV hash and original source lineage, checks conservation
 and verifies the new checkpoint through the same R905 roundtrip reader.
 
+## R907 complete verified sparse-state visual projection
+
+The original Creation & Design Studio's Local / Edge Hub now offers
+`SPHERE_TENSOR_RENDER` for a completed R904/R906 full-state checkpoint.
+It first reopens the exact original CSV through the approved-root R905
+receipt verifier, with strict integer-mass conservation, entire-state SHA
+and file SHA enforced. Then it creates a standalone SVG in a **new**
+approved project-relative destination. No prior project file is
+overwritten, and unchanged source is not silently assumed.
+
+Every one of the 20,736 base-12 cell addresses occupies a unique tile
+on a 144 × 144 projection: for the four 12-valued address digits
+`(d0,d1,d2,d3)`, `x=d0+12*d1` and `y=d2+12*d3`.
+All 20,736 possible state lanes within each cell contribute their exact
+conserved integer mass to that tile. Nonzero cells use logarithmic opacity
+for legibility; zero cells are background. The SVG includes an actual
+observed active-cell count, nonzero components, total integer mass,
+and source full-state SHA. The job returns the SVG path, separate file
+SHA-256, source SQLite receipt SHA and a new durable job receipt.
+It is the actual computed state projected into 2D, not a dense
+429-million-point allocation, an empirical matter model or a GPU proof.
+
+Windows CI parses the SVG created by the **compiled** native Hub,
+checks source lineage, total mass and artifact SHA-256, and verifies
+no-overwrite refusal. The underlying base-12 address mapping is separately
+unit-tested as a full 20,736-address bijection.
+
 ## R897 full-package integrity guard
 
 `OPEN-OMEGA.cmd` now runs `Verify-OMEGA-Package.ps1` before opening the
