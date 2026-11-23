@@ -53,7 +53,7 @@ def load_local_inference_adapter_r899():
     return adapter
 
 READ_ONLY_REPLAY = frozenset({"HASH_TREE", "CSV_STATS", "VERIFY_LEDGER_SPLIT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_VERIFY"})
-OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "LOCAL_INFER", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_EXPORT", "SPHERE_TENSOR_VERIFY", "RESIDUAL_RESTORE"})
+OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "LOCAL_INFER", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_EXPORT", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_CONTINUE", "RESIDUAL_RESTORE"})
 STATUS = frozenset({"QUEUED", "WAIT_EVENT", "RUNNING", "COMPLETED", "FAILED", "HELD", "CANCELLED"})
 def utc_ms(): return int(time.time() * 1000)
 def sha_file(path: Path) -> str:
@@ -149,42 +149,89 @@ class Hub:
             c.execute("UPDATE jobs SET state='QUEUED',updated_ms=? WHERE event_name=? AND state='WAIT_EVENT'",(utc_ms(),event_name))
             for i in ids:self._record(c,i,"EVENT_MATCH",event_name)
         return {"event":event_name,"released":len(ids)}
+    def verified_sparse_export(self, export_id, *, include_rows=False):
+        import importlib.util
+        if not isinstance(export_id,str) or len(export_id)!=32 or any(c not in "0123456789abcdef" for c in export_id):
+            raise ValueError("R905_EXPORT_JOB_ID_INVALID_HELD")
+        prior=self.get(export_id)
+        if not prior or prior.get("state")!="COMPLETED" or prior.get("operation") not in ("SPHERE_TENSOR_EXPORT","SPHERE_TENSOR_CONTINUE"):
+            raise ValueError("R905_COMPLETED_ORIGINAL_EXPORT_REQUIRED_HELD")
+        original=prior.get("result")
+        expected_schema=("OMEGA_SPARSE_TENSOR_EXPORT_R904" if prior["operation"]=="SPHERE_TENSOR_EXPORT"
+                         else "OMEGA_SPARSE_TENSOR_CONTINUATION_R906")
+        if not isinstance(original,dict) or original.get("schema")!=expected_schema:
+            raise ValueError("R905_ORIGINAL_EXPORT_RECEIPT_REQUIRED_HELD")
+        stored=prior.get("result_sha256")
+        if not isinstance(stored,str) or stored!=sha_bytes(json_bytes(original)):
+            raise ValueError("R905_DURABLE_RECEIPT_DRIFT_HELD")
+        artifact=original.get("artifact")
+        if not isinstance(artifact,dict):
+            raise ValueError("R905_ARTIFACT_RECEIPT_REQUIRED_HELD")
+        relative=artifact.get("path")
+        target=safe_under(self.root,relative,True)
+        module_path=Path(__file__).resolve().with_name("omega_sparse_verify_r905.py")
+        if not module_path.is_file(): raise ValueError("R905_ROUNDTRIP_VERIFIER_REQUIRED_HELD")
+        spec=importlib.util.spec_from_file_location("_omega_sparse_verify_r905",module_path)
+        module=importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        verified=module.verify_sparse_export_r905(target,original,include_rows=include_rows)
+        return prior, verified
+
     def execute(self,operation,args):
         if operation=="RESIDUAL_RESTORE": raise ValueError("R195_RESIDUAL_SOURCE_AND_AUTHORITY_REQUIRED")
         if operation=="LOCAL_INFER":
             return load_local_inference_adapter_r899().infer_local_r899(args)
         if operation=="SPHERE_TENSOR_VERIFY":
-            import importlib.util
             if not isinstance(args,dict) or set(args)!={"export_job_id"}:
                 raise ValueError("R905_EXPORT_JOB_ID_REQUIRED_HELD")
-            export_id=args.get("export_job_id")
-            if not isinstance(export_id,str) or len(export_id)!=32 or any(c not in "0123456789abcdef" for c in export_id):
-                raise ValueError("R905_EXPORT_JOB_ID_INVALID_HELD")
-            prior=self.get(export_id)
-            if not prior or prior.get("state")!="COMPLETED" or prior.get("operation")!="SPHERE_TENSOR_EXPORT":
-                raise ValueError("R905_COMPLETED_ORIGINAL_EXPORT_REQUIRED_HELD")
-            original=prior.get("result")
-            if not isinstance(original,dict) or original.get("schema")!="OMEGA_SPARSE_TENSOR_EXPORT_R904":
-                raise ValueError("R905_ORIGINAL_EXPORT_RECEIPT_REQUIRED_HELD")
-            # Bind to the exact stored result in the local SQLite ledger,
-            # not to a user-provided hash, path or reconstructed preview.
-            stored=prior.get("result_sha256")
-            if not isinstance(stored,str) or stored!=sha_bytes(json_bytes(original)):
-                raise ValueError("R905_DURABLE_RECEIPT_DRIFT_HELD")
-            artifact=original.get("artifact")
-            if not isinstance(artifact,dict):
-                raise ValueError("R905_ARTIFACT_RECEIPT_REQUIRED_HELD")
-            relative=artifact.get("path")
-            target=safe_under(self.root,relative,True)
-            module_path=Path(__file__).resolve().with_name("omega_sparse_verify_r905.py")
-            if not module_path.is_file(): raise ValueError("R905_ROUNDTRIP_VERIFIER_REQUIRED_HELD")
-            spec=importlib.util.spec_from_file_location("_omega_sparse_verify_r905",module_path)
+            prior, validated=self.verified_sparse_export(args.get("export_job_id"))
+            return {**validated,"exportJobId":prior["id"],
+                    "originalExportReceiptSha256":prior["result_sha256"],
+                    "artifactPath":prior["result"]["artifact"]["path"]}
+        if operation=="SPHERE_TENSOR_CONTINUE":
+            import importlib.util
+            if not isinstance(args,dict) or set(args)!={"export_job_id","destination","steps","cell_axis","lane_axis"}:
+                raise ValueError("R906_CONTINUATION_ARGUMENT_SCHEMA_HELD")
+            export_id=args["export_job_id"]
+            destination=args["destination"]
+            if not isinstance(destination,str) or not destination.lower().endswith(".csv"):
+                raise ValueError("R906_NEW_CSV_DESTINATION_REQUIRED_HELD")
+            prior, verified_rows=self.verified_sparse_export(export_id,include_rows=True)
+            verified, entries=verified_rows
+            module_path=Path(__file__).resolve().with_name("omega_sparse_tensor_r902.py")
+            if not module_path.is_file(): raise ValueError("R902_SPARSE_TENSOR_MODULE_REQUIRED")
+            spec=importlib.util.spec_from_file_location("_omega_sparse_tensor_r902",module_path)
             module=importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
-            validated=module.verify_sparse_export_r905(target,original)
-            return {**validated,"exportJobId":export_id,
-                    "originalExportReceiptSha256":stored,
-                    "artifactPath":relative}
+            steps=args["steps"]
+            if type(steps) is not int or not 1 <= steps <= module.MAX_STEPS:
+                raise ValueError("R906_CONTINUATION_STEP_BOUND_HELD")
+            compute_args={"seeds":[{"cell":cell,"lane":lane,"mass":mass} for cell,lane,mass in entries],
+                          "steps":steps,"cell_axis":args["cell_axis"],"lane_axis":args["lane_axis"]}
+            result, rows=module.sparse_tensor_rows_r904(compute_args,max_seeds=module.MAX_NONZERO)
+            if result["totalMassAfter"]!=verified["totalMass"]:
+                raise ValueError("R906_CONTINUATION_CONSERVATION_HELD")
+            target=safe_under(self.root,destination,False)
+            if target.exists(): raise ValueError("R906_EXPORT_TARGET_EXISTS_HELD")
+            target.parent.mkdir(parents=True,exist_ok=True)
+            try:
+                with target.open("x",newline="",encoding="utf-8") as stream:
+                    writer=csv.writer(stream,lineterminator="\n")
+                    writer.writerow(("cell","lane","mass"))
+                    for cell,lane,mass in rows:writer.writerow((cell,lane,mass))
+                file_receipt=receipt(target,self.root)
+            except BaseException:
+                try: target.unlink(missing_ok=True)
+                except OSError: pass
+                raise
+            return {"schema":"OMEGA_SPARSE_TENSOR_CONTINUATION_R906",
+                    "state":"VERIFIED_CHECKPOINT_CONTINUATION_EXPORTED",
+                    "tensor":result,"artifact":file_receipt,"exportedRows":len(rows),
+                    "canonicalFullStateSha256":result["fullStateSha256"],
+                    "sourceExportJobId":prior["id"],
+                    "sourceExportReceiptSha256":prior["result_sha256"],
+                    "sourceStateSha256":verified["fullStateSha256"],
+                    "physicalPcAccepted":False,"gpuComputeProven":False}
         if operation=="SPHERE_TENSOR_EXPORT":
             import importlib.util
             module_path=Path(__file__).resolve().with_name("omega_sparse_tensor_r902.py")
