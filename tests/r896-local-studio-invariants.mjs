@@ -66,6 +66,11 @@ for(const key of ['R900_TAMPER_PROOF','R900_UNMANAGED_FILE','PROJECT_DATA_MUST_S
  assert.ok(installSmokeR900.includes(key),'R900 install lifecycle proof incomplete: '+key);
 assert.ok(workflow.includes('r900-windows-install-lifecycle-smoke.ps1'),
  'R900 Windows installer lifecycle must be verified by release CI');
+const roundtripR905=readFileSync('tools/omega_sparse_verify_r905.py','utf8');
+for(const marker of ['verify_sparse_export_r905','R905_NONCANONICAL_ROW_HELD','R905_FILE_SHA_DRIFT_HELD','R905_STATE_SHA_DRIFT_HELD','R905_MASS_CONSERVATION_HELD','EXACT_EXPORTED_STATE_MATCH'])
+ assert.ok(roundtripR905.includes(marker),'R905 exact CSV state roundtrip verifier missing: '+marker);
+assert.ok(workflow.includes('omega_sparse_verify_r905.py'),
+ 'R905 roundtrip verifier missing from compiled Windows worker');
 const sparseTensor=readFileSync('tools/omega_sparse_tensor_r902.py','utf8');
 const sparseHub=readFileSync('tools/omega_local_hub_r881.py','utf8');
 const sparseWindows=readFileSync('tests/r897-windows-packaged-hub-smoke.ps1','utf8');
@@ -83,6 +88,8 @@ for(const needle of ['DIMENSIONS = AXIS**4','TOTAL_POSSIBLE = DIMENSIONS**2','MA
  assert.ok(sparseTensor.includes(needle),'R902 implicit 20,736 per-cell operator missing: '+needle);
 for(const needle of ['SPHERE_TENSOR_EXPORT','sparse_tensor_rows_r904','COMPLETE_SPARSE_STATE_CSV_EXPORTED','R904_EXPORT_TARGET_EXISTS_HELD'])
  assert.ok(sparseHub.includes(needle),'R904 complete sparse tensor CSV export missing: '+needle);
+for(const needle of ['SPHERE_TENSOR_VERIFY','OMEGA_SPARSE_EXPORT_ROUNDTRIP_R905','originalExportReceiptSha256','R905_'])
+ assert.ok(sparseWindows.includes(needle),'R905 native Windows roundtrip/tamper proof missing: '+needle);
 for(const needle of ['SPHERE_TENSOR_EXPORT','complete-tensor.csv','exportedRows','R904_EXPORT_TARGET_EXISTS_HELD'])
  assert.ok(sparseWindows.includes(needle),'R904 compiled Windows full-state artifact verification missing: '+needle);
 for(const needle of ['SPHERE_TENSOR_STEP','omega_sparse_tensor_r902.py'])
@@ -102,7 +109,7 @@ for(const line of ['127.0.0.1','11434','/api/tags','/api/generate','R899_EXECUTI
 assert.ok(workflow.includes('r899-windows-compiled-inference-smoke.ps1'),
  'R899 native Windows end-to-end inference test must run in release CI');
 const localHubPanel=readFileSync('src7/workspaces/OmegaLocalHubPanelR884.tsx','utf8');
-for(const marker of ['SPHERE_TENSOR_STEP','SPHERE_TENSOR_EXPORT','tensorExport','tensorResult','conservationExact','fullStateSha256','tensorPreview'])
+for(const marker of ['SPHERE_TENSOR_STEP','SPHERE_TENSOR_EXPORT','SPHERE_TENSOR_VERIFY','exportJobId','tensorExport','tensorResult','conservationExact','fullStateSha256','tensorPreview'])
  assert.ok(localHubPanel.includes(marker),'R902 interactive tensor operator or state receipt inspector missing: '+marker);
 
 for(const marker of ['importLocalToken','file.name!==\'hub-r881.token\'','file.size>512','file.text()','setToken(text)','Load local token file','Nothing is uploaded'])
