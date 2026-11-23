@@ -273,7 +273,7 @@ try {
     $historyJob = @((($historyResponse.Content | ConvertFrom-Json).jobs) | Where-Object { $_.id -eq $renderId })
     if ($historyJob.Count -ne 1 -or
         $historyJob[0].result.projection.projectionGridOmittedFromJobList -ne $true -or
-        $null -ne $historyJob[0].result.projection.projectionGrid) {
+        ($historyJob[0].result.projection.PSObject.Properties.Name -contains 'projectionGrid')) {
         throw 'R907 full visual preview incorrectly expanded in bulk job history'
     }
     [xml]$svgDocument=Get-Content -LiteralPath $svgFile -Raw
