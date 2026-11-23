@@ -72,8 +72,9 @@ for(const marker of ['verify_sparse_export_r905','R905_NONCANONICAL_ROW_HELD','R
 assert.ok(workflow.includes('omega_sparse_verify_r905.py'),
  'R905 roundtrip verifier missing from compiled Windows worker');
 const projectionR907=readFileSync('tools/omega_sparse_projection_r907.py','utf8');
-for(const marker of ['address_xy_r907','project_verified_rows_r907','BIJECTIVE_BASE12_D0_D1_D2_D3_144X144','totalMass','sourceFullStateSha256','gpuComputeProven'])
+for(const marker of ['address_xy_r907','project_verified_rows_r907','BIJECTIVE_BASE12_D0_D1_D2_D3_144X144','totalMass','sourceFullStateSha256','gpuComputeProven','projectionGrid','GRID_ALPHABET'])
  assert.ok(projectionR907.includes(marker),'R907 verified 20736-cell true address projection missing: '+marker);
+assert.ok(workflow.includes('--hidden-import math'),'R907 dynamically loaded SVG logarithmic mass projection math must be bundled');
 assert.ok(workflow.includes('omega_sparse_projection_r907.py')&&workflow.includes('test_omega_sparse_projection_r907.py'),
  'R907 authentic projection must be shipped in Windows EXE and tested before building');
 const sparseTensor=readFileSync('tools/omega_sparse_tensor_r902.py','utf8');
@@ -124,7 +125,7 @@ for(const line of ['127.0.0.1','11434','/api/tags','/api/generate','R899_EXECUTI
 assert.ok(workflow.includes('r899-windows-compiled-inference-smoke.ps1'),
  'R899 native Windows end-to-end inference test must run in release CI');
 const localHubPanel=readFileSync('src7/workspaces/OmegaLocalHubPanelR884.tsx','utf8');
-for(const marker of ['SPHERE_TENSOR_STEP','SPHERE_TENSOR_EXPORT','SPHERE_TENSOR_VERIFY','SPHERE_TENSOR_CONTINUE','SPHERE_TENSOR_RENDER','exportJobId','tensorExport','tensorResult','conservationExact','fullStateSha256','tensorPreview'])
+for(const marker of ['SPHERE_TENSOR_STEP','SPHERE_TENSOR_EXPORT','SPHERE_TENSOR_VERIFY','SPHERE_TENSOR_CONTINUE','SPHERE_TENSOR_RENDER','exportJobId','tensorExport','tensorResult','conservationExact','fullStateSha256','tensorPreview','projectionCanvasRef','putImageData','projectionGrid'])
  assert.ok(localHubPanel.includes(marker),'R902 interactive tensor operator or state receipt inspector missing: '+marker);
 
 for(const marker of ['importLocalToken','file.name!==\'hub-r881.token\'','file.size>512','file.text()','setToken(text)','Load local token file','Nothing is uploaded'])
