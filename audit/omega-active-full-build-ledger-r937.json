@@ -228,5 +228,127 @@
   ],
   "latestGovernedWork": "R944 two exact independent Drive ZIP+payload hash/CRC witnesses, 154 remaining named split parts unverified; R938 authenticated release-set auditor; R937 governing ledger",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
-  "independentArchiveByteWitnesses": 2
+  "independentArchiveByteWitnesses": 2,
+  "gateReceipts": [
+    {
+      "id": "EXACT_HEAD_ALL_WORKFLOWS",
+      "state": "HELD",
+      "proof": null
+    },
+    {
+      "id": "HISTORICAL_EXECUTOR_PARITY",
+      "state": "HELD",
+      "proof": null
+    },
+    {
+      "id": "SOURCE_BYTE_AND_HASH_PROOF",
+      "state": "HELD",
+      "proof": null
+    },
+    {
+      "id": "24_BIN_INVERSE_OUTVERSE",
+      "state": "HELD",
+      "proof": null
+    },
+    {
+      "id": "20_736_BY_20_736_SPARSE_CONSERVATION",
+      "state": "HELD",
+      "proof": null
+    },
+    {
+      "id": "ALL_MODES_EXECUTION_OR_GATED_DISCLOSURE",
+      "state": "HELD",
+      "proof": null
+    },
+    {
+      "id": "R125_R141_R146_R147_AUTHORITY",
+      "state": "HELD",
+      "proof": null
+    },
+    {
+      "id": "WINDOWS_GPU_INSTALLER_RETURN",
+      "state": "HELD",
+      "proof": null
+    },
+    {
+      "id": "FULL_DESKTOP_MOBILE_UX",
+      "state": "HELD",
+      "proof": null
+    },
+    {
+      "id": "PERFORMANCE_AND_FAILURE_RECOVERY",
+      "state": "HELD",
+      "proof": null
+    },
+    {
+      "id": "GOVERNED_MERGE_AND_EXACT_DEPLOY",
+      "state": "HELD",
+      "proof": null
+    },
+    {
+      "id": "LIVE_POST_DEPLOY_ROLLBACK",
+      "state": "HELD",
+      "proof": null
+    }
+  ],
+  "completionRule": "EACH_GATE_REQUIRES_INDEPENDENT_EXACT_SOURCE_PROOF; EACH_RESOLVED_BLOCKER_RETAINS_ITS_ID_AND_IMMUTABLE_RECEIPT; WORKSTREAM_COMPLETION_CANNOT_EXCEED_EVIDENCE; RELEASE_CLEAN_REQUIRES_ZERO_OPEN_BLOCKERS_ALL_WORKSTREAMS_PROVEN_AND_POST_DEPLOY_PROOFS",
+  "transitionRules": {
+    "workstreams": "PARTIAL_HELD_DEVICE_HELD_RELEASE_HELD_TO_VERIFIED_ONLY_WITH_ACCEPTANCE_PROOF",
+    "blockers": "OPEN_TO_RESOLVED_ONLY_WITH_RESOLUTION_RECEIPT",
+    "gates": "HELD_TO_PROVEN_ONLY_WITH_INDEPENDENT_GATE_PROOF",
+    "release": "UNMERGED_CANDIDATE_NOT_RELEASE_CLEAN_TO_RELEASE_CLEAN_PRODUCTION_PROVEN_ONLY_AFTER_ALL_GATES_AND_EXACT_DEPLOY"
+  },
+  "acceptanceDocumentation": "docs/OMEGA_ADVANCEMENT_LEDGER.md",
+  "buildHistory": [
+    {
+      "revision": "R936",
+      "conservation": "Six Drive split releases and companion archives source-listed",
+      "accepted": "SOURCE_METADATA_ONLY"
+    },
+    {
+      "revision": "R937",
+      "conservation": "Twelve-workstream active ledger and CI drift test established",
+      "accepted": "CANDIDATE_SOURCE_ONLY"
+    },
+    {
+      "revision": "R938",
+      "conservation": "Bounded authenticated release set audit job",
+      "accepted": "CANDIDATE_LOCAL_AND_CI_SCOPE"
+    },
+    {
+      "revision": "R939",
+      "conservation": "Corrected safe directory predicate for local archive audit",
+      "accepted": "CANDIDATE_FIX"
+    },
+    {
+      "revision": "R940",
+      "conservation": "ZIP-valid negative-fixture digest mismatch",
+      "accepted": "CANDIDATE_TEST_FIX"
+    },
+    {
+      "revision": "R941",
+      "conservation": "Archive catalogue to local-audit form connection",
+      "accepted": "CANDIDATE_UI"
+    },
+    {
+      "revision": "R942",
+      "conservation": "Updated catalogue callback regression",
+      "accepted": "CANDIDATE_TEST_FIX"
+    },
+    {
+      "revision": "R943",
+      "conservation": "49 manifest SHA expectations preserved",
+      "accepted": "HISTORICAL_SOURCE_ONLY"
+    },
+    {
+      "revision": "R944",
+      "conservation": "Two independent archive part and inner member byte witnesses",
+      "accepted": "BOUNDED_LOCAL_BYTE_PROOF"
+    },
+    {
+      "revision": "R945",
+      "conservation": "Windows POSIX relative-path safety fix",
+      "accepted": "WINDOWS_CI_PENDING"
+    }
+  ]
 }

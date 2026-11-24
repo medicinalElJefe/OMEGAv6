@@ -73,7 +73,7 @@ export default function OmegaOneSystemLedgerR926({onNavigate,onLaunchRecoveredSy
     <strong>{b.id} · {b.state}</strong><p style={{margin:'5px 0'}}>{b.description}</p><button type='button' style={click} onClick={()=>nav(b.route)}>Inspect owning workspace</button>
    </article>)}
    <h3 style={{marginBottom:0}}>Release acceptance gates · all require current proof</h3>
-   <ol>{activeBuild.releaseGates.map(g=><li key={g} style={{marginBottom:5}}>{g.replaceAll('_',' ')}</li>)}</ol>
+   <ol>{activeBuild.gateReceipts.map(g=><li key={g.id} style={{marginBottom:5}}><strong>{g.state==='PROVEN'?'PROVEN':'HELD'}</strong> · {g.id.replaceAll('_',' ')}</li>)}</ol>
    <p style={{color:'#b9cfd9'}}>{activeBuild.sourceTruth}</p>
   </section>}
   {tab==='SOFTWARE'&&<>
