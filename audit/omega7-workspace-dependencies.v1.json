@@ -147,6 +147,7 @@
         "../../src/corpusRuntime",
         "../../src/platformAdapter",
         "../../src/sourceBackedModeRuntimeR21",
+        "../OmegaOneSystemLedgerR926",
         "../capabilityRegistry",
         "./CanonicalSessionReplayPanelR679",
         "./NativeDecisionTruthPanelR681",
