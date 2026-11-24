@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R950 B053-R7 30/30 original source parts and 1856/1856 inner B053 file-manifest hashes validated; combined with R948 B043 29/29 and R944 V35 part20 yields 60/156 source ZIPs byte checked; R949 B043 62 isolated cases PASS; full OMEGA7 runtime parity remains HELD",
+  "latestGovernedWork": "R951 original B053 R7 28 isolated source test modules 70/70 cases PASS; R950 30/30 R7 source parts and 1856/1856 embedded file hashes; R949 B043 62/62 isolated; native Windows GPU and current OMEGA7 parity held",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 60,
   "gateReceipts": [
@@ -374,10 +374,16 @@
       "revision": "R950",
       "conservation": "Original B053 R7 30-part split reconstructed, ZIP CRC 1857 and independently hashed 1856 B053 file manifest entries",
       "accepted": "R7_SOURCE_BYTES_VERIFIED_NOT_OMEGA7_RUNTIME_PARITY_OR_ORIGINAL_MASTER_SHA_PIN"
+    },
+    {
+      "revision": "R951",
+      "conservation": "All 28 archived B053 R7 source test modules reproduced as 70 passing tests, including nested skin module",
+      "accepted": "ISOLATED_ORIGINAL_DONOR_TESTS_ONLY_NOT_OMEGA7_OR_WINDOWS_PROOF"
     }
   ],
   "independentArchiveUnverifiedOtherListedParts": 96,
   "reconstructedOriginalReleaseEvidence": "audit/omega-b043-full-source-byte-acceptance-r948.json",
   "isolatedB043ModuleProof": "audit/omega-b043-module-test-evidence-r949.json",
-  "reconstructedB053R7SourceEvidence": "audit/omega-b053-r7-full-source-acceptance-r950.json"
+  "reconstructedB053R7SourceEvidence": "audit/omega-b053-r7-full-source-acceptance-r950.json",
+  "originalB053R7ModuleEvidence": "audit/omega-b053-r7-isolated-module-parity-r951.json"
 }
