@@ -25,6 +25,8 @@ export default function OmegaOneSystemLedgerR926({onNavigate}:{onNavigate:(route
    (disposition==='ALL'||s.Disposition===disposition)&&
    (!term||searchable(s.ID,s.Family,s['Software / Artifact'],s['One-System Role'],s['Menu Setting'],s['Primary Capability'],s.Disposition,s['Upgrade Sequence']).includes(term))
  ),[menu,disposition,term]);
+ const familyRoute=(menuName:string)=>menuList.find((m:Menu)=>m.name===menuName)?.route;
+ const stageOwners=(sequence:string)=>all.filter((s:Software)=>s['Upgrade Sequence']===sequence);
  const tabs:Tab[]=['SOFTWARE','MENUS','CONTROLS','CAPABILITIES','SEQUENCE','GATES'];
  const evidence='SOURCE CHARTED · no independent runtime acceptance inferred from menu membership';
  const nav=(route:string)=>onNavigate(route);
@@ -50,13 +52,14 @@ export default function OmegaOneSystemLedgerR926({onNavigate}:{onNavigate:(route
    <p role='status'>{filtered.length} / 100 charted families match · selecting an item shows its exact original role and mapped OMEGA7 workspace.</p>
    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(275px,1fr))',gap:12}}>
     <div style={{maxHeight:460,overflowY:'auto',display:'grid',alignContent:'start',gap:6}}>
+     {filtered.length===0&&<p role='status'>No matching software families. Adjust the search or filters.</p>}
      {filtered.map((s:Software)=><button key={s.ID} type='button' onClick={()=>setPicked(s.ID)} aria-pressed={picked===s.ID} style={{...click,textAlign:'left',background:picked===s.ID?'#276982':'#142f40'}}>
       <span style={{display:'flex',justifyContent:'space-between',gap:8}}><strong>{s.ID} · {s['Software / Artifact']}</strong><small style={{color:dispositionColors[s.Disposition]||'#bbb'}}>{s.Disposition}</small></span>
       <small>{s['One-System Role']} · {s['Menu ID']}</small>
      </button>)}
     </div>
     <aside style={{padding:13,borderRadius:9,background:'#172f40'}}>
-     {chosen&&<><p style={{color:'#c9d9e6',marginTop:0}}>{chosen.ID} · {chosen.Disposition} · {chosen['Upgrade Sequence']}</p>
+     {chosen&&filtered.some((s:Software)=>s.ID===chosen.ID)&&<><p style={{color:'#c9d9e6',marginTop:0}}>{chosen.ID} · {chosen.Disposition} · {chosen['Upgrade Sequence']}</p>
       <h3>{chosen['Software / Artifact']}</h3><p>{chosen['Primary Capability']}</p>
       <p><strong>Original role:</strong> {chosen['One-System Role']}<br/><strong>Family:</strong> {chosen.Family}<br/><strong>Control:</strong> {chosen['Menu Setting']}<br/><strong>Growth:</strong> {chosen['Growth Tier']}</p>
       <p><strong>Input:</strong> {chosen['Input Contract']}<br/><strong>Output:</strong> {chosen['Output Contract']}</p>
@@ -65,6 +68,7 @@ export default function OmegaOneSystemLedgerR926({onNavigate}:{onNavigate:(route
       <small style={{display:'block',marginBottom:10}}>Source-registered workspace relation. This does not establish that this individual historical executable was ported or invoked.</small>
       <button type='button' style={click} onClick={()=>nav(chosen.navigationRoute)}>Open mapped OMEGA7 workspace</button>
      </>}
+     {(!chosen||!filtered.some((s:Software)=>s.ID===chosen.ID))&&<p role='status'>Select a family from the current results to inspect its source contract and route.</p>}
     </aside>
    </div>
   </>}
@@ -80,7 +84,8 @@ export default function OmegaOneSystemLedgerR926({onNavigate}:{onNavigate:(route
     <strong>{s['Option ID']} · {s['Option / Toggle']}</strong> <small>({s['Top Menu']})</small>
     <p>{s['Capability Output']} · State: {s['State Space Used']}</p>
     <small>Default {s.Default}; gate {s['Requires Proof Gate']}; acceptance: {s['Acceptance Check']}</small>
-    <p style={{marginBottom:0,color:'#d6b36e'}}>Charted intended control; actual safe mutation must be exercised through the governing executor.</p>
+    <p style={{marginBottom:8,color:'#d6b36e'}}>Charted intended control; actual safe mutation must be exercised through the governing executor.</p>
+    {familyRoute(s['Top Menu'])&&<button type='button' style={click} onClick={()=>nav(familyRoute(s['Top Menu'])!)}>Open governing {s['Top Menu']} workspace</button>}
    </article>)}
   </div>}
   {tab==='CAPABILITIES'&&<div style={{display:'grid',gap:9,marginTop:12}}>
@@ -92,6 +97,7 @@ export default function OmegaOneSystemLedgerR926({onNavigate}:{onNavigate:(route
   {tab==='SEQUENCE'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:8,marginTop:12}}>
    {original.sequences.map(s=><article key={s.SEQ} style={{background:'#173447',padding:10,borderRadius:8}}>
     <strong>{s.SEQ} · {s['Phase Name']}</strong><p>{s['Growth Upgrade']}</p><small>Input: {s.Input} · Proof: {s['Proof Gate']} · Next: {s['Next Sequence']}</small>
+    {stageOwners(s.SEQ).map((owner:Software)=><button type='button' key={owner.ID} style={{...click,display:'block',marginTop:8}} onClick={()=>nav(owner.navigationRoute)}>Open {owner.ID} · {owner.navigationRoute}</button>)}
    </article>)}
   </div>}
   {tab==='GATES'&&<div style={{display:'grid',gap:9,marginTop:12}}>
