@@ -8,8 +8,9 @@ const idx=(x,max)=>Number.isSafeInteger(x)&&x>=0&&x<max;
 const finite=(x)=>typeof x==='number'&&Number.isFinite(x);
 const unit=(x)=>finite(x)&&x>=0&&x<=1;
 function receipt(r,sequence,tick){
- return Boolean(r&&typeof r==='object'&&Number.isSafeInteger(r.taskId)&&r.taskId>=1&&r.taskId<=sequence&&idx(r.agent,AGENTS)&&idx(r.inner,SIZE)&&['OBSERVE','RELAX','EXCHANGE'].includes(r.kind)&&Number.isSafeInteger(r.tick)&&r.tick>=1&&r.tick<=tick&&unit(r.before)&&unit(r.after)&&
-  (r.kind!=='EXCHANGE'||(idx(r.peer,AGENTS)&&neighbors(r.agent).includes(r.peer)&&unit(r.peerBefore)&&unit(r.peerAfter)&&finite(r.conservationResidual)&&Math.abs(r.conservationResidual)<=1e-9)));
+ return Boolean(r&&typeof r==='object'&&Number.isSafeInteger(r.taskId)&&r.taskId>=1&&r.taskId<=sequence&&idx(r.agent,AGENTS)&&idx(r.inner,SIZE)&&['OBSERVE','RELAX','EXCHANGE','PHASE_EXCHANGE'].includes(r.kind)&&Number.isSafeInteger(r.tick)&&r.tick>=1&&r.tick<=tick&&unit(r.before)&&unit(r.after)&&
+  (r.kind!=='EXCHANGE'||(idx(r.peer,AGENTS)&&neighbors(r.agent).includes(r.peer)&&unit(r.peerBefore)&&unit(r.peerAfter)&&finite(r.conservationResidual)&&Math.abs(r.conservationResidual)<=1e-9))&&
+  (r.kind!=='PHASE_EXCHANGE'||(idx(r.phase,12)&&Math.floor(r.phase/4)!==1&&idx(r.neighborInner,SIZE)&&unit(r.neighborBefore)&&unit(r.neighborAfter)&&finite(r.conservationResidual)&&Math.abs(r.conservationResidual)<=1e-9)));
 }
 export function validateDurableR895(fabric,session){
  if(!fabric||!(fabric.active instanceof Map)||!Array.isArray(fabric.queue)||!Array.isArray(fabric.receipts)||fabric.active.size>512||fabric.queue.length>1024||fabric.receipts.length>512||!Number.isSafeInteger(fabric.tick)||fabric.tick<0||!Number.isSafeInteger(fabric.sequence)||fabric.sequence<fabric.tick)throw new Error('Invalid or over-budget fabric');
@@ -24,7 +25,7 @@ export function validateDurableR895(fabric,session){
  }
  const tasks=new Set();
  for(const t of fabric.queue){
-  if(!t||!Number.isSafeInteger(t.id)||t.id<1||t.id>fabric.sequence||tasks.has(t.id)||!idx(t.agent,AGENTS)||!idx(t.inner,SIZE)||!['OBSERVE','RELAX','EXCHANGE'].includes(t.kind)||!unit(t.weight)||(t.kind==='EXCHANGE'&&(!idx(t.target,AGENTS)||!neighbors(t.agent).includes(t.target))))throw new Error('Invalid durable pending task');
+  if(!t||!Number.isSafeInteger(t.id)||t.id<1||t.id>fabric.sequence||tasks.has(t.id)||!idx(t.agent,AGENTS)||!idx(t.inner,SIZE)||!['OBSERVE','RELAX','EXCHANGE','PHASE_EXCHANGE'].includes(t.kind)||!unit(t.weight)||(t.kind==='EXCHANGE'&&(!idx(t.target,AGENTS)||!neighbors(t.agent).includes(t.target)))||(t.kind==='PHASE_EXCHANGE'&&(!idx(t.phase,12)||Math.floor(t.phase/4)===1||t.target!==null)))throw new Error('Invalid durable pending task');
   tasks.add(t.id);
  }
  if(!fabric.receipts.every(r=>receipt(r,fabric.sequence,fabric.tick)))throw new Error('Invalid durable ledger receipt');
