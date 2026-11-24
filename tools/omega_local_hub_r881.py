@@ -458,6 +458,8 @@ class Hub:
                 if sha_file(target)!=sha_bytes(data):
                     raise ValueError("R915_MANIFEST_WRITE_DRIFT_HELD")
                 return {"manifest":receipt(target,self.root),"sourceCount":len(entries),"state":"HASHED_MANIFEST_WRITTEN"}
+            except FileExistsError:
+                raise ValueError("R915_MANIFEST_DESTINATION_EXISTS_HELD")
             except BaseException:
                 if created:
                     try: target.unlink(missing_ok=True)
