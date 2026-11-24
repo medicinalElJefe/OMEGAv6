@@ -4,7 +4,7 @@ import {executeR908GpuProjection} from './omegaR908GpuProjection';
 type HubJob={id:string;operation:string;state:string;scheduled_ms:number;created_ms:number;updated_ms:number;error?:string|null;result_sha256?:string|null;result?:unknown;history?:{event:string;at_ms:number;details:string}[]};
 type Json=Record<string,unknown>;
 const BASE='http://127.0.0.1:8765';
-const OPS=['HASH_TREE','CSV_STATS','COPY_ARTIFACT','EXPORT_MANIFEST','VERIFY_LEDGER_SPLIT','VERIFY_LEDGER_SET','LOCAL_INFER','SPHERE_TENSOR_STEP','SPHERE_TENSOR_EXPORT','SPHERE_TENSOR_VERIFY','SPHERE_TENSOR_CONTINUE','SPHERE_TENSOR_RENDER','RESIDUAL_RESTORE'] as const;
+const OPS=['HASH_TREE','CSV_STATS','COPY_ARTIFACT','EXPORT_MANIFEST','VERIFY_LEDGER_SPLIT','VERIFY_LEDGER_SET','LOCAL_INFER','SPHERE_TENSOR_STEP','SPHERE_TENSOR_EXPORT','SPHERE_TENSOR_VERIFY','SPHERE_TENSOR_CONTINUE','SPHERE_TENSOR_RENDER','SPHERE_TENSOR_AUDIT_LINEAGE','RESIDUAL_RESTORE'] as const;
 type Operation=typeof OPS[number];
 const surface:CSSProperties={padding:16,borderRadius:12,border:'1px solid #436079',background:'#0d1d2d',color:'#eff6fc',margin:'14px 0'};
 const field:CSSProperties={background:'#152f47',color:'#eaf5ff',border:'1px solid #607e98',padding:9,borderRadius:7,width:'100%',boxSizing:'border-box'};
@@ -127,6 +127,10 @@ export default function OmegaLocalHubPanelR884(){
    const n=Number(delay);
    if(!Number.isFinite(n)||n<0||n>604800)throw Error('Delay must be between 0 and 604800 seconds.');
    const args:Record<string,unknown>={};
+   if(operation==='SPHERE_TENSOR_AUDIT_LINEAGE'){
+    if(!/^[a-f0-9]{32}$/.test(exportJobId))throw Error('Select a completed full-state checkpoint job ID.');
+    args.export_job_id=exportJobId;
+   }
    if(operation==='SPHERE_TENSOR_VERIFY'){
     if(!/^[a-f0-9]{32}$/.test(exportJobId))throw Error('Choose a completed tensor export job ID (32 lowercase hexadecimal characters).');
     args.export_job_id=exportJobId;
@@ -265,8 +269,8 @@ export default function OmegaLocalHubPanelR884(){
     <h3>Queue bounded work</h3>
     <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:12}}>
      <label>Operation<select style={field} value={operation} onChange={e=>setOperation(e.target.value as Operation)}>{OPS.map(x=><option key={x} value={x}>{x.replaceAll('_',' ')}</option>)}</select></label>
-     {operation!=='LOCAL_INFER'&&operation!=='SPHERE_TENSOR_STEP'&&operation!=='SPHERE_TENSOR_EXPORT'&&operation!=='SPHERE_TENSOR_VERIFY'&&operation!=='SPHERE_TENSOR_CONTINUE'&&operation!=='SPHERE_TENSOR_RENDER'&&<label>{operation==='HASH_TREE'?'Project folder':operation==='EXPORT_MANIFEST'?'Source files (one per line)':'Source relative file'}<textarea style={field} rows={2} value={source} onChange={e=>setSource(e.target.value)} spellCheck={false}/></label>}
-     {(operation==='SPHERE_TENSOR_VERIFY'||operation==='SPHERE_TENSOR_CONTINUE'||operation==='SPHERE_TENSOR_RENDER')&&<label>Original completed export job ID<input style={field} value={exportJobId} onChange={e=>setExportJobId(e.target.value.trim())} maxLength={32} placeholder='Select a completed export job below'/></label>}
+     {operation!=='LOCAL_INFER'&&operation!=='SPHERE_TENSOR_STEP'&&operation!=='SPHERE_TENSOR_EXPORT'&&operation!=='SPHERE_TENSOR_VERIFY'&&operation!=='SPHERE_TENSOR_CONTINUE'&&operation!=='SPHERE_TENSOR_RENDER'&&operation!=='SPHERE_TENSOR_AUDIT_LINEAGE'&&<label>{operation==='HASH_TREE'?'Project folder':operation==='EXPORT_MANIFEST'?'Source files (one per line)':'Source relative file'}<textarea style={field} rows={2} value={source} onChange={e=>setSource(e.target.value)} spellCheck={false}/></label>}
+     {(operation==='SPHERE_TENSOR_VERIFY'||operation==='SPHERE_TENSOR_CONTINUE'||operation==='SPHERE_TENSOR_RENDER'||operation==='SPHERE_TENSOR_AUDIT_LINEAGE')&&<label>Original completed export job ID<input style={field} value={exportJobId} onChange={e=>setExportJobId(e.target.value.trim())} maxLength={32} placeholder='Select a completed export job below'/></label>}
      {operation==='SPHERE_TENSOR_CONTINUE'&&<label>Further state transitions (1–8)<input style={field} type='number' min={1} max={8} step={1} value={tensorSteps} onChange={e=>setTensorSteps(e.target.value)}/></label>}
      {(operation==='SPHERE_TENSOR_STEP'||operation==='SPHERE_TENSOR_EXPORT')&&<>
       <label>Cell address (0–20735)<input style={field} type='number' min={0} max={20735} step={1} value={tensorCell} onChange={e=>setTensorCell(e.target.value)}/></label>
@@ -287,6 +291,7 @@ export default function OmegaLocalHubPanelR884(){
      <label>Optional event gate<input style={field} value={eventName} onChange={e=>setEventName(e.target.value)} placeholder='example: new_asset'/></label>
     </div>
     {(operation==='SPHERE_TENSOR_STEP'||operation==='SPHERE_TENSOR_EXPORT')&&<p><small>R902 executes a real deterministic sparse operator over 20,736 address cells × 20,736 state lanes. A per-cell 20,736D state is implicit, only nonzero components are computed. Exact integer mass conservation and the SHA-256 of every resulting nonzero component are recorded in the local job receipt. This is not 20,736 separately trained AI models or a GPU workload.</small></p>}
+    {operation==='SPHERE_TENSOR_AUDIT_LINEAGE'&&<p><small>R912 audits every original SQLite receipt and every full-state CSV from the chosen checkpoint back to the first export. Missing or changed ancestors block further computation, rendering and checkpoint downloads.</small></p>}
     {operation==='SPHERE_TENSOR_RENDER'&&<p><small>R907 creates an actual SVG projection from the verified full CSV checkpoint. Each 12^4 cell has a unique pixel in the 144×144 view, while all state lanes in that cell contribute their conserved integer mass. This is a mathematical representation, not GPU or physical-world evidence.</small></p>}
     {operation==='SPHERE_TENSOR_CONTINUE'&&<p><small>R906 rechecks the entire source checkpoint and its original durable receipt, then advances the true sparse state. Every input mass must be divisible by 4^steps to conserve integers exactly. Outputs are new CSV artifacts with source receipt and state lineage, never overwrites.</small></p>}
     {operation==='SPHERE_TENSOR_VERIFY'&&<p><small>R905 reopens an earlier complete CSV export and compares every row and both hashes against that job's original persistent SQLite receipt. It refuses changed, reordered, truncated or missing files. This is an internal byte/state integrity verification, not a signature or native device proof.</small></p>}
@@ -304,7 +309,8 @@ export default function OmegaLocalHubPanelR884(){
     </div>}
     {chosen&&<div style={{marginTop:10}}>
      <strong>Selected job: {chosen.id}</strong>
-     {(chosen.operation==='SPHERE_TENSOR_EXPORT'||chosen.operation==='SPHERE_TENSOR_CONTINUE')&&chosen.state==='COMPLETED'&&<button type='button' style={{...button,margin:'8px 0'}} onClick={()=>{setExportJobId(chosen.id);setOperation('SPHERE_TENSOR_VERIFY');setInfo('R905 round-trip verification configured against '+chosen.id)}}>Verify complete CSV against this export receipt</button>}
+     {(chosen.operation==='SPHERE_TENSOR_EXPORT'||chosen.operation==='SPHERE_TENSOR_CONTINUE')&&chosen.state==='COMPLETED'&&<button type='button' style={{...button,margin:'8px 0'}} onClick={()=>{setExportJobId(chosen.id);setOperation('SPHERE_TENSOR_VERIFY');setInfo('R905 round-trip verification configured against '+chosen.id)}}>Verify complete CSV against this export receipt</button>
+     {(chosen.operation==='SPHERE_TENSOR_EXPORT'||chosen.operation==='SPHERE_TENSOR_CONTINUE')&&chosen.state==='COMPLETED'&&<button type='button' style={{...button,margin:'8px 0'}} onClick={()=>{setExportJobId(chosen.id);setOperation('SPHERE_TENSOR_AUDIT_LINEAGE');setInfo('R912 complete lineage audit selected from '+chosen.id)}}>Audit complete checkpoint lineage</button>}}
      {(chosen.operation==='SPHERE_TENSOR_EXPORT'||chosen.operation==='SPHERE_TENSOR_CONTINUE')&&chosen.state==='COMPLETED'&&
       <button type='button' disabled={busy||state!=='LOOPBACK_AUTHENTICATED'} style={{...button,margin:'8px 0'}} onClick={()=>{const a=(chosen.result as {artifact?:{sha256?:string}}|undefined)?.artifact;void downloadCsv(chosen.id,String(a?.sha256||''))}}>
        Download complete verified CSV checkpoint
