@@ -226,9 +226,9 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R949 34/34 isolated original B043 test modules and 62/62 cases PASS, combined 62-case pytest process timed out; R948 B043 complete source CRC and SHA accepted; current OMEGA7 executor parity remains HELD",
+  "latestGovernedWork": "R950 B053-R7 30/30 original source parts and 1856/1856 inner B053 file-manifest hashes validated; combined with R948 B043 29/29 and R944 V35 part20 yields 60/156 source ZIPs byte checked; R949 B043 62 isolated cases PASS; full OMEGA7 runtime parity remains HELD",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
-  "independentArchiveByteWitnesses": 30,
+  "independentArchiveByteWitnesses": 60,
   "gateReceipts": [
     {
       "id": "EXACT_HEAD_ALL_WORKFLOWS",
@@ -369,9 +369,15 @@
       "revision": "R949",
       "conservation": "34 recovered B043 modules tested separately; 62 cases pass; combined suite timeout persists",
       "accepted": "ISOLATED_DONOR_TEST_PARITY_ONLY_COMBINED_SUITE_HELD"
+    },
+    {
+      "revision": "R950",
+      "conservation": "Original B053 R7 30-part split reconstructed, ZIP CRC 1857 and independently hashed 1856 B053 file manifest entries",
+      "accepted": "R7_SOURCE_BYTES_VERIFIED_NOT_OMEGA7_RUNTIME_PARITY_OR_ORIGINAL_MASTER_SHA_PIN"
     }
   ],
-  "independentArchiveUnverifiedOtherListedParts": 126,
+  "independentArchiveUnverifiedOtherListedParts": 96,
   "reconstructedOriginalReleaseEvidence": "audit/omega-b043-full-source-byte-acceptance-r948.json",
-  "isolatedB043ModuleProof": "audit/omega-b043-module-test-evidence-r949.json"
+  "isolatedB043ModuleProof": "audit/omega-b043-module-test-evidence-r949.json",
+  "reconstructedB053R7SourceEvidence": "audit/omega-b053-r7-full-source-acceptance-r950.json"
 }

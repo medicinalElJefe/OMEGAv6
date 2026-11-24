@@ -76,9 +76,10 @@ if(releaseClean){
  assert.equal(a.releaseAcceptance?.rollbackEligible,true,'release lacks rollback-eligible baseline');
 }else assert.equal(a.releaseAcceptance,undefined,'candidate cannot claim a production receipt');
 assert.ok(a.transitionRules&&a.completionRule,'build completion transition laws absent');
-assert.ok(a.buildHistory.length>=14,'historical advancement history dropped');
-for(const id of Array.from({length:14},(_,i)=>'R'+(936+i)))assert.ok(a.buildHistory.some(h=>h.revision===id),'governed repair disappeared '+id);
+assert.ok(a.buildHistory.length>=15,'historical advancement history dropped');
+for(const id of Array.from({length:15},(_,i)=>'R'+(936+i)))assert.ok(a.buildHistory.some(h=>h.revision===id),'governed repair disappeared '+id);
 assert.equal(a.isolatedB043ModuleProof,'audit/omega-b043-module-test-evidence-r949.json');
+assert.equal(a.reconstructedB053R7SourceEvidence,'audit/omega-b053-r7-full-source-acceptance-r950.json');
 assert.deepEqual(a.archiveReleaseIds,ar.groups.map(x=>x.id));
 assert.ok(a.sourceTruth.includes('METADATA_IS_NOT_ZIP_BYTES'));
 assert.ok(a.sourceTruth.includes('CI_IS_NOT_NATIVE_DEVICE_PROOF'));
