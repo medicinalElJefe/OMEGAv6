@@ -395,6 +395,29 @@ to the manifest but cannot authenticate a manifest that an attacker has also
 replaced. Source provenance comes from GitHub's checked-out SHA and workflow
 artifact evidence. It does not establish physical-PC or installer acceptance.
 
+## R912 complete checkpoint lineage audit — core engine, not desktop appearance
+
+`SPHERE_TENSOR_AUDIT_LINEAGE` accepts a completed R904/R906 checkpoint
+job ID and re-verifies its entire ancestor sequence back to the initial
+R904 export. At every checkpoint, it uses R905 to validate the original
+SQLite result digest and all canonical CSV bytes, sorted cell/lane rows,
+mass conservation, state digest and file digest. For every R906 link it
+checks the child-pinned source job ID, parent result SHA-256, parent full
+state SHA-256 and input mass. Cycles, absent parents, changed ancestors,
+invalid lineage or more than 32 checkpoints are held. The returned
+machine-readable result includes the verified chain, depths, state/file
+digests and original root; it explicitly does not assert external
+signatures, native GPU execution or physical truth.
+
+This is a prerequisite for all new R906 continuations, R907 SVG renders
+and R910 verified CSV downloads. A leaf CSV cannot be promoted merely
+because it remains unchanged when its older source has been modified.
+The original Hub UI exposes **Audit complete checkpoint lineage** on a
+completed checkpoint job. Python regressions mutate the original export
+after two valid continuations and require descendant audit, execution,
+render and download refusal. The compiled Windows worker must
+independently execute the two-deep audit and check source evidence.
+
 ## Evidence and release boundary
 
 GitHub Actions builds and tests the ZIP from the exact PR commit.
