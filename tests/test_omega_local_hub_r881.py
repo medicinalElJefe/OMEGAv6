@@ -692,6 +692,74 @@ class LocalHubTests(unittest.TestCase):
         self.assertEqual(rejected["state"],"HELD")
         self.assertIn("R924_BIN_AUTHORITY_OR_SHA_HELD",rejected["error"])
 
+
+    def test_r925_exact_correlated_donor_field_and_duplex_receipts(self):
+        import json
+        import hashlib
+        def completed(operation,args,payload):
+            submitted=self.hub.enqueue(operation,args)
+            encoded=hubmod.json_bytes(payload)
+            with self.hub.connection() as conn:
+                conn.execute("UPDATE jobs SET state='COMPLETED',result_json=?,result_sha256=? WHERE id=?",
+                             (encoded.decode(),hubmod.sha_bytes(encoded),submitted["id"]))
+            return submitted["id"]
+        hexdigest=lambda b:hashlib.sha256(str(b).encode()).hexdigest()
+        address=11498
+        frame={"frame":1,"statePacketSha256":hexdigest("state"),
+               "traversalPacketSha256":hexdigest("traversal"),
+               "transitionSha256":hexdigest("transition"),
+               "renderControlSha256":hexdigest("render"),
+               "acceptanceSha256":hexdigest("acceptance"),
+               "traversalAddress":address}
+        donor={"schema":"OMEGA_VERIFIED_HISTORICAL_B010_EXECUTION_R922",
+               "archiveSha256":hubmod.B010_ARCHIVE_SHA256_R922,
+               "state":"HISTORICAL_DONOR_RUNTIME_EXECUTED_NOT_CANON_ADMITTED",
+               "currentCanonWrites":0,"nativePcAccepted":False,
+               "frames":[frame],"frameChainSha256":hubmod.sha_bytes(hubmod.json_bytes([frame]))}
+        sparse={"schema":"OMEGA_IMPLICIT_CELL_LANE_TENSOR_R902",
+                "conservationExact":True,"totalMassBefore":4096,"totalMassAfter":4096,
+                "cellCount":20736,"lanesPerCell":20736,
+                "physicalPcAccepted":False,"gpuComputeProven":False,
+                "fullStateSha256":hexdigest("real-state")}
+        source={"schema":"OMEGA_HISTORICAL_DUPLEX24_CORRELATION_R924",
+                "duplexPairs":[{"law":s} for s in hubmod.R924_LAWS],
+                "canonicalWrites":0,"productionReady":False,
+                "state":"INCOMPLETE_ARCHIVE_SET_HELD","verifiedOuterParts":19}
+        donor_id=completed("HISTORICAL_B010_EXECUTE",{"source":"data/pinned.zip"},donor)
+        tensor_id=completed("SPHERE_TENSOR_STEP",
+                            {"seeds":[{"cell":address,"lane":32,"mass":4096}],"steps":1},
+                            sparse)
+        duplex_id=completed("HISTORICAL_DUPLEX24_CORRELATE",{"manifest":"data/manifest.json"},source)
+        args={"b010_job_id":donor_id,"tensor_job_id":tensor_id,"duplex_job_id":duplex_id}
+        correlation=self.hub.enqueue("CORRELATE_HISTORICAL_FIELD",args)
+        received=self.hub.run_one()
+        self.assertEqual(received["state"],"COMPLETED")
+        result=received["result"]
+        self.assertEqual(result["schema"],"OMEGA_CROSS_ENGINE_CORRELATION_R925")
+        self.assertEqual(result["address"],address)
+        self.assertEqual(result["nestedStateComponents"],429981696)
+        self.assertEqual(len(result["nodes"]),3)
+        self.assertEqual(result["duplexCompleteness"],"INCOMPLETE_ARCHIVE_SET_HELD")
+        self.assertEqual(result["correlationSha256"],hubmod.sha_bytes(hubmod.json_bytes(result["nodes"])))
+        self.assertEqual(result["canonicalWrites"],0)
+        self.assertFalse(result["historicalDonorAuthorityEscalated"])
+        self.assertFalse(result["productionProof"])
+        self.assertEqual(self.hub.replay(correlation["id"])["state"],"MATCH")
+        with self.hub.connection() as conn:
+            conn.execute("UPDATE jobs SET args_json=? WHERE id=?",
+                         (json.dumps({"seeds":[{"cell":address+1,"lane":32,"mass":4096}],"steps":1}),tensor_id))
+        refused=self.hub.enqueue("CORRELATE_HISTORICAL_FIELD",args)
+        held=self.hub.run_one()
+        self.assertEqual(held["state"],"HELD")
+        self.assertIn("R925_SPHERE_ADDRESS_OR_CONSERVATION_HELD",held["error"])
+        self.assertEqual(self.hub.replay(correlation["id"])["state"],"REPLAY_FAILED")
+        with self.hub.connection() as conn:
+            conn.execute("UPDATE jobs SET result_sha256=? WHERE id=?",("0"*64,donor_id))
+        tampered=self.hub.enqueue("CORRELATE_HISTORICAL_FIELD",args)
+        reply=self.hub.run_one()
+        self.assertEqual(reply["state"],"HELD")
+        self.assertIn("R925_SOURCE_RECEIPT_INTEGRITY_OR_AUTHORITY_HELD",reply["error"])
+
     def test_counts_fail_closed(self):
         import json
         (self.root/"data"/"ledger.json").write_text(json.dumps([{"id":"x","tier":"VERIFIED_OR_INTERNALLY_TESTED"}]))
