@@ -14,6 +14,9 @@ import threading
 import time
 from contextlib import contextmanager
 import uuid
+import zipfile
+import stat
+import unicodedata
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlsplit
 
@@ -52,8 +55,82 @@ def load_local_inference_adapter_r899():
     spec.loader.exec_module(adapter)
     return adapter
 
-READ_ONLY_REPLAY = frozenset({"HASH_TREE", "CSV_STATS", "VERIFY_LEDGER_SPLIT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_AUDIT_LINEAGE"})
-OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "LOCAL_INFER", "LOCAL_CHAT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_EXPORT", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_CONTINUE", "SPHERE_TENSOR_RENDER", "SPHERE_TENSOR_AUDIT_LINEAGE", "RESIDUAL_RESTORE"})
+
+def audit_historical_zip_r921(root: Path, args: dict):
+    """Inspect historic build archive bytes without extraction, import or execution.
+
+    A bounded inventory proves member CRC and SHA-256 for the supplied file at
+    the time of the audit. It does not prove runnable software, source trust,
+    native device acceptance, or Canon admission.
+    """
+    if not isinstance(args, dict) or set(args)-{"source","expected_sha256"}:
+        raise ValueError("R921_ARCHIVE_ARGUMENT_SCHEMA_HELD")
+    rel=args.get("source")
+    if not isinstance(rel,str) or not rel.lower().endswith(".zip"):
+        raise ValueError("R921_ZIP_SOURCE_REQUIRED_HELD")
+    source=safe_under(root,rel,True)
+    compressed_size=source.stat().st_size
+    if compressed_size<22 or compressed_size>512*1024*1024:
+        raise ValueError("R921_ARCHIVE_SIZE_BOUND_HELD")
+    expected=args.get("expected_sha256")
+    if expected is not None and (not isinstance(expected,str) or len(expected)!=64 or
+        any(ch not in "0123456789abcdef" for ch in expected)):
+        raise ValueError("R921_EXPECTED_DIGEST_SCHEMA_HELD")
+    archive_hash=sha_file(source)
+    if expected is not None and expected!=archive_hash:
+        raise ValueError("R921_ARCHIVE_SHA256_MISMATCH_HELD")
+    entries=[]
+    total=0
+    seen=set()
+    types={}
+    try:
+        with zipfile.ZipFile(source,"r") as archive:
+            infos=archive.infolist()
+            if len(infos)>5000:
+                raise ValueError("R921_ARCHIVE_MEMBER_COUNT_HELD")
+            for info in infos:
+                name=unicodedata.normalize("NFC",info.filename)
+                parts=PurePosixPath(name).parts
+                if (not name or name.startswith("/") or "\\\\" in name or
+                    ":" in name or not parts or any(part in (".","..") for part in parts) or
+                    info.flag_bits&1 or (stat.S_IFMT(info.external_attr>>16)==stat.S_IFLNK)):
+                    raise ValueError("R921_UNSAFE_ARCHIVE_ENTRY_HELD")
+                normalized="/".join(parts).rstrip("/").casefold()
+                if normalized in seen:
+                    raise ValueError("R921_CASEFOLD_PATH_COLLISION_HELD")
+                seen.add(normalized)
+                if info.is_dir():
+                    continue
+                if info.file_size>512*1024*1024 or total+info.file_size>2*1024*1024*1024:
+                    raise ValueError("R921_ARCHIVE_EXPANSION_BUDGET_HELD")
+                total+=info.file_size
+                extension=PurePosixPath(name).suffix.lower() or "(none)"
+                types[extension]=types.get(extension,0)+1
+                digest=hashlib.sha256()
+                with archive.open(info,"r") as stream:
+                    while True:
+                        block=stream.read(1024*1024)
+                        if not block: break
+                        digest.update(block)
+                entries.append({"path":name,"size":info.file_size,"crc32":format(info.CRC,"08x"),"sha256":digest.hexdigest()})
+    except (zipfile.BadZipFile,EOFError,RuntimeError,NotImplementedError) as exc:
+        raise ValueError("R921_INVALID_ARCHIVE_OR_CRC_HELD") from exc
+    tree_hash=sha_bytes(json_bytes(sorted(entries,key=lambda e:e["path"])))
+    return {"schema":"OMEGA_HISTORICAL_ARCHIVE_INTAKE_R921",
+            "state":"HASHED_SOURCE_INVENTORY_ONLY",
+            "archive":{"path":rel,"sha256":archive_hash,"compressedBytes":compressed_size},
+            "fileCount":len(entries),"uncompressedBytes":total,
+            "extensionCounts":dict(sorted(types.items())),
+            "memberTreeSha256":tree_hash,
+            "firstMembers":sorted(entries,key=lambda e:e["path"])[:24],
+            "allMembersInTreeHash":True,
+            "historicalCodeExecuted":False,"canonicalWrites":0,
+            "nativePcAccepted":False,"gpuComputeProven":False,
+            "sourceExecutionProven":False,"empiricalTruthProven":False,
+            "proofTier":"OBSERVATION_OF_LOCAL_ARCHIVE_BYTES"}
+
+READ_ONLY_REPLAY = frozenset({"HASH_TREE", "CSV_STATS", "VERIFY_LEDGER_SPLIT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_AUDIT_LINEAGE", "HISTORICAL_ZIP_AUDIT"})
+OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "LOCAL_INFER", "LOCAL_CHAT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_EXPORT", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_CONTINUE", "SPHERE_TENSOR_RENDER", "SPHERE_TENSOR_AUDIT_LINEAGE", "HISTORICAL_ZIP_AUDIT", "RESIDUAL_RESTORE"})
 STATUS = frozenset({"QUEUED", "WAIT_EVENT", "RUNNING", "COMPLETED", "FAILED", "HELD", "CANCELLED"})
 def utc_ms(): return int(time.time() * 1000)
 def sha_file(path: Path) -> str:
@@ -313,6 +390,8 @@ class Hub:
                 "semanticTruthProven":False}
 
     def execute(self,operation,args):
+        if operation=="HISTORICAL_ZIP_AUDIT":
+            return audit_historical_zip_r921(self.root,args)
         if operation=="LOCAL_CHAT":
             return self.execute_local_chat_r916(args)
         if operation=="RESIDUAL_RESTORE": raise ValueError("R195_RESIDUAL_SOURCE_AND_AUTHORITY_REQUIRED")
