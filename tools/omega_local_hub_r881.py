@@ -631,7 +631,15 @@ def serve(hub,token,port):
             return self._send({"ok":False,"state":"NOT_FOUND"},404)
         def do_POST(self):
             if not self._authorized():return self._send({"ok":False,"state":"AUTH_REQUIRED"},401)
-            length=int(self.headers.get("Content-Length",0))
+            # Refuse ambiguous framing before reading a byte.  In particular,
+            # duplicate Content-Length, Transfer-Encoding, and non-decimal
+            # lengths must not disconnect the operator or queue a partial job.
+            lengths=self.headers.get_all("Content-Length",[])
+            if (len(lengths)!=1 or self.headers.get("Transfer-Encoding") is not None
+                or not lengths[0].isascii() or not lengths[0].isdigit()
+                or len(lengths[0])>10):
+                return self._send({"ok":False,"state":"INVALID_REQUEST_FRAMING_HELD"},400)
+            length=int(lengths[0])
             if length<1 or length>MAX_BODY:return self._send({"ok":False,"state":"BODY_SIZE_HELD"},413)
             try:
                 data=json.loads(self.rfile.read(length))
