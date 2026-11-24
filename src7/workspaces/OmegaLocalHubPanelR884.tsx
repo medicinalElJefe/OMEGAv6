@@ -309,8 +309,8 @@ export default function OmegaLocalHubPanelR884(){
     </div>}
     {chosen&&<div style={{marginTop:10}}>
      <strong>Selected job: {chosen.id}</strong>
-     {(chosen.operation==='SPHERE_TENSOR_EXPORT'||chosen.operation==='SPHERE_TENSOR_CONTINUE')&&chosen.state==='COMPLETED'&&<button type='button' style={{...button,margin:'8px 0'}} onClick={()=>{setExportJobId(chosen.id);setOperation('SPHERE_TENSOR_VERIFY');setInfo('R905 round-trip verification configured against '+chosen.id)}}>Verify complete CSV against this export receipt</button>
-     {(chosen.operation==='SPHERE_TENSOR_EXPORT'||chosen.operation==='SPHERE_TENSOR_CONTINUE')&&chosen.state==='COMPLETED'&&<button type='button' style={{...button,margin:'8px 0'}} onClick={()=>{setExportJobId(chosen.id);setOperation('SPHERE_TENSOR_AUDIT_LINEAGE');setInfo('R912 complete lineage audit selected from '+chosen.id)}}>Audit complete checkpoint lineage</button>}}
+     {(chosen.operation==='SPHERE_TENSOR_EXPORT'||chosen.operation==='SPHERE_TENSOR_CONTINUE')&&chosen.state==='COMPLETED'&&<button type='button' style={{...button,margin:'8px 0'}} onClick={()=>{setExportJobId(chosen.id);setOperation('SPHERE_TENSOR_VERIFY');setInfo('R905 round-trip verification configured against '+chosen.id)}}>Verify complete CSV against this export receipt</button>}
+     {(chosen.operation==='SPHERE_TENSOR_EXPORT'||chosen.operation==='SPHERE_TENSOR_CONTINUE')&&chosen.state==='COMPLETED'&&<button type='button' style={{...button,margin:'8px 0'}} onClick={()=>{setExportJobId(chosen.id);setOperation('SPHERE_TENSOR_AUDIT_LINEAGE');setInfo('R912 complete lineage audit selected from '+chosen.id)}}>Audit complete checkpoint lineage</button>}
      {(chosen.operation==='SPHERE_TENSOR_EXPORT'||chosen.operation==='SPHERE_TENSOR_CONTINUE')&&chosen.state==='COMPLETED'&&
       <button type='button' disabled={busy||state!=='LOOPBACK_AUTHENTICATED'} style={{...button,margin:'8px 0'}} onClick={()=>{const a=(chosen.result as {artifact?:{sha256?:string}}|undefined)?.artifact;void downloadCsv(chosen.id,String(a?.sha256||''))}}>
        Download complete verified CSV checkpoint
