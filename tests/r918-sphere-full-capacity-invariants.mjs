@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {
  AXES,SIZE,SHELLS,AGENTS,NESTED,R918_CAPACITY,R918_SCHEMA,
- agentId,agentAddress,nestedId,expandedAddressR918,expandedCoordinatesR918,
+ agentId,agentAddress,nestedId,expandedAddressR918,expandedCoordinatesR918,phaseNeighborR919,
  axes4,fromAxes4,createFabric,phaseSampleR918,stateValue,
  neighbors,submitTask,stepFabric,serializeFabricR888,restoreFabricR888
 } from '../src/sphereAgentFabricR887.mjs';
@@ -59,6 +59,7 @@ for(let phase=0;phase<AXES;phase++){
  const digits=axes4(inner);
  digits[phase%4]=(digits[phase%4]+projection.turn+AXES)%AXES;
  assert.equal(projection.neighbor,fromAxes4(digits));
+ assert.equal(phaseNeighborR919(inner,phase),projection.neighbor);
  assert.equal(projection.sampledValue,stateValue(fabric,agent,projection.neighbor));
  assert.ok(Math.abs(projection.delta)<=1);
  assert.equal(projection.gradientMagnitude,Math.abs(projection.delta));
@@ -107,6 +108,10 @@ assert.equal(serializeFabricR888(phaseRestored),phaseCheckpoint,'phase state and
 assert.equal(stateValue(phaseRestored,agent,neighbor),stateValue(fabric,agent,neighbor));
 const durableSession={agent,memberCount:1,stepCursor:0,batch:1,mode:'SELECTED_INNER',selectedInner:inner};
 assert.equal(validateDurableR895(phaseRestored,durableSession).schema,'OMEGA_SPHERE_DURABLE_CHECKPOINT_R895');
+const tampered=restoreFabricR888(phaseCheckpoint);
+tampered.receipts.at(-1).neighborInner=(neighbor+1)%SIZE;
+assert.throws(()=>validateDurableR895(tampered,durableSession),/durable ledger receipt/);
+assert.throws(()=>restoreFabricR888(serializeFabricR888(tampered)),/Invalid checkpoint receipt/);
 submitTask(phaseRestored,{agent,kind:'PHASE_EXCHANGE',inner,phase:8,weight:.2});
 const phaseQueue=restoreFabricR888(serializeFabricR888(phaseRestored));
 assert.equal(phaseQueue.queue[0].kind,'PHASE_EXCHANGE');
