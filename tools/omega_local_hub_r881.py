@@ -91,7 +91,7 @@ def audit_historical_zip_r921(root: Path, args: dict):
             for info in infos:
                 name=unicodedata.normalize("NFC",info.filename)
                 parts=PurePosixPath(name).parts
-                if (not name or name.startswith("/") or "\\\\" in name or
+                if (not name or name.startswith("/") or "\\" in name or
                     ":" in name or not parts or any(part in (".","..") for part in parts) or
                     info.flag_bits&1 or (stat.S_IFMT(info.external_attr>>16)==stat.S_IFLNK)):
                     raise ValueError("R921_UNSAFE_ARCHIVE_ENTRY_HELD")
