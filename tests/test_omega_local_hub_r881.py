@@ -534,7 +534,11 @@ class LocalHubTests(unittest.TestCase):
         from unittest.mock import patch
         source = "data/one.csv"
         destination = "out/r915-raced.json"
-        target = self.root / destination
+        # Use the same canonicalized path as the production safe_under() call.
+        # Windows tempfile roots can have alternate absolute spellings, so
+        # comparing an unresolved test path to the resolved execution path
+        # silently bypasses the deliberate race injection.
+        target = hubmod.safe_under(self.root, destination, False)
         target.parent.mkdir(parents=True, exist_ok=True)
         original_open = Path.open
         injected = [False]
