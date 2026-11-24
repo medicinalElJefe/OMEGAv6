@@ -241,6 +241,13 @@ class LocalHubTests(unittest.TestCase):
         self.assertEqual([x["jobId"] for x in lineage["entries"]],[leaf["id"],middle["id"],root["id"]])
         self.assertTrue(all(x["mass"]==16384 for x in lineage["entries"]))
         self.assertFalse(lineage["signedProvenance"])
+        self.assertEqual(self.hub.replay(audit_job["id"])["state"],"MATCH")
+        render_valid=self.hub.enqueue("SPHERE_TENSOR_RENDER",{
+            "export_job_id":leaf["id"],"destination":"chain-original-art.svg"})
+        rendered=self.hub.run_one()
+        self.assertEqual(rendered["state"],"COMPLETED")
+        self.assertEqual(self.hub.verified_svg_artifact(render_valid["id"])[1],
+                         rendered["result"]["artifact"]["sha256"])
         original=self.root/"chain-root.csv"
         content=original.read_bytes()
         try:
@@ -249,6 +256,10 @@ class LocalHubTests(unittest.TestCase):
             held=self.hub.run_one()
             self.assertEqual(held["state"],"HELD")
             self.assertIn("R905_",held["error"])
+            verify_leaf=self.hub.enqueue("SPHERE_TENSOR_VERIFY",{"export_job_id":leaf["id"]})
+            self.assertEqual(self.hub.run_one()["state"],"HELD")
+            with self.assertRaises(ValueError):
+                self.hub.verified_svg_artifact(render_valid["id"])
             continued=self.hub.enqueue("SPHERE_TENSOR_CONTINUE",{
                 "export_job_id":leaf["id"],"destination":"cannot-continue.csv",
                 "steps":1,"cell_axis":0,"lane_axis":1})
