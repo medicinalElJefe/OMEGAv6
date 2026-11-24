@@ -226,9 +226,9 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R951 original B053 R7 28 isolated source test modules 70/70 cases PASS; R950 30/30 R7 source parts and 1856/1856 embedded file hashes; R949 B043 62/62 isolated; native Windows GPU and current OMEGA7 parity held",
+  "latestGovernedWork": "R953 original V35 20/20 ZIP SHA/CRC and 17 payload + 3 expansion SHA accepted; 79/156 numbered source ZIPs now independently byte verified; R951 B053 R7 70 original tests PASS and R949 B043 62 isolated tests PASS; full OMEGA7/GPU/installer proof held",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
-  "independentArchiveByteWitnesses": 60,
+  "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
     {
       "id": "EXACT_HEAD_ALL_WORKFLOWS",
@@ -379,11 +379,22 @@
       "revision": "R951",
       "conservation": "All 28 archived B053 R7 source test modules reproduced as 70 passing tests, including nested skin module",
       "accepted": "ISOLATED_ORIGINAL_DONOR_TESTS_ONLY_NOT_OMEGA7_OR_WINDOWS_PROOF"
+    },
+    {
+      "revision": "R952",
+      "conservation": "Correct source-acceptance regression assertion to immutable recorded replay scope; do not confuse R950 with R951",
+      "accepted": "CANDIDATE_TEST_FIX"
+    },
+    {
+      "revision": "R953",
+      "conservation": "Full original V35 20-part SHA/CRC and its 17 main runtime payload plus 3 expansion SHA verified",
+      "accepted": "ORIGINAL_V35_SOURCE_BYTES_ONLY_RUNTIME_AND_INSTALLER_HELD"
     }
   ],
-  "independentArchiveUnverifiedOtherListedParts": 96,
+  "independentArchiveUnverifiedOtherListedParts": 77,
   "reconstructedOriginalReleaseEvidence": "audit/omega-b043-full-source-byte-acceptance-r948.json",
   "isolatedB043ModuleProof": "audit/omega-b043-module-test-evidence-r949.json",
   "reconstructedB053R7SourceEvidence": "audit/omega-b053-r7-full-source-acceptance-r950.json",
-  "originalB053R7ModuleEvidence": "audit/omega-b053-r7-isolated-module-parity-r951.json"
+  "originalB053R7ModuleEvidence": "audit/omega-b053-r7-isolated-module-parity-r951.json",
+  "recoveredV35SourceEvidence": "audit/omega-v35-full-source-acceptance-r953.json"
 }

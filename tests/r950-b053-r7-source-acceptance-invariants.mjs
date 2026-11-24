@@ -36,8 +36,8 @@ for(const [i,p] of receipt.parts.entries()){
  assert.match(p.embeddedChunkSha256,/^[a-f0-9]{64}$/);
  assert.equal(p.zipCrc,'PASS');
 }
-assert.equal(active.independentArchiveByteWitnesses,60);
-assert.equal(active.independentArchiveUnverifiedOtherListedParts,96);
+assert.equal(active.independentArchiveByteWitnesses,79);
+assert.equal(active.independentArchiveUnverifiedOtherListedParts,77);
 assert.equal(active.reconstructedB053R7SourceEvidence,'audit/omega-b053-r7-full-source-acceptance-r950.json');
 assert.ok(active.blockers.some(x=>x.id==='ZIP_BYTES'&&x.state==='OPEN'));
 assert.ok(active.blockers.some(x=>x.id==='FAMILY_PARITY'&&x.state==='OPEN'));

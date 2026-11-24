@@ -29,8 +29,8 @@ for(const w of proof.witnesses){
  assert.equal(w.nativeGpuProof,false);
  assert.equal(w.canonicalWrites,0);
 }
-assert.equal(ledger.independentArchiveByteWitnesses,60);
-assert.equal(ledger.independentArchiveUnverifiedOtherListedParts,96);
+assert.equal(ledger.independentArchiveByteWitnesses,79);
+assert.equal(ledger.independentArchiveUnverifiedOtherListedParts,77);
 assert.equal(ledger.reconstructedOriginalReleaseEvidence,'audit/omega-b043-full-source-byte-acceptance-r948.json');
 assert.equal(ledger.independentArchiveWitnessLedger,'audit/omega-historical-byte-witnesses-r944.json');
 assert.ok(ledger.blockers.some(x=>x.id==='ZIP_BYTES'&&x.state==='OPEN'));
