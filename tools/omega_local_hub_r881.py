@@ -268,7 +268,7 @@ def correlate_duplex24_r924(root:Path,args:dict):
             raise ValueError("R924_PART_RECORD_HELD")
         name=item.get("file")
         if (not isinstance(name,str) or not name.startswith("OMEGA_V61_3_PART_") or
-            not name.endswith(".zip") or len(name)!=24 or not name[20:22].isdigit() or
+            not name.endswith(".zip") or len(name)!=23 or not name[17:19].isdigit() or
             not valid_sha(item.get("sha256")) or type(item.get("bytes")) is not int or
             item["bytes"]<22 or item["bytes"]>768*1024*1024 or name in expected_parts):
             raise ValueError("R924_DISTRIBUTION_PART_RECORD_HELD")
