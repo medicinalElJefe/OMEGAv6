@@ -4,7 +4,7 @@ import {executeR908GpuProjection} from './omegaR908GpuProjection';
 type HubJob={id:string;operation:string;state:string;scheduled_ms:number;created_ms:number;updated_ms:number;error?:string|null;result_sha256?:string|null;result?:unknown;history?:{event:string;at_ms:number;details:string}[]};
 type Json=Record<string,unknown>;
 const BASE='http://127.0.0.1:8765';
-const OPS=['HASH_TREE','CSV_STATS','COPY_ARTIFACT','EXPORT_MANIFEST','VERIFY_LEDGER_SPLIT','VERIFY_LEDGER_SET','HISTORICAL_ZIP_AUDIT','HISTORICAL_B010_EXECUTE','LOCAL_INFER','SPHERE_TENSOR_STEP','SPHERE_TENSOR_EXPORT','SPHERE_TENSOR_VERIFY','SPHERE_TENSOR_CONTINUE','SPHERE_TENSOR_RENDER','SPHERE_TENSOR_AUDIT_LINEAGE','RESIDUAL_RESTORE'] as const;
+const OPS=['HASH_TREE','CSV_STATS','COPY_ARTIFACT','EXPORT_MANIFEST','VERIFY_LEDGER_SPLIT','VERIFY_LEDGER_SET','HISTORICAL_ZIP_AUDIT','HISTORICAL_B010_EXECUTE','HISTORICAL_DUPLEX24_CORRELATE','LOCAL_INFER','SPHERE_TENSOR_STEP','SPHERE_TENSOR_EXPORT','SPHERE_TENSOR_VERIFY','SPHERE_TENSOR_CONTINUE','SPHERE_TENSOR_RENDER','SPHERE_TENSOR_AUDIT_LINEAGE','RESIDUAL_RESTORE'] as const;
 type Operation=typeof OPS[number];
 const surface:CSSProperties={padding:16,borderRadius:12,border:'1px solid #436079',background:'#0d1d2d',color:'#eff6fc',margin:'14px 0'};
 const field:CSSProperties={background:'#152f47',color:'#eaf5ff',border:'1px solid #607e98',padding:9,borderRadius:7,width:'100%',boxSizing:'border-box'};
@@ -66,7 +66,7 @@ async function fetchVerifiedCsvR910(token:string,jobId:string,expectedHash:strin
 export default function OmegaLocalHubPanelR884(){
  const [token,setToken]=useState(''),[state,setState]=useState<'UNCONNECTED'|'LOOPBACK_AUTHENTICATED'|'HELD'>('UNCONNECTED');
  const [operation,setOperation]=useState<Operation>('HASH_TREE'),[source,setSource]=useState('.'),[destination,setDestination]=useState('exports/omega-artifact.json');
- const [b010Steps,setB010Steps]=useState('3'),[b010Domain,setB010Domain]=useState('semantic'),[b010Scale,setB010Scale]=useState('surface'),[b010View,setB010View]=useState('cinematic'),[b010Color,setB010Color]=useState('violet'),[archiveExpectedSha,setArchiveExpectedSha]=useState(''),[delay,setDelay]=useState('0'),[eventName,setEventName]=useState(''),[jobs,setJobs]=useState<HubJob[]>([]);
+ const [b010Steps,setB010Steps]=useState('3'),[b010Domain,setB010Domain]=useState('semantic'),[b010Scale,setB010Scale]=useState('surface'),[b010View,setB010View]=useState('cinematic'),[b010Color,setB010Color]=useState('violet'),[duplexFolder,setDuplexFolder]=useState('.'),[archiveExpectedSha,setArchiveExpectedSha]=useState(''),[delay,setDelay]=useState('0'),[eventName,setEventName]=useState(''),[jobs,setJobs]=useState<HubJob[]>([]);
  const [model,setModel]=useState(''),[prompt,setPrompt]=useState(''),[maxTokens,setMaxTokens]=useState('256');
  const [tensorCell,setTensorCell]=useState('0'),[tensorLane,setTensorLane]=useState('0'),[tensorMass,setTensorMass]=useState('4096'),[tensorSteps,setTensorSteps]=useState('4');
  const [exportJobId,setExportJobId]=useState('');
@@ -155,6 +155,11 @@ export default function OmegaLocalHubPanelR884(){
     if(operation==='SPHERE_TENSOR_EXPORT'){if(!destination.trim().toLowerCase().endsWith('.csv'))throw Error('Choose a new .csv destination inside the approved root.');args.destination=destination.trim();}
    }
    if(operation==='HASH_TREE')args.path=source||'.';
+   if(operation==='HISTORICAL_DUPLEX24_CORRELATE'){
+    if(!source.trim().toLowerCase().endsWith('.json')||source.includes('..')||source.includes('\\')||source.startsWith('/')||source.includes(':'))throw Error('R924 requires a local release manifest JSON relative to the approved workspace root.');
+    if(duplexFolder.includes('..')||duplexFolder.includes('\\')||duplexFolder.startsWith('/')||duplexFolder.includes(':'))throw Error('R924 requires an approved relative ZIP distribution folder.');
+    args.manifest=source.trim();args.archive_folder=duplexFolder.trim()||'.';
+   }
    if(operation==='HISTORICAL_ZIP_AUDIT'){
     if(!source.trim().toLowerCase().endsWith('.zip')||source.includes('\\')||source.startsWith('/')||source.includes('..'))throw Error('Select an existing ZIP relative to the approved local workspace root.');
     args.source=source.trim();
@@ -246,6 +251,10 @@ export default function OmegaLocalHubPanelR884(){
   donorReceipt.currentCanonWrites===0&&Array.isArray(donorReceipt.frames)
   ?donorReceipt.frames as {frame:number;traversalAddress:number;statePacketSha256:string;acceptanceSha256:string}[]:null;
  const donorFinal=donorFrames?.length?donorFrames[donorFrames.length-1]:null;
+ const duplexReceipt=chosen?.operation==='HISTORICAL_DUPLEX24_CORRELATE'&&chosen.state==='COMPLETED'&&chosen.result&&typeof chosen.result==='object'
+  ?chosen.result as Record<string,unknown>:null;
+ const duplexPairs=duplexReceipt?.schema==='OMEGA_HISTORICAL_DUPLEX24_CORRELATION_R924'&&Array.isArray(duplexReceipt.duplexPairs)
+  ?duplexReceipt.duplexPairs as {law:string;inverse:string;outverse:string;inverseArchiveMemberLocated:boolean;outverseArchiveMemberLocated:boolean}[]:null;
  const tensorExport=chosen&&(chosen.operation==='SPHERE_TENSOR_EXPORT'||chosen.operation==='SPHERE_TENSOR_CONTINUE')&&chosen.state==='COMPLETED'&&chosen.result&&typeof chosen.result==='object'
   ?chosen.result as Record<string,unknown>:null;
  const tensorResult=tensorExport&&tensorExport.tensor&&typeof tensorExport.tensor==='object'
@@ -291,7 +300,8 @@ export default function OmegaLocalHubPanelR884(){
     <h3>Queue bounded work</h3>
     <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:12}}>
      <label>Operation<select style={field} value={operation} onChange={e=>setOperation(e.target.value as Operation)}>{OPS.map(x=><option key={x} value={x}>{x.replaceAll('_',' ')}</option>)}</select></label>
-     {operation!=='LOCAL_INFER'&&operation!=='SPHERE_TENSOR_STEP'&&operation!=='SPHERE_TENSOR_EXPORT'&&operation!=='SPHERE_TENSOR_VERIFY'&&operation!=='SPHERE_TENSOR_CONTINUE'&&operation!=='SPHERE_TENSOR_RENDER'&&operation!=='SPHERE_TENSOR_AUDIT_LINEAGE'&&<label>{operation==='HASH_TREE'?'Project folder':operation==='EXPORT_MANIFEST'?'Source files (one per line)':operation==='HISTORICAL_ZIP_AUDIT'||operation==='HISTORICAL_B010_EXECUTE'?'Historical ZIP relative path':'Source relative file'}<textarea style={field} rows={2} value={source} onChange={e=>setSource(e.target.value)} spellCheck={false}/></label>}
+     {operation!=='LOCAL_INFER'&&operation!=='SPHERE_TENSOR_STEP'&&operation!=='SPHERE_TENSOR_EXPORT'&&operation!=='SPHERE_TENSOR_VERIFY'&&operation!=='SPHERE_TENSOR_CONTINUE'&&operation!=='SPHERE_TENSOR_RENDER'&&operation!=='SPHERE_TENSOR_AUDIT_LINEAGE'&&<label>{operation==='HASH_TREE'?'Project folder':operation==='EXPORT_MANIFEST'?'Source files (one per line)':operation==='HISTORICAL_ZIP_AUDIT'||operation==='HISTORICAL_B010_EXECUTE'?'Historical ZIP relative path':operation==='HISTORICAL_DUPLEX24_CORRELATE'?'V61.3 full release manifest JSON':'Source relative file'}<textarea style={field} rows={2} value={source} onChange={e=>setSource(e.target.value)} spellCheck={false}/></label>}
+     {operation==='HISTORICAL_DUPLEX24_CORRELATE'&&<><label>Folder containing the 20 historical ZIP parts (relative path)<input style={field} value={duplexFolder} onChange={e=>setDuplexFolder(e.target.value)} placeholder='.' spellCheck={false}/></label><small>Validate all 24 inverse/outverse identities against the 20-part release manifest; independently hash present ZIP files and disclose missing parts. No code extraction or Canon promotion.</small></>}
      {operation==='HISTORICAL_B010_EXECUTE'&&<><label>Historical execution frames (1–12)<input style={field} type='number' min={1} max={12} step={1} value={b010Steps} onChange={e=>setB010Steps(e.target.value)}/></label><label>B010 domain<select style={field} value={b010Domain} onChange={e=>setB010Domain(e.target.value)}>{['semantic','physical','temporal','relational','inverse','outverse','material','spectral','causal','evidence','scar','forecast'].map(n=><option key={n}>{n}</option>)}</select></label><label>B010 scale<select style={field} value={b010Scale} onChange={e=>setB010Scale(e.target.value)}>{['surface','micro','object','assembly','planetary','regional','cosmic','galactic','system','architectural','part','field'].map(n=><option key={n}>{n}</option>)}</select></label><label>B010 view<select style={field} value={b010View} onChange={e=>setB010View(e.target.value)}>{['cinematic','field','structure','surface','material','semantic','diagnostic','wireframe','evidence'].map(n=><option key={n}>{n}</option>)}</select></label><label>B010 color operator<select style={field} value={b010Color} onChange={e=>setB010Color(e.target.value)}>{['violet','teal','spectral','scar','water','evidence','neutral'].map(n=><option key={n}>{n}</option>)}</select></label><small>Runs only byte-pinned OMEGA B010 donor (SHA-256 bb8df3a4…). Frames execute in a disposable local workspace and return packet/traversal/acceptance hashes. This does not modify Canon or establish GPU/physical authority.</small></>}
      {operation==='HISTORICAL_ZIP_AUDIT'&&<label>Expected archive SHA-256 (optional, required for comparison against a recorded release)<input style={field} value={archiveExpectedSha} maxLength={64} spellCheck={false} placeholder='64 lowercase hexadecimal characters' onChange={e=>setArchiveExpectedSha(e.target.value)}/></label>}
      {(operation==='SPHERE_TENSOR_VERIFY'||operation==='SPHERE_TENSOR_CONTINUE'||operation==='SPHERE_TENSOR_RENDER'||operation==='SPHERE_TENSOR_AUDIT_LINEAGE')&&<label>Original completed export job ID<input style={field} value={exportJobId} onChange={e=>setExportJobId(e.target.value.trim())} maxLength={32} placeholder='Select a completed export job below'/></label>}
@@ -333,6 +343,7 @@ export default function OmegaLocalHubPanelR884(){
     </div>}
     {chosen&&<div style={{marginTop:10}}>
      <strong>Selected job: {chosen.id}</strong>
+     {duplexPairs&&<div data-r924-duplex24='SOURCE_ONLY' style={{...surface,margin:'8px 0'}}><h4>Historical 24-BIN Duplex · 12 paired authorities</h4><p><small>{String(duplexReceipt?.state)} · {String(duplexReceipt?.verifiedOuterParts)}/20 distribution parts SHA-256 verified · {String(duplexReceipt?.payloadsLocatedByName)}/24 BIN names found. Missing parts: {Array.isArray(duplexReceipt?.missingParts)?(duplexReceipt.missingParts as string[]).join(', ')||'none':'unknown'}. Source presence alone does not establish runtime capability.</small></p><div style={{overflowX:'auto'}}><table style={{width:'100%',borderCollapse:'collapse'}}><thead><tr><th align='left'>Relational law</th><th align='left'>Inverse</th><th align='left'>Outverse</th></tr></thead><tbody>{duplexPairs.map(p=><tr key={p.law}><td>{p.law}</td><td>{p.inverse} · {p.inverseArchiveMemberLocated?'located':'held'}</td><td>{p.outverse} · {p.outverseArchiveMemberLocated?'located':'held'}</td></tr>)}</tbody></table></div></div>}
      {donorFinal&&Number.isSafeInteger(donorFinal.traversalAddress)&&donorFinal.traversalAddress>=0&&donorFinal.traversalAddress<20736&&<div data-r922-b010-to-sphere='EXPLICIT_ADDRESS_TRANSLATION_ONLY' style={{...surface,margin:'8px 0'}}>
       <strong>Recovered B010 traversal → SPHERE</strong>
       <p><small>Historical donor frame {donorFinal.frame} · exact 20,736 address {donorFinal.traversalAddress} · B010 acceptance hash {String(donorFinal.acceptanceSha256).slice(0,16)}… This transfers only an address coordinate; no donor state, evidence tier, or canonical authority is imported.</small></p>
