@@ -458,6 +458,33 @@ class LocalHubTests(unittest.TestCase):
         manifest=self.hub.enqueue("EXPORT_MANIFEST",{"destination":"out/manifest.json","sources":["data/one.csv","out/copy.csv"]})
         self.assertEqual(self.hub.run_one()["state"],"COMPLETED")
         self.assertEqual(len(__import__("json").loads((self.root/"out"/"manifest.json").read_text())["sources"]),2)
+    def test_r915_manifest_exclusive_creation_refuses_race_without_clobber(self):
+        from unittest.mock import patch
+        source = "data/one.csv"
+        destination = "out/r915-raced.json"
+        target = self.root / destination
+        target.parent.mkdir(parents=True, exist_ok=True)
+        original_open = Path.open
+        injected = [False]
+
+        def competing_open(path, mode="r", *args, **kwargs):
+            if path == target and mode == "xb" and not injected[0]:
+                injected[0] = True
+                with original_open(path, "wb") as stream:
+                    stream.write(b"independent-file")
+            return original_open(path, mode, *args, **kwargs)
+
+        job = self.hub.enqueue("EXPORT_MANIFEST", {
+            "destination": destination, "sources": [source]})
+        with patch.object(Path, "open", competing_open):
+            refused = self.hub.run_one()
+        self.assertTrue(injected[0], "R915 race was not exercised")
+        self.assertEqual(refused["id"], job["id"])
+        self.assertEqual(refused["state"], "HELD")
+        self.assertIn("R915_MANIFEST_DESTINATION_EXISTS_HELD", refused["error"])
+        self.assertEqual(target.read_bytes(), b"independent-file")
+        self.assertEqual(self.hub.replay(job["id"])["state"], "REPLAY_NOT_ADMISSIBLE")
+
     def test_counts_fail_closed(self):
         import json
         (self.root/"data"/"ledger.json").write_text(json.dumps([{"id":"x","tier":"VERIFIED_OR_INTERNALLY_TESTED"}]))
