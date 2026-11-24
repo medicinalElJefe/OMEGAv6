@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R944 two exact independent Drive ZIP+payload hash/CRC witnesses, 154 remaining named split parts unverified; R938 authenticated release-set auditor; R937 governing ledger",
+  "latestGovernedWork": "R947 exact pinned streamed B043 reconstruction available as authenticated local operation; 29 source parts still not all reassembled from current Drive bytes; R945 Windows path repair and R946 proof-qualified completion ledger",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 2,
   "gateReceipts": [
@@ -349,6 +349,16 @@
       "revision": "R945",
       "conservation": "Windows POSIX relative-path safety fix",
       "accepted": "WINDOWS_CI_PENDING"
+    },
+    {
+      "revision": "R946",
+      "conservation": "Active ledger accepts only evidence-qualified closeout and governed release promotion",
+      "accepted": "CANDIDATE_SOURCE_ONLY"
+    },
+    {
+      "revision": "R947",
+      "conservation": "Source-pinned B043 29-part streaming reconstruction with non-overwrite durable receipt",
+      "accepted": "CANDIDATE_EXECUTOR_NOT_29_PART_FULL_RUN"
     }
   ]
 }

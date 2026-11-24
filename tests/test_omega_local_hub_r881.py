@@ -44,6 +44,63 @@ class LocalHubTests(unittest.TestCase):
     def test_hub_db_location_must_be_private(self):
         with self.assertRaisesRegex(ValueError,"DB_MUST_RESIDE_IN_PRIVATE_HUB_DIR"):
             hubmod.Hub(self.root,self.root/"data"/"database.sqlite")
+    def test_r947_original_b043_stream_assembler_no_overwrite_and_refusal(self):
+        import hashlib, json, zipfile
+        spec=importlib.util.spec_from_file_location(
+            "omega_b043_reconstruct_r947",
+            MODULE.parent / "omega_b043_reconstruct_r947.py")
+        module=importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        folder=self.root/"data"/"r947_parts"
+        folder.mkdir()
+        pieces=[b"part-one-stream\n",b"part-two-stream\n"]
+        master=b"".join(pieces)
+        digest=lambda b:hashlib.sha256(b).hexdigest()
+        manifest={"build":module.RELEASE,
+                  "master":{"name":module.MASTER,"sha256":digest(master),"bytes":len(master)},
+                  "part_count":2,"parts":[]}
+        for i,chunk in enumerate(pieces,1):
+            name=f"OMEGA_B043_FULL_SYSTEM_PART_{i:02d}_OF_02.zip"
+            member=f"OMEGA_B043_FULL_SYSTEM.chunk_{i:03d}_of_002.bin"
+            with zipfile.ZipFile(folder/name,"w",compression=zipfile.ZIP_STORED) as wrapper:
+                wrapper.writestr(member,chunk)
+            data=(folder/name).read_bytes()
+            manifest["parts"].append({"index":i,"part":name,"chunk":member,
+               "part_bytes":len(data),"chunk_bytes":len(chunk),
+               "part_sha256":digest(data),"chunk_sha256":digest(chunk),
+               "members":[member],"part_crc":"PASS"})
+        (self.root/"data"/"OMEGA_B043_PARTITION_MANIFEST.json").write_text(
+            json.dumps(manifest),encoding="utf-8")
+        args={"manifest":"data/OMEGA_B043_PARTITION_MANIFEST.json",
+              "archive_folder":"data/r947_parts","destination":"data/OMEGA_B043_FULL_SYSTEM.zip"}
+        receipt=module._assemble_parts_r947(self.root,args,hubmod.safe_under,
+            expected_count=2,expected_sha256=digest(master),expected_bytes=len(master))
+        self.assertEqual(receipt["masterSha256"],digest(master))
+        self.assertEqual(receipt["masterBytes"],len(master))
+        self.assertEqual(receipt["verifiedWrapperCount"],2)
+        self.assertTrue(receipt["sourceExactByteReconstruction"])
+        self.assertFalse(receipt["donorCodeExecuted"])
+        self.assertEqual(receipt["canonWrites"],0)
+        self.assertEqual((self.root/"data"/module.MASTER).read_bytes(),master)
+        with self.assertRaisesRegex(ValueError,"R947_DESTINATION_MUST_BE_NEW_MASTER_HELD"):
+            module._assemble_parts_r947(self.root,args,hubmod.safe_under,
+                expected_count=2,expected_sha256=digest(master),expected_bytes=len(master))
+        (self.root/"data"/module.MASTER).unlink()
+        with self.assertRaisesRegex(ValueError,"R947_MASTER_SOURCE_AUTHORITY_HELD"):
+            module.reconstruct_b043_r947(self.root,args,hubmod.safe_under)
+        # The official executor cannot accept the two-part fixture.
+        queued=self.hub.enqueue("HISTORICAL_B043_RECONSTRUCT",args)
+        held=self.hub.run_one()
+        self.assertEqual(held["id"],queued["id"])
+        self.assertEqual(held["state"],"HELD")
+        self.assertFalse((self.root/"data"/module.MASTER).exists())
+        original=(folder/manifest["parts"][0]["part"]).read_bytes()
+        (folder/manifest["parts"][0]["part"]).write_bytes(original.replace(b"part-one-stream",b"part-one-tamper"))
+        with self.assertRaisesRegex(ValueError,"R947_ORIGINAL_PART_SHA256_MISMATCH_HELD"):
+            module._assemble_parts_r947(self.root,args,hubmod.safe_under,
+                expected_count=2,expected_sha256=digest(master),expected_bytes=len(master))
+        self.assertFalse((self.root/"data"/module.MASTER).exists())
+
     def test_r938_full_release_source_set_batch_hash_and_fail_closed(self):
         import hashlib
         import json
