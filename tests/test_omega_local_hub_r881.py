@@ -609,6 +609,32 @@ class LocalHubTests(unittest.TestCase):
         # No files are extracted or executed, and all 4 corrupted cases retain receipts.
         self.assertFalse((self.root / "escape.py").exists())
 
+
+    def test_r922_historical_b010_execution_must_be_exact_pinned_source(self):
+        import zipfile
+        import hashlib
+        self.assertEqual(hubmod.B010_ARCHIVE_SHA256_R922,
+                         "bb8df3a47008db98cf2348241e1bff035dd6ff5beacb5e5553a5693e41907d4e")
+        candidate=self.root/"data"/"untrusted-b010.zip"
+        with zipfile.ZipFile(candidate,"w") as z:
+            z.writestr("omega/runtime_core.py",b"raise RuntimeError('must not execute')")
+        before=(self.root/".omega"/"b010-r922-").exists()
+        for args,error in [
+            ({"source":"data/untrusted-b010.zip","steps":0},"R922_B010_INPUT_BOUND_HELD"),
+            ({"source":"data/untrusted-b010.zip","steps":13},"R922_B010_INPUT_BOUND_HELD"),
+            ({"source":"data/untrusted-b010.zip","steps":True},"R922_B010_INPUT_BOUND_HELD"),
+            ({"source":"data/untrusted-b010.zip","steps":1,"axes":{"invalid":"x"}},"R922_B010_AXES_SCHEMA_HELD"),
+            ({"source":"data/untrusted-b010.zip","steps":1},"R922_B010_EXACT_SOURCE_SHA256_REQUIRED_HELD"),
+            ({"source":"../untrusted-b010.zip","steps":1},"OUTSIDE_APPROVED_ROOT_HELD"),
+        ]:
+            queued=self.hub.enqueue("HISTORICAL_B010_EXECUTE",args)
+            received=self.hub.run_one()
+            self.assertEqual(received["id"],queued["id"])
+            self.assertEqual(received["state"],"HELD")
+            self.assertIn(error,received["error"])
+            self.assertEqual(self.hub.replay(queued["id"])["state"],"REPLAY_NOT_ADMISSIBLE")
+        self.assertEqual((self.root/".omega"/"b010-r922-").exists(),before)
+
     def test_counts_fail_closed(self):
         import json
         (self.root/"data"/"ledger.json").write_text(json.dumps([{"id":"x","tier":"VERIFIED_OR_INTERNALLY_TESTED"}]))
