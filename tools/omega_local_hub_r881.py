@@ -53,7 +53,7 @@ def load_local_inference_adapter_r899():
     return adapter
 
 READ_ONLY_REPLAY = frozenset({"HASH_TREE", "CSV_STATS", "VERIFY_LEDGER_SPLIT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_VERIFY"})
-OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "LOCAL_INFER", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_EXPORT", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_CONTINUE", "SPHERE_TENSOR_RENDER", "RESIDUAL_RESTORE"})
+OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "LOCAL_INFER", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_EXPORT", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_CONTINUE", "SPHERE_TENSOR_RENDER", "SPHERE_TENSOR_AUDIT_LINEAGE", "RESIDUAL_RESTORE"})
 STATUS = frozenset({"QUEUED", "WAIT_EVENT", "RUNNING", "COMPLETED", "FAILED", "HELD", "CANCELLED"})
 def utc_ms(): return int(time.time() * 1000)
 def sha_file(path: Path) -> str:
@@ -195,10 +195,67 @@ class Hub:
         verified=module.verify_sparse_export_r905(target,original,include_rows=include_rows)
         return prior, verified
 
+    def audit_sparse_lineage_r912(self, export_id):
+        """Verify *every* original checkpoint and SQLite receipt back to R904.
+
+        Traverse iteratively, reject cyclic links and overdeep ancestry, and
+        compare each R906 child's pinned parent result/state hashes to the
+        parent's verified original receipt. Never reconstruct truth from a
+        32-component display preview or trust only the current leaf.
+        """
+        if not isinstance(export_id,str) or len(export_id)!=32 or any(c not in "0123456789abcdef" for c in export_id):
+            raise ValueError("R912_CHECKPOINT_JOB_ID_HELD")
+        visited=set()
+        current=export_id
+        child=None
+        chain=[]
+        for depth in range(33):
+            if current in visited: raise ValueError("R912_LINEAGE_CYCLE_HELD")
+            if depth==32: raise ValueError("R912_LINEAGE_DEPTH_BOUND_HELD")
+            visited.add(current)
+            prior, verified=self.verified_sparse_export(current)
+            original=prior["result"]
+            if child is not None:
+                child_receipt=child["result"]
+                if (child_receipt.get("sourceExportJobId")!=current or
+                    child_receipt.get("sourceExportReceiptSha256")!=prior["result_sha256"] or
+                    child_receipt.get("sourceStateSha256")!=verified["fullStateSha256"] or
+                    child_receipt.get("tensor",{}).get("totalMassBefore")!=verified["totalMass"]):
+                    raise ValueError("R912_PARENT_RECEIPT_OR_STATE_DRIFT_HELD")
+            chain.append({"jobId":current,
+                          "receiptSha256":prior["result_sha256"],
+                          "stateSha256":verified["fullStateSha256"],
+                          "fileSha256":verified["fileSha256"],
+                          "mass":verified["totalMass"],
+                          "operation":prior["operation"]})
+            if prior["operation"]=="SPHERE_TENSOR_EXPORT":
+                break
+            current=original.get("sourceExportJobId")
+            child=prior
+            if not isinstance(current,str):raise ValueError("R912_PARENT_JOB_ID_REQUIRED_HELD")
+        else:
+            raise ValueError("R912_LINEAGE_DEPTH_BOUND_HELD")
+        return {"schema":"OMEGA_SPARSE_LINEAGE_AUDIT_R912",
+                "state":"EXACT_COMPLETE_CHECKPOINT_LINEAGE_VERIFIED",
+                "leafJobId":export_id,
+                "rootExportJobId":chain[-1]["jobId"],
+                "depth":len(chain),
+                "totalMass":chain[0]["mass"],
+                "sourceFullStateSha256":chain[0]["stateSha256"],
+                "entries":chain,
+                "signedProvenance":False,
+                "nativePcAccepted":False,
+                "gpuComputeProven":False,
+                "empiricalTruthProven":False}
+
     def execute(self,operation,args):
         if operation=="RESIDUAL_RESTORE": raise ValueError("R195_RESIDUAL_SOURCE_AND_AUTHORITY_REQUIRED")
         if operation=="LOCAL_INFER":
             return load_local_inference_adapter_r899().infer_local_r899(args)
+        if operation=="SPHERE_TENSOR_AUDIT_LINEAGE":
+            if not isinstance(args,dict) or set(args)!={"export_job_id"}:
+                raise ValueError("R912_LINEAGE_ARGUMENT_SCHEMA_HELD")
+            return self.audit_sparse_lineage_r912(args["export_job_id"])
         if operation=="SPHERE_TENSOR_RENDER":
             import importlib.util
             if not isinstance(args,dict) or set(args)!={"export_job_id","destination"}:
@@ -206,6 +263,7 @@ class Hub:
             destination=args.get("destination")
             if not isinstance(destination,str) or not destination.lower().endswith(".svg"):
                 raise ValueError("R907_NEW_SVG_DESTINATION_REQUIRED_HELD")
+            self.audit_sparse_lineage_r912(args.get("export_job_id"))
             prior, verified_rows=self.verified_sparse_export(args.get("export_job_id"),include_rows=True)
             verified, rows=verified_rows
             module_path=Path(__file__).resolve().with_name("omega_sparse_projection_r907.py")
@@ -248,6 +306,7 @@ class Hub:
             destination=args["destination"]
             if not isinstance(destination,str) or not destination.lower().endswith(".csv"):
                 raise ValueError("R906_NEW_CSV_DESTINATION_REQUIRED_HELD")
+            self.audit_sparse_lineage_r912(export_id)
             prior, verified_rows=self.verified_sparse_export(export_id,include_rows=True)
             verified, entries=verified_rows
             module_path=Path(__file__).resolve().with_name("omega_sparse_tensor_r902.py")
@@ -396,6 +455,7 @@ class Hub:
         This download has an additional 8 MiB in-memory transport bound;
         the local file remains available at its original approved path.
         """
+        self.audit_sparse_lineage_r912(job_id)
         prior,validated=self.verified_sparse_export(job_id)
         source=prior["result"]["artifact"]
         path=safe_under(self.root,source["path"],True)
