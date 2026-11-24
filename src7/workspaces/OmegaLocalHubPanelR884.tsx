@@ -238,6 +238,14 @@ export default function OmegaLocalHubPanelR884(){
   }catch(error){setInfo(error instanceof Error?error.message:'Could not load selected job detail.')}
  };
  const chosen=selectedJobDetail?.id===selected?selectedJobDetail:jobs.find(x=>x.id===selected);
+ const donorReceipt=chosen?.operation==='HISTORICAL_B010_EXECUTE'&&chosen.state==='COMPLETED'&&chosen.result&&typeof chosen.result==='object'
+  ?chosen.result as Record<string,unknown>:null;
+ const donorFrames=donorReceipt?.schema==='OMEGA_VERIFIED_HISTORICAL_B010_EXECUTION_R922'&&
+  donorReceipt.state==='HISTORICAL_DONOR_RUNTIME_EXECUTED_NOT_CANON_ADMITTED'&&
+  donorReceipt.archiveSha256==='bb8df3a47008db98cf2348241e1bff035dd6ff5beacb5e5553a5693e41907d4e'&&
+  donorReceipt.currentCanonWrites===0&&Array.isArray(donorReceipt.frames)
+  ?donorReceipt.frames as {frame:number;traversalAddress:number;statePacketSha256:string;acceptanceSha256:string}[]:null;
+ const donorFinal=donorFrames?.length?donorFrames[donorFrames.length-1]:null;
  const tensorExport=chosen&&(chosen.operation==='SPHERE_TENSOR_EXPORT'||chosen.operation==='SPHERE_TENSOR_CONTINUE')&&chosen.state==='COMPLETED'&&chosen.result&&typeof chosen.result==='object'
   ?chosen.result as Record<string,unknown>:null;
  const tensorResult=tensorExport&&tensorExport.tensor&&typeof tensorExport.tensor==='object'
@@ -325,6 +333,11 @@ export default function OmegaLocalHubPanelR884(){
     </div>}
     {chosen&&<div style={{marginTop:10}}>
      <strong>Selected job: {chosen.id}</strong>
+     {donorFinal&&Number.isSafeInteger(donorFinal.traversalAddress)&&donorFinal.traversalAddress>=0&&donorFinal.traversalAddress<20736&&<div data-r922-b010-to-sphere='EXPLICIT_ADDRESS_TRANSLATION_ONLY' style={{...surface,margin:'8px 0'}}>
+      <strong>Recovered B010 traversal → SPHERE</strong>
+      <p><small>Historical donor frame {donorFinal.frame} · exact 20,736 address {donorFinal.traversalAddress} · B010 acceptance hash {String(donorFinal.acceptanceSha256).slice(0,16)}… This transfers only an address coordinate; no donor state, evidence tier, or canonical authority is imported.</small></p>
+      <button type='button' style={button} onClick={()=>{setTensorCell(String(donorFinal.traversalAddress));setOperation('SPHERE_TENSOR_STEP');setInfo('Historical B010 address '+donorFinal.traversalAddress+' selected for R902 sparse tensor computation. Inner lane and mass remain under operator control; no job submitted or Canon state mutated.')}}>Use verified B010 traversal address as SPHERE tensor cell</button>
+     </div>}
      {(chosen.operation==='SPHERE_TENSOR_EXPORT'||chosen.operation==='SPHERE_TENSOR_CONTINUE')&&chosen.state==='COMPLETED'&&<button type='button' style={{...button,margin:'8px 0'}} onClick={()=>{setExportJobId(chosen.id);setOperation('SPHERE_TENSOR_VERIFY');setInfo('R905 round-trip verification configured against '+chosen.id)}}>Verify complete CSV against this export receipt</button>}
      {(chosen.operation==='SPHERE_TENSOR_EXPORT'||chosen.operation==='SPHERE_TENSOR_CONTINUE')&&chosen.state==='COMPLETED'&&<button type='button' style={{...button,margin:'8px 0'}} onClick={()=>{setExportJobId(chosen.id);setOperation('SPHERE_TENSOR_AUDIT_LINEAGE');setInfo('R912 complete lineage audit selected from '+chosen.id)}}>Audit complete checkpoint lineage</button>}
      {(chosen.operation==='SPHERE_TENSOR_EXPORT'||chosen.operation==='SPHERE_TENSOR_CONTINUE')&&chosen.state==='COMPLETED'&&
