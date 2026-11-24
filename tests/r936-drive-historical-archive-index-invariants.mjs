@@ -41,5 +41,5 @@ const ui=readFileSync('src/DriveHistoricalRecoveryR936.tsx','utf8');
 const archive=readFileSync('src/ArchiveGovernanceControl.tsx','utf8');
 for(const marker of ['data-r936-drive-recovery','data-r936-release','index.groups','index.companionZipArchives','Export verified-source inventory metadata','HISTORICAL_ZIP_AUDIT'])
  assert.ok(ui.includes(marker),'recovery source UI missing '+marker);
-assert.ok(archive.includes('<DriveHistoricalRecoveryR936/>'),'recovery inventory not available in Archive Operators');
+assert.ok(archive.includes('<DriveHistoricalRecoveryR936 onAuditRelease={operators?onAuditRelease:undefined}/>'),'recovery inventory and selected-release callback not available in Archive Operators');
 console.log('R936 PASS: six split archives, 156 contiguous source-listed parts, 18 companion ZIPs, Drive identities and conservative source boundary.');
