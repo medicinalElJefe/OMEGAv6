@@ -53,6 +53,20 @@ assert.ok(source.includes('onNavigate(chosen.navigationRoute)')||source.includes
 assert.ok(source.includes('HISTORICAL_CHARTED_DESIGN')||source.includes('Source-registered workspace relation'));
 assert.ok(source.includes('source')&&source.includes('original.settings')&&source.includes('original.gates'));
 assert.ok(boundary.includes('../OmegaOneSystemLedgerR926'));
+// R927: every source-charted control must resolve to a navigable OMEGA7 owner.
+for(const setting of registry.settings){
+ const owner=menus.get(setting['Top Menu']);
+ assert.ok(owner,'missing governing menu for control '+setting['Option ID']);
+ assert.ok(routes.has(owner.route),'control route absent from native registry '+setting['Option ID']);
+}
+for(const sequence of registry.sequences){
+ const owners=registry.software.filter(s=>s['Upgrade Sequence']===sequence.SEQ);
+ for(const owner of owners)assert.ok(routes.has(owner.navigationRoute),'stage owner route absent '+sequence.SEQ);
+}
+assert.ok(source.includes("familyRoute(s['Top Menu'])"),'governing control navigation not rendered');
+assert.ok(source.includes('stageOwners(s.SEQ).map'),'stage executor owner navigation not rendered');
+assert.ok(source.includes('filtered.some((s:Software)=>s.ID===chosen.ID)'),'stale software detail after filtering');
+assert.ok(source.includes('filtered.length===0'),'missing empty-result state');
 assert.equal(registry.gates.filter(x=>x['Blocks Packaging?']==='YES').length,10);
 assert.equal(registry.gates.filter(x=>x['Blocks Packaging?']==='NO').length,2);
 console.log('R926 PASS · exact 100 software/12 menus/36 settings/18 capabilities/144 phases/12 gates · 44-route native containment · one system route ownership · conservative proof classification');
