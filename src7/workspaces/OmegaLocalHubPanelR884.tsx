@@ -63,9 +63,9 @@ async function fetchVerifiedCsvR910(token:string,jobId:string,expectedHash:strin
   return new Blob([bytes],{type:'text/csv;charset=utf-8'});
  }finally{window.clearTimeout(timeout)}
 }
-export default function OmegaLocalHubPanelR884(){
+export default function OmegaLocalHubPanelR884({initialOperation='HASH_TREE'}:{initialOperation?:Operation}={}){
  const [token,setToken]=useState(''),[state,setState]=useState<'UNCONNECTED'|'LOOPBACK_AUTHENTICATED'|'HELD'>('UNCONNECTED');
- const [operation,setOperation]=useState<Operation>('HASH_TREE'),[source,setSource]=useState('.'),[destination,setDestination]=useState('exports/omega-artifact.json');
+ const [operation,setOperation]=useState<Operation>(initialOperation),[source,setSource]=useState('.'),[destination,setDestination]=useState('exports/omega-artifact.json');
  const [b010Steps,setB010Steps]=useState('3'),[b010Domain,setB010Domain]=useState('semantic'),[b010Scale,setB010Scale]=useState('surface'),[b010View,setB010View]=useState('cinematic'),[b010Color,setB010Color]=useState('violet'),[correlateDonorId,setCorrelateDonorId]=useState(''),[correlateTensorId,setCorrelateTensorId]=useState(''),[correlateDuplexId,setCorrelateDuplexId]=useState(''),[duplexFolder,setDuplexFolder]=useState('.'),[archiveExpectedSha,setArchiveExpectedSha]=useState(''),[delay,setDelay]=useState('0'),[eventName,setEventName]=useState(''),[jobs,setJobs]=useState<HubJob[]>([]);
  const [model,setModel]=useState(''),[prompt,setPrompt]=useState(''),[maxTokens,setMaxTokens]=useState('256');
  const [tensorCell,setTensorCell]=useState('0'),[tensorLane,setTensorLane]=useState('0'),[tensorMass,setTensorMass]=useState('4096'),[tensorSteps,setTensorSteps]=useState('4');

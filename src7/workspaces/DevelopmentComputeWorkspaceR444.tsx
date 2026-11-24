@@ -68,7 +68,7 @@ export default function DevelopmentComputeWorkspaceR444({route,onNavigate,depth}
    <button className='o7-open-instrument' onClick={()=>setInstrumentOpen(true)}>Open full {route} workspace</button>
   </section>}
 
-  {route==='Hybrid Link'&&<Suspense fallback={<section role='status'>Loading local automation hub controls…</section>}><OmegaLocalHubPanelR884/></Suspense>}
+  {(route==='Hybrid Link'||route==='Development'||route==='Build Out')&&<Suspense fallback={<section role='status'>Loading authenticated local execution controls…</section>}><OmegaLocalHubPanelR884 initialOperation={route==='Hybrid Link'?'HASH_TREE':'SPHERE_TENSOR_STEP'}/></Suspense>}
 
   {instrumentOpen&&<div className='o7-native-surface'>
    {route==='Hybrid Link'?<HybridMissionControlR8 status={status} record={record}/>:

@@ -73,6 +73,7 @@ export default function OmegaOneSystemLedgerR926({onNavigate}:{onNavigate:(route
       <p><strong>OMEGA7 route:</strong> {chosen.navigationRoute}</p>
       <small style={{display:'block',marginBottom:10}}>Source-registered workspace relation. This does not establish that this individual historical executable was ported or invoked.</small>
       <button type='button' style={click} onClick={()=>nav(chosen.navigationRoute)}>Open mapped OMEGA7 workspace</button>
+      {chosen['Menu ID']==='11 Archive Merge'&&<button type='button' style={{...click,marginLeft:8,marginTop:6}} onClick={()=>nav('Archive Operators')}>Open authenticated archive execution</button>}
       <button type='button' style={{...click,marginLeft:8,marginTop:6}} onClick={()=>focusStage(chosen['Upgrade Sequence'])}>Inspect {chosen['Upgrade Sequence']} stage</button>
      </>}
      {(!chosen||!filtered.some((s:Software)=>s.ID===chosen.ID))&&<p role='status'>Select a family from the current results to inspect its source contract and route.</p>}

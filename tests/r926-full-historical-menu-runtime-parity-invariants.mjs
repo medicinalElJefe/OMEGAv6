@@ -49,6 +49,16 @@ for(const route of ['System Atlas','Control Matrix','Archive Census']){
  assert.ok(workspace.includes("route==='"+route+"'"),'historical software ledger not mounted under '+route);
 }
 assert.ok(workspace.includes("import('../OmegaOneSystemLedgerR926')"));
+const developerWorkspace=readFileSync('src7/workspaces/DevelopmentComputeWorkspaceR444.tsx','utf8');
+const localHubPanel=readFileSync('src7/workspaces/OmegaLocalHubPanelR884.tsx','utf8');
+assert.ok(workspace.includes("import('./OmegaLocalHubPanelR884')"),'archive execution surface not imported');
+assert.ok(workspace.includes("route==='Archive Operators'?<><ArchiveGovernanceControl operators"),'archive operators must retain catalogue and authenticated executor together');
+assert.ok(workspace.includes("initialOperation='HISTORICAL_ZIP_AUDIT'"),'archive operators default must be source ZIP audit');
+assert.ok(developerWorkspace.includes("route==='Development'||route==='Build Out'"),'governed development executor must be reachable');
+assert.ok(developerWorkspace.includes("initialOperation={route==='Hybrid Link'?'HASH_TREE':'SPHERE_TENSOR_STEP'}"),'development defaults to real sparse compute operation');
+assert.ok(localHubPanel.includes("initialOperation='HASH_TREE'"),'local hub fallback default missing');
+assert.ok(localHubPanel.includes("useState<Operation>(initialOperation)"),'local hub operation not initialized by owning workspace');
+assert.ok(source.includes("nav('Archive Operators')"),'historical software source missing actual archive-executor shortcut');
 assert.ok(source.includes('onNavigate(chosen.navigationRoute)')||source.includes('nav(chosen.navigationRoute)'));
 assert.ok(source.includes('HISTORICAL_CHARTED_DESIGN')||source.includes('Source-registered workspace relation'));
 assert.ok(source.includes('source')&&source.includes('original.settings')&&source.includes('original.gates'));

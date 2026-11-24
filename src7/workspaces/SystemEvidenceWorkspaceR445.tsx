@@ -1,5 +1,6 @@
 import {lazy,Suspense,useEffect,useMemo,useState} from 'react';
 const OmegaOneSystemLedgerR926=lazy(()=>import('../OmegaOneSystemLedgerR926'));
+const OmegaLocalHubPanelR884=lazy(()=>import('./OmegaLocalHubPanelR884'));
 const OperationalModesPanelR671=lazy(()=>import('./OperationalModesPanelR671').then(m=>({default:m.OperationalModesPanelR671})));
 const OperatorGraphPanelR676=lazy(()=>import('./OperatorGraphPanelR676').then(m=>({default:m.OperatorGraphPanelR676})));
 const CanonicalSessionReplayPanelR679=lazy(()=>import('./CanonicalSessionReplayPanelR679').then(m=>({default:m.CanonicalSessionReplayPanelR679})));
@@ -78,7 +79,7 @@ export default function SystemEvidenceWorkspaceR445({route,onNavigate,depth}:Pro
    {route==='Cockpit'?<OmegaWorkspaceCockpitR18 variant='Cockpit' record={record} state={state} address={address} onAddress={commit} onNavigate={onNavigate} status={status} restore={restore} modeCount={modeSummary.appliedCount}/>:
     route==='Modes'?<><SourceBackedModesPanelR21 record={record} address={address} onAddress={commit} onNavigate={onNavigate}/><Suspense fallback={<p role='status'>Loading operational mode executors…</p>}><OperationalModesPanelR671 address={address} onAddress={commit} onNavigate={onNavigate}/></Suspense><Suspense fallback={<p role='status'>Loading recovered operator graph…</p>}><OperatorGraphPanelR676 address={address} onAddress={commit}/></Suspense><Suspense fallback={<p role='status'>Loading native session history…</p>}><CanonicalSessionReplayPanelR679 address={address} onAddress={commit}/></Suspense><Suspense fallback={<p role='status'>Loading historical native decision audit…</p>}><NativeDecisionTruthPanelR681/></Suspense></>:
     route==='Archive Census'?<ArchiveGovernanceControl onNavigate={onNavigate}/>:
-    route==='Archive Operators'?<ArchiveGovernanceControl operators onNavigate={onNavigate}/>:
+    route==='Archive Operators'?<><ArchiveGovernanceControl operators onNavigate={onNavigate}/><Suspense fallback={<p role='status'>Loading authenticated archive and historical compute executors…</p>}><OmegaLocalHubPanelR884 initialOperation='HISTORICAL_ZIP_AUDIT'/></Suspense></>:
     route==='Plugins'?<PluginRegistryR45 onNavigate={onNavigate}/>:
     route==='Validation'?<UniversalQualityControl record={record} status={status} restore={restore} modeCount={modeSummary.appliedCount} catalogCount={modeSummary.catalogCount}/>:
     route==='System Atlas'?<SystemAtlasControl record={record} onNavigate={onNavigate}/>:
