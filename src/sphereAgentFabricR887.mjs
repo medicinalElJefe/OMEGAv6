@@ -28,7 +28,7 @@ export function agentCSV(fabric,id){agentAddress(id);const{shell,outer}=agentAdd
 export const CHECKPOINT_SCHEMA_R888='OMEGA_SPHERE_AGENT_CHECKPOINT_R888';
 const CHECKPOINT_LIMIT_R888=4*1024*1024;
 function checksumR888(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(16).padStart(8,'0')}
-function validReceipt(r){return r&&typeof r==='object'&&!Array.isArray(r)&&Number.isSafeInteger(r.taskId)&&r.taskId>0&&Number.isSafeInteger(r.tick)&&r.tick>=0&&['OBSERVE','RELAX','EXCHANGE','PHASE_EXCHANGE'].includes(r.kind)&&Number.isSafeInteger(r.agent)&&r.agent>=0&&r.agent<AGENTS&&Number.isSafeInteger(r.inner)&&r.inner>=0&&r.inner<SIZE&&Number.isFinite(r.before)&&r.before>=0&&r.before<=1&&Number.isFinite(r.after)&&r.after>=0&&r.after<=1&&(r.kind!=='PHASE_EXCHANGE'||(Number.isSafeInteger(r.phase)&&r.phase>=0&&r.phase<AXES&&Math.floor(r.phase/4)!==1&&Number.isSafeInteger(r.neighborInner)&&r.neighborInner>=0&&r.neighborInner<SIZE&&Number.isFinite(r.neighborBefore)&&r.neighborBefore>=0&&r.neighborBefore<=1&&Number.isFinite(r.neighborAfter)&&r.neighborAfter>=0&&r.neighborAfter<=1&&Number.isFinite(r.conservationResidual)&&Math.abs(r.conservationResidual)<=1e-9))}
+function validReceipt(r){return r&&typeof r==='object'&&!Array.isArray(r)&&Number.isSafeInteger(r.taskId)&&r.taskId>0&&Number.isSafeInteger(r.tick)&&r.tick>=0&&['OBSERVE','RELAX','EXCHANGE','PHASE_EXCHANGE'].includes(r.kind)&&Number.isSafeInteger(r.agent)&&r.agent>=0&&r.agent<AGENTS&&Number.isSafeInteger(r.inner)&&r.inner>=0&&r.inner<SIZE&&Number.isFinite(r.before)&&r.before>=0&&r.before<=1&&Number.isFinite(r.after)&&r.after>=0&&r.after<=1&&(r.kind!=='PHASE_EXCHANGE'||(Number.isSafeInteger(r.phase)&&r.phase>=0&&r.phase<AXES&&Math.floor(r.phase/4)!==1&&Number.isSafeInteger(r.neighborInner)&&r.neighborInner===phaseNeighborR919(r.inner,r.phase)&&Number.isFinite(r.neighborBefore)&&r.neighborBefore>=0&&r.neighborBefore<=1&&Number.isFinite(r.neighborAfter)&&r.neighborAfter>=0&&r.neighborAfter<=1&&Number.isFinite(r.conservationResidual)&&Math.abs(r.conservationResidual)<=1e-9&&Math.abs((r.after+r.neighborAfter)-(r.before+r.neighborBefore)-r.conservationResidual)<=1e-9))}
 export function serializeFabricR888(fabric){
  if(fabric.active.size>MAX_ACTIVE||fabric.queue.length>MAX_QUEUE||fabric.receipts.length>512)throw Error('Checkpoint budget violation');
  const agents=[...fabric.active.values()].sort((a,b)=>a.id-b.id).map(a=>({id:a.id,epoch:a.epoch,mode:a.mode,values:[...a.values.entries()].sort((a,b)=>a[0]-b[0]),memory:a.memory,inbox:a.inbox}));
@@ -86,12 +86,16 @@ export function expandedCoordinatesR918(address){
  * with negative, neutral and positive one-step displacement. This samples
  * the existing inner state and its neighbors without allocating shadow state.
  */
+export function phaseNeighborR919(inner,phase){
+ integer(inner,SIZE,'inner');integer(phase,AXES,'phase');
+ const axis=phase%4,turn=Math.floor(phase/4)-1,digits=axes4(inner);
+ digits[axis]=(digits[axis]+turn+AXES)%AXES;
+ return fromAxes4(digits);
+}
 export function phaseSampleR918(fabric,agent,inner,phase){
  agentAddress(agent);integer(inner,SIZE,'inner');integer(phase,AXES,'phase');
  const axis=phase%4,turn=Math.floor(phase/4)-1;
- const digits=axes4(inner),neighborDigits=digits.slice();
- neighborDigits[axis]=(neighborDigits[axis]+turn+AXES)%AXES;
- const neighbor=fromAxes4(neighborDigits),value=stateValue(fabric,agent,inner);
+ const neighbor=phaseNeighborR919(inner,phase),value=stateValue(fabric,agent,inner);
  const neighborValue=stateValue(fabric,agent,neighbor);
  const delta=neighborValue-value;
  return Object.freeze({
