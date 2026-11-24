@@ -276,6 +276,60 @@ class LocalHubTests(unittest.TestCase):
         after=self.hub.enqueue("SPHERE_TENSOR_AUDIT_LINEAGE",{"export_job_id":leaf["id"]})
         self.assertEqual(self.hub.run_one()["state"],"COMPLETED")
 
+    def test_r913_intermediate_state_and_sqlite_receipt_tamper_refusal(self):
+        """An unchanged leaf cannot launder a corrupted middle CSV or receipt."""
+        root = self.hub.enqueue("SPHERE_TENSOR_EXPORT", {
+            "seeds": [{"cell": 0, "lane": 0, "mass": 16384}],
+            "steps": 4, "cell_axis": 0, "lane_axis": 1,
+            "destination": "r913-root.csv"})
+        self.assertEqual(self.hub.run_one()["state"], "COMPLETED")
+        middle = self.hub.enqueue("SPHERE_TENSOR_CONTINUE", {
+            "export_job_id": root["id"], "destination": "r913-middle.csv",
+            "steps": 1, "cell_axis": 0, "lane_axis": 1})
+        self.assertEqual(self.hub.run_one()["state"], "COMPLETED")
+        leaf = self.hub.enqueue("SPHERE_TENSOR_CONTINUE", {
+            "export_job_id": middle["id"], "destination": "r913-leaf.csv",
+            "steps": 1, "cell_axis": 0, "lane_axis": 1})
+        self.assertEqual(self.hub.run_one()["state"], "COMPLETED")
+        self.assertEqual(self.hub.audit_sparse_lineage_r912(leaf["id"])["depth"], 3)
+
+        middle_file = self.root / "r913-middle.csv"
+        original_bytes = middle_file.read_bytes()
+        try:
+            middle_file.write_bytes(original_bytes + b"tampered")
+            with self.assertRaisesRegex(ValueError, "R905_"):
+                self.hub.audit_sparse_lineage_r912(leaf["id"])
+            with self.assertRaises(ValueError):
+                self.hub.verified_csv_artifact(leaf["id"])
+            denied = self.hub.enqueue("SPHERE_TENSOR_CONTINUE", {
+                "export_job_id": leaf["id"], "destination": "r913-denied.csv",
+                "steps": 1, "cell_axis": 0, "lane_axis": 1})
+            self.assertEqual(self.hub.run_one()["state"], "HELD")
+            self.assertFalse((self.root / "r913-denied.csv").exists())
+        finally:
+            middle_file.write_bytes(original_bytes)
+        self.assertEqual(self.hub.audit_sparse_lineage_r912(leaf["id"])["depth"], 3)
+
+        original_sha = self.hub.get(middle["id"])["result_sha256"]
+        try:
+            with self.hub.connection() as conn:
+                conn.execute("UPDATE jobs SET result_sha256=? WHERE id=?",
+                             ("0" * 64, middle["id"]))
+            with self.assertRaisesRegex(ValueError, "R905_DURABLE_RECEIPT_DRIFT_HELD"):
+                self.hub.audit_sparse_lineage_r912(leaf["id"])
+            denied = self.hub.enqueue("SPHERE_TENSOR_RENDER", {
+                "export_job_id": leaf["id"],
+                "destination": "r913-denied.svg"})
+            self.assertEqual(self.hub.run_one()["state"], "HELD")
+            self.assertFalse((self.root / "r913-denied.svg").exists())
+            with self.assertRaises(ValueError):
+                self.hub.verified_csv_artifact(leaf["id"])
+        finally:
+            with self.hub.connection() as conn:
+                conn.execute("UPDATE jobs SET result_sha256=? WHERE id=?",
+                             (original_sha, middle["id"]))
+        self.assertEqual(self.hub.audit_sparse_lineage_r912(leaf["id"])["depth"], 3)
+
     def test_r906_verified_sparse_checkpoint_continuation_and_lineage(self):
         original=self.hub.enqueue("SPHERE_TENSOR_EXPORT",{
             "seeds":[{"cell":0,"lane":0,"mass":4096}],"steps":4,
