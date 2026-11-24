@@ -53,7 +53,7 @@ def load_local_inference_adapter_r899():
     return adapter
 
 READ_ONLY_REPLAY = frozenset({"HASH_TREE", "CSV_STATS", "VERIFY_LEDGER_SPLIT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_AUDIT_LINEAGE"})
-OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "LOCAL_INFER", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_EXPORT", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_CONTINUE", "SPHERE_TENSOR_RENDER", "SPHERE_TENSOR_AUDIT_LINEAGE", "RESIDUAL_RESTORE"})
+OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "LOCAL_INFER", "LOCAL_CHAT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_EXPORT", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_CONTINUE", "SPHERE_TENSOR_RENDER", "SPHERE_TENSOR_AUDIT_LINEAGE", "RESIDUAL_RESTORE"})
 STATUS = frozenset({"QUEUED", "WAIT_EVENT", "RUNNING", "COMPLETED", "FAILED", "HELD", "CANCELLED"})
 def utc_ms(): return int(time.time() * 1000)
 def sha_file(path: Path) -> str:
@@ -248,7 +248,73 @@ class Hub:
                 "gpuComputeProven":False,
                 "empiricalTruthProven":False}
 
+    def execute_local_chat_r916(self,args):
+        """Run an actual linked local-model conversation from immutable job receipts.
+
+        All context comes from completed, SHA-verified LOCAL_CHAT jobs. No
+        remote model endpoints, autonomous execution or synthetic answers.
+        """
+        if not isinstance(args,dict) or set(args)-{"model","prompt","num_predict","previous_job_id"}:
+            raise ValueError("R916_CHAT_ARGUMENT_SCHEMA_HELD")
+        model=args.get("model")
+        prompt=args.get("prompt")
+        tokens=args.get("num_predict",256)
+        if (not isinstance(model,str) or not isinstance(prompt,str)
+            or not prompt.strip() or len(prompt)>4096 or "\0" in prompt
+            or type(tokens) is not int or not 1<=tokens<=512):
+            raise ValueError("R916_CHAT_INPUT_BOUND_HELD")
+        parent=args.get("previous_job_id")
+        turns=[]
+        seen=set()
+        while parent is not None:
+            if (not isinstance(parent,str) or len(parent)!=32
+                or any(c not in "0123456789abcdef" for c in parent)):
+                raise ValueError("R916_CHAT_PARENT_ID_HELD")
+            if parent in seen: raise ValueError("R916_CHAT_CYCLE_HELD")
+            if len(turns)>=8: raise ValueError("R916_CHAT_CONTEXT_DEPTH_HELD")
+            seen.add(parent)
+            prior=self.get(parent)
+            if (not prior or prior.get("state")!="COMPLETED"
+                or prior.get("operation")!="LOCAL_CHAT"):
+                raise ValueError("R916_CHAT_COMPLETED_PARENT_REQUIRED_HELD")
+            original=prior.get("result")
+            if (not isinstance(original,dict) or original.get("schema")!="OMEGA_LOCAL_CHAT_R916"
+                or prior.get("result_sha256")!=sha_bytes(json_bytes(original))
+                or original.get("model")!=model):
+                raise ValueError("R916_CHAT_PARENT_INTEGRITY_OR_MODEL_HELD")
+            prior_args=prior.get("args")
+            if (not isinstance(prior_args,dict) or
+                not isinstance(prior_args.get("prompt"),str) or
+                not isinstance(original.get("response"),str) or
+                original.get("promptSha256")!=sha_bytes(prior_args["prompt"].encode("utf-8"))):
+                raise ValueError("R916_CHAT_PARENT_PROMPT_OR_REPLY_HELD")
+            turns.append((parent,prior_args["prompt"],original["response"],prior.get("result_sha256")))
+            parent=original.get("previousJobId")
+        turns.reverse()
+        segments=[]
+        for _,question,answer,_ in turns:
+            segments.append("User:\n"+question+"\nAssistant:\n"+answer)
+        segments.append("User:\n"+prompt+"\nAssistant:\n")
+        context="\n\n".join(segments)
+        if len(context)>8192: raise ValueError("R916_CHAT_CONTEXT_BYTES_HELD")
+        result=load_local_inference_adapter_r899().infer_local_r899({
+            "model":model,"prompt":context,"num_predict":tokens})
+        if result.get("schema")!="OMEGA_LOCAL_INFER_R899" or result.get("done") is not True:
+            raise ValueError("R916_CHAT_BACKEND_COMPLETION_HELD")
+        return {"schema":"OMEGA_LOCAL_CHAT_R916","state":"LOCAL_CHAT_REPLY_COMPLETED",
+                "model":model,"response":result["response"],
+                "promptSha256":sha_bytes(prompt.encode("utf-8")),
+                "previousJobId":args.get("previous_job_id"),
+                "contextJobIds":[item[0] for item in turns],
+                "contextReceiptSha256":[item[3] for item in turns],
+                "contextTurns":len(turns)+1,
+                "tokensRequested":tokens,"backend":"OLLAMA_LOOPBACK_ONLY",
+                "nativePcAccepted":False,"gpuProven":False,
+                "semanticTruthProven":False}
+
     def execute(self,operation,args):
+        if operation=="LOCAL_CHAT":
+            return self.execute_local_chat_r916(args)
         if operation=="RESIDUAL_RESTORE": raise ValueError("R195_RESIDUAL_SOURCE_AND_AUTHORITY_REQUIRED")
         if operation=="LOCAL_INFER":
             return load_local_inference_adapter_r899().infer_local_r899(args)
