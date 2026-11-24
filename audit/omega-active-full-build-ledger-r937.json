@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R958 explicit closure of three V35 SQLite fixture connections and Windows cleanup regression; Windows portable-studio job passed on 4c164b6; full candidate workflows, archive executor parity, actual device and production proof remain held",
+  "latestGovernedWork": "R959 reject invalid atlas requests before source I/O; preserve full valid-query source hash and SQLite integrity checks; exact-head regression pending",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -414,6 +414,11 @@
       "revision": "R958",
       "conservation": "Explicit SQLite fixture connection closure and Windows cleanup regression; exact R958 Windows portable-studio job passed (138458932652); inherited verify and native repair passed; browser parity and R241 full workflow pending at observation",
       "accepted": "BOUNDED_WINDOWS_CI_JOB_PROOF_NOT_NATIVE_DEVICE_OR_RELEASE_ACCEPTANCE"
+    },
+    {
+      "revision": "R959",
+      "conservation": "V35 atlas validates request before source filesystem access and rejects overlong unsplit FTS tokens; regression covers refusal before source I/O",
+      "accepted": "CANDIDATE_SOURCE_ONLY_TEST_EXECUTION_PENDING"
     }
   ],
   "independentArchiveUnverifiedOtherListedParts": 77,

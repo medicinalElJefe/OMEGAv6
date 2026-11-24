@@ -126,6 +126,21 @@ class LocalHubTests(unittest.TestCase):
                                 hubmod.safe_under,**expected)
         self.assertFalse(prepared.exists())
 
+    def test_r959_invalid_atlas_queries_reject_before_source_io(self):
+        import importlib.util
+        spec=importlib.util.spec_from_file_location("omega_v35_atlas_r954",MODULE.parent/"omega_v35_atlas_r954.py")
+        atlas=importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(atlas)
+        def no_io(*args):
+            self.fail("Invalid query must not touch source storage")
+        for term in ("a"*33, "a"*32+"OR", "water OR stone", "water*"):
+            with self.subTest(term=term), self.assertRaisesRegex(ValueError,"R954_FTS_SAFE_TERMS_REQUIRED_HELD"):
+                atlas._query_v35_index(self.root,{"source":atlas.NAME,"term":term},no_io,
+                    expected_sha256="a"*64,expected_bytes=1,expected_rows=3)
+        with self.assertRaisesRegex(ValueError,"R954_PAGE_BOUND_HELD"):
+            atlas._query_v35_index(self.root,{"source":atlas.NAME,"limit":500},no_io,
+                expected_sha256="a"*64,expected_bytes=1,expected_rows=3)
+
     def test_r954_original_v35_indexed_query_and_refusal(self):
         import sqlite3,hashlib,importlib.util
         module_file=MODULE.parent/"omega_v35_atlas_r954.py"

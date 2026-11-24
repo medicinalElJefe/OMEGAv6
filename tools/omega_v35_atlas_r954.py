@@ -15,7 +15,7 @@ ORIGINAL_BYTES = 383766528
 ORIGINAL_ROWS = 149679
 NAME = "psc_finished_atlas.sqlite"
 ALLOWED_GATES = {"", "STAY", "TURN", "ESCALATE", "ADMIT"}
-TOKEN = re.compile(r"[A-Za-z0-9_]{1,32}")
+TOKEN = re.compile(r"[A-Za-z0-9_]+")
 MAX_QUERY_LENGTH = 128
 
 def _sha_file(path: Path) -> str:
@@ -33,12 +33,6 @@ def _query_v35_index(root: Path,args:dict,safe_under,*,expected_sha256:str,expec
     if (not isinstance(source_name,str) or not source_name.endswith("/"+NAME) and source_name!=NAME
         or len(source_name)>256):
         raise ValueError("R954_ORIGINAL_SQLITE_SOURCE_REQUIRED_HELD")
-    source=safe_under(root,source_name,True)
-    if source.stat().st_size != expected_bytes:
-        raise ValueError("R954_ORIGINAL_SQLITE_SIZE_HELD")
-    source_sha=_sha_file(source)
-    if source_sha!=expected_sha256:
-        raise ValueError("R954_ORIGINAL_SQLITE_SHA256_HELD")
     raw_term=args.get("term","")
     raw_domain=args.get("domain","")
     raw_gate=args.get("gate","")
@@ -56,11 +50,17 @@ def _query_v35_index(root: Path,args:dict,safe_under,*,expected_sha256:str,expec
         raise ValueError("R954_PAGE_BOUND_HELD")
     query_tokens=TOKEN.findall(raw_term)
     if raw_term.strip() and (not query_tokens or len(query_tokens)>8 or
-       any(tok.upper() in {"AND","OR","NOT","NEAR"} for tok in query_tokens) or
+       any(len(tok)>32 or tok.upper() in {"AND","OR","NOT","NEAR"} for tok in query_tokens) or
        "".join(query_tokens).lower()!=re.sub(r"\s+","",raw_term).lower()):
         raise ValueError("R954_FTS_SAFE_TERMS_REQUIRED_HELD")
     # Bound and quote each literal FTS5 token; no user-provided MATCH syntax.
     fts = " AND ".join('"'+tok+'"' for tok in query_tokens)
+    source=safe_under(root,source_name,True)
+    if source.stat().st_size != expected_bytes:
+        raise ValueError("R954_ORIGINAL_SQLITE_SIZE_HELD")
+    source_sha=_sha_file(source)
+    if source_sha!=expected_sha256:
+        raise ValueError("R954_ORIGINAL_SQLITE_SHA256_HELD")
     db_uri=source.as_uri()+"?mode=ro&immutable=1"
     con=sqlite3.connect(db_uri,uri=True,timeout=2)
     con.row_factory=sqlite3.Row
