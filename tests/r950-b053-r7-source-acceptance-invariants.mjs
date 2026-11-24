@@ -16,7 +16,7 @@ assert.match(receipt.reconstructedMasterObservedSha256,/^[a-f0-9]{64}$/);
 assert.equal(receipt.originalIndependentMasterSha256Pin,false);
 assert.equal(receipt.reconstructedZipMembers,1857);
 assert.equal(receipt.reconstructedZipMemberCrc,'PASS_ALL_1857');
-assert.equal(receipt.innerRuntimeTestsAccepted,false);
+assert.equal(receipt.currentOriginalTestsReplayed,0,'R950 source receipt must precede independently replayed R951 test evidence');
 assert.equal(receipt.internalManifestFilesIndependentlyRehashed,1856);
 assert.equal(receipt.internalManifestDeclaredFiles,1856);
 assert.equal(receipt.internalManifestFileSizeAndSha256MismatchCount,0);
