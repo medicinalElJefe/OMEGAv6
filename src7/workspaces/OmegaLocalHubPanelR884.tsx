@@ -165,7 +165,7 @@ export default function OmegaLocalHubPanelR884(){
    }
    if(operation==='HISTORICAL_B010_EXECUTE'){
     const steps=Number(b010Steps);
-    if(!source.trim().toLowerCase().endsWith('.zip')||source.includes('\\\\')||source.startsWith('/')||source.includes('..')||source.includes(':')||!Number.isInteger(steps)||steps<1||steps>12)throw Error('R922 requires an existing B010 ZIP relative to the approved root and 1–12 bounded frames.');
+    if(!source.trim().toLowerCase().endsWith('.zip')||source.includes('\\')||source.startsWith('/')||source.includes('..')||source.includes(':')||!Number.isInteger(steps)||steps<1||steps>12)throw Error('R922 requires an existing B010 ZIP relative to the approved root and 1–12 bounded frames.');
     args.source=source.trim();args.steps=steps;
     args.axes={view_mode:b010View,domain:b010Domain,scale:b010Scale,color_profile:b010Color,quality:'production'};
    }
