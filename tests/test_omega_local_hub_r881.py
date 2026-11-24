@@ -458,6 +458,78 @@ class LocalHubTests(unittest.TestCase):
         manifest=self.hub.enqueue("EXPORT_MANIFEST",{"destination":"out/manifest.json","sources":["data/one.csv","out/copy.csv"]})
         self.assertEqual(self.hub.run_one()["state"],"COMPLETED")
         self.assertEqual(len(__import__("json").loads((self.root/"out"/"manifest.json").read_text())["sources"]),2)
+    def test_r916_real_local_chat_context_and_durable_followup(self):
+        from unittest.mock import patch
+        from types import SimpleNamespace
+        calls = []
+        def infer(payload):
+            calls.append(payload)
+            return {"schema": "OMEGA_LOCAL_INFER_R899", "done": True,
+                    "response": "answer-" + str(len(calls))}
+        fake = SimpleNamespace(infer_local_r899=infer)
+        with patch.object(hubmod, "load_local_inference_adapter_r899", return_value=fake):
+            first = self.hub.enqueue("LOCAL_CHAT", {
+                "model": "local-test", "prompt": "Explain the grid", "num_predict": 64})
+            result1 = self.hub.run_one()
+            self.assertEqual(result1["state"], "COMPLETED")
+            self.assertEqual(result1["result"]["response"], "answer-1")
+            self.assertEqual(result1["result"]["contextTurns"], 1)
+            second = self.hub.enqueue("LOCAL_CHAT", {
+                "model": "local-test", "prompt": "Continue with one example",
+                "num_predict": 64, "previous_job_id": first["id"]})
+            result2 = self.hub.run_one()
+            self.assertEqual(result2["state"], "COMPLETED")
+            self.assertEqual(result2["result"]["contextTurns"], 2)
+            self.assertEqual(result2["result"]["contextJobIds"], [first["id"]])
+            self.assertIn("Explain the grid", calls[1]["prompt"])
+            self.assertIn("answer-1", calls[1]["prompt"])
+            self.assertIn("Continue with one example", calls[1]["prompt"])
+            restarted = hubmod.Hub(self.root, self.root / ".omega" / "jobs.sqlite")
+            third = restarted.enqueue("LOCAL_CHAT", {
+                "model": "local-test", "prompt": "Give the next step",
+                "previous_job_id": second["id"]})
+            result3 = restarted.run_one()
+            self.assertEqual(result3["state"], "COMPLETED")
+            self.assertEqual(result3["result"]["contextTurns"], 3)
+            self.assertEqual(result3["result"]["contextJobIds"],
+                             [first["id"], second["id"]])
+            self.assertEqual(len(calls), 3)
+
+    def test_r916_refuses_parent_tamper_and_model_mismatch(self):
+        from unittest.mock import patch
+        from types import SimpleNamespace
+        fake = SimpleNamespace(infer_local_r899=lambda payload: {
+            "schema": "OMEGA_LOCAL_INFER_R899", "done": True, "response": "local response"})
+        with patch.object(hubmod, "load_local_inference_adapter_r899", return_value=fake):
+            first = self.hub.enqueue("LOCAL_CHAT", {
+                "model": "local-test", "prompt": "first"})
+            self.assertEqual(self.hub.run_one()["state"], "COMPLETED")
+            mismatch = self.hub.enqueue("LOCAL_CHAT", {
+                "model": "other-model", "prompt": "second", "previous_job_id": first["id"]})
+            self.assertEqual(self.hub.run_one()["state"], "HELD")
+            self.assertIn("R916_CHAT_PARENT_INTEGRITY_OR_MODEL_HELD",
+                          self.hub.get(mismatch["id"])["error"])
+            original = self.hub.get(first["id"])["result_sha256"]
+            try:
+                with self.hub.connection() as conn:
+                    conn.execute("UPDATE jobs SET result_sha256=? WHERE id=?",
+                                 ("0"*64, first["id"]))
+                follow = self.hub.enqueue("LOCAL_CHAT", {
+                    "model": "local-test", "prompt": "followup",
+                    "previous_job_id": first["id"]})
+                held = self.hub.run_one()
+                self.assertEqual(held["state"], "HELD")
+                self.assertIn("R916_CHAT_PARENT_INTEGRITY_OR_MODEL_HELD", held["error"])
+            finally:
+                with self.hub.connection() as conn:
+                    conn.execute("UPDATE jobs SET result_sha256=? WHERE id=?",
+                                 (original, first["id"]))
+            invalid = self.hub.enqueue("LOCAL_CHAT", {
+                "model": "local-test", "prompt": "x", "endpoint": "https://remote.example"})
+            self.assertEqual(self.hub.run_one()["state"], "HELD")
+            self.assertIn("R916_CHAT_ARGUMENT_SCHEMA_HELD",
+                          self.hub.get(invalid["id"])["error"])
+
     def test_r915_manifest_exclusive_creation_refuses_race_without_clobber(self):
         from unittest.mock import patch
         source = "data/one.csv"
