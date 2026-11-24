@@ -447,8 +447,22 @@ class Hub:
             if not isinstance(sources,list) or len(sources)>MAX_FILES:raise ValueError("INVALID_SOURCE_LIST")
             entries=[receipt(safe_under(self.root,p,True),self.root) for p in sources]
             obj={"schema":"OMEGA_MASTER_TRUTH_RUN_MANIFEST_R881","sources":entries,"proofTier":"OBS","localPcAccepted":False,"physicalProof":False}
-            target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(json_bytes(obj))
-            return {"manifest":receipt(target,self.root),"sourceCount":len(entries),"state":"HASHED_MANIFEST_WRITTEN"}
+            data=json_bytes(obj)
+            target.parent.mkdir(parents=True,exist_ok=True)
+            created=False
+            try:
+                # Exclusive creation closes the check/open overwrite race.
+                with target.open("xb") as stream:
+                    created=True
+                    stream.write(data)
+                if sha_file(target)!=sha_bytes(data):
+                    raise ValueError("R915_MANIFEST_WRITE_DRIFT_HELD")
+                return {"manifest":receipt(target,self.root),"sourceCount":len(entries),"state":"HASHED_MANIFEST_WRITTEN"}
+            except BaseException:
+                if created:
+                    try: target.unlink(missing_ok=True)
+                    except OSError: pass
+                raise
         raise ValueError("UNSUPPORTED_OPERATION")
     def verified_csv_artifact(self,job_id):
         """Retrieve only an original, fully verified R904/R906 checkpoint.
