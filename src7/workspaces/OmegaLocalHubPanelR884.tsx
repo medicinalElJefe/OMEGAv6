@@ -4,7 +4,7 @@ import {executeR908GpuProjection} from './omegaR908GpuProjection';
 type HubJob={id:string;operation:string;state:string;scheduled_ms:number;created_ms:number;updated_ms:number;error?:string|null;result_sha256?:string|null;result?:unknown;history?:{event:string;at_ms:number;details:string}[]};
 type Json=Record<string,unknown>;
 const BASE='http://127.0.0.1:8765';
-const OPS=['HASH_TREE','CSV_STATS','COPY_ARTIFACT','EXPORT_MANIFEST','VERIFY_LEDGER_SPLIT','VERIFY_LEDGER_SET','HISTORICAL_ZIP_AUDIT','LOCAL_INFER','SPHERE_TENSOR_STEP','SPHERE_TENSOR_EXPORT','SPHERE_TENSOR_VERIFY','SPHERE_TENSOR_CONTINUE','SPHERE_TENSOR_RENDER','SPHERE_TENSOR_AUDIT_LINEAGE','RESIDUAL_RESTORE'] as const;
+const OPS=['HASH_TREE','CSV_STATS','COPY_ARTIFACT','EXPORT_MANIFEST','VERIFY_LEDGER_SPLIT','VERIFY_LEDGER_SET','HISTORICAL_ZIP_AUDIT','HISTORICAL_B010_EXECUTE','LOCAL_INFER','SPHERE_TENSOR_STEP','SPHERE_TENSOR_EXPORT','SPHERE_TENSOR_VERIFY','SPHERE_TENSOR_CONTINUE','SPHERE_TENSOR_RENDER','SPHERE_TENSOR_AUDIT_LINEAGE','RESIDUAL_RESTORE'] as const;
 type Operation=typeof OPS[number];
 const surface:CSSProperties={padding:16,borderRadius:12,border:'1px solid #436079',background:'#0d1d2d',color:'#eff6fc',margin:'14px 0'};
 const field:CSSProperties={background:'#152f47',color:'#eaf5ff',border:'1px solid #607e98',padding:9,borderRadius:7,width:'100%',boxSizing:'border-box'};
@@ -66,7 +66,7 @@ async function fetchVerifiedCsvR910(token:string,jobId:string,expectedHash:strin
 export default function OmegaLocalHubPanelR884(){
  const [token,setToken]=useState(''),[state,setState]=useState<'UNCONNECTED'|'LOOPBACK_AUTHENTICATED'|'HELD'>('UNCONNECTED');
  const [operation,setOperation]=useState<Operation>('HASH_TREE'),[source,setSource]=useState('.'),[destination,setDestination]=useState('exports/omega-artifact.json');
- const [archiveExpectedSha,setArchiveExpectedSha]=useState(''),[delay,setDelay]=useState('0'),[eventName,setEventName]=useState(''),[jobs,setJobs]=useState<HubJob[]>([]);
+ const [b010Steps,setB010Steps]=useState('3'),[b010Domain,setB010Domain]=useState('semantic'),[b010Scale,setB010Scale]=useState('surface'),[b010View,setB010View]=useState('cinematic'),[b010Color,setB010Color]=useState('violet'),[archiveExpectedSha,setArchiveExpectedSha]=useState(''),[delay,setDelay]=useState('0'),[eventName,setEventName]=useState(''),[jobs,setJobs]=useState<HubJob[]>([]);
  const [model,setModel]=useState(''),[prompt,setPrompt]=useState(''),[maxTokens,setMaxTokens]=useState('256');
  const [tensorCell,setTensorCell]=useState('0'),[tensorLane,setTensorLane]=useState('0'),[tensorMass,setTensorMass]=useState('4096'),[tensorSteps,setTensorSteps]=useState('4');
  const [exportJobId,setExportJobId]=useState('');
@@ -162,6 +162,12 @@ export default function OmegaLocalHubPanelR884(){
      if(!/^[a-f0-9]{64}$/.test(archiveExpectedSha.trim()))throw Error('Optional expected archive SHA-256 must be exactly 64 lowercase hex characters.');
      args.expected_sha256=archiveExpectedSha.trim();
     }
+   }
+   if(operation==='HISTORICAL_B010_EXECUTE'){
+    const steps=Number(b010Steps);
+    if(!/^(?!\/)(?!.*\\\\)(?!.*\\.\\.)[^:]+\\.zip$/i.test(source.trim())||!Number.isInteger(steps)||steps<1||steps>12)throw Error('R922 requires an existing B010 ZIP relative to the approved root and 1–12 bounded frames.');
+    args.source=source.trim();args.steps=steps;
+    args.axes={view_mode:b010View,domain:b010Domain,scale:b010Scale,color_profile:b010Color,quality:'production'};
    }
    if(operation==='LOCAL_INFER'){
     if(!/^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,127}$/.test(model)||!prompt.trim()||prompt.length>8192)
@@ -277,7 +283,8 @@ export default function OmegaLocalHubPanelR884(){
     <h3>Queue bounded work</h3>
     <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:12}}>
      <label>Operation<select style={field} value={operation} onChange={e=>setOperation(e.target.value as Operation)}>{OPS.map(x=><option key={x} value={x}>{x.replaceAll('_',' ')}</option>)}</select></label>
-     {operation!=='LOCAL_INFER'&&operation!=='SPHERE_TENSOR_STEP'&&operation!=='SPHERE_TENSOR_EXPORT'&&operation!=='SPHERE_TENSOR_VERIFY'&&operation!=='SPHERE_TENSOR_CONTINUE'&&operation!=='SPHERE_TENSOR_RENDER'&&operation!=='SPHERE_TENSOR_AUDIT_LINEAGE'&&<label>{operation==='HASH_TREE'?'Project folder':operation==='EXPORT_MANIFEST'?'Source files (one per line)':operation==='HISTORICAL_ZIP_AUDIT'?'Historical ZIP relative path':'Source relative file'}<textarea style={field} rows={2} value={source} onChange={e=>setSource(e.target.value)} spellCheck={false}/></label>}
+     {operation!=='LOCAL_INFER'&&operation!=='SPHERE_TENSOR_STEP'&&operation!=='SPHERE_TENSOR_EXPORT'&&operation!=='SPHERE_TENSOR_VERIFY'&&operation!=='SPHERE_TENSOR_CONTINUE'&&operation!=='SPHERE_TENSOR_RENDER'&&operation!=='SPHERE_TENSOR_AUDIT_LINEAGE'&&<label>{operation==='HASH_TREE'?'Project folder':operation==='EXPORT_MANIFEST'?'Source files (one per line)':operation==='HISTORICAL_ZIP_AUDIT'||operation==='HISTORICAL_B010_EXECUTE'?'Historical ZIP relative path':'Source relative file'}<textarea style={field} rows={2} value={source} onChange={e=>setSource(e.target.value)} spellCheck={false}/></label>}
+     {operation==='HISTORICAL_B010_EXECUTE'&&<><label>Historical execution frames (1–12)<input style={field} type='number' min={1} max={12} step={1} value={b010Steps} onChange={e=>setB010Steps(e.target.value)}/></label><label>B010 domain<select style={field} value={b010Domain} onChange={e=>setB010Domain(e.target.value)}>{['semantic','physical','temporal','relational','inverse','outverse','material','spectral','causal','evidence','scar','forecast'].map(n=><option key={n}>{n}</option>)}</select></label><label>B010 scale<select style={field} value={b010Scale} onChange={e=>setB010Scale(e.target.value)}>{['surface','micro','object','assembly','planetary','regional','cosmic','galactic','system','architectural','part','field'].map(n=><option key={n}>{n}</option>)}</select></label><label>B010 view<select style={field} value={b010View} onChange={e=>setB010View(e.target.value)}>{['cinematic','field','structure','surface','material','semantic','diagnostic','wireframe','evidence'].map(n=><option key={n}>{n}</option>)}</select></label><label>B010 color operator<select style={field} value={b010Color} onChange={e=>setB010Color(e.target.value)}>{['violet','teal','spectral','scar','water','evidence','neutral'].map(n=><option key={n}>{n}</option>)}</select></label><small>Runs only byte-pinned OMEGA B010 donor (SHA-256 bb8df3a4…). Frames execute in a disposable local workspace and return packet/traversal/acceptance hashes. This does not modify Canon or establish GPU/physical authority.</small></>}
      {operation==='HISTORICAL_ZIP_AUDIT'&&<label>Expected archive SHA-256 (optional, required for comparison against a recorded release)<input style={field} value={archiveExpectedSha} maxLength={64} spellCheck={false} placeholder='64 lowercase hexadecimal characters' onChange={e=>setArchiveExpectedSha(e.target.value)}/></label>}
      {(operation==='SPHERE_TENSOR_VERIFY'||operation==='SPHERE_TENSOR_CONTINUE'||operation==='SPHERE_TENSOR_RENDER'||operation==='SPHERE_TENSOR_AUDIT_LINEAGE')&&<label>Original completed export job ID<input style={field} value={exportJobId} onChange={e=>setExportJobId(e.target.value.trim())} maxLength={32} placeholder='Select a completed export job below'/></label>}
      {operation==='SPHERE_TENSOR_CONTINUE'&&<label>Further state transitions (1–8)<input style={field} type='number' min={1} max={8} step={1} value={tensorSteps} onChange={e=>setTensorSteps(e.target.value)}/></label>}
