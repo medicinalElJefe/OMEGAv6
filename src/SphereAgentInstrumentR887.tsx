@@ -59,7 +59,7 @@ export default function SphereAgentInstrumentR887({address,onAddress}:{address:n
  }catch(e){setError('Global address navigation refused: '+String(e))}
  };
  const navigateExpanded=()=>{try{
-  if(!/^(0|[1-9]\\d*)$/.test(expandedJump))throw new RangeError('Enter a whole 12^10 address');
+  if(!/^(0|[1-9]\d*)$/.test(expandedJump))throw new RangeError('Enter a whole 12^10 address');
   const {shell:nextShell,outer:nextOuter,inner:nextInner,phase:nextPhase}=expandedCoordinatesR918(Number(expandedJump));
   setRunning(false);setShell(nextShell);setOuter(nextOuter);onAddress(nextOuter);
   setActiveInner(nextInner);setInnerPage(Math.floor(nextInner/144));setPhaseSlot(nextPhase);
