@@ -53,5 +53,6 @@ assert.ok(source.includes('onNavigate(chosen.navigationRoute)')||source.includes
 assert.ok(source.includes('HISTORICAL_CHARTED_DESIGN')||source.includes('Source-registered workspace relation'));
 assert.ok(source.includes('source')&&source.includes('original.settings')&&source.includes('original.gates'));
 assert.ok(boundary.includes('../OmegaOneSystemLedgerR926'));
-assert.equal(registry.gates.filter(x=>x['Blocks Packaging?']==='YES').length,12);
+assert.equal(registry.gates.filter(x=>x['Blocks Packaging?']==='YES').length,10);
+assert.equal(registry.gates.filter(x=>x['Blocks Packaging?']==='NO').length,2);
 console.log('R926 PASS · exact 100 software/12 menus/36 settings/18 capabilities/144 phases/12 gates · 44-route native containment · one system route ownership · conservative proof classification');
