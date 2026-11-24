@@ -126,6 +126,12 @@ for(const needle of ['/api/hub/artifacts/','r909-download.svg','X-Omega-Artifact
 }
 for(const needle of ['SPHERE_TENSOR_RENDER','verified-cell-projection.svg','sourceFullStateSha256','OMEGA_SPARSE_PROJECTION_ARTIFACT_R907'])
  assert.ok(sparseWindows.includes(needle),'R907 actual compiled Windows SVG proof missing: '+needle);
+for(const needle of ['SPHERE_TENSOR_AUDIT_LINEAGE','audit_sparse_lineage_r912','R912_PARENT_RECEIPT_OR_STATE_DRIFT_HELD','R912_LINEAGE_CYCLE_HELD','R912_LINEAGE_DEPTH_BOUND_HELD']){
+ assert.ok(sparseHub.includes(needle),'R912 entire checkpoint ancestry executor missing: '+needle);
+}
+for(const needle of ['SPHERE_TENSOR_AUDIT_LINEAGE','OMEGA_SPARSE_LINEAGE_AUDIT_R912','rootExportJobId','R912 compiled native exact checkpoint ancestry mismatch']){
+ assert.ok(sparseWindows.includes(needle),'R912 packaged Windows ancestry check missing: '+needle);
+}
 for(const needle of ['SPHERE_TENSOR_CONTINUE','OMEGA_SPARSE_TENSOR_CONTINUATION_R906','sourceExportReceiptSha256','VERIFIED_CHECKPOINT_CONTINUATION_EXPORTED'])
  assert.ok(sparseHub.includes(needle),'R906 complete verified checkpoint continuation missing: '+needle);
 for(const needle of ['SPHERE_TENSOR_CONTINUE','tensor-next.csv','sourceExportReceiptSha256','OMEGA_SPARSE_TENSOR_CONTINUATION_R906'])
@@ -153,7 +159,7 @@ for(const line of ['127.0.0.1','11434','/api/tags','/api/generate','R899_EXECUTI
 assert.ok(workflow.includes('r899-windows-compiled-inference-smoke.ps1'),
  'R899 native Windows end-to-end inference test must run in release CI');
 const localHubPanel=readFileSync('src7/workspaces/OmegaLocalHubPanelR884.tsx','utf8');
-for(const marker of ['SPHERE_TENSOR_STEP','SPHERE_TENSOR_EXPORT','SPHERE_TENSOR_VERIFY','SPHERE_TENSOR_CONTINUE','SPHERE_TENSOR_RENDER','exportJobId','tensorExport','tensorResult','conservationExact','fullStateSha256','tensorPreview','projectionCanvasRef','putImageData','projectionGrid','executeR908GpuProjection','Run real WebGPU projection parity on this device','Download exact verified SVG','fetchVerifiedSvgR909','Download complete verified CSV checkpoint','fetchVerifiedCsvR910','crypto.subtle.digest'])
+for(const marker of ['SPHERE_TENSOR_STEP','SPHERE_TENSOR_EXPORT','SPHERE_TENSOR_VERIFY','SPHERE_TENSOR_CONTINUE','SPHERE_TENSOR_RENDER','SPHERE_TENSOR_AUDIT_LINEAGE','exportJobId','tensorExport','tensorResult','conservationExact','fullStateSha256','tensorPreview','projectionCanvasRef','putImageData','projectionGrid','executeR908GpuProjection','Run real WebGPU projection parity on this device','Download exact verified SVG','fetchVerifiedSvgR909','Download complete verified CSV checkpoint','fetchVerifiedCsvR910','crypto.subtle.digest'])
  assert.ok(localHubPanel.includes(marker),'R902 interactive tensor operator or state receipt inspector missing: '+marker);
 
 for(const marker of ['importLocalToken','file.name!==\'hub-r881.token\'','file.size>512','file.text()','setToken(text)','Load local token file','Nothing is uploaded'])
