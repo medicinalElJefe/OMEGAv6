@@ -52,7 +52,7 @@ def load_local_inference_adapter_r899():
     spec.loader.exec_module(adapter)
     return adapter
 
-READ_ONLY_REPLAY = frozenset({"HASH_TREE", "CSV_STATS", "VERIFY_LEDGER_SPLIT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_VERIFY"})
+READ_ONLY_REPLAY = frozenset({"HASH_TREE", "CSV_STATS", "VERIFY_LEDGER_SPLIT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_AUDIT_LINEAGE"})
 OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "LOCAL_INFER", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_EXPORT", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_CONTINUE", "SPHERE_TENSOR_RENDER", "SPHERE_TENSOR_AUDIT_LINEAGE", "RESIDUAL_RESTORE"})
 STATUS = frozenset({"QUEUED", "WAIT_EVENT", "RUNNING", "COMPLETED", "FAILED", "HELD", "CANCELLED"})
 def utc_ms(): return int(time.time() * 1000)
@@ -294,6 +294,7 @@ class Hub:
         if operation=="SPHERE_TENSOR_VERIFY":
             if not isinstance(args,dict) or set(args)!={"export_job_id"}:
                 raise ValueError("R905_EXPORT_JOB_ID_REQUIRED_HELD")
+            self.audit_sparse_lineage_r912(args.get("export_job_id"))
             prior, validated=self.verified_sparse_export(args.get("export_job_id"))
             return {**validated,"exportJobId":prior["id"],
                     "originalExportReceiptSha256":prior["result_sha256"],
@@ -484,6 +485,14 @@ class Hub:
             raise ValueError("R909_ORIGINAL_RENDER_RECEIPT_REQUIRED_HELD")
         if not isinstance(job.get("result_sha256"),str) or job["result_sha256"]!=sha_bytes(json_bytes(result)):
             raise ValueError("R909_RENDER_RECEIPT_DRIFT_HELD")
+        # A valid SVG file is not a verified derived export if its
+        # original checkpoint chain has since drifted. Check that chain
+        # and the render's exact pinned source-state/receipt references.
+        source_id=result.get("sourceExportJobId")
+        source_audit=self.audit_sparse_lineage_r912(source_id)
+        if (result.get("sourceExportReceiptSha256")!=source_audit["entries"][0]["receiptSha256"] or
+            result.get("sourceFullStateSha256")!=source_audit["entries"][0]["stateSha256"]):
+            raise ValueError("R912_RENDER_SOURCE_RECEIPT_DRIFT_HELD")
         artifact=result.get("artifact")
         if not isinstance(artifact,dict) or not isinstance(artifact.get("path"),str) or not artifact["path"].lower().endswith(".svg"):
             raise ValueError("R909_SVG_ARTIFACT_REQUIRED_HELD")
