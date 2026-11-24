@@ -1,13 +1,13 @@
-import {useMemo,useState} from 'react';
+import {useMemo,useState,type CSSProperties} from 'react';
 import original from '../audit/omega-full-historical-software-ledger-r926.json';
 
 type Software=typeof original.software[number];
 type Menu=typeof original.menus[number];
 type Tab='SOFTWARE'|'MENUS'|'CONTROLS'|'CAPABILITIES'|'SEQUENCE'|'GATES';
 
-const frame:React.CSSProperties={border:'1px solid #567489',borderRadius:12,background:'#102435',padding:16,color:'#e6f1f8',margin:'14px 0'};
-const input:React.CSSProperties={border:'1px solid #7894a6',borderRadius:7,padding:'9px 11px',color:'#f3fbff',background:'#17384a',minWidth:0,maxWidth:'100%',boxSizing:'border-box'};
-const click:React.CSSProperties={padding:'8px 11px',background:'#225568',color:'#fff',border:'1px solid #7296a3',borderRadius:7,cursor:'pointer'};
+const frame:CSSProperties={border:'1px solid #567489',borderRadius:12,background:'#102435',padding:16,color:'#e6f1f8',margin:'14px 0'};
+const input:CSSProperties={border:'1px solid #7894a6',borderRadius:7,padding:'9px 11px',color:'#f3fbff',background:'#17384a',minWidth:0,maxWidth:'100%',boxSizing:'border-box'};
+const click:CSSProperties={padding:'8px 11px',background:'#225568',color:'#fff',border:'1px solid #7296a3',borderRadius:7,cursor:'pointer'};
 const all=original.software;
 const menuList=original.menus;
 const searchable=(...parts:string[])=>parts.join(' ').toLowerCase();
