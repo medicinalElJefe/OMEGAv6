@@ -86,5 +86,23 @@
     "Historical 2-year archive exhaustive content reconciliation",
     "Current production deployment acceptance"
   ],
-  "acceptanceBoundary": "R921 hashes ZIP byte trees and refuses unsafe paths; R922 runs only pinned B010 donor. Neither mutates canonical OMEGA state or promotes scientific claims."
+  "acceptanceBoundary": "R921 hashes ZIP byte trees and refuses unsafe paths; R922 runs only pinned B010 donor. Neither mutates canonical OMEGA state or promotes scientific claims.",
+  "provenAddressTranslations": [
+    {
+      "id": "R923_B010_TRAVERSAL_TO_R902_SPHERE_CELL",
+      "source": "OMEGA_VERIFIED_HISTORICAL_B010_EXECUTION_R922.frames[last].traversalAddress",
+      "target": "SPHERE_TENSOR_STEP.seeds[0].cell",
+      "range": [
+        0,
+        20735
+      ],
+      "ui": "src7/workspaces/OmegaLocalHubPanelR884.tsx",
+      "mechanism": "OPERATOR_EXPLICIT_ADDRESS_COORDINATE_ONLY",
+      "stateMutation": false,
+      "canonicalPromotion": false,
+      "automaticJobSubmission": false,
+      "independentInnerStateCarry": false,
+      "livePcProof": false
+    }
+  ]
 }
