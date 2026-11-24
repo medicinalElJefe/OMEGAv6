@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R956 source-exact staged original V35 383.8MB SQLite from SHA-pinned Part 18 wrapper, direct R954 search handoff (local root, explicit auth and submit); R955 FTS5 boolean term refusal; original source 79/156 indexed ZIPs verified, native/OMEGA7 full acceptance held",
+  "latestGovernedWork": "R957 original V35 149679-row FTS5 rowid-index optimization, exact gate/domain parity and bounded microbenchmark; R956 authenticated source-safe staging; full OMEGA7 native/UI and production proof held",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -404,6 +404,11 @@
       "revision": "R956",
       "conservation": "Authenticated original V35 source-pinned nested ZIP/SQLite staging plus one-action transition into indexed FTS5 search",
       "accepted": "CANDIDATE_LOCAL_EXECUTOR_UNTIL_EXACT_SHA_CI_AND_HOST_RETURN"
+    },
+    {
+      "revision": "R957",
+      "conservation": "Original V35 FTS5 rowid-pushdown query avoids dependent gate-index scans and temp sort, with source-result parity and bounded local performance evidence",
+      "accepted": "LOCAL_QUERY_PLAN_PERFORMANCE_MEASUREMENT_NOT_DEVICE_OR_RUNTIME_ACCEPTANCE"
     }
   ],
   "independentArchiveUnverifiedOtherListedParts": 77,
@@ -412,5 +417,6 @@
   "reconstructedB053R7SourceEvidence": "audit/omega-b053-r7-full-source-acceptance-r950.json",
   "originalB053R7ModuleEvidence": "audit/omega-b053-r7-isolated-module-parity-r951.json",
   "recoveredV35SourceEvidence": "audit/omega-v35-full-source-acceptance-r953.json",
-  "v35OriginalAtlasSqliteEvidence": "audit/omega-v35-original-atlas-db-r954.json"
+  "v35OriginalAtlasSqliteEvidence": "audit/omega-v35-original-atlas-db-r954.json",
+  "originalV35IndexedQueryPerformanceEvidence": "audit/omega-v35-fts-performance-r957.json"
 }

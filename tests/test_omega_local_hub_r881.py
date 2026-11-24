@@ -138,6 +138,21 @@ class LocalHubTests(unittest.TestCase):
         next_page=module._query_v35_index(self.root,{**args,"cursor":first["nextCursor"]},hubmod.safe_under,expected_sha256=digest,expected_bytes=path.stat().st_size,expected_rows=3)
         self.assertEqual([r["rowId"] for r in next_page["records"]],[2])
         self.assertEqual(next_page["hasMore"],False)
+        stay=module._query_v35_index(self.root,{**args,"gate":"STAY","limit":25},hubmod.safe_under,
+              expected_sha256=digest,expected_bytes=path.stat().st_size,expected_rows=3)
+        turn=module._query_v35_index(self.root,{**args,"gate":"TURN","limit":25},hubmod.safe_under,
+              expected_sha256=digest,expected_bytes=path.stat().st_size,expected_rows=3)
+        domain=module._query_v35_index(self.root,{**args,"domain":"water domain","limit":25},hubmod.safe_under,
+              expected_sha256=digest,expected_bytes=path.stat().st_size,expected_rows=3)
+        self.assertEqual([r["rowId"] for r in stay["records"]],[1])
+        self.assertEqual([r["rowId"] for r in turn["records"]],[2])
+        self.assertEqual([r["rowId"] for r in domain["records"]],[1,2])
+        with sqlite3.connect(path) as c:
+            plan=[row[3] for row in c.execute(
+              "EXPLAIN QUERY PLAN SELECT r.row_id FROM rows_fts JOIN rows r ON r.row_id=rows_fts.rowid WHERE rows_fts MATCH ? AND rows_fts.rowid > ? AND r.gate = ? ORDER BY rows_fts.rowid ASC LIMIT ?",
+              ('"water"',0,"STAY",26))]
+        self.assertTrue(any("VIRTUAL TABLE INDEX" in step for step in plan))
+        self.assertFalse(any("TEMP B-TREE" in step for step in plan),"R957 must not require a temporary result-order sort")
         self.assertEqual(next_page["canonicalWrites"],0)
         self.assertFalse(next_page["historicalExecutorParityProven"])
         with self.assertRaisesRegex(ValueError,"R954_ORIGINAL_SQLITE_SIZE_HELD"):

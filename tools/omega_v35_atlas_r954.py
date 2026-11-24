@@ -72,20 +72,28 @@ def _query_v35_index(root: Path,args:dict,safe_under,*,expected_sha256:str,expec
         count=con.execute("SELECT count(*) FROM rows").fetchone()[0]
         if count!=expected_rows:
             raise ValueError("R954_ORIGINAL_ATLAS_ROW_COUNT_HELD")
-        sql="SELECT r.row_id,r.source_file,r.sheet,r.row_number,r.domain,r.root,r.function,r.gate,r.row_text,r.row_json FROM rows r"
-        clauses=["r.row_id > ?"]
-        params=[cursor]
+        # Drive FTS5's own rowid range, not the joined row-table gate index.
+        # The original rows-first query could scan every STAY row for each
+        # filtered search and make SQLite allocate a temporary sort B-tree.
+        # This plan retains source rowid ordering and exact domain/gate rules.
+        sql="SELECT r.row_id,r.source_file,r.sheet,r.row_number,r.domain,r.root,r.function,r.gate,r.row_text,r.row_json"
         if fts:
-            sql+=" JOIN rows_fts ON rows_fts.rowid=r.row_id"
-            clauses.append("rows_fts MATCH ?")
-            params.append(fts)
+            sql+=" FROM rows_fts JOIN rows r ON r.row_id=rows_fts.rowid"
+            clauses=["rows_fts MATCH ?", "rows_fts.rowid > ?"]
+            params=[fts,cursor]
+            ordering="rows_fts.rowid"
+        else:
+            sql+=" FROM rows r"
+            clauses=["r.row_id > ?"]
+            params=[cursor]
+            ordering="r.row_id"
         if raw_domain:
             clauses.append("r.domain = ?")
             params.append(raw_domain)
         if raw_gate:
             clauses.append("r.gate = ?")
             params.append(raw_gate)
-        sql+=" WHERE "+" AND ".join(clauses)+" ORDER BY r.row_id ASC LIMIT ?"
+        sql+=" WHERE "+" AND ".join(clauses)+" ORDER BY "+ordering+" ASC LIMIT ?"
         params.append(limit+1)
         batch=con.execute(sql,params).fetchall()
         page=batch[:limit]

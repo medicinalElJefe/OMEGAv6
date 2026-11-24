@@ -1,0 +1,41 @@
+{
+  "schema": "OMEGA_V35_FTS5_ROWID_PERFORMANCE_WITNESS_R957",
+  "source": "audit/omega-v35-original-atlas-db-r954.json",
+  "dbSha256": "24a03b232ebd35d755fe2f7152e04067c9e5755d0593dcc525a727480601fb38",
+  "originalRows": 149679,
+  "samples": 100,
+  "warmupPairs": 5,
+  "environment": "TRANSIENT_LINUX_PYTHON_3_13_SQLITE_3_46_1_NOT_USER_PC",
+  "comparator": "SAME_SOURCE_ROWS_SAME_QUERY_TERM_SOURCE_ONLY",
+  "sourceQuery": "water",
+  "pageLimit": 11,
+  "cases": [
+    {
+      "name": "FTS-only",
+      "baselineMedianMs": 0.617,
+      "optimizedMedianMs": 0.054,
+      "baselineP95Ms": 0.773,
+      "optimizedP95Ms": 0.088,
+      "resultIdsMatched": true,
+      "baselineTempSort": true,
+      "optimizedTempSort": false
+    },
+    {
+      "name": "FTS-plus-original-STAY-gate",
+      "baselineMedianMs": 61.783,
+      "optimizedMedianMs": 0.044,
+      "baselineP95Ms": 71.61,
+      "optimizedP95Ms": 0.06,
+      "resultIdsMatched": true,
+      "baselineTempSort": false,
+      "optimizedTempSort": false,
+      "baselinePlannerProblem": "rows indexed by gate first then nested FTS scan",
+      "optimizedPlanner": "FTS indexed candidate rowids first, PK lookup and exact gate filter"
+    }
+  ],
+  "acceptanceBoundary": "ONE_MACHINE_BOUNDED_MICROBENCHMARK_NOT_END_TO_END_PRODUCT_LATENCY_SLA_AND_NOT_PROOF_OF_NATIVE_WINDOWS_OR_GPU_EXECUTION",
+  "sourceImmutable": true,
+  "canonicalWrites": 0,
+  "gpuProof": false,
+  "productionCertified": false
+}
