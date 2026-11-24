@@ -1,0 +1,198 @@
+{
+  "schema": "OMEGA_B043_PER_MODULE_HISTORICAL_EXECUTION_R949",
+  "sourceArchive": "audit/omega-b043-full-source-byte-acceptance-r948.json",
+  "sourceMasterSha256": "76092ac1396ab5224dde6f77401ce7c76819c10a749c102950045de9bad6e4e7",
+  "environment": "ISOLATED_LOCAL_PYTHON_3_13_PYTEST_NOT_AUTHENTICATED_WINDOWS_HOST",
+  "executionMethod": "EACH_ORIGINAL_TEST_FILE_RUN_IN_SEPARATE_PYTEST_SUBPROCESS_WITH_CACHE_DISABLED",
+  "testModuleCount": 34,
+  "allModulesPassedIndividually": true,
+  "passedTestsAcrossPerModuleExecutions": 62,
+  "perModuleInitialBudgetSeconds": 15,
+  "extendedBudgetSecondsForSlowestModule": 100,
+  "extendedRetestModule": "test_total_control_regression.py",
+  "extendedRetestObservedSeconds": 18.2,
+  "extendedRetestResult": "1_PASSED",
+  "combinedSuite": {
+    "collectedTests": 62,
+    "state": "TIMED_OUT",
+    "lastObservedTest": "test_b040_fusion_runtime.py::test_full_fusion_runtime_and_modes",
+    "acceptanceProven": false
+  },
+  "modules": [
+    {
+      "file": "tests/test_b037_governed_commands.py",
+      "observedPassed": 2,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_b037_installer_contract.py",
+      "observedPassed": 2,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_b037_routes.py",
+      "observedPassed": 1,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_b038_release_contract.py",
+      "observedPassed": 2,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_b038_visual_authority.py",
+      "observedPassed": 1,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_b039_full_traversal.py",
+      "observedPassed": 4,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_b039_routes.py",
+      "observedPassed": 1,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_b040_fusion_core.py",
+      "observedPassed": 7,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_b040_fusion_runtime.py",
+      "observedPassed": 3,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_b040_routes.py",
+      "observedPassed": 1,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_b041_ledger_cockpit.py",
+      "observedPassed": 3,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_b042_highest_potential.py",
+      "observedPassed": 4,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_b043_reality_compiler.py",
+      "observedPassed": 6,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_basin.py",
+      "observedPassed": 1,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_boot.py",
+      "observedPassed": 1,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_boot_full_runtime.py",
+      "observedPassed": 1,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_decision_enforcement.py",
+      "observedPassed": 1,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_full_session_replay.py",
+      "observedPassed": 1,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_host_routes.py",
+      "observedPassed": 2,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_packet_builder.py",
+      "observedPassed": 1,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_packet_store.py",
+      "observedPassed": 1,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_phase_elastic_stay.py",
+      "observedPassed": 3,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_projection_heatmap.py",
+      "observedPassed": 1,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_projection_image.py",
+      "observedPassed": 1,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_projection_proof.py",
+      "observedPassed": 1,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_proof_overlay.py",
+      "observedPassed": 1,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_realized_suite.py",
+      "observedPassed": 1,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_recursive_field_admission.py",
+      "observedPassed": 1,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_replay.py",
+      "observedPassed": 1,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_runtime_boot.py",
+      "observedPassed": 1,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_session_replay.py",
+      "observedPassed": 1,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_skin_engine.py",
+      "observedPassed": 2,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_total_control_regression.py",
+      "observedPassed": 1,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    },
+    {
+      "file": "tests/test_transition.py",
+      "observedPassed": 1,
+      "state": "PASS_IN_ISOLATED_PROCESS"
+    }
+  ],
+  "truthBoundary": "SAME_TEST_CASES_PASS_SEPARATELY; ENTIRE_COMBINED_SUITE_AND_CURRENT_OMEGA7_RUNTIME_PARITY_NOT_ACCEPTED",
+  "nativeWindowsDeviceProof": false,
+  "gpuComputeProof": false,
+  "originalApplicationProductionProof": false,
+  "canonicalWrites": 0
+}

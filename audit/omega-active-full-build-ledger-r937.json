@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R948 original B043 full 29/29 source byte reconstruction and 1891-member CRC PASS; 27 selected donor tests PASS; full 62-item suite timed out; R938/R947 Windows root alias repair",
+  "latestGovernedWork": "R949 34/34 isolated original B043 test modules and 62/62 cases PASS, combined 62-case pytest process timed out; R948 B043 complete source CRC and SHA accepted; current OMEGA7 executor parity remains HELD",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 30,
   "gateReceipts": [
@@ -364,8 +364,14 @@
       "revision": "R948",
       "conservation": "Full original B043 source SHA/CRC recovery, selected test proof and Windows-safe audit/reconstruction paths",
       "accepted": "ORIGINAL_B043_SOURCE_BYTES_ONLY_OTHER_ARCHIVES_AND_RUNTIME_HELD"
+    },
+    {
+      "revision": "R949",
+      "conservation": "34 recovered B043 modules tested separately; 62 cases pass; combined suite timeout persists",
+      "accepted": "ISOLATED_DONOR_TEST_PARITY_ONLY_COMBINED_SUITE_HELD"
     }
   ],
   "independentArchiveUnverifiedOtherListedParts": 126,
-  "reconstructedOriginalReleaseEvidence": "audit/omega-b043-full-source-byte-acceptance-r948.json"
+  "reconstructedOriginalReleaseEvidence": "audit/omega-b043-full-source-byte-acceptance-r948.json",
+  "isolatedB043ModuleProof": "audit/omega-b043-module-test-evidence-r949.json"
 }
