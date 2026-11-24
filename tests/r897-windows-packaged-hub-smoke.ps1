@@ -242,6 +242,30 @@ try {
        $nextResult.result.fullStateSha256 -ne $continueResult.result.canonicalFullStateSha256){
         throw 'R906 continued native checkpoint could not be independently roundtrip verified'
     }
+    # R912 verify the entire checkpoint chain, not merely the most recent
+    # CSV. The original source must be present and hash-unchanged.
+    $auditPayload=@{operation='SPHERE_TENSOR_AUDIT_LINEAGE';args=@{
+        export_job_id=$continueId
+    }} | ConvertTo-Json -Compress -Depth 4
+    $auditQueued=Invoke-WebRequest -Uri "http://127.0.0.1:$port/api/hub/jobs" -Headers $headers -UseBasicParsing -Method Post -ContentType 'application/json' -Body $auditPayload -TimeoutSec 5
+    $auditId=($auditQueued.Content|ConvertFrom-Json).job.id
+    if(-not $auditId){throw 'R912 native lineage job did not queue'}
+    $auditResult=$null
+    for($poll=0;$poll -lt 100;$poll++){
+        $read=Invoke-WebRequest -Uri ("http://127.0.0.1:$port/api/hub/jobs/" + $auditId) -Headers $headers -UseBasicParsing -TimeoutSec 5
+        $auditResult=($read.Content|ConvertFrom-Json).job
+        if($auditResult.state -in @('COMPLETED','FAILED','HELD')){break}
+        Start-Sleep -Milliseconds 100
+    }
+    if($null -eq $auditResult -or $auditResult.state -ne 'COMPLETED' -or
+       $auditResult.result.schema -ne 'OMEGA_SPARSE_LINEAGE_AUDIT_R912' -or
+       $auditResult.result.depth -ne 2 -or
+       $auditResult.result.rootExportJobId -ne $exportId -or
+       $auditResult.result.entries[0].jobId -ne $continueId -or
+       $auditResult.result.entries[1].jobId -ne $exportId -or
+       $auditResult.result.totalMass -ne 4096){
+       throw "R912 compiled native exact checkpoint ancestry mismatch: $($auditResult.state) $($auditResult.error)"
+    }
     # R907 the same compiled Windows Hub must render a genuine SVG from the
     # independently verified full 20,736D cell-state checkpoint.
     $renderPayload = @{operation='SPHERE_TENSOR_RENDER';args=@{
