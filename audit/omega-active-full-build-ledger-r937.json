@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R961 independently bind projection rows to canonical sparse-state SHA and reuse log-normalized intensity across SVG and grid; R960 six workflows passed and three pending at observation; R961 regression pending",
+  "latestGovernedWork": "R962 canonical historical executor capsule authority and exact multi-term search across 100 software families; regression pending",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -429,6 +429,11 @@
       "revision": "R961",
       "conservation": "Projection verifies canonical row digest before rendering and computes shared intensity once; regressions reject changed cell, lane, or mass under a valid-format source digest",
       "accepted": "CANDIDATE_SOURCE_ONLY_TEST_EXECUTION_PENDING"
+    },
+    {
+      "revision": "R962",
+      "conservation": "All historical execution capsules resolve from canonical registry by system ID; caller cannot override route or execution state; exact ID search ranking and conjunctive term matching; regression covers all 100 families",
+      "accepted": "CANDIDATE_SOURCE_ONLY_NOT_INDEPENDENT_HISTORICAL_EXECUTOR_PARITY"
     }
   ],
   "independentArchiveUnverifiedOtherListedParts": 77,

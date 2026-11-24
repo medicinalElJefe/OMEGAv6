@@ -10,7 +10,9 @@ export function searchRecoveredSystemsR512(query:string){
  return Object.freeze(RECOVERED_SYSTEM_EXECUTION_R512
   .map(row=>{
    const text=normalizeR512([row.systemId,row.artifact,row.family,row.role,row.capability,row.route,row.state].join(' '));
-   const score=terms.reduce((n,t)=>n+(normalizeR512(row.artifact)===q?30:0)+(text.includes(t)?5:0),0);
+   const exactId=normalizeR512(row.systemId)===q;
+   const exactArtifact=normalizeR512(row.artifact)===q;
+   const score=terms.every(t=>text.includes(t))?(exactId?100:exactArtifact?80:terms.length*5):0;
    return{row,score};
   })
   .filter(x=>x.score>0)
@@ -19,6 +21,10 @@ export function searchRecoveredSystemsR512(query:string){
 }
 
 export function recoveredSystemExecutionCapsuleR512(row:R512RecoveredSystemResolution,createdAt=new Date().toISOString()):RecoveredExecutionCapsuleR512{
+ const canonical=RECOVERED_SYSTEM_EXECUTION_R512.find(candidate=>candidate.systemId===row.systemId);
+ if(!canonical)throw new Error('R512_UNKNOWN_HISTORICAL_SYSTEM_HELD');
+ // Resolve every execution field from the canonical registry, not the caller.
+ row=canonical;
  const state:RecoveredExecutionCapsuleR512['state']=row.state==='WORKING_SUCCESSOR'?'EXECUTES_NOW':row.state==='GATED_SUCCESSOR'?'TRUTH_GATED':row.state;
  const launchKind:RecoveredExecutionCapsuleR512['launchKind']=row.state==='WORKING_SUCCESSOR'?'EXECUTE':row.state==='GATED_SUCCESSOR'?'EVIDENCE_GATE':row.state==='ARCHIVE_ONLY'?'ARCHIVE':'RESTORE';
  return Object.freeze({

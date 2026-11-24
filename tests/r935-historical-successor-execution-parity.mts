@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {MASTER_SYSTEMS_R83} from '../src/softwareMasterLedgerR83';
 import {RECOVERED_SYSTEM_EXECUTION_R512,RECOVERED_SYSTEM_SUMMARY_R512,resolveRecoveredSystemR512} from '../src/recoveredSoftwareExecutionR512';
-import {recoveredSystemExecutionCapsuleR512} from '../src7/recoveredSystemSearchR512';
+import {recoveredSystemExecutionCapsuleR512,searchRecoveredSystemsR512} from '../src7/recoveredSystemSearchR512';
 
 const original=JSON.parse(readFileSync('audit/omega-full-historical-software-ledger-r926.json','utf8'));
 const native=readFileSync('src7/nativeCapabilityRegistry.tsx','utf8');
@@ -61,6 +61,14 @@ for(const row of MASTER_SYSTEMS_R83){
  }
 }
 assert.equal(originals.size,100);
+for(const row of RECOVERED_SYSTEM_EXECUTION_R512){
+ assert.equal(searchRecoveredSystemsR512(row.systemId)[0]?.systemId,row.systemId,'exact system ID search');
+ const canonical=recoveredSystemExecutionCapsuleR512(row,'2026-01-01T00:00:00.000Z');
+ const altered=recoveredSystemExecutionCapsuleR512({...row,route:'Settings',state:'WORKING_SUCCESSOR',executorCapabilityId:'forged',executionDomain:'LOCAL'},'2026-01-01T00:00:00.000Z');
+ assert.deepEqual(altered,canonical,'caller must not override canonical executor authority');
+}
+assert.equal(searchRecoveredSystemsR512('SYS-001 zzzzzunmatchedtoken').length,0);
+assert.throws(()=>recoveredSystemExecutionCapsuleR512({...RECOVERED_SYSTEM_EXECUTION_R512[0],systemId:'UNKNOWN'}),/R512_UNKNOWN_HISTORICAL_SYSTEM_HELD/);
 assert.equal(working,RECOVERED_SYSTEM_SUMMARY_R512.working);
 assert.equal(gated,RECOVERED_SYSTEM_SUMMARY_R512.gated);
 assert.equal(archived,RECOVERED_SYSTEM_SUMMARY_R512.archiveOnly);
