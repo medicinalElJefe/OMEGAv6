@@ -1,6 +1,6 @@
 // R895: atomic IndexedDB exact-float64 state persistence for a bounded complete 12-agent × 20,736 inner-state sweep.
 // No silent truncation, no automatic cloud work, and no second CanonState writer.
-import {AGENTS,SIZE,neighbors} from './sphereAgentFabricR887.mjs';
+import {AGENTS,SIZE,neighbors,phaseNeighborR919} from './sphereAgentFabricR887.mjs';
 export const R895_SCHEMA='OMEGA_SPHERE_DURABLE_CHECKPOINT_R895';
 export const R895_MAX_VALUES=12*SIZE;
 const DB='omega-sphere-durable-r895',STORE='checkpoints',KEY='latest';
@@ -10,7 +10,7 @@ const unit=(x)=>finite(x)&&x>=0&&x<=1;
 function receipt(r,sequence,tick){
  return Boolean(r&&typeof r==='object'&&Number.isSafeInteger(r.taskId)&&r.taskId>=1&&r.taskId<=sequence&&idx(r.agent,AGENTS)&&idx(r.inner,SIZE)&&['OBSERVE','RELAX','EXCHANGE','PHASE_EXCHANGE'].includes(r.kind)&&Number.isSafeInteger(r.tick)&&r.tick>=1&&r.tick<=tick&&unit(r.before)&&unit(r.after)&&
   (r.kind!=='EXCHANGE'||(idx(r.peer,AGENTS)&&neighbors(r.agent).includes(r.peer)&&unit(r.peerBefore)&&unit(r.peerAfter)&&finite(r.conservationResidual)&&Math.abs(r.conservationResidual)<=1e-9))&&
-  (r.kind!=='PHASE_EXCHANGE'||(idx(r.phase,12)&&Math.floor(r.phase/4)!==1&&idx(r.neighborInner,SIZE)&&unit(r.neighborBefore)&&unit(r.neighborAfter)&&finite(r.conservationResidual)&&Math.abs(r.conservationResidual)<=1e-9)));
+  (r.kind!=='PHASE_EXCHANGE'||(idx(r.phase,12)&&Math.floor(r.phase/4)!==1&&idx(r.neighborInner,SIZE)&&r.neighborInner===phaseNeighborR919(r.inner,r.phase)&&unit(r.neighborBefore)&&unit(r.neighborAfter)&&finite(r.conservationResidual)&&Math.abs(r.conservationResidual)<=1e-9&&Math.abs((r.after+r.neighborAfter)-(r.before+r.neighborBefore)-r.conservationResidual)<=1e-9)));
 }
 export function validateDurableR895(fabric,session){
  if(!fabric||!(fabric.active instanceof Map)||!Array.isArray(fabric.queue)||!Array.isArray(fabric.receipts)||fabric.active.size>512||fabric.queue.length>1024||fabric.receipts.length>512||!Number.isSafeInteger(fabric.tick)||fabric.tick<0||!Number.isSafeInteger(fabric.sequence)||fabric.sequence<fabric.tick)throw new Error('Invalid or over-budget fabric');
