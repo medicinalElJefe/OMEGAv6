@@ -596,11 +596,18 @@ class LocalHubTests(unittest.TestCase):
         for name,rows,error in [
             ("zip-slip",[("../escape.py",b"x")],"R921_UNSAFE_ARCHIVE_ENTRY_HELD"),
             ("windows-collision",[("Omega/Run.py",b"a"),("omega/run.PY",b"b")],"R921_CASEFOLD_PATH_COLLISION_HELD"),
-            ("windows-separator",[(r"omega\\runtime.py",b"x")],"R921_UNSAFE_ARCHIVE_ENTRY_HELD"),
+            ("windows-separator",[("omega/runtime.py",b"x")],"R921_UNSAFE_ARCHIVE_ENTRY_HELD"),
         ]:
             target=self.root / "data" / (name+".zip")
             with zipfile.ZipFile(target,"w") as z:
                 for entry,payload in rows:z.writestr(entry,payload)
+            if name=="windows-separator":
+                # Python ZipInfo normalizes backslash to slash on Windows.
+                # Patch both ZIP filename headers so every OS audits the
+                # same genuinely unsafe raw entry rather than a sanitized one.
+                raw=target.read_bytes()
+                self.assertEqual(raw.count(b"omega/runtime.py"),2)
+                target.write_bytes(raw.replace(b"omega/runtime.py",b"omega\\runtime.py"))
             queued=self.hub.enqueue("HISTORICAL_ZIP_AUDIT",{"source":"data/"+name+".zip"})
             reply=self.hub.run_one()
             self.assertEqual(reply["state"],"HELD",name)
