@@ -29,10 +29,12 @@ for(const w of proof.witnesses){
  assert.equal(w.nativeGpuProof,false);
  assert.equal(w.canonicalWrites,0);
 }
-assert.equal(ledger.independentArchiveByteWitnesses,2);
+assert.equal(ledger.independentArchiveByteWitnesses,30);
+assert.equal(ledger.independentArchiveUnverifiedOtherListedParts,126);
+assert.equal(ledger.reconstructedOriginalReleaseEvidence,'audit/omega-b043-full-source-byte-acceptance-r948.json');
 assert.equal(ledger.independentArchiveWitnessLedger,'audit/omega-historical-byte-witnesses-r944.json');
 assert.ok(ledger.blockers.some(x=>x.id==='ZIP_BYTES'&&x.state==='OPEN'));
 const ui=readFileSync('src/DriveHistoricalRecoveryR936.tsx','utf8');
 assert.ok(ui.includes('witnesses.witnesses.some'),'source witnesses not represented at original archive file');
 assert.ok(ui.includes('All other parts remain unverified'),'unearned archive-completion claim');
-console.log('R944 PASS: B043 part 01 and V35 part 20 independently hashed with ZIP CRC and original inner payload SHA; 154 other parts remain unverified.');
+console.log('R944 original witnesses conserved; R948 independently reconstructed all B043 parts while V35 part 20 remains verified.');

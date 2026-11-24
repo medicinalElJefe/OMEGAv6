@@ -87,7 +87,7 @@ def _assemble_parts_r947(root: Path, args: dict, safe_under, *, expected_count: 
             temp_path=Path(output.name)
             for part in parts:
                 source=folder/part["part"]
-                source=safe_under(root,source.relative_to(root).as_posix(),True)
+                source=safe_under(root,(Path(args["archive_folder"])/part["part"]).as_posix(),True)
                 if not source.is_file() or source.stat().st_size!=part["part_bytes"]:
                     raise ValueError("R947_ORIGINAL_PART_SIZE_MISMATCH_HELD")
                 with source.open("rb") as source_stream:
@@ -135,7 +135,7 @@ def _assemble_parts_r947(root: Path, args: dict, safe_under, *, expected_count: 
             temp_path.unlink(missing_ok=True)
     return {"schema":"OMEGA_B043_EXACT_STREAMED_RECONSTRUCTION_R947","archiveBuild":RELEASE,
             "sourceManifestSha256":hashlib.sha256(raw_manifest).hexdigest(),
-            "destination":destination.relative_to(root).as_posix(),"masterSha256":master_hash.hexdigest(),
+            "destination":Path(args["destination"]).as_posix(),"masterSha256":master_hash.hexdigest(),
             "masterBytes":written,"verifiedWrapperCount":len(witnesses),"partWitnesses":witnesses,
             "sourceExactByteReconstruction":True,"donorCodeExecuted":False,"nativeDeviceProven":False,
             "historicalRuntimeParityProven":False,"canonWrites":0,"productionCertified":False}

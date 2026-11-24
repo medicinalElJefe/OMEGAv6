@@ -11,7 +11,7 @@ assert.equal(b043.expectedParts,29);
 assert.equal(b043.parts.length,29);
 assert.equal(b043.reportedEvidence.masterSha256,'76092ac1396ab5224dde6f77401ce7c76819c10a749c102950045de9bad6e4e7');
 for(const token of ['OMEGA_B043_FULL_SYSTEM.zip','PART_COUNT = 29','MASTER_SHA256 = "76092ac1396ab5224dde6f77401ce7c76819c10a749c102950045de9bad6e4e7"',
-'_assemble_parts_r947','R947_MASTER_SOURCE_AUTHORITY_HELD','R947_ORIGINAL_PART_SHA256_MISMATCH_HELD',
+'_assemble_parts_r947','(Path(args["archive_folder"])/part["part"]).as_posix()','R947_MASTER_SOURCE_AUTHORITY_HELD','R947_ORIGINAL_PART_SHA256_MISMATCH_HELD',
 'R947_ORIGINAL_CHUNK_SHA256_MISMATCH_HELD','R947_MASTER_SHA256_OR_LENGTH_MISMATCH_HELD',
 'os.link(temp_path,destination)','sourceExactByteReconstruction":True','donorCodeExecuted":False'])
  assert.ok(source.includes(token),'R947 source conservation or refusal lost: '+token);

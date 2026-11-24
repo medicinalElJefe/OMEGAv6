@@ -226,9 +226,9 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R947 exact pinned streamed B043 reconstruction available as authenticated local operation; 29 source parts still not all reassembled from current Drive bytes; R945 Windows path repair and R946 proof-qualified completion ledger",
+  "latestGovernedWork": "R948 original B043 full 29/29 source byte reconstruction and 1891-member CRC PASS; 27 selected donor tests PASS; full 62-item suite timed out; R938/R947 Windows root alias repair",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
-  "independentArchiveByteWitnesses": 2,
+  "independentArchiveByteWitnesses": 30,
   "gateReceipts": [
     {
       "id": "EXACT_HEAD_ALL_WORKFLOWS",
@@ -359,6 +359,13 @@
       "revision": "R947",
       "conservation": "Source-pinned B043 29-part streaming reconstruction with non-overwrite durable receipt",
       "accepted": "CANDIDATE_EXECUTOR_NOT_29_PART_FULL_RUN"
+    },
+    {
+      "revision": "R948",
+      "conservation": "Full original B043 source SHA/CRC recovery, selected test proof and Windows-safe audit/reconstruction paths",
+      "accepted": "ORIGINAL_B043_SOURCE_BYTES_ONLY_OTHER_ARCHIVES_AND_RUNTIME_HELD"
     }
-  ]
+  ],
+  "independentArchiveUnverifiedOtherListedParts": 126,
+  "reconstructedOriginalReleaseEvidence": "audit/omega-b043-full-source-byte-acceptance-r948.json"
 }

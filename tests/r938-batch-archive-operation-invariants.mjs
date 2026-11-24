@@ -10,6 +10,7 @@ for(const marker of [
   'return audit_historical_release_set_r938(self.root,args)',
   'R938_RELEASE_PART_SIZE_MISMATCH_HELD',
   'R938_RELEASE_PART_SHA256_MISMATCH_HELD',
+  '(PurePosixPath(folder_name)/filename).as_posix()',
   'historicalRuntimeParityProven":False',
   'canonicalWrites":0'
 ])assert.ok(source.includes(marker),'R938 local execution contract missing: '+marker);

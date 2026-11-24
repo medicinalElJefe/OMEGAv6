@@ -1,6 +1,7 @@
 import {useMemo,useState} from 'react';
 import index from '../audit/omega-drive-historical-archive-source-index-r936.json';
 import witnesses from '../audit/omega-historical-byte-witnesses-r944.json';
+import fullB043 from '../audit/omega-b043-full-source-byte-acceptance-r948.json';
 
 const displaySize=(bytes:number)=>(bytes/(1024*1024)).toFixed(1)+' MiB';
 const fileUrl=(id:string)=>'https://drive.google.com/file/d/'+encodeURIComponent(id)+'/view';
@@ -23,6 +24,7 @@ export default function DriveHistoricalRecoveryR936({onAuditRelease}:{onAuditRel
   <header><h3>Drive historical recovery · source-linked distributions</h3>
    <p>{index.counts.splitFamilies} separately identified split releases · {index.counts.discoveredParts}/{index.counts.expectedParts} named parts · {index.counts.companionZipArchives} companion ZIP archives.</p>
    <p><strong>Independent source witnesses:</strong> {witnesses.verifiedParts} of {index.counts.discoveredParts} indexed split parts passed direct local SHA-256, ZIP CRC and internal payload-digest checks. All other parts remain unverified.</p>
+   <p><strong>Original release-byte progress:</strong> {fullB043.verifiedWrapperCount+1} of {index.counts.discoveredParts} indexed ZIP parts independently byte verified (B043 complete plus V35 part 20); the other {index.counts.discoveredParts-fullB043.verifiedWrapperCount-1} remain unverified.</p>
    <p><strong>Verification boundary:</strong> Drive file metadata confirms filenames and reported sizes only. Historical PASS reports do not establish present SHA-256 integrity, ZIP extraction safety, executable capability, Canon admission or GPU proof. No archive is auto-extracted, executed or uploaded.</p>
   </header>
   <div style={{display:'flex',gap:8,flexWrap:'wrap',margin:'12px 0'}}>
@@ -37,7 +39,8 @@ export default function DriveHistoricalRecoveryR936({onAuditRelease}:{onAuditRel
    {g.reportedEvidence&&'partDigestManifest' in g.reportedEvidence&&<p>Historical recorded SHA-256 expectations: {g.parts.filter(p=>'sha256' in p).length} part digests from {g.reportedEvidence.partDigestManifest}. These must match current local bytes before source-authority claims.</p>}
    {onAuditRelease&&<button type='button' data-r941-select-release={g.id} onClick={()=>onAuditRelease(g.id)}>Prepare authenticated local audit of {g.id}</button>}
    {g.reportedEvidence&&<p>Historical evidence: {g.reportedEvidence.manifest} · {g.reportedEvidence.evidenceState.replaceAll('_',' ').toLowerCase()}{'masterSha256' in g.reportedEvidence&&<code style={{display:'block',overflowWrap:'anywhere'}}>Expected reconstructed master SHA-256: {g.reportedEvidence.masterSha256}</code>}</p>}
-   <ol>{g.parts.map(p=><li key={p.driveId}><a href={fileUrl(p.driveId)} target='_blank' rel='noreferrer'>{p.filename}</a> · {displaySize(p.bytes)} · source ID <code>{p.driveId}</code>{witnesses.witnesses.some(w=>w.driveId===p.driveId&&'sha256' in p&&w.observedSha256===p.sha256)&&<strong style={{display:'block'}}>Exact downloaded part SHA-256, ZIP CRC and inner payload hash independently checked · R944</strong>}</li>)}</ol>
+   {g.id==='B043'&&<p><strong>Full original B043 recovered:</strong> 29/29 outer and embedded SHA-256s and CRCs verified; 2,778,646,289-byte master, 1,891 ZIP members passed CRC. <code style={{overflowWrap:'anywhere'}}>{fullB043.masterObservedSha256}</code>. Original selected tests: 27 pass; full 62-test suite timed out. OMEGA7 executor parity remains unproven.</p>}
+   <ol>{g.parts.map(p=><li key={p.driveId}><a href={fileUrl(p.driveId)} target='_blank' rel='noreferrer'>{p.filename}</a> · {displaySize(p.bytes)} · source ID <code>{p.driveId}</code>{g.id==='B043'&&fullB043.sourceParts.some(w=>w.driveId===p.driveId)&&<strong style={{display:'block'}}>B043 fully reconstructed source ZIP+chunk SHA-256 and CRC accepted · R948</strong>}{g.id!=='B043'&&witnesses.witnesses.some(w=>w.driveId===p.driveId&&'sha256' in p&&w.observedSha256===p.sha256)&&<strong style={{display:'block'}}>Exact downloaded part SHA-256, ZIP CRC and inner payload hash independently checked · R944</strong>}</li>)}</ol>
   </details>)}
   <details data-r936-companions='true'><summary><strong>Separate historical workstation ZIPs and reconstruction kits</strong> · {companions.length} matching</summary>
    <ul>{companions.map(x=><li key={x.driveId}><a href={fileUrl(x.driveId)} target='_blank' rel='noreferrer'>{x.filename}</a> · {displaySize(x.bytes)}</li>)}</ul>
