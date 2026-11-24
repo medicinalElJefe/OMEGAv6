@@ -625,7 +625,7 @@ class LocalHubTests(unittest.TestCase):
             ({"source":"data/untrusted-b010.zip","steps":True},"R922_B010_INPUT_BOUND_HELD"),
             ({"source":"data/untrusted-b010.zip","steps":1,"axes":{"invalid":"x"}},"R922_B010_AXES_SCHEMA_HELD"),
             ({"source":"data/untrusted-b010.zip","steps":1},"R922_B010_EXACT_SOURCE_SHA256_REQUIRED_HELD"),
-            ({"source":"../untrusted-b010.zip","steps":1},"OUTSIDE_APPROVED_ROOT_HELD"),
+            ({"source":"../untrusted-b010.zip","steps":1},"PARENT_TRAVERSAL_HELD"),
         ]:
             queued=self.hub.enqueue("HISTORICAL_B010_EXECUTE",args)
             received=self.hub.run_one()
