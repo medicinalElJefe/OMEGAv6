@@ -19,15 +19,16 @@ import {api} from '../../src/platformAdapter';
 import {corpusState,decodeAddress,initCorpusPack} from '../../src/corpusRuntime';
 import {sourceBackedModeSummary} from '../../src/sourceBackedModeRuntimeR21';
 import type {Omega7Depth} from '../capabilityRegistry';
+import type {R512RecoveredSystemResolution} from '../../src/recoveredSoftwareExecutionR512';
 
 export type Omega7SystemEvidenceRoute='Cockpit'|'Modes'|'Evidence & Proof'|'Archive Census'|'Archive Operators'|'Canon Evolution'|'Governance'|'Consolidation'|'Instructions'|'Plugins'|'Settings'|'System'|'Validation'|'System Atlas'|'Control Matrix';
-type Props={route:Omega7SystemEvidenceRoute;onNavigate:(route:string)=>void;depth:Omega7Depth};
+type Props={route:Omega7SystemEvidenceRoute;onNavigate:(route:string)=>void;onLaunchRecoveredSystem?:(row:R512RecoveredSystemResolution)=>void;depth:Omega7Depth};
 
 const clamp=(n:number)=>Math.max(0,Math.min(20735,Number.isFinite(n)?Math.floor(n):11498));
 const readAddress=()=>{try{return clamp(Number(localStorage.getItem('omega.v6.address')||11498))}catch{return 11498}};
 const writeAddress=(n:number)=>{const next=clamp(n);try{localStorage.setItem('omega.v6.address',String(next));window.dispatchEvent(new CustomEvent('omega7-address-changed',{detail:{address:next}}))}catch{}return next};
 
-export default function SystemEvidenceWorkspaceR445({route,onNavigate,depth}:Props){
+export default function SystemEvidenceWorkspaceR445({route,onNavigate,onLaunchRecoveredSystem,depth}:Props){
  const[ready,setReady]=useState(false),[error,setError]=useState(''),[address,setAddress]=useState(readAddress),[instrumentOpen,setInstrumentOpen]=useState(depth!=='STANDARD'),[soundOpen,setSoundOpen]=useState(false);
  const[status,setStatus]=useState<any>(null),[restore,setRestore]=useState<any>(null),[uiMode,setUiMode]=useState('AUTO');
  useEffect(()=>setInstrumentOpen(depth!=='STANDARD'),[depth,route]);
@@ -75,7 +76,7 @@ export default function SystemEvidenceWorkspaceR445({route,onNavigate,depth}:Pro
 
   {route==='System Atlas'&&<section data-r593-sound-temple='true' aria-label='Sound Temple'><h2>Sound Temple · SOMA</h2><p>Local 12-phase audio sonification. Sound begins only when you press Start audio. This is an audible model representation, not measured physical frequencies or a medical treatment.</p><button type='button' aria-expanded={soundOpen} onClick={()=>setSoundOpen(v=>!v)}>{soundOpen?'Close Sound Temple':'Open Sound Temple audio controls'}</button>{soundOpen&&<SomaAudioEngine record={record}/>}</section>}
   {instrumentOpen&&<div className='o7-native-surface'>
-   {(route==='System Atlas'||route==='Control Matrix'||route==='Archive Census')&&<Suspense fallback={<p role='status'>Loading recovered 100-system CanonForge software ledger…</p>}><OmegaOneSystemLedgerR926 onNavigate={onNavigate}/></Suspense>}
+   {(route==='System Atlas'||route==='Control Matrix'||route==='Archive Census')&&<Suspense fallback={<p role='status'>Loading recovered 100-system CanonForge software ledger…</p>}><OmegaOneSystemLedgerR926 onNavigate={onNavigate} onLaunchRecoveredSystem={onLaunchRecoveredSystem}/></Suspense>}
    {route==='Cockpit'?<OmegaWorkspaceCockpitR18 variant='Cockpit' record={record} state={state} address={address} onAddress={commit} onNavigate={onNavigate} status={status} restore={restore} modeCount={modeSummary.appliedCount}/>:
     route==='Modes'?<><SourceBackedModesPanelR21 record={record} address={address} onAddress={commit} onNavigate={onNavigate}/><Suspense fallback={<p role='status'>Loading operational mode executors…</p>}><OperationalModesPanelR671 address={address} onAddress={commit} onNavigate={onNavigate}/></Suspense><Suspense fallback={<p role='status'>Loading recovered operator graph…</p>}><OperatorGraphPanelR676 address={address} onAddress={commit}/></Suspense><Suspense fallback={<p role='status'>Loading native session history…</p>}><CanonicalSessionReplayPanelR679 address={address} onAddress={commit}/></Suspense><Suspense fallback={<p role='status'>Loading historical native decision audit…</p>}><NativeDecisionTruthPanelR681/></Suspense></>:
     route==='Archive Census'?<ArchiveGovernanceControl onNavigate={onNavigate}/>:

@@ -1,5 +1,6 @@
 import {useMemo,useState,type CSSProperties} from 'react';
 import original from '../audit/omega-full-historical-software-ledger-r926.json';
+import {RECOVERED_SYSTEM_EXECUTION_R512,type R512RecoveredSystemResolution} from '../src/recoveredSoftwareExecutionR512';
 
 type Software=typeof original.software[number];
 type Menu=typeof original.menus[number];
@@ -12,7 +13,7 @@ const all=original.software;
 const menuList=original.menus;
 const searchable=(...parts:string[])=>parts.join(' ').toLowerCase();
 const dispositionColors:Record<string,string>={KEEP:'#66c4b0',MERGE:'#d6b36e',DONOR:'#b0abc4'};
-export default function OmegaOneSystemLedgerR926({onNavigate}:{onNavigate:(route:string)=>void}){
+export default function OmegaOneSystemLedgerR926({onNavigate,onLaunchRecoveredSystem}:{onNavigate:(route:string)=>void;onLaunchRecoveredSystem?:(row:R512RecoveredSystemResolution)=>void}){
  const [tab,setTab]=useState<Tab>('SOFTWARE');
  const [menu,setMenu]=useState('ALL');
  const [disposition,setDisposition]=useState('ALL');
@@ -22,6 +23,7 @@ export default function OmegaOneSystemLedgerR926({onNavigate}:{onNavigate:(route
  const [picked,setPicked]=useState<string>('SYS-001');
  const term=search.trim().toLowerCase();
  const chosen=all.find((s:Software)=>s.ID===picked);
+ const successor=chosen?RECOVERED_SYSTEM_EXECUTION_R512.find(row=>row.systemId===chosen.ID):null;
  const filtered=useMemo(()=>all.filter((s:Software)=>
    (menu==='ALL'||s['Menu ID']===menu)&&
    (disposition==='ALL'||s.Disposition===disposition)&&
@@ -70,7 +72,8 @@ export default function OmegaOneSystemLedgerR926({onNavigate}:{onNavigate:(route
       <p><strong>Original role:</strong> {chosen['One-System Role']}<br/><strong>Family:</strong> {chosen.Family}<br/><strong>Control:</strong> {chosen['Menu Setting']}<br/><strong>Growth:</strong> {chosen['Growth Tier']}</p>
       <p><strong>Input:</strong> {chosen['Input Contract']}<br/><strong>Output:</strong> {chosen['Output Contract']}</p>
       <p><strong>Historical wiring:</strong> {chosen['Wiring Notes']}</p>
-      <p><strong>OMEGA7 route:</strong> {chosen.navigationRoute}</p>
+      <p><strong>Historical menu route:</strong> {chosen.navigationRoute}</p>
+      {successor&&<div data-r933-recovered-successor={successor.state} style={{padding:10,border:'1px solid #547184',borderRadius:7,marginBottom:10}}><strong>Current R512 successor: {successor.state.replaceAll('_',' ')}</strong><p>Executor route: {successor.route} · reality: {successor.executorReality} · capability: {successor.executorCapabilityId}</p><p>{successor.truth}</p><small>{successor.executorProof}</small><button type='button' style={{...click,display:'block',marginTop:9}} data-r933-launch-system={successor.systemId} onClick={()=>onLaunchRecoveredSystem?onLaunchRecoveredSystem(successor):nav(successor.route)}>{successor.state==='WORKING_SUCCESSOR'?'Launch current governed successor':successor.state==='GATED_SUCCESSOR'?'Open current evidence gate':successor.state==='ARCHIVE_ONLY'?'Inspect historical donor in archive':'Inspect unresolved restoration'}</button></div>}
       <small style={{display:'block',marginBottom:10}}>Source-registered workspace relation. This does not establish that this individual historical executable was ported or invoked.</small>
       <button type='button' style={click} onClick={()=>nav(chosen.navigationRoute)}>Open mapped OMEGA7 workspace</button>
       {chosen['Menu ID']==='11 Archive Merge'&&<button type='button' style={{...click,marginLeft:8,marginTop:6}} onClick={()=>nav('Archive Operators')}>Open authenticated archive execution</button>}

@@ -172,7 +172,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
       <dl><div><dt>Executor</dt><dd>{activeRecovered.capabilityId}</dd></div><div><dt>Domain</dt><dd>{activeRecovered.executionDomain}</dd></div><div><dt>State</dt><dd>{activeRecovered.state.replaceAll('_',' ')}</dd></div><div><dt>Action</dt><dd>{(activeRecovered.launchKind||'EXECUTE').replaceAll('_',' ')}</dd></div><div><dt>Source</dt><dd>{(activeRecovered.sourceKind||'CAPABILITY_LINEAGE').replaceAll('_',' ')}</dd></div><div><dt>Proof</dt><dd>{activeRecovered.receiptAuthority} / {activeRecovered.admissionAuthority}</dd></div></dl>
       <button onClick={clearRecoveredExecution}>Clear focus</button>
      </aside>}
-     <Omega7NativeSurface route={state.selectedRoute} onNavigate={open} depth={state.depth} softwareLaunch={activeRecovered}/>
+     <Omega7NativeSurface route={state.selectedRoute} onNavigate={open} onLaunchRecoveredSystem={launchRecoveredSystem} depth={state.depth} softwareLaunch={activeRecovered}/>
     </section>:
     <>
      {state.domain!=='HOME'&&<section className='o7-intro o7-intro-r512 o7-intro-r519'>

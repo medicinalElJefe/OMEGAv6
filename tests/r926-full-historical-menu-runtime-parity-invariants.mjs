@@ -60,6 +60,14 @@ assert.ok(localHubPanel.includes("initialOperation='HASH_TREE'"),'local hub fall
 assert.ok(localHubPanel.includes("useState<Operation>(initialOperation)"),'local hub operation not initialized by owning workspace');
 assert.ok(source.includes("nav('Archive Operators')"),'historical software source missing actual archive-executor shortcut');
 assert.ok(source.includes('onNavigate(chosen.navigationRoute)')||source.includes('nav(chosen.navigationRoute)'));
+const root=readFileSync('src7/Omega7Root.tsx','utf8');
+assert.ok(root.includes('onLaunchRecoveredSystem={launchRecoveredSystem}'),'R512 root launcher not wired through native shell');
+assert.ok(native.includes('onLaunchRecoveredSystem={onLaunchRecoveredSystem}'),'R512 native successor callback not passed to workspace');
+assert.ok(workspace.includes('onLaunchRecoveredSystem={onLaunchRecoveredSystem}'),'R512 workspace successor callback not passed to ledger');
+assert.ok(source.includes('RECOVERED_SYSTEM_EXECUTION_R512.find(row=>row.systemId===chosen.ID)'),'100-system R512 successor resolution missing');
+assert.ok(source.includes('data-r933-launch-system={successor.systemId}'),'historical successor launch missing');
+assert.ok(source.includes('successor.state===\'ARCHIVE_ONLY\''),'archive-only hold presentation missing');
+assert.ok(source.includes('successor.executorProof')&&source.includes('successor.truth'),'historical executor proof disclosure missing');
 assert.ok(source.includes('HISTORICAL_CHARTED_DESIGN')||source.includes('Source-registered workspace relation'));
 assert.ok(source.includes('source')&&source.includes('original.settings')&&source.includes('original.gates'));
 assert.ok(boundary.includes('../OmegaOneSystemLedgerR926'));
