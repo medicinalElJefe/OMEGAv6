@@ -81,7 +81,11 @@ class LocalHubTests(unittest.TestCase):
         self.assertEqual(incomplete["locatedParts"],1)
         self.assertEqual(incomplete["missingParts"],[entries[1]["filename"]])
         self.assertEqual(incomplete["authorityState"],"LOCAL_HASH_ONLY_NOT_ORIGINAL_RELEASE_AUTHORITY")
-        (folder/entries[0]["filename"]).write_bytes(b"x"*entries[0]["bytes"])
+        original=(folder/entries[0]["filename"]).read_bytes()
+        self.assertIn(b"source bytes 1",original)
+        # Change a payload with identical length while retaining ZIP metadata.
+        # A truncated/non-ZIP file must fail at the earlier metadata gate.
+        (folder/entries[0]["filename"]).write_bytes(original.replace(b"source bytes 1",b"source bytes 2"))
         with self.assertRaisesRegex(ValueError,"R938_RELEASE_PART_SHA256_MISMATCH_HELD"):
             hubmod.audit_historical_release_set_r938(self.root,args)
         with self.assertRaisesRegex(ValueError,"R938_RELEASE_SET_ARGUMENT_SCHEMA_HELD"):
