@@ -93,7 +93,9 @@ def audit_historical_release_set_r938(root: Path, args: dict):
     if (not isinstance(entries,list) or not isinstance(expected,int) or
         isinstance(expected,bool) or not 1<=expected<=40 or len(entries)!=expected):
         raise ValueError("R938_SOURCE_INDEX_COUNT_HELD")
-    base=safe_under(root,folder_name,True)
+    # Directories must be checked with the folder predicate; safe_under(...,True)
+    # deliberately accepts source FILES only and would hold every valid release.
+    base=safe_under(root,folder_name,False)
     if not base.is_dir():
         raise ValueError("R938_ARCHIVE_FOLDER_NOT_DIRECTORY_HELD")
     verified=[]
