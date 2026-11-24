@@ -64,7 +64,22 @@ for(const sequence of registry.sequences){
  for(const owner of owners)assert.ok(routes.has(owner.navigationRoute),'stage owner route absent '+sequence.SEQ);
 }
 assert.ok(source.includes("familyRoute(s['Top Menu'])"),'governing control navigation not rendered');
-assert.ok(source.includes('stageOwners(s.SEQ).map'),'stage executor owner navigation not rendered');
+assert.ok(source.includes("stageOwners(s.SEQ,s['Primary Software Family']).map"),'stage primary family navigation not rendered');
+for(const sequence of registry.sequences){
+ const owners=registry.software.filter(s=>s['Software / Artifact']===sequence['Primary Software Family']||s['Upgrade Sequence']===sequence.SEQ);
+ assert.ok(owners.length>0,'stage has no concrete owning software '+sequence.SEQ);
+ for(const owner of owners)assert.ok(routes.has(owner.navigationRoute),'stage route not native '+sequence.SEQ);
+}
+for(const cap of registry.capabilities){
+ const owner=menus.get(cap.Menu);
+ assert.ok(owner&&routes.has(owner.route),'capability has no native menu owner '+cap['Capability ID']);
+}
+for(const gate of registry.gates){
+ const owner=menus.get(gate['Menu Binding']);
+ assert.ok(owner&&routes.has(owner.route),'gate has no native menu owner '+gate['Gate ID']);
+}
+assert.ok(source.includes('familyRoute(c.Menu)'),'capability route button absent');
+assert.ok(source.includes("familyRoute(g['Menu Binding'])"),'gate route button absent');
 assert.ok(source.includes('filtered.some((s:Software)=>s.ID===chosen.ID)'),'stale software detail after filtering');
 assert.ok(source.includes('filtered.length===0'),'missing empty-result state');
 assert.equal(registry.gates.filter(x=>x['Blocks Packaging?']==='YES').length,10);
