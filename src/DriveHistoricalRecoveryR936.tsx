@@ -1,5 +1,6 @@
 import {useMemo,useState} from 'react';
 import index from '../audit/omega-drive-historical-archive-source-index-r936.json';
+import witnesses from '../audit/omega-historical-byte-witnesses-r944.json';
 
 const displaySize=(bytes:number)=>(bytes/(1024*1024)).toFixed(1)+' MiB';
 const fileUrl=(id:string)=>'https://drive.google.com/file/d/'+encodeURIComponent(id)+'/view';
@@ -21,6 +22,7 @@ export default function DriveHistoricalRecoveryR936({onAuditRelease}:{onAuditRel
  return <section data-r936-drive-recovery='SOURCE_INDEX_NOT_EXECUTION_CERTIFICATION' aria-label='Historical Drive recovery sources' style={{padding:12,border:'1px solid #60758c',borderRadius:10,margin:'12px 0'}}>
   <header><h3>Drive historical recovery · source-linked distributions</h3>
    <p>{index.counts.splitFamilies} separately identified split releases · {index.counts.discoveredParts}/{index.counts.expectedParts} named parts · {index.counts.companionZipArchives} companion ZIP archives.</p>
+   <p><strong>Independent source witnesses:</strong> {witnesses.verifiedParts} of {index.counts.discoveredParts} indexed split parts passed direct local SHA-256, ZIP CRC and internal payload-digest checks. All other parts remain unverified.</p>
    <p><strong>Verification boundary:</strong> Drive file metadata confirms filenames and reported sizes only. Historical PASS reports do not establish present SHA-256 integrity, ZIP extraction safety, executable capability, Canon admission or GPU proof. No archive is auto-extracted, executed or uploaded.</p>
   </header>
   <div style={{display:'flex',gap:8,flexWrap:'wrap',margin:'12px 0'}}>
@@ -35,7 +37,7 @@ export default function DriveHistoricalRecoveryR936({onAuditRelease}:{onAuditRel
    {g.reportedEvidence&&'partDigestManifest' in g.reportedEvidence&&<p>Historical recorded SHA-256 expectations: {g.parts.filter(p=>'sha256' in p).length} part digests from {g.reportedEvidence.partDigestManifest}. These must match current local bytes before source-authority claims.</p>}
    {onAuditRelease&&<button type='button' data-r941-select-release={g.id} onClick={()=>onAuditRelease(g.id)}>Prepare authenticated local audit of {g.id}</button>}
    {g.reportedEvidence&&<p>Historical evidence: {g.reportedEvidence.manifest} · {g.reportedEvidence.evidenceState.replaceAll('_',' ').toLowerCase()}{'masterSha256' in g.reportedEvidence&&<code style={{display:'block',overflowWrap:'anywhere'}}>Expected reconstructed master SHA-256: {g.reportedEvidence.masterSha256}</code>}</p>}
-   <ol>{g.parts.map(p=><li key={p.driveId}><a href={fileUrl(p.driveId)} target='_blank' rel='noreferrer'>{p.filename}</a> · {displaySize(p.bytes)} · source ID <code>{p.driveId}</code></li>)}</ol>
+   <ol>{g.parts.map(p=><li key={p.driveId}><a href={fileUrl(p.driveId)} target='_blank' rel='noreferrer'>{p.filename}</a> · {displaySize(p.bytes)} · source ID <code>{p.driveId}</code>{witnesses.witnesses.some(w=>w.driveId===p.driveId&&'sha256' in p&&w.observedSha256===p.sha256)&&<strong style={{display:'block'}}>Exact downloaded part SHA-256, ZIP CRC and inner payload hash independently checked · R944</strong>}</li>)}</ol>
   </details>)}
   <details data-r936-companions='true'><summary><strong>Separate historical workstation ZIPs and reconstruction kits</strong> · {companions.length} matching</summary>
    <ul>{companions.map(x=><li key={x.driveId}><a href={fileUrl(x.driveId)} target='_blank' rel='noreferrer'>{x.filename}</a> · {displaySize(x.bytes)}</li>)}</ul>

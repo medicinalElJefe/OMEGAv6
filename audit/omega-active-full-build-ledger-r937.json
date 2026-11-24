@@ -226,5 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R938 durable release-set SHA audit and guarded operator controls; R937 active ledger retains unresolved source-byte acceptance"
+  "latestGovernedWork": "R944 two exact independent Drive ZIP+payload hash/CRC witnesses, 154 remaining named split parts unverified; R938 authenticated release-set auditor; R937 governing ledger",
+  "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
+  "independentArchiveByteWitnesses": 2
 }

@@ -1,0 +1,38 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const index=JSON.parse(readFileSync('audit/omega-drive-historical-archive-source-index-r936.json','utf8'));
+const proof=JSON.parse(readFileSync('audit/omega-historical-byte-witnesses-r944.json','utf8'));
+const ledger=JSON.parse(readFileSync('audit/omega-active-full-build-ledger-r937.json','utf8'));
+assert.equal(proof.schema,'OMEGA_HISTORICAL_DRIVE_BYTE_WITNESSES_R944');
+assert.equal(proof.verifiedParts,2);
+assert.equal(proof.unverifiedOtherListedParts,index.counts.discoveredParts-2);
+assert.equal(proof.witnesses.length,2);
+assert.equal(proof.releaseComplete,false);
+assert.equal(proof.productionCertified,false);
+assert.equal(new Set(proof.witnesses.map(x=>x.driveId)).size,2);
+for(const w of proof.witnesses){
+ const g=index.groups.find(g=>g.id===w.release);
+ const p=g?.parts.find(p=>p.index===w.partIndex);
+ assert.ok(p,'witness source part absent');
+ assert.equal(p.filename,w.filename);
+ assert.equal(p.driveId,w.driveId);
+ assert.equal(p.bytes,w.bytes);
+ assert.equal(p.sha256,w.sha256);
+ assert.equal(w.observedSha256,w.sha256);
+ assert.equal(w.observedBytes,w.bytes);
+ assert.match(w.containedSha256,/^[a-f0-9]{64}$/);
+ assert.ok(w.containedBytes>0);
+ assert.equal(w.outerZipCrc,'PASS');
+ assert.equal(w.outerShaMatchesRecorded,true);
+ assert.equal(w.innerShaMatchesRecorded,true);
+ assert.equal(w.executionProof,false);
+ assert.equal(w.nativeGpuProof,false);
+ assert.equal(w.canonicalWrites,0);
+}
+assert.equal(ledger.independentArchiveByteWitnesses,2);
+assert.equal(ledger.independentArchiveWitnessLedger,'audit/omega-historical-byte-witnesses-r944.json');
+assert.ok(ledger.blockers.some(x=>x.id==='ZIP_BYTES'&&x.state==='OPEN'));
+const ui=readFileSync('src/DriveHistoricalRecoveryR936.tsx','utf8');
+assert.ok(ui.includes('witnesses.witnesses.some'),'source witnesses not represented at original archive file');
+assert.ok(ui.includes('All other parts remain unverified'),'unearned archive-completion claim');
+console.log('R944 PASS: B043 part 01 and V35 part 20 independently hashed with ZIP CRC and original inner payload SHA; 154 other parts remain unverified.');
