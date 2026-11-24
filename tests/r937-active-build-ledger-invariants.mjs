@@ -1,0 +1,45 @@
+import assert from 'node:assert/strict';
+import {readFileSync,existsSync} from 'node:fs';
+const get=(p)=>JSON.parse(readFileSync(p,'utf8'));
+const a=get('audit/omega-active-full-build-ledger-r937.json');
+const h=get('audit/omega-full-historical-software-ledger-r926.json');
+const ar=get('audit/omega-drive-historical-archive-source-index-r936.json');
+const donor=get('audit/omega-historical-donor-conservation-r922.json');
+assert.equal(a.schema,'OMEGA_ACTIVE_FULL_BUILD_LEDGER_R937');
+assert.equal(a.releaseState,'UNMERGED_CANDIDATE_NOT_RELEASE_CLEAN');
+assert.equal(a.sourceBaselineSha.length,40);
+assert.equal(a.canonicalAdvancementIssue,'https://github.com/medicinalElJefe/OMEGAv6/issues/435');
+const required={systems:h.software.length,menus:h.menus.length,controls:h.settings.length,capabilities:h.capabilities.length,stages:h.sequences.length,gates:h.gates.length,nativeRoutes:44,bins:24,outverse:12,inverse:12,outerAddresses:20736,innerAddressesPerCell:20736,addressPairs:20736*20736,archivedSplitFamilies:ar.groups.length,archivedNamedParts:ar.counts.discoveredParts,archivedCompanionZips:ar.counts.companionZipArchives,otherChatArchiveMetadata:donor.sourceInventory.chatGptArchiveFilesIndexed};
+assert.deepEqual(a.invariants,required,'R937 active ledger must reconcile all historical source counts');
+const requiredCounts={systems:100,menus:12,controls:36,capabilities:18,stages:144,gates:12,nativeRoutes:44,bins:24,outverse:12,inverse:12,outerAddresses:20736,innerAddressesPerCell:20736,addressPairs:429981696,archivedSplitFamilies:6,archivedNamedParts:156,archivedCompanionZips:18};
+for(const [key,value] of Object.entries(requiredCounts))assert.equal(required[key],value,'historical scope lost '+key);
+const routes=readFileSync('src7/nativeCapabilityRegistry.tsx','utf8');
+const match=/OMEGA7_NATIVE_ROUTES=Object\.freeze\(\[([\s\S]*?)\] as const/.exec(routes);
+assert.ok(match,'native routes absent');
+const native=new Set([...match[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
+assert.equal(native.size,44);
+assert.equal(a.workstreams.length,12,'missing one of 12 canonical workstreams');
+assert.equal(a.releaseGates.length,12,'release proof gate omitted');
+assert.equal(new Set(a.releaseGates).size,12);
+assert.ok(a.laws.includes('NO_STAGE_PROMOTED_BEYOND_EVIDENCE'));
+assert.ok(a.laws.includes('NO_SECOND_SHADOW_RUNTIME'));
+assert.equal(new Set(a.workstreams.map(x=>x.id)).size,12);
+for(const w of a.workstreams){
+ assert.ok(existsSync(w.primarySource),'source missing for '+w.id+': '+w.primarySource);
+ assert.ok(native.has(w.route),'not a native workspace '+w.id+': '+w.route);
+ assert.equal(w.complete,false,'unearned full-system completion '+w.id);
+ assert.ok(['PARTIAL','HELD','DEVICE_HELD','RELEASE_HELD'].includes(w.evidenceState),'unsupported state '+w.id);
+}
+assert.ok(a.blockers.length>=9,'open historical issues silently dropped');
+assert.equal(new Set(a.blockers.map(x=>x.id)).size,a.blockers.length);
+for(const b of a.blockers){assert.equal(b.state,'OPEN','unproved obligation was closed '+b.id);assert.ok(native.has(b.route),'blocker owner route absent '+b.id);}
+const requiredBlockers=['HISTORY','ZIP_BYTES','V61','BIN_PARITY','FAMILY_PARITY','MODE_PARITY','NATIVE_PC','UI_PARITY','RELEASE'];
+for(const id of requiredBlockers)assert.ok(a.blockers.some(b=>b.id===id),'missing critical restoration debt '+id);
+assert.deepEqual(a.archiveReleaseIds,ar.groups.map(x=>x.id));
+assert.ok(a.sourceTruth.includes('METADATA_IS_NOT_ZIP_BYTES'));
+assert.ok(a.sourceTruth.includes('CI_IS_NOT_NATIVE_DEVICE_PROOF'));
+const ui=readFileSync('src7/OmegaOneSystemLedgerR926.tsx','utf8');
+for(const flag of ['data-r937-governing-build-ledger','data-r937-workstream','data-r937-blocker','activeBuild.releaseGates',"setTab('BUILD')"])assert.ok(ui.includes(flag),'active ledger inaccessible '+flag);
+const docs=readFileSync('docs/OMEGA_ADVANCEMENT_LEDGER.md','utf8');
+assert.ok(docs.includes('omega-active-full-build-ledger-r937.json'),'canonical advancement index missing active ledger');
+console.log('R937 ACTIVE LEDGER PASS · 12 workstreams · 12 gates · 9 historical blockers · original sources and route integrity · no false release promotion.');

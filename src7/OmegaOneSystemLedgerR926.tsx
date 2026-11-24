@@ -1,10 +1,11 @@
 import {useMemo,useState,type CSSProperties} from 'react';
 import original from '../audit/omega-full-historical-software-ledger-r926.json';
+import activeBuild from '../audit/omega-active-full-build-ledger-r937.json';
 import {RECOVERED_SYSTEM_EXECUTION_R512,type R512RecoveredSystemResolution} from '../src/recoveredSoftwareExecutionR512';
 
 type Software=typeof original.software[number];
 type Menu=typeof original.menus[number];
-type Tab='SOFTWARE'|'MENUS'|'CONTROLS'|'CAPABILITIES'|'SEQUENCE'|'GATES';
+type Tab='SOFTWARE'|'MENUS'|'CONTROLS'|'CAPABILITIES'|'SEQUENCE'|'GATES'|'BUILD';
 
 const frame:CSSProperties={border:'1px solid #567489',borderRadius:12,background:'#102435',padding:16,color:'#e6f1f8',margin:'14px 0'};
 const input:CSSProperties={border:'1px solid #7894a6',borderRadius:7,padding:'9px 11px',color:'#f3fbff',background:'#17384a',minWidth:0,maxWidth:'100%',boxSizing:'border-box'};
@@ -43,6 +44,7 @@ export default function OmegaOneSystemLedgerR926({onNavigate,onLaunchRecoveredSy
    <p style={{color:'#a9d5e4',margin:0,letterSpacing:'0.07em'}}>ONE SYSTEM · CANONICAL HISTORICAL INVENTORY</p>
    <h2 style={{margin:'7px 0'}}>100 software families · 12 master menus · 24-bin historical lineage</h2>
    <p style={{color:'#b5cbd7',marginTop:0}}>The original software ledger is correlated with current OMEGA7 route ownership, controls, upgrade sequence and proof gates. This inventory does not falsely certify executors merely because they are listed or reachable.</p>
+   <button type='button' style={{...click,marginBottom:12}} onClick={()=>setTab('BUILD')}>Open governing build ledger · {activeBuild.blockers.length} unresolved obligations</button>
   </header>
   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(135px,1fr))',gap:9,marginBottom:16}}>
    {([['SOFTWARE',100],['MENUS',12],['CONTROLS',36],['CAPABILITIES',18],['SEQUENCE',144],['GATES',12]] as const).map(([key,value])=>
@@ -51,6 +53,29 @@ export default function OmegaOneSystemLedgerR926({onNavigate,onLaunchRecoveredSy
     </button>)}
   </div>
   <small style={{color:'#b9cfd9'}}>{evidence} · 63 KEEP / 26 MERGE / 11 DONOR · 44 native routes exist elsewhere in OMEGA7.</small>
+  {tab==='BUILD'&&<section data-r937-governing-build-ledger='CANDIDATE_WITH_OPEN_GATES' aria-label='OMEGA full-build governing ledger' style={{display:'grid',gap:12,marginTop:14}}>
+   <div style={{padding:12,border:'1px solid #a89972',borderRadius:9,background:'#1c3744'}}>
+    <h3 style={{marginTop:0}}>One OMEGA · build obligations and evidence</h3>
+    <p><strong>{activeBuild.releaseState.replaceAll('_',' ')}</strong> · source baseline <code>{activeBuild.sourceBaselineSha.slice(0,12)}</code>. Never mark a release finished from route reachability or metadata alone.</p>
+    <p>Source universe: {activeBuild.invariants.systems} historical systems · {activeBuild.invariants.menus} master menus · {activeBuild.invariants.bins} bins · {activeBuild.invariants.outerAddresses.toLocaleString()} × {activeBuild.invariants.innerAddressesPerCell.toLocaleString()} nested address spaces · {activeBuild.invariants.archivedNamedParts} Drive-listed split parts.</p>
+    <p><a href={activeBuild.canonicalAdvancementIssue} target='_blank' rel='noreferrer' style={{color:'#bdeafa'}}>Canonical advancement and production proof ledger</a> · candidate work is recorded here, production acceptance is recorded only after verified deployment.</p>
+   </div>
+   <h3 style={{marginBottom:0}}>12 conserved workstreams</h3>
+   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(225px,1fr))',gap:9}}>
+    {activeBuild.workstreams.map(w=><article key={w.id} data-r937-workstream={w.id} style={{padding:12,background:'#193747',border:'1px solid #547184',borderRadius:9}}>
+     <small>{w.id} · {w.evidenceState.replaceAll('_',' ')} · not release accepted</small>
+     <h4 style={{margin:'7px 0'}}>{w.name}</h4><small style={{display:'block',overflowWrap:'anywhere'}}>Source: {w.primarySource}</small>
+     <button type='button' style={{...click,marginTop:10}} onClick={()=>nav(w.route)}>Open {w.route} workspace</button>
+    </article>)}
+   </div>
+   <h3 style={{marginBottom:0}}>Unresolved build defects and restoration debt ({activeBuild.blockers.length})</h3>
+   {activeBuild.blockers.map(b=><article key={b.id} data-r937-blocker={b.id} style={{padding:10,borderLeft:'3px solid #d1a85f',background:'#1a3443'}}>
+    <strong>{b.id} · {b.state}</strong><p style={{margin:'5px 0'}}>{b.description}</p><button type='button' style={click} onClick={()=>nav(b.route)}>Inspect owning workspace</button>
+   </article>)}
+   <h3 style={{marginBottom:0}}>Release acceptance gates · all require current proof</h3>
+   <ol>{activeBuild.releaseGates.map(g=><li key={g} style={{marginBottom:5}}>{g.replaceAll('_',' ')}</li>)}</ol>
+   <p style={{color:'#b9cfd9'}}>{activeBuild.sourceTruth}</p>
+  </section>}
   {tab==='SOFTWARE'&&<>
    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(155px,1fr))',gap:9,margin:'13px 0'}}>
     <label>Find software or capability<input style={{...input,width:'100%'}} value={search} onChange={e=>setSearch(e.target.value)} placeholder='Search all 100 families' aria-label='Search all 100 software families'/></label>

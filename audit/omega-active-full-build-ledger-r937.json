@@ -1,0 +1,229 @@
+{
+  "schema": "OMEGA_ACTIVE_FULL_BUILD_LEDGER_R937",
+  "sourceBaselineSha": "d40009e255d30ca407cff80526c80f385531cf85",
+  "scope": "ALL_KNOWN_SOURCE_AND_HISTORICAL_WORKSTREAMS_NOT_AN_EXHAUSTIVE_TWO_YEAR_ARCHIVE_AUDIT",
+  "releaseState": "UNMERGED_CANDIDATE_NOT_RELEASE_CLEAN",
+  "canonicalAdvancementIssue": "https://github.com/medicinalElJefe/OMEGAv6/issues/435",
+  "sourceLedgers": {
+    "software": "audit/omega-full-historical-software-ledger-r926.json",
+    "archive": "audit/omega-drive-historical-archive-source-index-r936.json",
+    "donor": "audit/omega-historical-donor-conservation-r922.json"
+  },
+  "invariants": {
+    "systems": 100,
+    "menus": 12,
+    "controls": 36,
+    "capabilities": 18,
+    "stages": 144,
+    "gates": 12,
+    "nativeRoutes": 44,
+    "bins": 24,
+    "outverse": 12,
+    "inverse": 12,
+    "outerAddresses": 20736,
+    "innerAddressesPerCell": 20736,
+    "addressPairs": 429981696,
+    "archivedSplitFamilies": 6,
+    "archivedNamedParts": 156,
+    "archivedCompanionZips": 18,
+    "otherChatArchiveMetadata": 1233
+  },
+  "archiveReleaseIds": [
+    "B043",
+    "B045",
+    "B053",
+    "B053-R7",
+    "V32",
+    "V35"
+  ],
+  "sourceTruth": "ROUTE_MAPPING_IS_NOT_INDEPENDENT_EXECUTOR_PROOF; METADATA_IS_NOT_ZIP_BYTES; HISTORICAL_REPORT_IS_NOT_NEW_CI; CI_IS_NOT_NATIVE_DEVICE_PROOF; NO_CANON_PROMOTION_BEYOND_EVIDENCE",
+  "workstreams": [
+    {
+      "id": "W01",
+      "name": "Runtime, CanonState and HostState",
+      "route": "System",
+      "primarySource": "src7/Omega7Root.tsx",
+      "evidenceState": "PARTIAL",
+      "acceptance": "REQUIRES_EXACT_SOURCE_RUNTIME_AND_NEGATIVE_TEST_PROOF",
+      "complete": false
+    },
+    {
+      "id": "W02",
+      "name": "100 software successors, 12 menus, 36 controls, 18 capabilities and 144 stages",
+      "route": "System Atlas",
+      "primarySource": "src/recoveredSoftwareExecutionR512.ts",
+      "evidenceState": "PARTIAL",
+      "acceptance": "REQUIRES_EXACT_SOURCE_RUNTIME_AND_NEGATIVE_TEST_PROOF",
+      "complete": false
+    },
+    {
+      "id": "W03",
+      "name": "44 routes, actions, ergonomic desktop/mobile",
+      "route": "Control Matrix",
+      "primarySource": "src7/nativeCapabilityRegistry.tsx",
+      "evidenceState": "PARTIAL",
+      "acceptance": "REQUIRES_EXACT_SOURCE_RUNTIME_AND_NEGATIVE_TEST_PROOF",
+      "complete": false
+    },
+    {
+      "id": "W04",
+      "name": "20,736 source states, nested 20,736-lane sparse transitions",
+      "route": "Atlas",
+      "primarySource": "tools/omega_sparse_tensor_r902.py",
+      "evidenceState": "PARTIAL",
+      "acceptance": "REQUIRES_EXACT_SOURCE_RUNTIME_AND_NEGATIVE_TEST_PROOF",
+      "complete": false
+    },
+    {
+      "id": "W05",
+      "name": "24 inverses/outverses and B010/B053/V61 release parity",
+      "route": "Archive Operators",
+      "primarySource": "src/v77BinLedgerR83.ts",
+      "evidenceState": "HELD",
+      "acceptance": "REQUIRES_EXACT_SOURCE_RUNTIME_AND_NEGATIVE_TEST_PROOF",
+      "complete": false
+    },
+    {
+      "id": "W06",
+      "name": "188 historical modes and complete mode catalogue with executed/gated distinctions",
+      "route": "Modes",
+      "primarySource": "src/sourceBackedModeRuntimeR21.ts",
+      "evidenceState": "PARTIAL",
+      "acceptance": "REQUIRES_EXACT_SOURCE_RUNTIME_AND_NEGATIVE_TEST_PROOF",
+      "complete": false
+    },
+    {
+      "id": "W07",
+      "name": "R125, R141, R146, R147, R170, R237 evidence and return governance",
+      "route": "Governance",
+      "primarySource": "docs/OMEGA_ADVANCEMENT_LEDGER.md",
+      "evidenceState": "PARTIAL",
+      "acceptance": "REQUIRES_EXACT_SOURCE_RUNTIME_AND_NEGATIVE_TEST_PROOF",
+      "complete": false
+    },
+    {
+      "id": "W08",
+      "name": "B043/B045/B053/B053-R7/V32/V35 and other historical ZIPs",
+      "route": "Archive Census",
+      "primarySource": "audit/omega-drive-historical-archive-source-index-r936.json",
+      "evidenceState": "HELD",
+      "acceptance": "REQUIRES_EXACT_SOURCE_RUNTIME_AND_NEGATIVE_TEST_PROOF",
+      "complete": false
+    },
+    {
+      "id": "W09",
+      "name": "Creation studio, render, geometry, images, traversal and authored output",
+      "route": "Visual Instrument",
+      "primarySource": "src7/workspaces/CreationDesignStudioR881.tsx",
+      "evidenceState": "PARTIAL",
+      "acceptance": "REQUIRES_EXACT_SOURCE_RUNTIME_AND_NEGATIVE_TEST_PROOF",
+      "complete": false
+    },
+    {
+      "id": "W10",
+      "name": "AI agents, workers, local inference and unified automation",
+      "route": "SAI Lab",
+      "primarySource": "src/FullSystemCompletionR153.tsx",
+      "evidenceState": "DEVICE_HELD",
+      "acceptance": "REQUIRES_EXACT_SOURCE_RUNTIME_AND_NEGATIVE_TEST_PROOF",
+      "complete": false
+    },
+    {
+      "id": "W11",
+      "name": "Windows EXE/installer, GPU and local host execution",
+      "route": "Build Out",
+      "primarySource": "tools/omega_local_hub_r881.py",
+      "evidenceState": "DEVICE_HELD",
+      "acceptance": "REQUIRES_EXACT_SOURCE_RUNTIME_AND_NEGATIVE_TEST_PROOF",
+      "complete": false
+    },
+    {
+      "id": "W12",
+      "name": "Performance, tests, deterministic packaging, exact deployed SHA and rollback",
+      "route": "Validation",
+      "primarySource": ".github/workflows/ci.yml",
+      "evidenceState": "RELEASE_HELD",
+      "acceptance": "REQUIRES_EXACT_SOURCE_RUNTIME_AND_NEGATIVE_TEST_PROOF",
+      "complete": false
+    }
+  ],
+  "blockers": [
+    {
+      "id": "HISTORY",
+      "state": "OPEN",
+      "description": "Unexamined historical archive contents and variant-specific behavior",
+      "route": "Archive Census"
+    },
+    {
+      "id": "ZIP_BYTES",
+      "state": "OPEN",
+      "description": "156 named Drive parts are not independently hashed or reconstructed",
+      "route": "Archive Operators"
+    },
+    {
+      "id": "V61",
+      "state": "OPEN",
+      "description": "V61.3 first part not found in targeted Library index, not proven globally absent",
+      "route": "Archive Operators"
+    },
+    {
+      "id": "BIN_PARITY",
+      "state": "OPEN",
+      "description": "24 bin source and execution parity across versions not established",
+      "route": "Archive Operators"
+    },
+    {
+      "id": "FAMILY_PARITY",
+      "state": "OPEN",
+      "description": "100 historical binaries not independently executable/proven equivalent",
+      "route": "System Atlas"
+    },
+    {
+      "id": "MODE_PARITY",
+      "state": "OPEN",
+      "description": "All historical modes not individually execution-proven",
+      "route": "Modes"
+    },
+    {
+      "id": "NATIVE_PC",
+      "state": "OPEN",
+      "description": "Current authenticated Windows/installer/GPU/model execution not accepted",
+      "route": "Hybrid Link"
+    },
+    {
+      "id": "UI_PARITY",
+      "state": "OPEN",
+      "description": "All route, control and complete user workflows not end-to-end accepted",
+      "route": "Validation"
+    },
+    {
+      "id": "RELEASE",
+      "state": "OPEN",
+      "description": "PR remains candidate; production exact-SHA proof and rollback required",
+      "route": "Governance"
+    }
+  ],
+  "releaseGates": [
+    "EXACT_HEAD_ALL_WORKFLOWS",
+    "HISTORICAL_EXECUTOR_PARITY",
+    "SOURCE_BYTE_AND_HASH_PROOF",
+    "24_BIN_INVERSE_OUTVERSE",
+    "20_736_BY_20_736_SPARSE_CONSERVATION",
+    "ALL_MODES_EXECUTION_OR_GATED_DISCLOSURE",
+    "R125_R141_R146_R147_AUTHORITY",
+    "WINDOWS_GPU_INSTALLER_RETURN",
+    "FULL_DESKTOP_MOBILE_UX",
+    "PERFORMANCE_AND_FAILURE_RECOVERY",
+    "GOVERNED_MERGE_AND_EXACT_DEPLOY",
+    "LIVE_POST_DEPLOY_ROLLBACK"
+  ],
+  "laws": [
+    "NO_STAGE_PROMOTED_BEYOND_EVIDENCE",
+    "NO_SECOND_SHADOW_RUNTIME",
+    "NEVER_DELETE_OR_OVERWRITE_HISTORICAL_DONORS",
+    "NO_UI_ROUTE_IMPLIED_EXECUTOR_COMPLETION",
+    "NO_PRODUCTION_PROMOTION_FROM_CANDIDATE_TEST",
+    "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
+    "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
+  ]
+}
