@@ -126,7 +126,7 @@ for(const needle of ['/api/hub/artifacts/','r909-download.svg','X-Omega-Artifact
 }
 for(const needle of ['SPHERE_TENSOR_RENDER','verified-cell-projection.svg','sourceFullStateSha256','OMEGA_SPARSE_PROJECTION_ARTIFACT_R907'])
  assert.ok(sparseWindows.includes(needle),'R907 actual compiled Windows SVG proof missing: '+needle);
-for(const needle of ['SPHERE_TENSOR_AUDIT_LINEAGE','audit_sparse_lineage_r912','R912_PARENT_RECEIPT_OR_STATE_DRIFT_HELD','R912_LINEAGE_CYCLE_HELD','R912_LINEAGE_DEPTH_BOUND_HELD']){
+for(const needle of ['SPHERE_TENSOR_AUDIT_LINEAGE','audit_sparse_lineage_r912','R912_PARENT_RECEIPT_OR_STATE_DRIFT_HELD','R912_LINEAGE_CYCLE_HELD','R912_LINEAGE_DEPTH_BOUND_HELD','R912_RENDER_SOURCE_RECEIPT_DRIFT_HELD']){
  assert.ok(sparseHub.includes(needle),'R912 entire checkpoint ancestry executor missing: '+needle);
 }
 for(const needle of ['SPHERE_TENSOR_AUDIT_LINEAGE','OMEGA_SPARSE_LINEAGE_AUDIT_R912','rootExportJobId','R912 compiled native exact checkpoint ancestry mismatch']){
