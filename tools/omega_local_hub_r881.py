@@ -332,8 +332,8 @@ def correlate_duplex24_r924(root:Path,args:dict):
             "productionReady":False,"gpuComputeProven":False,
             "basis":"HISTORICAL_SOURCE_AND_LOCAL_FILE_HASHES_NOT_RUNTIME_PARITY"}
 
-READ_ONLY_REPLAY = frozenset({"HASH_TREE", "CSV_STATS", "VERIFY_LEDGER_SPLIT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_AUDIT_LINEAGE", "HISTORICAL_ZIP_AUDIT", "HISTORICAL_B010_EXECUTE", "HISTORICAL_DUPLEX24_CORRELATE"})
-OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "LOCAL_INFER", "LOCAL_CHAT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_EXPORT", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_CONTINUE", "SPHERE_TENSOR_RENDER", "SPHERE_TENSOR_AUDIT_LINEAGE", "HISTORICAL_ZIP_AUDIT", "HISTORICAL_B010_EXECUTE", "HISTORICAL_DUPLEX24_CORRELATE", "RESIDUAL_RESTORE"})
+READ_ONLY_REPLAY = frozenset({"HASH_TREE", "CSV_STATS", "VERIFY_LEDGER_SPLIT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_AUDIT_LINEAGE", "HISTORICAL_ZIP_AUDIT", "HISTORICAL_B010_EXECUTE", "HISTORICAL_DUPLEX24_CORRELATE", "CORRELATE_HISTORICAL_FIELD"})
+OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "LOCAL_INFER", "LOCAL_CHAT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_EXPORT", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_CONTINUE", "SPHERE_TENSOR_RENDER", "SPHERE_TENSOR_AUDIT_LINEAGE", "HISTORICAL_ZIP_AUDIT", "HISTORICAL_B010_EXECUTE", "HISTORICAL_DUPLEX24_CORRELATE", "CORRELATE_HISTORICAL_FIELD", "RESIDUAL_RESTORE"})
 STATUS = frozenset({"QUEUED", "WAIT_EVENT", "RUNNING", "COMPLETED", "FAILED", "HELD", "CANCELLED"})
 def utc_ms(): return int(time.time() * 1000)
 def sha_file(path: Path) -> str:
@@ -592,7 +592,94 @@ class Hub:
                 "nativePcAccepted":False,"gpuProven":False,
                 "semanticTruthProven":False}
 
+    def correlate_historical_field_r925(self,args):
+        """Correlate three independent, durable and hash-bound evidence planes.
+
+        Links B010 traversal coordinates to actual R902 selected SPHERE seeds,
+        with optional V61.3 inverse/outverse source-archive evidence.
+        No source is merged into the others, and no Canon mutation occurs.
+        """
+        if not isinstance(args,dict) or set(args)-{"b010_job_id","tensor_job_id","duplex_job_id"}:
+            raise ValueError("R925_CORRELATION_ARGUMENT_SCHEMA_HELD")
+        def original_job(value,kind,schema):
+            if not isinstance(value,str) or len(value)!=32 or any(c not in "0123456789abcdef" for c in value):
+                raise ValueError("R925_EXACT_JOB_ID_REQUIRED_HELD")
+            job=self.get(value)
+            if (not job or job.get("state")!="COMPLETED" or job.get("operation")!=kind or
+                not isinstance(job.get("result"),dict) or job["result"].get("schema")!=schema or
+                not isinstance(job.get("result_sha256"),str) or
+                sha_bytes(json_bytes(job["result"]))!=job["result_sha256"]):
+                raise ValueError("R925_SOURCE_RECEIPT_INTEGRITY_OR_AUTHORITY_HELD")
+            return job
+        donor=original_job(args.get("b010_job_id"),"HISTORICAL_B010_EXECUTE",
+                           "OMEGA_VERIFIED_HISTORICAL_B010_EXECUTION_R922")
+        tensor=original_job(args.get("tensor_job_id"),"SPHERE_TENSOR_STEP",
+                            "OMEGA_IMPLICIT_CELL_LANE_TENSOR_R902")
+        data=donor["result"]
+        tensor_result=tensor["result"]
+        if (data.get("archiveSha256")!=B010_ARCHIVE_SHA256_R922 or
+            data.get("state")!="HISTORICAL_DONOR_RUNTIME_EXECUTED_NOT_CANON_ADMITTED" or
+            data.get("currentCanonWrites")!=0 or data.get("nativePcAccepted") is not False or
+            not isinstance(data.get("frames"),list) or not data["frames"] or
+            len(data["frames"])>12 or
+            sha_bytes(json_bytes(data["frames"]))!=data.get("frameChainSha256")):
+            raise ValueError("R925_DONOR_PACKET_CHAIN_HELD")
+        final=data["frames"][-1]
+        address=final.get("traversalAddress") if isinstance(final,dict) else None
+        if (type(address) is not int or address<0 or address>=20736 or
+            not all(isinstance(final.get(k),str) and len(final[k])==64 and
+                    all(c in "0123456789abcdef" for c in final[k])
+                    for k in ("statePacketSha256","traversalPacketSha256",
+                              "transitionSha256","renderControlSha256","acceptanceSha256"))):
+            raise ValueError("R925_DONOR_COORDINATE_OR_PROOF_HELD")
+        seeds=tensor["args"].get("seeds") if isinstance(tensor.get("args"),dict) else None
+        if (not isinstance(seeds,list) or len(seeds)!=1 or
+            not isinstance(seeds[0],dict) or seeds[0].get("cell")!=address or
+            tensor_result.get("conservationExact") is not True or
+            tensor_result.get("totalMassBefore")!=tensor_result.get("totalMassAfter") or
+            tensor_result.get("cellCount")!=20736 or
+            tensor_result.get("lanesPerCell")!=20736 or
+            tensor_result.get("physicalPcAccepted") is not False or
+            tensor_result.get("gpuComputeProven") is not False):
+            raise ValueError("R925_SPHERE_ADDRESS_OR_CONSERVATION_HELD")
+        nodes=[
+            {"plane":"HISTORICAL_B010_TRAVERSAL","jobId":donor["id"],
+             "receiptSha256":donor["result_sha256"],"packetSha256":final["statePacketSha256"],
+             "traversalAddress":address},
+            {"plane":"LIVE_R902_SPARSE_FIELD","jobId":tensor["id"],
+             "receiptSha256":tensor["result_sha256"],
+             "stateSha256":tensor_result["fullStateSha256"],
+             "seedAddress":seeds[0]["cell"],
+             "massConserved":True}
+        ]
+        duplex=None
+        if args.get("duplex_job_id") is not None:
+            original=original_job(args["duplex_job_id"],"HISTORICAL_DUPLEX24_CORRELATE",
+                                  "OMEGA_HISTORICAL_DUPLEX24_CORRELATION_R924")
+            matrix=original["result"]
+            if (len(matrix.get("duplexPairs",[]))!=12 or
+                matrix.get("canonicalWrites")!=0 or matrix.get("productionReady") is not False):
+                raise ValueError("R925_DUPLEX_SOURCE_AUTHORITY_HELD")
+            duplex={"plane":"HISTORICAL_INVERSE_OUTVERSE_SOURCE",
+                    "jobId":original["id"],"receiptSha256":original["result_sha256"],
+                    "verifiedOuterParts":matrix["verifiedOuterParts"],
+                    "state":matrix["state"]}
+            nodes.append(duplex)
+        return {"schema":"OMEGA_CROSS_ENGINE_CORRELATION_R925",
+                "state":"CORRELATED_RECEIPTS_NOT_UNIFIED_CANON_AUTHORITY",
+                "address":address,"canonicalAddressSpace":20736,
+                "nestedStateComponents":20736*20736,"nodes":nodes,
+                "relation":"EXACT_OPERATOR_SELECTED_COORDINATE_AND_HASH_BOUND_RECEIPTS",
+                "correlationSha256":sha_bytes(json_bytes(nodes)),
+                "allInputReceiptsIntegrityVerified":True,
+                "duplexCompleteness":None if duplex is None else duplex["state"],
+                "canonicalWrites":0,"historicalDonorAuthorityEscalated":False,
+                "physicalProof":False,"gpuComputeProven":False,
+                "productionProof":False}
+
     def execute(self,operation,args):
+        if operation=="CORRELATE_HISTORICAL_FIELD":
+            return self.correlate_historical_field_r925(args)
         if operation=="HISTORICAL_DUPLEX24_CORRELATE":
             return correlate_duplex24_r924(self.root,args)
         if operation=="HISTORICAL_ZIP_AUDIT":
