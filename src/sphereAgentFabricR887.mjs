@@ -62,3 +62,44 @@ export function restoreFabricR888(serialized){
  restored.receipts=state.receipts;
  return restored;
 }
+
+
+/**
+ * R918: exact 12^10 hierarchical address over shell / outer / inner / phase.
+ * The last radix-12 coordinate is a projection/phase slot, not a newly
+ * allocated neuron, physical dimension, or independently stored state.
+ * All integers remain below Number.MAX_SAFE_INTEGER and round-trip exactly.
+ */
+export const R918_CAPACITY=NESTED*AXES; // 61,917,364,224 = 12^10
+export const R918_SCHEMA='OMEGA_SPHERE_PHASE_FIELD_R918';
+export function expandedAddressR918(shell,outer,inner,phase){
+ return nestedId(agentId(shell,outer),inner)*AXES+integer(phase,AXES,'phase');
+}
+export function expandedCoordinatesR918(address){
+ integer(address,R918_CAPACITY,'expanded address');
+ const phase=address%AXES,nested=Math.floor(address/AXES);
+ const {agent,inner}=nestedAddress(nested),{shell,outer}=agentAddress(agent);
+ return Object.freeze({schema:R918_SCHEMA,address,shell,outer,agent,inner,phase,nested});
+}
+/**
+ * One of twelve exact axis/turn samples: four canonical inner axes crossed
+ * with negative, neutral and positive one-step displacement. This samples
+ * the existing inner state and its neighbors without allocating shadow state.
+ */
+export function phaseSampleR918(fabric,agent,inner,phase){
+ agentAddress(agent);integer(inner,SIZE,'inner');integer(phase,AXES,'phase');
+ const axis=phase%4,turn=Math.floor(phase/4)-1;
+ const digits=axes4(inner),neighborDigits=digits.slice();
+ neighborDigits[axis]=(neighborDigits[axis]+turn+AXES)%AXES;
+ const neighbor=fromAxes4(neighborDigits),value=stateValue(fabric,agent,inner);
+ const neighborValue=stateValue(fabric,agent,neighbor);
+ const delta=neighborValue-value;
+ return Object.freeze({
+  schema:R918_SCHEMA,expandedAddress:nestedId(agent,inner)*AXES+phase,
+  agent,inner,phase,axis,turn,neighbor,originalValue:value,
+  sampledValue:neighborValue,delta,gradientMagnitude:Math.abs(delta),
+  angularPhase:phase*Math.PI/6,
+  authority:'SYNTHETIC_INTERNAL_FIELD_PROJECTION',
+  createsIndependentPhaseState:false,canonicalWrites:0
+ });
+}
