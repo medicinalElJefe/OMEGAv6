@@ -44,6 +44,75 @@ class LocalHubTests(unittest.TestCase):
     def test_hub_db_location_must_be_private(self):
         with self.assertRaisesRegex(ValueError,"DB_MUST_RESIDE_IN_PRIVATE_HUB_DIR"):
             hubmod.Hub(self.root,self.root/"data"/"database.sqlite")
+    def test_r956_original_v35_safe_stage_and_indexed_query(self):
+        import hashlib,io,json,sqlite3,zipfile,importlib.util
+        path=MODULE.parent/"omega_v35_prepare_r956.py"
+        spec=importlib.util.spec_from_file_location("omega_v35_prepare_r956",path)
+        module=importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        atlas=MODULE.parent/"omega_v35_atlas_r954.py"
+        atlas_spec=importlib.util.spec_from_file_location("omega_v35_atlas_r954",atlas)
+        atlasmod=importlib.util.module_from_spec(atlas_spec)
+        atlas_spec.loader.exec_module(atlasmod)
+        source_db=self.root/"data"/"tiny_v35_sqlite.db"
+        with sqlite3.connect(source_db) as db:
+            db.execute("CREATE TABLE rows(row_id INTEGER PRIMARY KEY,source_file TEXT,sheet TEXT,row_number INTEGER,row_json TEXT,row_text TEXT,domain TEXT,root TEXT,function TEXT,gate TEXT)")
+            db.execute('CREATE VIRTUAL TABLE rows_fts USING fts5(row_text,source_file,sheet,domain,root,function,gate,content="rows",content_rowid="row_id")')
+            db.executemany("INSERT INTO rows VALUES(?,?,?,?,?,?,?,?,?,?)",[
+                (1,"original.xlsx","Chart1",2,'{"name":"water"}',"water shift","water","OUTVERSE","flow","STAY"),
+                (2,"original.xlsx","Chart1",3,'{"name":"water"}',"water pressure","water","INVERSE","load","TURN"),
+                (3,"original.xlsx","Chart2",4,'{"name":"stone"}',"stone density","stone","OUTVERSE","weight","STAY")])
+            db.execute("INSERT INTO rows_fts(rows_fts) VALUES('rebuild')")
+        digest=lambda b:hashlib.sha256(b).hexdigest()
+        original=source_db.read_bytes()
+        manifest={"stats":{"rows":3},"files":[{"path":module.DB_NAME,
+                  "size_bytes":len(original),"sha256":digest(original)}]}
+        nested_io=io.BytesIO()
+        with zipfile.ZipFile(nested_io,"w",compression=zipfile.ZIP_STORED) as nested:
+            nested.writestr("source_manifest/OMEGA_MASTER_MANIFEST.json",json.dumps(manifest))
+            nested.writestr(module.DB_NAME,original)
+        nested_bytes=nested_io.getvalue()
+        wrapper=self.root/"data"/module.WRAPPER_NAME
+        with zipfile.ZipFile(wrapper,"w",compression=zipfile.ZIP_STORED) as outer:
+            outer.writestr(module.NESTED_NAME,nested_bytes)
+        original_wrapper=wrapper.read_bytes()
+        args={"source":"data/"+module.WRAPPER_NAME,"destination":"data/v35/"+module.DB_NAME}
+        expected=dict(wrapper_sha=digest(original_wrapper),wrapper_bytes=len(original_wrapper),
+                      nested_sha=digest(nested_bytes),nested_bytes=len(nested_bytes),
+                      db_sha=digest(original),db_bytes=len(original),db_rows=3)
+        result=module._prepare_v35(self.root,args,hubmod.safe_under,**expected)
+        self.assertEqual(result["schema"],module.SCHEMA)
+        self.assertEqual(result["originalRows"],3)
+        self.assertEqual(result["originalSqliteSha256"],digest(original))
+        self.assertTrue(result["sourceExact"])
+        self.assertFalse(result["historicalRuntimeParityProven"])
+        self.assertEqual(result["canonicalWrites"],0)
+        prepared=self.root/"data"/"v35"/module.DB_NAME
+        self.assertEqual(prepared.read_bytes(),original)
+        query=atlasmod._query_v35_index(self.root,{"source":args["destination"],
+              "term":"water","limit":1,"cursor":0},hubmod.safe_under,
+              expected_sha256=digest(original),expected_bytes=len(original),expected_rows=3)
+        self.assertEqual(query["returned"],1)
+        self.assertTrue(query["hasMore"])
+        self.assertEqual(query["records"][0]["rowId"],1)
+        self.assertEqual(query["sourceIndex"],"FTS5")
+        with self.assertRaisesRegex(ValueError,"R956_DESTINATION_ALREADY_EXISTS_HELD"):
+            module._prepare_v35(self.root,args,hubmod.safe_under,**expected)
+        prepared.unlink()
+        with self.assertRaisesRegex(ValueError,"R956_NESTED_SHA256_HELD"):
+            module._prepare_v35(self.root,args,hubmod.safe_under,
+                                **{**expected,"nested_sha":"0"*64})
+        self.assertFalse(prepared.exists())
+        with self.assertRaisesRegex(ValueError,"R956_ORIGINAL_V35_WRAPPER_SHA256_HELD"):
+            module.prepare_v35_atlas_r956(self.root,args,hubmod.safe_under)
+        wrapper.write_bytes(original_wrapper[:-1]+b"X")
+        with self.assertRaisesRegex(ValueError,"R956_ORIGINAL_V35_WRAPPER_SHA256_HELD"):
+            module._prepare_v35(self.root,args,hubmod.safe_under,**expected)
+        with self.assertRaisesRegex(ValueError,"PARENT_TRAVERSAL_HELD"):
+            module._prepare_v35(self.root,{**args,"destination":"../psc_finished_atlas.sqlite"},
+                                hubmod.safe_under,**expected)
+        self.assertFalse(prepared.exists())
+
     def test_r954_original_v35_indexed_query_and_refusal(self):
         import sqlite3,hashlib,importlib.util
         module_file=MODULE.parent/"omega_v35_atlas_r954.py"

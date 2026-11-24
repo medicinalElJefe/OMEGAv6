@@ -76,8 +76,8 @@ if(releaseClean){
  assert.equal(a.releaseAcceptance?.rollbackEligible,true,'release lacks rollback-eligible baseline');
 }else assert.equal(a.releaseAcceptance,undefined,'candidate cannot claim a production receipt');
 assert.ok(a.transitionRules&&a.completionRule,'build completion transition laws absent');
-assert.ok(a.buildHistory.length>=19,'historical advancement history dropped');
-for(const id of Array.from({length:19},(_,i)=>'R'+(936+i)))assert.ok(a.buildHistory.some(h=>h.revision===id),'governed repair disappeared '+id);
+assert.ok(a.buildHistory.length>=21,'historical advancement history dropped');
+for(const id of Array.from({length:21},(_,i)=>'R'+(936+i)))assert.ok(a.buildHistory.some(h=>h.revision===id),'governed repair disappeared '+id);
 assert.equal(a.isolatedB043ModuleProof,'audit/omega-b043-module-test-evidence-r949.json');
 assert.equal(a.reconstructedB053R7SourceEvidence,'audit/omega-b053-r7-full-source-acceptance-r950.json');
 assert.equal(a.originalB053R7ModuleEvidence,'audit/omega-b053-r7-isolated-module-parity-r951.json');

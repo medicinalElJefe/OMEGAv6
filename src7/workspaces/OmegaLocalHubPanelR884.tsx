@@ -4,7 +4,7 @@ import {executeR908GpuProjection} from './omegaR908GpuProjection';
 type HubJob={id:string;operation:string;state:string;scheduled_ms:number;created_ms:number;updated_ms:number;error?:string|null;result_sha256?:string|null;result?:unknown;history?:{event:string;at_ms:number;details:string}[]};
 type Json=Record<string,unknown>;
 const BASE='http://127.0.0.1:8765';
-const OPS=['HASH_TREE','CSV_STATS','COPY_ARTIFACT','EXPORT_MANIFEST','VERIFY_LEDGER_SPLIT','VERIFY_LEDGER_SET','HISTORICAL_ZIP_AUDIT','HISTORICAL_RELEASE_SET_AUDIT','HISTORICAL_V35_ATLAS_QUERY','HISTORICAL_B043_RECONSTRUCT','HISTORICAL_B010_EXECUTE','HISTORICAL_DUPLEX24_CORRELATE','CORRELATE_HISTORICAL_FIELD','LOCAL_INFER','SPHERE_TENSOR_STEP','SPHERE_TENSOR_EXPORT','SPHERE_TENSOR_VERIFY','SPHERE_TENSOR_CONTINUE','SPHERE_TENSOR_RENDER','SPHERE_TENSOR_AUDIT_LINEAGE','RESIDUAL_RESTORE'] as const;
+const OPS=['HASH_TREE','CSV_STATS','COPY_ARTIFACT','EXPORT_MANIFEST','VERIFY_LEDGER_SPLIT','VERIFY_LEDGER_SET','HISTORICAL_ZIP_AUDIT','HISTORICAL_RELEASE_SET_AUDIT','HISTORICAL_V35_ATLAS_QUERY','HISTORICAL_V35_ATLAS_PREPARE','HISTORICAL_B043_RECONSTRUCT','HISTORICAL_B010_EXECUTE','HISTORICAL_DUPLEX24_CORRELATE','CORRELATE_HISTORICAL_FIELD','LOCAL_INFER','SPHERE_TENSOR_STEP','SPHERE_TENSOR_EXPORT','SPHERE_TENSOR_VERIFY','SPHERE_TENSOR_CONTINUE','SPHERE_TENSOR_RENDER','SPHERE_TENSOR_AUDIT_LINEAGE','RESIDUAL_RESTORE'] as const;
 type Operation=typeof OPS[number];
 const surface:CSSProperties={padding:16,borderRadius:12,border:'1px solid #436079',background:'#0d1d2d',color:'#eff6fc',margin:'14px 0'};
 const field:CSSProperties={background:'#152f47',color:'#eaf5ff',border:'1px solid #607e98',padding:9,borderRadius:7,width:'100%',boxSizing:'border-box'};
@@ -78,6 +78,13 @@ export default function OmegaLocalHubPanelR884({initialOperation='HASH_TREE',req
  const [busy,setBusy]=useState(false),[connectedAt,setConnectedAt]=useState<number|null>(null);
  useEffect(()=>{
   if(!requestedRelease)return;
+  if(requestedRelease==='V35-ATLAS'){
+   setOperation('HISTORICAL_V35_ATLAS_PREPARE');
+   setSource('OMEGA_V35_PART_18.zip');
+   setDestination('data/v35/psc_finished_atlas.sqlite');
+   setInfo('Original V35 atlas staging prepared from verified Part 18. Provide the source ZIP under the approved local workspace, authenticate and explicitly submit. No job has started.');
+   return;
+  }
   if(!['B043','B045','B053','B053-R7','V32','V35'].includes(requestedRelease))return;
   setOperation('HISTORICAL_RELEASE_SET_AUDIT');
   setReleaseId(requestedRelease);
@@ -178,6 +185,11 @@ export default function OmegaLocalHubPanelR884({initialOperation='HASH_TREE',req
     if(!source.trim().toLowerCase().endsWith('.json')||source.includes('..')||source.includes('\\')||source.startsWith('/')||source.includes(':'))throw Error('R924 requires a local release manifest JSON relative to the approved workspace root.');
     if(duplexFolder.includes('..')||duplexFolder.includes('\\')||duplexFolder.startsWith('/')||duplexFolder.includes(':'))throw Error('R924 requires an approved relative ZIP distribution folder.');
     args.manifest=source.trim();args.archive_folder=duplexFolder.trim()||'.';
+   }
+   if(operation==='HISTORICAL_V35_ATLAS_PREPARE'){
+    if(!source.trim().endsWith('OMEGA_V35_PART_18.zip')||source.includes('..')||source.includes('\\')||source.startsWith('/')||source.includes(':'))throw Error('Choose original V35 Part 18 ZIP under the approved root.');
+    if(!destination.trim().endsWith('/psc_finished_atlas.sqlite')||destination.includes('..')||destination.includes('\\')||destination.startsWith('/')||destination.includes(':'))throw Error('Choose new V35 SQLite destination under the approved root.');
+    args.source=source.trim();args.destination=destination.trim();
    }
    if(operation==='HISTORICAL_V35_ATLAS_QUERY'){
     if(!source.trim().endsWith('/psc_finished_atlas.sqlite')||source.includes('..')||source.includes('\\')||source.startsWith('/')||source.includes(':'))throw Error('Stage the original verified V35 SQLite inside the approved workspace under a relative folder.');
@@ -280,6 +292,7 @@ export default function OmegaLocalHubPanelR884({initialOperation='HASH_TREE',req
   }catch(error){setInfo(error instanceof Error?error.message:'Could not load selected job detail.')}
  };
  const chosen=selectedJobDetail?.id===selected?selectedJobDetail:jobs.find(x=>x.id===selected);
+ const preparedV35=chosen?.operation==='HISTORICAL_V35_ATLAS_PREPARE'&&chosen.state==='COMPLETED'&&chosen.result&&typeof chosen.result==='object'?chosen.result as Record<string,unknown>:null;
  const atlasReceipt=chosen?.operation==='HISTORICAL_V35_ATLAS_QUERY'&&chosen.state==='COMPLETED'&&chosen.result&&typeof chosen.result==='object'?chosen.result as Record<string,unknown>:null;
  const atlasRows=atlasReceipt?.schema==='OMEGA_V35_ORIGINAL_ATLAS_INDEXED_QUERY_R954'&&Array.isArray(atlasReceipt.records)?atlasReceipt.records as {rowId:number;domain:string;root:string;function:string;originalGate:string;sourceFile:string;sheet:string;originalRow:number;sourceTextPreview:string;sourceTextTruncated:boolean;originalRowJsonPreview:string}[]:null;
  const donorReceipt=chosen?.operation==='HISTORICAL_B010_EXECUTE'&&chosen.state==='COMPLETED'&&chosen.result&&typeof chosen.result==='object'
@@ -341,9 +354,10 @@ export default function OmegaLocalHubPanelR884({initialOperation='HASH_TREE',req
    <div style={{...surface,marginTop:14}}>
     <h3>Queue bounded work</h3>
     <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:12}}>
-     <label>Operation<select style={field} value={operation} onChange={e=>{const next=e.target.value as Operation;setOperation(next);if(next==='HISTORICAL_B043_RECONSTRUCT'){setSource('OMEGA_B043_PARTITION_MANIFEST.json');setDuplexFolder('.');setDestination('OMEGA_B043_FULL_SYSTEM.zip');}if(next==='HISTORICAL_V35_ATLAS_QUERY'){setSource('data/v35/psc_finished_atlas.sqlite');setAtlasCursor('0');}}}>{OPS.map(x=><option key={x} value={x}>{x.replaceAll('_',' ')}</option>)}</select></label>
-     {operation!=='CORRELATE_HISTORICAL_FIELD'&&operation!=='LOCAL_INFER'&&operation!=='SPHERE_TENSOR_STEP'&&operation!=='SPHERE_TENSOR_EXPORT'&&operation!=='SPHERE_TENSOR_VERIFY'&&operation!=='SPHERE_TENSOR_CONTINUE'&&operation!=='SPHERE_TENSOR_RENDER'&&operation!=='SPHERE_TENSOR_AUDIT_LINEAGE'&&<label>{operation==='HASH_TREE'?'Project folder':operation==='EXPORT_MANIFEST'?'Source files (one per line)':operation==='HISTORICAL_ZIP_AUDIT'||operation==='HISTORICAL_B010_EXECUTE'?'Historical ZIP relative path':operation==='HISTORICAL_DUPLEX24_CORRELATE'?'V61.3 full release manifest JSON':operation==='HISTORICAL_RELEASE_SET_AUDIT'?'R936 Drive source index JSON':operation==='HISTORICAL_B043_RECONSTRUCT'?'Original B043 partition manifest JSON':operation==='HISTORICAL_V35_ATLAS_QUERY'?'Verified V35 Atlas SQLite relative path':'Source relative file'}<textarea style={field} rows={2} value={source} onChange={e=>setSource(e.target.value)} spellCheck={false}/></label>}
+     <label>Operation<select style={field} value={operation} onChange={e=>{const next=e.target.value as Operation;setOperation(next);if(next==='HISTORICAL_B043_RECONSTRUCT'){setSource('OMEGA_B043_PARTITION_MANIFEST.json');setDuplexFolder('.');setDestination('OMEGA_B043_FULL_SYSTEM.zip');}if(next==='HISTORICAL_V35_ATLAS_QUERY'){setSource('data/v35/psc_finished_atlas.sqlite');setAtlasCursor('0');}if(next==='HISTORICAL_V35_ATLAS_PREPARE'){setSource('OMEGA_V35_PART_18.zip');setDestination('data/v35/psc_finished_atlas.sqlite');}}}>{OPS.map(x=><option key={x} value={x}>{x.replaceAll('_',' ')}</option>)}</select></label>
+     {operation!=='CORRELATE_HISTORICAL_FIELD'&&operation!=='LOCAL_INFER'&&operation!=='SPHERE_TENSOR_STEP'&&operation!=='SPHERE_TENSOR_EXPORT'&&operation!=='SPHERE_TENSOR_VERIFY'&&operation!=='SPHERE_TENSOR_CONTINUE'&&operation!=='SPHERE_TENSOR_RENDER'&&operation!=='SPHERE_TENSOR_AUDIT_LINEAGE'&&<label>{operation==='HASH_TREE'?'Project folder':operation==='EXPORT_MANIFEST'?'Source files (one per line)':operation==='HISTORICAL_ZIP_AUDIT'||operation==='HISTORICAL_B010_EXECUTE'?'Historical ZIP relative path':operation==='HISTORICAL_DUPLEX24_CORRELATE'?'V61.3 full release manifest JSON':operation==='HISTORICAL_RELEASE_SET_AUDIT'?'R936 Drive source index JSON':operation==='HISTORICAL_B043_RECONSTRUCT'?'Original B043 partition manifest JSON':operation==='HISTORICAL_V35_ATLAS_QUERY'?'Verified V35 Atlas SQLite relative path':operation==='HISTORICAL_V35_ATLAS_PREPARE'?'Original V35 Part 18 ZIP relative path':'Source relative file'}<textarea style={field} rows={2} value={source} onChange={e=>setSource(e.target.value)} spellCheck={false}/></label>}
      {operation==='CORRELATE_HISTORICAL_FIELD'&&<><label>B010 completed historical traversal job ID<input style={field} value={correlateDonorId} onChange={e=>setCorrelateDonorId(e.target.value)} maxLength={32} placeholder='32 lowercase hex characters'/></label><label>R902 conserved SPHERE tensor job ID<input style={field} value={correlateTensorId} onChange={e=>setCorrelateTensorId(e.target.value)} maxLength={32} placeholder='32 lowercase hex characters'/></label><label>R924 24-BIN source-audit job ID (optional)<input style={field} value={correlateDuplexId} onChange={e=>setCorrelateDuplexId(e.target.value)} maxLength={32} placeholder='Optional 32 lowercase hex characters'/></label><small>R925 verifies each durable result hash and compares the actual B010 traversal address with the cell seeded into R902. A source mismatch is refused; passing this correlation does not admit historical authority into Canon.</small></>}
+     {operation==='HISTORICAL_V35_ATLAS_PREPARE'&&<p><small>R956 validates original V35 Part 18, its embedded master-atlas ZIP and source-manifest SQLite SHA-256. It checks SQLite integrity and all 149,679 row identities before publishing a NEW original database by atomic no-overwrite operation. Requires temporary local disk space. No donor code runs, and no Canon writes, native/GPU claims or automatic job submission occur.</small></p>}
      {operation==='HISTORICAL_V35_ATLAS_QUERY'&&<>
       <label>Search original atlas text (FTS5)<input style={field} value={atlasSearch} onChange={e=>{setAtlasSearch(e.target.value);setAtlasCursor('0')}} placeholder='water, orbital motion, atlas'/></label>
       <label>Exact original domain filter (optional)<input style={field} value={atlasDomain} onChange={e=>{setAtlasDomain(e.target.value);setAtlasCursor('0')}} maxLength={100} placeholder='e.g. orbital mechanics'/></label>
@@ -365,7 +379,7 @@ export default function OmegaLocalHubPanelR884({initialOperation='HASH_TREE',req
       <label>Discrete mass (integer)<input style={field} type='number' min={1} step={1} value={tensorMass} onChange={e=>setTensorMass(e.target.value)}/></label>
       <label>Transition steps (0–8)<input style={field} type='number' min={0} max={8} step={1} value={tensorSteps} onChange={e=>setTensorSteps(e.target.value)}/></label>
      </>}
-     {(operation==='COPY_ARTIFACT'||operation==='EXPORT_MANIFEST'||operation==='SPHERE_TENSOR_EXPORT'||operation==='SPHERE_TENSOR_CONTINUE'||operation==='SPHERE_TENSOR_RENDER'||operation==='HISTORICAL_B043_RECONSTRUCT')&&<label>New destination path<input style={field} value={destination} onChange={e=>setDestination(e.target.value)} spellCheck={false}/></label>}
+     {(operation==='COPY_ARTIFACT'||operation==='EXPORT_MANIFEST'||operation==='SPHERE_TENSOR_EXPORT'||operation==='SPHERE_TENSOR_CONTINUE'||operation==='SPHERE_TENSOR_RENDER'||operation==='HISTORICAL_B043_RECONSTRUCT'||operation==='HISTORICAL_V35_ATLAS_PREPARE')&&<label>New destination path<input style={field} value={destination} onChange={e=>setDestination(e.target.value)} spellCheck={false}/></label>}
      {operation==='LOCAL_INFER'&&<>
       <label>Installed local model name<input style={field} value={model} onChange={e=>setModel(e.target.value)} placeholder='e.g. llama3.2' maxLength={128}/>
        <button type='button' style={{...button,marginTop:6}} disabled={busy||state!=='LOOPBACK_AUTHENTICATED'} onClick={discoverModels}>Find installed local models</button>
@@ -396,6 +410,12 @@ export default function OmegaLocalHubPanelR884({initialOperation='HASH_TREE',req
     </div>}
     {chosen&&<div style={{marginTop:10}}>
      <strong>Selected job: {chosen.id}</strong>
+     {preparedV35?.schema==='OMEGA_V35_ORIGINAL_ATLAS_PREPARE_R956'&&preparedV35.sourceExact===true&&typeof preparedV35.destination==='string'&&<div data-r956-source-ready='SOURCE_VERIFIED_NOT_CANON_ADMITTED' style={{...surface,margin:'8px 0'}}>
+      <h4>Original V35 atlas staged and source-verified</h4>
+      <p>Source rows: {String(preparedV35.originalRows)} · SHA-256 <code style={{overflowWrap:'anywhere'}}>{String(preparedV35.originalSqliteSha256)}</code></p>
+      <button type='button' style={button} onClick={()=>{setOperation('HISTORICAL_V35_ATLAS_QUERY');setSource(String(preparedV35.destination));setAtlasCursor('0');setInfo('Source-verified V35 SQLite selected. Choose indexed query filters, then explicitly submit.');}}>Search this source-verified V35 atlas</button>
+      <p><small>This only stages source data; canonical and native-device proof remain separate.</small></p>
+     </div>}
      {atlasRows&&<section data-r954-original-atlas='EXACT_SQLITE_SOURCE_ONLY' style={{...surface,margin:'8px 0'}}>
        <h4>Recovered V35 Atlas · original indexed source rows</h4>
        <p>Source SHA-256: <code style={{overflowWrap:'anywhere'}}>{String(atlasReceipt?.sourceSha256)}</code> · 149,679 original rows · {atlasRows.length} displayed · indexed {String(atlasReceipt?.sourceIndex)} query.</p>

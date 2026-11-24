@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R954 original V35 149,679-row FTS5 SQLite query with exact pinned source hash, read-only bounded pages and gate/domain filters; 79/156 original ZIPs byte verified; OMEGA7 runtime/native GPU proof still held",
+  "latestGovernedWork": "R956 source-exact staged original V35 383.8MB SQLite from SHA-pinned Part 18 wrapper, direct R954 search handoff (local root, explicit auth and submit); R955 FTS5 boolean term refusal; original source 79/156 indexed ZIPs verified, native/OMEGA7 full acceptance held",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -394,6 +394,16 @@
       "revision": "R954",
       "conservation": "Full original V35 383MB atlas SQLite, FTS5 149679 rows and source-address metadata read-only query adapter",
       "accepted": "ORIGINAL_SOURCE_INDEXED_QUERY_ONLY_NO_EMPIRICAL_OR_NATIVE_PARITY"
+    },
+    {
+      "revision": "R955",
+      "conservation": "Refuse ambiguous FTS5 boolean operator input with original-source SQL parser intact",
+      "accepted": "CANDIDATE_OPERATOR_TEST_FIX"
+    },
+    {
+      "revision": "R956",
+      "conservation": "Authenticated original V35 source-pinned nested ZIP/SQLite staging plus one-action transition into indexed FTS5 search",
+      "accepted": "CANDIDATE_LOCAL_EXECUTOR_UNTIL_EXACT_SHA_CI_AND_HOST_RETURN"
     }
   ],
   "independentArchiveUnverifiedOtherListedParts": 77,
