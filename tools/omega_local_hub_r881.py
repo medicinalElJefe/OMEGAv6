@@ -216,8 +216,124 @@ def execute_b010_r922(root:Path,args:dict):
             "gpuComputeProven":False,"nativePcAccepted":False,
             "scientificTruthProven":False,"currentProductionAcceptance":False}
 
-READ_ONLY_REPLAY = frozenset({"HASH_TREE", "CSV_STATS", "VERIFY_LEDGER_SPLIT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_AUDIT_LINEAGE", "HISTORICAL_ZIP_AUDIT", "HISTORICAL_B010_EXECUTE"})
-OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "LOCAL_INFER", "LOCAL_CHAT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_EXPORT", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_CONTINUE", "SPHERE_TENSOR_RENDER", "SPHERE_TENSOR_AUDIT_LINEAGE", "HISTORICAL_ZIP_AUDIT", "HISTORICAL_B010_EXECUTE", "RESIDUAL_RESTORE"})
+
+R924_LAWS=("OBJECTIVE","INFORMATION","IDENTITY","BOUNDARY","RELATIONSHIP","TRANSFORMATION",
+           "RESOURCE","CONTINUITY","EVIDENCE","EVALUATION","EXPRESSION","RECURSION")
+def correlate_duplex24_r924(root:Path,args:dict):
+    """Reconcile all 24 historical BIN authorities and the complete ZIP distribution.
+
+    No code execution, extraction, Canon mutation or release promotion.
+    File presence != hash verification; historical metadata != a live proof.
+    """
+    if not isinstance(args,dict) or set(args)-{"manifest","archive_folder"}:
+        raise ValueError("R924_DUPLEX_ARGUMENT_SCHEMA_HELD")
+    rel=args.get("manifest")
+    folder=args.get("archive_folder",".")
+    if not isinstance(rel,str) or not rel.lower().endswith(".json") or not isinstance(folder,str):
+        raise ValueError("R924_MANIFEST_PATH_REQUIRED_HELD")
+    manifest_path=safe_under(root,rel,True)
+    if manifest_path.stat().st_size>2*1024*1024:
+        raise ValueError("R924_MANIFEST_TOO_LARGE_HELD")
+    try:
+        manifest=json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (UnicodeError,ValueError) as exc:
+        raise ValueError("R924_MANIFEST_JSON_HELD") from exc
+    if not isinstance(manifest,dict):
+        raise ValueError("R924_MANIFEST_SCHEMA_HELD")
+    parts=manifest.get("outer_parts")
+    payloads=manifest.get("payloads")
+    if not isinstance(parts,list) or len(parts)!=20 or not isinstance(payloads,list) or len(payloads)!=24:
+        raise ValueError("R924_EXACT_20_PART_24_BIN_SCHEMA_HELD")
+    def valid_sha(value):
+        return isinstance(value,str) and len(value)==64 and all(x in "0123456789abcdef" for x in value)
+    observed_payload={}
+    payload_index={}
+    for item in payloads:
+        if not isinstance(item,dict):
+            raise ValueError("R924_PAYLOAD_RECORD_HELD")
+        index=item.get("index")
+        name=item.get("name")
+        if type(index) is not int or not 1<=index<=24 or name!=f"P{index:02d}.bin" or index in payload_index:
+            raise ValueError("R924_BIN_IDENTITY_HELD")
+        expected_side="INVERSE" if index<=12 else "OUTVERSE"
+        law=R924_LAWS[(index-1)%12]
+        if item.get("space")!=expected_side or item.get("authority")!=f"{expected_side}_{law}" or not valid_sha(item.get("sha256")):
+            raise ValueError("R924_BIN_AUTHORITY_OR_SHA_HELD")
+        payload_index[index]=item
+    if len(payload_index)!=24:
+        raise ValueError("R924_INCOMPLETE_BIN_PARTITION_HELD")
+    expected_parts={}
+    for item in parts:
+        if not isinstance(item,dict):
+            raise ValueError("R924_PART_RECORD_HELD")
+        name=item.get("file")
+        if (not isinstance(name,str) or not name.startswith("OMEGA_V61_3_PART_") or
+            not name.endswith(".zip") or len(name)!=24 or not name[20:22].isdigit() or
+            not valid_sha(item.get("sha256")) or type(item.get("bytes")) is not int or
+            item["bytes"]<22 or item["bytes"]>768*1024*1024 or name in expected_parts):
+            raise ValueError("R924_DISTRIBUTION_PART_RECORD_HELD")
+        expected_parts[name]=item
+    if len(expected_parts)!=20 or sorted(expected_parts)!=[f"OMEGA_V61_3_PART_{i:02d}.zip" for i in range(1,21)]:
+        raise ValueError("R924_DISTRIBUTION_SEQUENCE_HELD")
+    results=[]
+    verified=0
+    present=0
+    all_identified_payloads=set()
+    for name in sorted(expected_parts):
+        source=safe_under(root,(folder.rstrip("/")+"/" if folder!="." else "")+name,False)
+        record=expected_parts[name]
+        if not source.is_file():
+            results.append({"file":name,"state":"MISSING","expectedSha256":record["sha256"]})
+            continue
+        present+=1
+        if source.stat().st_size!=record["bytes"]:
+            results.append({"file":name,"state":"SIZE_MISMATCH_HELD","expectedBytes":record["bytes"],
+                            "observedBytes":source.stat().st_size})
+            continue
+        digest=sha_file(source)
+        if digest!=record["sha256"]:
+            results.append({"file":name,"state":"SHA256_MISMATCH_HELD","expectedSha256":record["sha256"],
+                            "observedSha256":digest})
+            continue
+        try:
+            with zipfile.ZipFile(source) as z:
+                entries=z.namelist()
+                if len(entries)!=record.get("entries"):
+                    results.append({"file":name,"state":"ZIP_ENTRY_COUNT_HELD","expectedEntries":record.get("entries"),"observedEntries":len(entries)})
+                    continue
+                for filename in entries:
+                    if filename.startswith("OMEGA_SETUP/") and filename.endswith(".bin"):
+                        all_identified_payloads.add(filename.rsplit("/",1)[-1])
+        except (zipfile.BadZipFile,OSError):
+            results.append({"file":name,"state":"ZIP_STRUCTURE_HELD"})
+            continue
+        verified+=1
+        results.append({"file":name,"state":"VERIFIED_DISTRIBUTION_BYTES",
+                        "bytes":record["bytes"],"sha256":digest})
+    pairs=[]
+    for i,law in enumerate(R924_LAWS,1):
+        inverse=payload_index[i]
+        outverse=payload_index[i+12]
+        pairs.append({"law":law,"inverse":inverse["name"],"outverse":outverse["name"],
+                      "inverseSha256":inverse["sha256"],"outverseSha256":outverse["sha256"],
+                      "inverseArchiveMemberLocated":inverse["name"] in all_identified_payloads,
+                      "outverseArchiveMemberLocated":outverse["name"] in all_identified_payloads,
+                      "authority":"HISTORICAL_MANIFEST_ONLY"})
+    complete=verified==20 and len(all_identified_payloads)==24
+    return {"schema":"OMEGA_HISTORICAL_DUPLEX24_CORRELATION_R924",
+            "state":"COMPLETE_OUTER_DISTRIBUTION_HASHES_SOURCE_ONLY" if complete else "INCOMPLETE_ARCHIVE_SET_HELD",
+            "manifestSha256":sha_file(manifest_path),"manifest":rel,
+            "expectedParts":20,"locatedParts":present,"verifiedOuterParts":verified,
+            "missingParts":[x["file"] for x in results if x["state"]=="MISSING"],
+            "partResults":results,"duplexPairs":pairs,
+            "payloadsLocatedByName":len(all_identified_payloads),
+            "payloadBytesAllIndependentlyVerified":False,
+            "historicExecutableFunctionalityProven":False,"canonicalWrites":0,
+            "productionReady":False,"gpuComputeProven":False,
+            "basis":"HISTORICAL_SOURCE_AND_LOCAL_FILE_HASHES_NOT_RUNTIME_PARITY"}
+
+READ_ONLY_REPLAY = frozenset({"HASH_TREE", "CSV_STATS", "VERIFY_LEDGER_SPLIT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_AUDIT_LINEAGE", "HISTORICAL_ZIP_AUDIT", "HISTORICAL_B010_EXECUTE", "HISTORICAL_DUPLEX24_CORRELATE"})
+OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "LOCAL_INFER", "LOCAL_CHAT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_EXPORT", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_CONTINUE", "SPHERE_TENSOR_RENDER", "SPHERE_TENSOR_AUDIT_LINEAGE", "HISTORICAL_ZIP_AUDIT", "HISTORICAL_B010_EXECUTE", "HISTORICAL_DUPLEX24_CORRELATE", "RESIDUAL_RESTORE"})
 STATUS = frozenset({"QUEUED", "WAIT_EVENT", "RUNNING", "COMPLETED", "FAILED", "HELD", "CANCELLED"})
 def utc_ms(): return int(time.time() * 1000)
 def sha_file(path: Path) -> str:
@@ -477,6 +593,8 @@ class Hub:
                 "semanticTruthProven":False}
 
     def execute(self,operation,args):
+        if operation=="HISTORICAL_DUPLEX24_CORRELATE":
+            return correlate_duplex24_r924(self.root,args)
         if operation=="HISTORICAL_ZIP_AUDIT":
             return audit_historical_zip_r921(self.root,args)
         if operation=="HISTORICAL_B010_EXECUTE":
