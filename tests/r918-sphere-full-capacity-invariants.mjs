@@ -6,6 +6,7 @@ import {
  axes4,fromAxes4,createFabric,phaseSampleR918,stateValue,
  neighbors,submitTask,stepFabric,serializeFabricR888,restoreFabricR888
 } from '../src/sphereAgentFabricR887.mjs';
+import {validateDurableR895} from '../src/sphereDurableCheckpointR895.mjs';
 
 assert.equal(AXES,12);
 assert.equal(SIZE,20736);
@@ -80,8 +81,40 @@ const restored=restoreFabricR888(checkpoint);
 assert.deepEqual(phaseSampleR918(restored,agent,inner,0),phaseAfter,'projection must be replayable from exact checkpoint');
 assert.equal(stateValue(restored,agent,inner),stateValue(fabric,agent,inner));
 
+// R919: the chosen phase now drives an actual intrapacket operation:
+ // two inner values exchange a bounded amount, with exact conservation
+ // and durable recovery, rather than merely changing their color.
+const neighbor=phaseSampleR918(fabric,agent,inner,0).neighbor;
+const massBefore=stateValue(fabric,agent,inner)+stateValue(fabric,agent,neighbor);
+const beforePhase=stateValue(fabric,agent,inner);
+for(const invalid of [4,5,6,7,12,-1,1.5])
+ assert.throws(()=>submitTask(fabric,{agent,kind:'PHASE_EXCHANGE',inner,phase:invalid}),Error);
+const queueBefore=fabric.queue.length;
+assert.throws(()=>submitTask(fabric,{agent,kind:'PHASE_EXCHANGE',inner,phase:0,target:counterpart}),Error);
+assert.equal(fabric.queue.length,queueBefore,'invalid phase must not enqueue or mutate');
+const phaseJob=submitTask(fabric,{agent,kind:'PHASE_EXCHANGE',inner,phase:0,weight:.5});
+const phaseReceipt=stepFabric(fabric,1)[0];
+assert.equal(phaseReceipt.taskId,phaseJob);
+assert.equal(phaseReceipt.kind,'PHASE_EXCHANGE');
+assert.equal(phaseReceipt.neighborInner,neighbor);
+assert.equal(phaseReceipt.phase,0);
+assert.ok(Math.abs(phaseReceipt.conservationResidual)<1e-12);
+assert.ok(Math.abs(stateValue(fabric,agent,inner)+stateValue(fabric,agent,neighbor)-massBefore)<1e-12);
+assert.notEqual(stateValue(fabric,agent,inner),beforePhase);
+const phaseCheckpoint=serializeFabricR888(fabric);
+const phaseRestored=restoreFabricR888(phaseCheckpoint);
+assert.equal(serializeFabricR888(phaseRestored),phaseCheckpoint,'phase state and receipt must roundtrip exactly');
+assert.equal(stateValue(phaseRestored,agent,neighbor),stateValue(fabric,agent,neighbor));
+const durableSession={agent,memberCount:1,stepCursor:0,batch:1,mode:'SELECTED_INNER',selectedInner:inner};
+assert.equal(validateDurableR895(phaseRestored,durableSession).schema,'OMEGA_SPHERE_DURABLE_CHECKPOINT_R895');
+submitTask(phaseRestored,{agent,kind:'PHASE_EXCHANGE',inner,phase:8,weight:.2});
+const phaseQueue=restoreFabricR888(serializeFabricR888(phaseRestored));
+assert.equal(phaseQueue.queue[0].kind,'PHASE_EXCHANGE');
+assert.equal(validateDurableR895(phaseQueue,durableSession).fabric.queue[0].phase,8);
+assert.equal(stepFabric(phaseQueue,1)[0].kind,'PHASE_EXCHANGE');
+
 const ui=readFileSync('src/SphereAgentInstrumentR887.tsx','utf8');
-for(const token of ['expandedAddressR918','expandedCoordinatesR918','phaseSampleR918','PHASE_GRADIENT','data-r918-expanded-address','Full 12 power 10 address','Go to 12^10 state projection'])
+for(const token of ['expandedAddressR918','expandedCoordinatesR918','phaseSampleR918','PHASE_GRADIENT','data-r918-expanded-address','Full 12 power 10 address','Go to 12^10 state projection','Execute conserved inner phase exchange'])
  assert.ok(ui.includes(token),'R918 instrument binding missing '+token);
 assert.ok(!ui.includes('Math.sin((x+y)*.09'),'Pixel field must not invent animated wave data');
-console.log('R918 PASS · 12^10 exact reversible address hierarchy · phase-neighbor projection · read-only geometry · state conservation · checkpoint replay · bound SPHERE instrument');
+console.log('R918/R919 PASS · 12^10 reversible hierarchy · state-derived phase projection · conserved within-agent execution · durable checkpoint and queue recovery · bound SPHERE instrument');
