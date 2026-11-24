@@ -44,6 +44,55 @@ class LocalHubTests(unittest.TestCase):
     def test_hub_db_location_must_be_private(self):
         with self.assertRaisesRegex(ValueError,"DB_MUST_RESIDE_IN_PRIVATE_HUB_DIR"):
             hubmod.Hub(self.root,self.root/"data"/"database.sqlite")
+    def test_r938_full_release_source_set_batch_hash_and_fail_closed(self):
+        import hashlib
+        import json
+        import zipfile
+        folder=self.root/"data"/"release_parts"
+        folder.mkdir()
+        entries=[]
+        for i in range(1,3):
+            name=f"OMEGA_TEST_PART_{i:02d}.zip"
+            with zipfile.ZipFile(folder/name,"w",compression=zipfile.ZIP_STORED) as z:
+                z.writestr(f"part_{i:02d}/readme.txt",b"source bytes "+str(i).encode())
+            blob=(folder/name).read_bytes()
+            entries.append({"index":i,"filename":name,"driveId":f"TEST_SOURCE_DRIVE_ID_{i:02d}",
+                            "bytes":len(blob),"sha256":hashlib.sha256(blob).hexdigest()})
+        index={"schema":"OMEGA_DRIVE_HISTORICAL_ARCHIVE_SOURCE_INDEX_R936",
+               "groups":[{"id":"R938-TEST","expectedParts":2,"parts":entries}]}
+        path=self.root/"data"/"release-index.json"
+        path.write_text(json.dumps(index),encoding="utf-8")
+        args={"manifest":"data/release-index.json","archive_folder":"data/release_parts","release":"R938-TEST"}
+        queued=self.hub.enqueue("HISTORICAL_RELEASE_SET_AUDIT",args)
+        receipt=self.hub.run_one()
+        self.assertEqual(receipt["id"],queued["id"])
+        self.assertEqual(receipt["state"],"COMPLETED")
+        result=receipt["result"]
+        self.assertEqual(result["expectedParts"],2)
+        self.assertEqual(result["locatedParts"],2)
+        self.assertEqual(result["originalSourceDigestsMatched"],2)
+        self.assertEqual(result["authorityState"],"SOURCE_DIGESTS_MATCHED_ZIP_PAYLOADS_NOT_EXECUTED")
+        self.assertFalse(result["fullZipCrcVerified"])
+        self.assertFalse(result["historicalRuntimeParityProven"])
+        self.assertEqual(result["canonicalWrites"],0)
+        self.assertEqual(self.hub.replay(queued["id"])["state"],"MATCH")
+        (folder/entries[1]["filename"]).unlink()
+        incomplete=hubmod.audit_historical_release_set_r938(self.root,args)
+        self.assertEqual(incomplete["locatedParts"],1)
+        self.assertEqual(incomplete["missingParts"],[entries[1]["filename"]])
+        self.assertEqual(incomplete["authorityState"],"LOCAL_HASH_ONLY_NOT_ORIGINAL_RELEASE_AUTHORITY")
+        (folder/entries[0]["filename"]).write_bytes(b"x"*entries[0]["bytes"])
+        with self.assertRaisesRegex(ValueError,"R938_RELEASE_PART_SHA256_MISMATCH_HELD"):
+            hubmod.audit_historical_release_set_r938(self.root,args)
+        with self.assertRaisesRegex(ValueError,"R938_RELEASE_SET_ARGUMENT_SCHEMA_HELD"):
+            hubmod.audit_historical_release_set_r938(self.root,{**args,"execute":True})
+        with self.assertRaisesRegex(ValueError,"R938_RELEASE_ID_UNIQUE_SOURCE_REQUIRED_HELD"):
+            hubmod.audit_historical_release_set_r938(self.root,{**args,"release":"MISSING"})
+        index["groups"][0]["parts"][0]["filename"]="../unsafe.zip"
+        path.write_text(json.dumps(index),encoding="utf-8")
+        with self.assertRaisesRegex(ValueError,"R938_SOURCE_INDEX_MEMBER_HELD"):
+            hubmod.audit_historical_release_set_r938(self.root,args)
+
     def test_r902_real_sparse_tensor_execution_and_durable_receipt(self):
         request={"seeds":[{"cell":20735,"lane":20735,"mass":4096}],
                  "steps":4,"cell_axis":0,"lane_axis":1}

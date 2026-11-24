@@ -225,5 +225,6 @@
     "NO_PRODUCTION_PROMOTION_FROM_CANDIDATE_TEST",
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
-  ]
+  ],
+  "latestGovernedWork": "R938 durable release-set SHA audit and guarded operator controls; R937 active ledger retains unresolved source-byte acceptance"
 }

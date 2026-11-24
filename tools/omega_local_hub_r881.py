@@ -56,6 +56,112 @@ def load_local_inference_adapter_r899():
     return adapter
 
 
+def audit_historical_release_set_r938(root: Path, args: dict):
+    """Hash an entire explicitly selected Drive-listed release without extraction.
+
+    A complete source listing, locally observed complete file set and recorded
+    SHA-256 digests are different evidence classes. Zip metadata and wrapper
+    checks cannot substitute for payload decompression/CRC, native operation,
+    or canonical promotion. Work is read-only and scoped under the approved root.
+    """
+    if not isinstance(args, dict) or set(args) != {"manifest", "archive_folder", "release"}:
+        raise ValueError("R938_RELEASE_SET_ARGUMENT_SCHEMA_HELD")
+    release_id=args.get("release")
+    if not isinstance(release_id,str) or not release_id or len(release_id)>32:
+        raise ValueError("R938_RELEASE_ID_REQUIRED_HELD")
+    manifest_name=args.get("manifest")
+    folder_name=args.get("archive_folder")
+    if not isinstance(manifest_name,str) or not manifest_name.endswith(".json"):
+        raise ValueError("R938_SOURCE_INDEX_REQUIRED_HELD")
+    if not isinstance(folder_name,str) or not folder_name or len(folder_name)>255:
+        raise ValueError("R938_ARCHIVE_FOLDER_REQUIRED_HELD")
+    manifest_path=safe_under(root,manifest_name,True)
+    if manifest_path.stat().st_size>262144:
+        raise ValueError("R938_SOURCE_INDEX_SIZE_HELD")
+    manifest=json.loads(manifest_path.read_text(encoding="utf-8"))
+    if not isinstance(manifest,dict) or manifest.get("schema")!="OMEGA_DRIVE_HISTORICAL_ARCHIVE_SOURCE_INDEX_R936":
+        raise ValueError("R938_SOURCE_INDEX_SCHEMA_HELD")
+    groups=manifest.get("groups")
+    if not isinstance(groups,list) or len(groups)>64:
+        raise ValueError("R938_SOURCE_INDEX_GROUPS_HELD")
+    selected=[g for g in groups if isinstance(g,dict) and g.get("id")==release_id]
+    if len(selected)!=1:
+        raise ValueError("R938_RELEASE_ID_UNIQUE_SOURCE_REQUIRED_HELD")
+    group=selected[0]
+    entries=group.get("parts")
+    expected=group.get("expectedParts")
+    if (not isinstance(entries,list) or not isinstance(expected,int) or
+        isinstance(expected,bool) or not 1<=expected<=40 or len(entries)!=expected):
+        raise ValueError("R938_SOURCE_INDEX_COUNT_HELD")
+    base=safe_under(root,folder_name,True)
+    if not base.is_dir():
+        raise ValueError("R938_ARCHIVE_FOLDER_NOT_DIRECTORY_HELD")
+    verified=[]
+    missing=[]
+    seen=set()
+    for position,entry in enumerate(entries,1):
+        if not isinstance(entry,dict) or entry.get("index")!=position:
+            raise ValueError("R938_SOURCE_INDEX_ORDER_HELD")
+        filename=entry.get("filename")
+        size=entry.get("bytes")
+        drive_id=entry.get("driveId")
+        if (not isinstance(filename,str) or not filename.endswith(".zip") or
+            not filename.isascii() or filename in (".","..") or
+            "/" in filename or chr(92) in filename or ":" in filename or
+            len(filename)>200 or filename.casefold() in seen or
+            not isinstance(size,int) or isinstance(size,bool) or size<22 or size>512*1024*1024 or
+            not isinstance(drive_id,str) or not 10<=len(drive_id)<=128 or
+            any(ch not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-" for ch in drive_id)):
+            raise ValueError("R938_SOURCE_INDEX_MEMBER_HELD")
+        seen.add(filename.casefold())
+        file=base/filename
+        if not file.exists():
+            missing.append(filename)
+            continue
+        file=safe_under(root,str(file.relative_to(root)),True)
+        if not file.is_file():
+            raise ValueError("R938_SOURCE_MEMBER_NOT_FILE_HELD")
+        actual_size=file.stat().st_size
+        if actual_size!=size:
+            raise ValueError("R938_RELEASE_PART_SIZE_MISMATCH_HELD")
+        # Read the current original bytes, but do not decompress multi-GB donors.
+        sha=sha_file(file)
+        try:
+            with zipfile.ZipFile(file,"r") as archive:
+                infos=archive.infolist()
+                if not infos or len(infos)>5000:
+                    raise ValueError("R938_ZIP_METADATA_INVALID_HELD")
+                if any(i.flag_bits & 1 for i in infos):
+                    raise ValueError("R938_ENCRYPTED_ARCHIVE_HELD")
+                # The archive remains unextracted and not CRC-proven here.
+                member_count=len(infos)
+        except (zipfile.BadZipFile,EOFError) as exc:
+            raise ValueError("R938_ZIP_METADATA_INVALID_HELD") from exc
+        expected_sha=entry.get("sha256")
+        if expected_sha is not None:
+            if (not isinstance(expected_sha,str) or len(expected_sha)!=64 or
+                any(ch not in "0123456789abcdef" for ch in expected_sha)):
+                raise ValueError("R938_SOURCE_INDEX_DIGEST_SCHEMA_HELD")
+            if sha!=expected_sha:
+                raise ValueError("R938_RELEASE_PART_SHA256_MISMATCH_HELD")
+        verified.append({"index":position,"filename":filename,"driveId":drive_id,
+                         "bytes":actual_size,"observedSha256":sha,"zipMemberCount":member_count,
+                         "sourceDigestMatched":expected_sha is not None})
+    all_located=not missing
+    pinned=sum(1 for row in verified if row["sourceDigestMatched"])
+    return {"schema":"OMEGA_HISTORICAL_RELEASE_SET_AUDIT_R938",
+            "release":release_id,"sourceIndexSha256":sha_file(manifest_path),
+            "expectedParts":expected,"locatedParts":len(verified),
+            "missingParts":missing,"verifiedLocalBytes":sum(x["bytes"] for x in verified),
+            "originalSourceDigestsMatched":pinned,
+            "localByteState":"ALL_LISTED_PART_BYTES_HASHED" if all_located else "INCOMPLETE_PART_SET_HELD",
+            "authorityState":("SOURCE_DIGESTS_MATCHED_ZIP_PAYLOADS_NOT_EXECUTED" if all_located and pinned==expected
+                              else "LOCAL_HASH_ONLY_NOT_ORIGINAL_RELEASE_AUTHORITY"),
+            "parts":verified,"unextracted":True,"fullZipCrcVerified":False,
+            "historicalRuntimeParityProven":False,"gpuOrDeviceProven":False,
+            "canonicalWrites":0,"productionReady":False}
+
+
 def audit_historical_zip_r921(root: Path, args: dict):
     """Inspect historic build archive bytes without extraction, import or execution.
 
@@ -358,8 +464,8 @@ def correlate_duplex24_r924(root:Path,args:dict):
             "productionReady":False,"gpuComputeProven":False,
             "basis":"HISTORICAL_SOURCE_AND_LOCAL_FILE_HASHES_NOT_RUNTIME_PARITY"}
 
-READ_ONLY_REPLAY = frozenset({"HASH_TREE", "CSV_STATS", "VERIFY_LEDGER_SPLIT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_AUDIT_LINEAGE", "HISTORICAL_ZIP_AUDIT", "HISTORICAL_B010_EXECUTE", "HISTORICAL_DUPLEX24_CORRELATE", "CORRELATE_HISTORICAL_FIELD"})
-OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "LOCAL_INFER", "LOCAL_CHAT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_EXPORT", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_CONTINUE", "SPHERE_TENSOR_RENDER", "SPHERE_TENSOR_AUDIT_LINEAGE", "HISTORICAL_ZIP_AUDIT", "HISTORICAL_B010_EXECUTE", "HISTORICAL_DUPLEX24_CORRELATE", "CORRELATE_HISTORICAL_FIELD", "RESIDUAL_RESTORE"})
+READ_ONLY_REPLAY = frozenset({"HASH_TREE", "CSV_STATS", "VERIFY_LEDGER_SPLIT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_AUDIT_LINEAGE", "HISTORICAL_ZIP_AUDIT", "HISTORICAL_RELEASE_SET_AUDIT", "HISTORICAL_B010_EXECUTE", "HISTORICAL_DUPLEX24_CORRELATE", "CORRELATE_HISTORICAL_FIELD"})
+OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "LOCAL_INFER", "LOCAL_CHAT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_EXPORT", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_CONTINUE", "SPHERE_TENSOR_RENDER", "SPHERE_TENSOR_AUDIT_LINEAGE", "HISTORICAL_ZIP_AUDIT", "HISTORICAL_RELEASE_SET_AUDIT", "HISTORICAL_B010_EXECUTE", "HISTORICAL_DUPLEX24_CORRELATE", "CORRELATE_HISTORICAL_FIELD", "RESIDUAL_RESTORE"})
 STATUS = frozenset({"QUEUED", "WAIT_EVENT", "RUNNING", "COMPLETED", "FAILED", "HELD", "CANCELLED"})
 def utc_ms(): return int(time.time() * 1000)
 def sha_file(path: Path) -> str:
@@ -710,6 +816,8 @@ class Hub:
             return correlate_duplex24_r924(self.root,args)
         if operation=="HISTORICAL_ZIP_AUDIT":
             return audit_historical_zip_r921(self.root,args)
+        if operation=="HISTORICAL_RELEASE_SET_AUDIT":
+            return audit_historical_release_set_r938(self.root,args)
         if operation=="HISTORICAL_B010_EXECUTE":
             return execute_b010_r922(self.root,args)
         if operation=="LOCAL_CHAT":
