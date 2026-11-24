@@ -26,7 +26,7 @@ export default function OmegaOneSystemLedgerR926({onNavigate}:{onNavigate:(route
    (!term||searchable(s.ID,s.Family,s['Software / Artifact'],s['One-System Role'],s['Menu Setting'],s['Primary Capability'],s.Disposition,s['Upgrade Sequence']).includes(term))
  ),[menu,disposition,term]);
  const familyRoute=(menuName:string)=>menuList.find((m:Menu)=>m.name===menuName)?.route;
- const stageOwners=(sequence:string)=>all.filter((s:Software)=>s['Upgrade Sequence']===sequence);
+ const stageOwners=(sequence:string,primaryFamily:string)=>all.filter((s:Software)=>s['Software / Artifact']===primaryFamily||s['Upgrade Sequence']===sequence);
  const tabs:Tab[]=['SOFTWARE','MENUS','CONTROLS','CAPABILITIES','SEQUENCE','GATES'];
  const evidence='SOURCE CHARTED · no independent runtime acceptance inferred from menu membership';
  const nav=(route:string)=>onNavigate(route);
@@ -92,12 +92,13 @@ export default function OmegaOneSystemLedgerR926({onNavigate}:{onNavigate:(route
    {original.capabilities.map(c=><article key={c['Capability ID']} style={{background:'#173447',padding:12,borderRadius:8}}>
     <strong>{c['Capability ID']} · {c.Capability}</strong><p>{c['Processing Law']} → {c.Output}</p>
     <small>Gate: {c['Proof Gate']} · State: {c['State Tier']} · Completion: {c['Completion Definition']}</small>
+    {familyRoute(c.Menu)&&<button type='button' style={{...click,display:'block',marginTop:9}} onClick={()=>nav(familyRoute(c.Menu)!)}>Open governing {c.Menu} workspace</button>}
    </article>)}
   </div>}
   {tab==='SEQUENCE'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:8,marginTop:12}}>
    {original.sequences.map(s=><article key={s.SEQ} style={{background:'#173447',padding:10,borderRadius:8}}>
     <strong>{s.SEQ} · {s['Phase Name']}</strong><p>{s['Growth Upgrade']}</p><small>Input: {s.Input} · Proof: {s['Proof Gate']} · Next: {s['Next Sequence']}</small>
-    {stageOwners(s.SEQ).map((owner:Software)=><button type='button' key={owner.ID} style={{...click,display:'block',marginTop:8}} onClick={()=>nav(owner.navigationRoute)}>Open {owner.ID} · {owner.navigationRoute}</button>)}
+    {stageOwners(s.SEQ,s['Primary Software Family']).map((owner:Software)=><button type='button' key={owner.ID} style={{...click,display:'block',marginTop:8}} onClick={()=>nav(owner.navigationRoute)}>Open {owner.ID} · {owner.navigationRoute}</button>)}
    </article>)}
   </div>}
   {tab==='GATES'&&<div style={{display:'grid',gap:9,marginTop:12}}>
@@ -105,6 +106,7 @@ export default function OmegaOneSystemLedgerR926({onNavigate}:{onNavigate:(route
     <strong>{g['Gate ID']} · {g.Gate}</strong> <small>Packaging block: {g['Blocks Packaging?']}</small>
     <p>Required: {g['Required Evidence']} · PASS when: {g['Pass Rule']}</p>
     <small>Source acceptance contract, not independent current runtime proof. Recovery: {g['Recovery Action']}</small>
+    {familyRoute(g['Menu Binding'])&&<button type='button' style={{...click,display:'block',marginTop:9}} onClick={()=>nav(familyRoute(g['Menu Binding'])!)}>Open governing {g['Menu Binding']} workspace</button>}
    </article>)}
   </div>}
   <footer style={{marginTop:16,borderTop:'1px solid #547184',paddingTop:9}}>
