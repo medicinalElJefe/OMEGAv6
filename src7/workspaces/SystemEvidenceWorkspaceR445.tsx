@@ -31,6 +31,7 @@ const writeAddress=(n:number)=>{const next=clamp(n);try{localStorage.setItem('om
 export default function SystemEvidenceWorkspaceR445({route,onNavigate,onLaunchRecoveredSystem,depth}:Props){
  const[ready,setReady]=useState(false),[error,setError]=useState(''),[address,setAddress]=useState(readAddress),[instrumentOpen,setInstrumentOpen]=useState(depth!=='STANDARD'),[soundOpen,setSoundOpen]=useState(false);
  const[status,setStatus]=useState<any>(null),[restore,setRestore]=useState<any>(null),[uiMode,setUiMode]=useState('AUTO');
+ const [auditRelease,setAuditRelease]=useState<string|null>(null);
  useEffect(()=>setInstrumentOpen(depth!=='STANDARD'),[depth,route]);
  useEffect(()=>{let live=true;initCorpusPack().then(()=>{if(live){setReady(true);setError('')}}).catch(e=>{if(live)setError(e instanceof Error?e.message:String(e))});return()=>{live=false}},[]);
  useEffect(()=>{let live=true;Promise.all([api.get<any>('/api/status'),api.get<any>('/api/restoration')]).then(([s,r])=>{if(live){setStatus(s.data);setRestore(r.data)}}).catch(()=>{});return()=>{live=false}},[]);
@@ -80,7 +81,7 @@ export default function SystemEvidenceWorkspaceR445({route,onNavigate,onLaunchRe
    {route==='Cockpit'?<OmegaWorkspaceCockpitR18 variant='Cockpit' record={record} state={state} address={address} onAddress={commit} onNavigate={onNavigate} status={status} restore={restore} modeCount={modeSummary.appliedCount}/>:
     route==='Modes'?<><SourceBackedModesPanelR21 record={record} address={address} onAddress={commit} onNavigate={onNavigate}/><Suspense fallback={<p role='status'>Loading operational mode executors…</p>}><OperationalModesPanelR671 address={address} onAddress={commit} onNavigate={onNavigate}/></Suspense><Suspense fallback={<p role='status'>Loading recovered operator graph…</p>}><OperatorGraphPanelR676 address={address} onAddress={commit}/></Suspense><Suspense fallback={<p role='status'>Loading native session history…</p>}><CanonicalSessionReplayPanelR679 address={address} onAddress={commit}/></Suspense><Suspense fallback={<p role='status'>Loading historical native decision audit…</p>}><NativeDecisionTruthPanelR681/></Suspense></>:
     route==='Archive Census'?<ArchiveGovernanceControl onNavigate={onNavigate}/>:
-    route==='Archive Operators'?<><ArchiveGovernanceControl operators onNavigate={onNavigate}/><Suspense fallback={<p role='status'>Loading authenticated archive and historical compute executors…</p>}><OmegaLocalHubPanelR884 initialOperation='HISTORICAL_ZIP_AUDIT'/></Suspense></>:
+    route==='Archive Operators'?<><ArchiveGovernanceControl operators onNavigate={onNavigate} onAuditRelease={setAuditRelease}/><Suspense fallback={<p role='status'>Loading authenticated archive and historical compute executors…</p>}><OmegaLocalHubPanelR884 initialOperation='HISTORICAL_ZIP_AUDIT' requestedRelease={auditRelease}/></Suspense></>:
     route==='Plugins'?<PluginRegistryR45 onNavigate={onNavigate}/>:
     route==='Validation'?<UniversalQualityControl record={record} status={status} restore={restore} modeCount={modeSummary.appliedCount} catalogCount={modeSummary.catalogCount}/>:
     route==='System Atlas'?<SystemAtlasControl record={record} onNavigate={onNavigate}/>:

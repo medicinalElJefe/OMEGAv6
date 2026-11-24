@@ -19,4 +19,13 @@ for(const marker of ["'HISTORICAL_RELEASE_SET_AUDIT'","args.release=releaseId","
 assert.ok(tests.includes('test_r938_full_release_source_set_batch_hash_and_fail_closed'),'R938 positive and refusal tests absent');
 assert.equal(ledger.workstreams.find(w=>w.id==='W08').evidenceState,'HELD','archive status must remain held without bytes');
 assert.ok(ledger.blockers.some(b=>b.id==='ZIP_BYTES'&&b.state==='OPEN'),'pending historical ZIP recovery silently removed');
+const recovery=readFileSync('src/DriveHistoricalRecoveryR936.tsx','utf8');
+const archiveSurface=readFileSync('src/ArchiveGovernanceControl.tsx','utf8');
+const workspace=readFileSync('src7/workspaces/SystemEvidenceWorkspaceR445.tsx','utf8');
+assert.ok(recovery.includes('data-r941-select-release={g.id}'),'recovery source selection is not actionable');
+assert.ok(archiveSurface.includes('onAuditRelease={operators?onAuditRelease:undefined}'),'governed archive operator callback not wired');
+assert.ok(workspace.includes('onAuditRelease={setAuditRelease}'),'historical source UI and local executor not integrated');
+assert.ok(workspace.includes('requestedRelease={auditRelease}'),'selected release not passed to local worker interface');
+assert.ok(ui.includes("setOperation('HISTORICAL_RELEASE_SET_AUDIT')"),'local audit form does not become actionable');
+assert.ok(ui.includes('No job has started.'),'selection must never auto-execute');
 console.log('R938 source registration PASS · durable read-only batch SHA audit · 156-part provenance contract not promoted to runtime authority');

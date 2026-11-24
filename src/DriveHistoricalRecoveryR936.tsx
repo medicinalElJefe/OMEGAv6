@@ -4,7 +4,7 @@ import index from '../audit/omega-drive-historical-archive-source-index-r936.jso
 const displaySize=(bytes:number)=>(bytes/(1024*1024)).toFixed(1)+' MiB';
 const fileUrl=(id:string)=>'https://drive.google.com/file/d/'+encodeURIComponent(id)+'/view';
 
-export default function DriveHistoricalRecoveryR936(){
+export default function DriveHistoricalRecoveryR936({onAuditRelease}:{onAuditRelease?:(release:string)=>void}={}){
  const [query,setQuery]=useState('');
  const [selected,setSelected]=useState('ALL');
  const terms=query.trim().toLowerCase().split(/\s+/).filter(Boolean);
@@ -32,6 +32,7 @@ export default function DriveHistoricalRecoveryR936(){
   {filtered.map(g=><details key={g.id} data-r936-release={g.id} style={{borderTop:'1px solid #60758c',padding:'10px 0'}}>
    <summary><strong>{g.label}</strong> · {g.parts.length}/{g.expectedParts} matching named parts · {displaySize(g.parts.reduce((n,p)=>n+p.bytes,0))} indexed</summary>
    <p><a href={g.folderUrl} target='_blank' rel='noreferrer'>Open original Drive folder</a> · {g.sourceState.replaceAll('_',' ').toLowerCase()}</p>
+   {onAuditRelease&&<button type='button' data-r941-select-release={g.id} onClick={()=>onAuditRelease(g.id)}>Prepare authenticated local audit of {g.id}</button>}
    {g.reportedEvidence&&<p>Historical evidence: {g.reportedEvidence.manifest} · {g.reportedEvidence.evidenceState.replaceAll('_',' ').toLowerCase()}{'masterSha256' in g.reportedEvidence&&<code style={{display:'block',overflowWrap:'anywhere'}}>Expected reconstructed master SHA-256: {g.reportedEvidence.masterSha256}</code>}</p>}
    <ol>{g.parts.map(p=><li key={p.driveId}><a href={fileUrl(p.driveId)} target='_blank' rel='noreferrer'>{p.filename}</a> · {displaySize(p.bytes)} · source ID <code>{p.driveId}</code></li>)}</ol>
   </details>)}

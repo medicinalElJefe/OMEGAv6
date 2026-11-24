@@ -63,7 +63,7 @@ async function fetchVerifiedCsvR910(token:string,jobId:string,expectedHash:strin
   return new Blob([bytes],{type:'text/csv;charset=utf-8'});
  }finally{window.clearTimeout(timeout)}
 }
-export default function OmegaLocalHubPanelR884({initialOperation='HASH_TREE'}:{initialOperation?:Operation}={}){
+export default function OmegaLocalHubPanelR884({initialOperation='HASH_TREE',requestedRelease=null}:{initialOperation?:Operation;requestedRelease?:string|null}={}){
  const [token,setToken]=useState(''),[state,setState]=useState<'UNCONNECTED'|'LOOPBACK_AUTHENTICATED'|'HELD'>('UNCONNECTED');
  const [operation,setOperation]=useState<Operation>(initialOperation),[source,setSource]=useState('.'),[destination,setDestination]=useState('exports/omega-artifact.json');
  const [b010Steps,setB010Steps]=useState('3'),[b010Domain,setB010Domain]=useState('semantic'),[b010Scale,setB010Scale]=useState('surface'),[b010View,setB010View]=useState('cinematic'),[b010Color,setB010Color]=useState('violet'),[correlateDonorId,setCorrelateDonorId]=useState(''),[correlateTensorId,setCorrelateTensorId]=useState(''),[correlateDuplexId,setCorrelateDuplexId]=useState(''),[duplexFolder,setDuplexFolder]=useState('.'),[archiveExpectedSha,setArchiveExpectedSha]=useState(''),[delay,setDelay]=useState('0'),[eventName,setEventName]=useState(''),[jobs,setJobs]=useState<HubJob[]>([]);
@@ -75,6 +75,15 @@ export default function OmegaLocalHubPanelR884({initialOperation='HASH_TREE'}:{i
  const [selected,setSelected]=useState<string|null>(null),[info,setInfo]=useState('Local daemon is not connected.');
  const [selectedJobDetail,setSelectedJobDetail]=useState<HubJob|null>(null);
  const [busy,setBusy]=useState(false),[connectedAt,setConnectedAt]=useState<number|null>(null);
+ useEffect(()=>{
+  if(!requestedRelease)return;
+  if(!['B043','B045','B053','B053-R7','V32','V35'].includes(requestedRelease))return;
+  setOperation('HISTORICAL_RELEASE_SET_AUDIT');
+  setReleaseId(requestedRelease);
+  setSource('audit/omega-drive-historical-archive-source-index-r936.json');
+  setDuplexFolder('.');
+  setInfo('Release '+requestedRelease+' is prepared for local source-set audit. Copy the original ZIP parts to an approved local folder, select that folder, authenticate, then submit explicitly. No job has started.');
+ },[requestedRelease]);
  const tokenRef=useRef<HTMLInputElement|null>(null);
  const projectionCanvasRef=useRef<HTMLCanvasElement|null>(null);
  const [gpuResult,setGpuResult]=useState<Record<string,unknown>|null>(null);
