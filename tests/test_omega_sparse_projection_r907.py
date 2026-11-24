@@ -1,4 +1,5 @@
 import importlib.util
+import hashlib
 import unittest
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -18,8 +19,8 @@ class ProjectionR907Tests(unittest.TestCase):
         self.assertEqual(len({module.address_xy_r907(c) for c in range(20736)}),20736)
 
     def test_svg_contains_real_verified_aggregated_cells(self):
-        digest="a"*64
         rows=[(0,0,4),(0,1,8),(1,0,4),(1728,12,16)]
+        digest=hashlib.sha256(b"0:0:4\n0:1:8\n1:0:4\n1728:12:16\n").hexdigest()
         svg,result=module.project_verified_rows_r907(rows,digest)
         self.assertEqual(result["activeCells"],3)
         self.assertEqual(result["nonzeroComponents"],4)
@@ -40,6 +41,13 @@ class ProjectionR907Tests(unittest.TestCase):
         self.assertEqual(coords,{(0,0),(5,0),(0,60)})
         self.assertNotIn(b"<script",svg)
         self.assertLess(len(svg),4*1024*1024)
+
+    def test_r961_projection_rejects_valid_format_but_wrong_source_digest(self):
+        digest=hashlib.sha256(b"0:0:4\n").hexdigest()
+        module.project_verified_rows_r907([(0,0,4)],digest)
+        for rows in ([(0,0,5)],[(0,1,4)],[(1,0,4)]):
+            with self.subTest(rows=rows),self.assertRaisesRegex(ValueError,"R907_SOURCE_STATE_SHA_DRIFT_HELD"):
+                module.project_verified_rows_r907(rows,digest)
 
     def test_reject_unsorted_invalid_or_bad_digest(self):
         good="a"*64

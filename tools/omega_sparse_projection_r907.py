@@ -9,6 +9,7 @@ physical simulation truth is implied.
 """
 from __future__ import annotations
 import math
+import hashlib
 
 SCHEMA = "OMEGA_SPARSE_CELL_PROJECTION_R907"
 SIDE = 144
@@ -36,6 +37,7 @@ def project_verified_rows_r907(rows, source_state_sha256: str):
         or any(c not in "0123456789abcdef" for c in source_state_sha256)):
         raise ValueError("R907_SOURCE_STATE_HASH_HELD")
     cell_mass = {}
+    state_hash = hashlib.sha256()
     total_mass = 0
     previous = (-1, -1)
     for entry in rows:
@@ -52,7 +54,12 @@ def project_verified_rows_r907(rows, source_state_sha256: str):
         if total_mass > MAX_MASS:
             raise ValueError("R907_MASS_BOUND_HELD")
         cell_mass[cell] = cell_mass.get(cell, 0) + mass
+        state_hash.update(f"{cell}:{lane}:{mass}\n".encode("ascii"))
+    if state_hash.hexdigest() != source_state_sha256:
+        raise ValueError("R907_SOURCE_STATE_SHA_DRIFT_HELD")
     max_cell_mass = max(cell_mass.values())
+    log_max = math.log1p(max_cell_mass)
+    intensity = {}
     # Use pure numeric SVG attributes: no scripts, external assets or text
     # interpolated from an untrusted file.
     # A 20,736-character quantized preview accompanies the complete SVG.
@@ -61,7 +68,8 @@ def project_verified_rows_r907(rows, source_state_sha256: str):
     grid = [GRID_ALPHABET[0]] * DIMENSIONS
     for cell, value in cell_mass.items():
         x, y = address_xy_r907(cell)
-        alpha = 0.20 + 0.80 * math.log1p(value) / math.log1p(max_cell_mass)
+        alpha = 0.20 + 0.80 * math.log1p(value) / log_max
+        intensity[cell] = alpha
         level = min(63, max(1, round(alpha * 63)))
         grid[y * SIDE + x] = GRID_ALPHABET[level]
     fragments = [
