@@ -17,6 +17,26 @@ class SparseTensorR902Tests(unittest.TestCase):
         self.assertEqual(r902.shift_axis(20735,3),1727)
         self.assertEqual(r902.shift_axis(0,3),1728)
 
+    def test_r960_strict_shift_and_bounded_sparse_capacity(self):
+        from unittest.mock import patch
+        for delta in (True, 0.5, "1", None):
+            with self.subTest(delta=delta), self.assertRaises(ValueError):
+                r902.shift_axis(0,0,delta)
+        self.assertEqual(r902.shift_axis(0,0,-1),11)
+        self.assertEqual(r902.shift_axis(0,0,24),0)
+        with patch.object(r902,"MAX_NONZERO",2):
+            with self.assertRaisesRegex(ValueError,"R902_SPARSE_ACTIVE_LIMIT_HELD"):
+                r902.sparse_tensor_rows_r904({"steps":0,"seeds":[
+                    {"cell":0,"lane":i,"mass":1} for i in range(3)]})
+            with self.assertRaisesRegex(ValueError,"R902_SPARSE_ACTIVE_LIMIT_HELD"):
+                r902.sparse_tensor_run_r902({"steps":1,"seeds":[
+                    {"cell":0,"lane":0,"mass":4}]})
+            receipt=r902.sparse_tensor_run_r902({"steps":0,"seeds":[
+                {"cell":0,"lane":0,"mass":1},{"cell":0,"lane":1,"mass":1},
+                {"cell":0,"lane":0,"mass":1}]})
+            self.assertEqual(receipt["activeComponents"],2)
+            self.assertEqual(receipt["totalMassAfter"],3)
+
     def test_one_step_exact_distribution(self):
         actual=r902.sparse_tensor_run_r902({"steps":1,"cell_axis":0,"lane_axis":1,
             "seeds":[{"cell":0,"lane":0,"mass":400}]})

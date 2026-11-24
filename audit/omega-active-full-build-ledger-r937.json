@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R959 reject invalid atlas requests before source I/O; preserve full valid-query source hash and SQLite integrity checks; exact-head regression pending",
+  "latestGovernedWork": "R960 enforce sparse capacity before insertion including zero-step exports; integer-only axis shifts; R959 exact-head nine CI workflows passed; R960 tests pending",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -419,6 +419,11 @@
       "revision": "R959",
       "conservation": "V35 atlas validates request before source filesystem access and rejects overlong unsplit FTS tokens; regression covers refusal before source I/O",
       "accepted": "CANDIDATE_SOURCE_ONLY_TEST_EXECUTION_PENDING"
+    },
+    {
+      "revision": "R960",
+      "conservation": "Sparse tensor bounded before insertion on seed aggregation and transitions; strict integer shift delta; tests cover zero-step overflow, transition overflow and duplicate aggregation; R959 exact head 55ef12f passed nine workflows",
+      "accepted": "CANDIDATE_SOURCE_ONLY_R960_TEST_EXECUTION_PENDING"
     }
   ],
   "independentArchiveUnverifiedOtherListedParts": 77,

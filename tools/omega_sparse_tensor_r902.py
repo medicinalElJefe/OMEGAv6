@@ -26,7 +26,7 @@ def valid_index(n):
 
 def shift_axis(index: int, digit: int, delta: int = 1) -> int:
     """Rotate one base-12 digit without carrying into the other 3 axes."""
-    if not valid_index(index) or type(digit) is not int or not 0 <= digit < 4:
+    if not valid_index(index) or type(digit) is not int or not 0 <= digit < 4 or type(delta) is not int:
         raise ValueError("R902_ADDRESS_OR_AXIS_HELD")
     base = AXIS**digit
     value = (index // base) % AXIS
@@ -61,12 +61,14 @@ def _compute_sparse_r902(args: dict, *, max_seeds: int = MAX_SEEDS):
         if initial_sum > MAX_ABS_MASS:
             raise ValueError("R902_TOTAL_MASS_BOUND_HELD")
         key = (cell, lane)
+        if key not in initial and len(initial) >= MAX_NONZERO:
+            raise ValueError("R902_SPARSE_ACTIVE_LIMIT_HELD")
         initial[key] = initial.get(key, 0) + mass
 
     state = initial
     audit = []
     for step in range(steps):
-        if len(state) * 3 > MAX_NONZERO * 3:
+        if len(state) > MAX_NONZERO:
             raise ValueError("R902_SPARSE_ACTIVE_LIMIT_HELD")
         next_state = {}
         for (cell, lane), mass in state.items():
@@ -78,6 +80,8 @@ def _compute_sparse_r902(args: dict, *, max_seeds: int = MAX_SEEDS):
                 ((cell, shift_axis(lane, lane_axis)), mass // 4),
             )
             for key, delta in destinations:
+                if key not in next_state and len(next_state) >= MAX_NONZERO:
+                    raise ValueError("R902_SPARSE_ACTIVE_LIMIT_HELD")
                 next_state[key] = next_state.get(key, 0) + delta
         if len(next_state) > MAX_NONZERO:
             raise ValueError("R902_SPARSE_ACTIVE_LIMIT_HELD")
