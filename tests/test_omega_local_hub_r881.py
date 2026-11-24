@@ -1,5 +1,6 @@
 import tempfile
 import unittest
+from contextlib import closing
 from pathlib import Path
 import importlib.util
 
@@ -44,6 +45,18 @@ class LocalHubTests(unittest.TestCase):
     def test_hub_db_location_must_be_private(self):
         with self.assertRaisesRegex(ValueError,"DB_MUST_RESIDE_IN_PRIVATE_HUB_DIR"):
             hubmod.Hub(self.root,self.root/"data"/"database.sqlite")
+    def test_r958_v35_sqlite_fixtures_close_connections_before_cleanup(self):
+        # sqlite3.Connection.__exit__ commits/rolls back, but never closes.
+        # Windows refuses to remove an open SQLite file at tearDown.
+        import sqlite3
+        path=self.root/"data"/"r958_close_fixture.sqlite"
+        with closing(sqlite3.connect(path)) as db, db:
+            db.execute("CREATE TABLE close_witness(value INTEGER)")
+            db.execute("INSERT INTO close_witness VALUES(7)")
+        # This must succeed on Windows, not only POSIX.
+        path.unlink()
+        self.assertFalse(path.exists())
+
     def test_r956_original_v35_safe_stage_and_indexed_query(self):
         import hashlib,io,json,sqlite3,zipfile,importlib.util
         path=MODULE.parent/"omega_v35_prepare_r956.py"
@@ -55,7 +68,7 @@ class LocalHubTests(unittest.TestCase):
         atlasmod=importlib.util.module_from_spec(atlas_spec)
         atlas_spec.loader.exec_module(atlasmod)
         source_db=self.root/"data"/"tiny_v35_sqlite.db"
-        with sqlite3.connect(source_db) as db:
+        with closing(sqlite3.connect(source_db)) as db, db:
             db.execute("CREATE TABLE rows(row_id INTEGER PRIMARY KEY,source_file TEXT,sheet TEXT,row_number INTEGER,row_json TEXT,row_text TEXT,domain TEXT,root TEXT,function TEXT,gate TEXT)")
             db.execute('CREATE VIRTUAL TABLE rows_fts USING fts5(row_text,source_file,sheet,domain,root,function,gate,content="rows",content_rowid="row_id")')
             db.executemany("INSERT INTO rows VALUES(?,?,?,?,?,?,?,?,?,?)",[
@@ -120,7 +133,7 @@ class LocalHubTests(unittest.TestCase):
         module=importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         path=self.root/"data"/"psc_finished_atlas.sqlite"
-        with sqlite3.connect(path) as db:
+        with closing(sqlite3.connect(path)) as db, db:
             db.execute("CREATE TABLE rows(row_id INTEGER PRIMARY KEY,source_file TEXT,sheet TEXT,row_number INTEGER,row_json TEXT,row_text TEXT,domain TEXT,root TEXT,function TEXT,gate TEXT)")
             db.execute('CREATE VIRTUAL TABLE rows_fts USING fts5(row_text,source_file,sheet,domain,root,function,gate,content="rows",content_rowid="row_id")')
             values=[(1,"a.csv","Tab1",2,'{"name":"water"}',"water motion","water domain","Parent","LocateRoot","STAY"),
@@ -147,7 +160,7 @@ class LocalHubTests(unittest.TestCase):
         self.assertEqual([r["rowId"] for r in stay["records"]],[1])
         self.assertEqual([r["rowId"] for r in turn["records"]],[2])
         self.assertEqual([r["rowId"] for r in domain["records"]],[1,2])
-        with sqlite3.connect(path) as c:
+        with closing(sqlite3.connect(path)) as c, c:
             plan=[row[3] for row in c.execute(
               "EXPLAIN QUERY PLAN SELECT r.row_id FROM rows_fts JOIN rows r ON r.row_id=rows_fts.rowid WHERE rows_fts MATCH ? AND rows_fts.rowid > ? AND r.gate = ? ORDER BY rows_fts.rowid ASC LIMIT ?",
               ('"water"',0,"STAY",26))]
