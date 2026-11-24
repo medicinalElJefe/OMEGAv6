@@ -561,6 +561,54 @@ class LocalHubTests(unittest.TestCase):
         self.assertEqual(target.read_bytes(), b"independent-file")
         self.assertEqual(self.hub.replay(job["id"])["state"], "REPLAY_NOT_ADMISSIBLE")
 
+
+    def test_r921_historical_archive_hash_tree_replay_and_refusals(self):
+        import hashlib
+        import zipfile
+        source = self.root / "data" / "historical-b010.zip"
+        with zipfile.ZipFile(source,"w",compression=zipfile.ZIP_DEFLATED) as z:
+            z.writestr("omega/runtime_core.py", b"print('do-not-execute-me')\\n")
+            z.writestr("native/src/main.cpp", b"int main(){return 0;}\\n")
+            z.writestr("ledgers/BUILD_LEDGER.json", b'{"status":"SOURCE_ONLY"}')
+        expected=hubmod.sha_file(source)
+        job=self.hub.enqueue("HISTORICAL_ZIP_AUDIT",{"source":"data/historical-b010.zip","expected_sha256":expected})
+        completed=self.hub.run_one()
+        self.assertEqual(completed["id"],job["id"])
+        self.assertEqual(completed["state"],"COMPLETED")
+        result=completed["result"]
+        self.assertEqual(result["schema"],"OMEGA_HISTORICAL_ARCHIVE_INTAKE_R921")
+        self.assertEqual(result["fileCount"],3)
+        self.assertEqual(result["archive"]["sha256"],expected)
+        self.assertEqual(result["extensionCounts"],{".cpp":1,".json":1,".py":1})
+        self.assertEqual(len(result["memberTreeSha256"]),64)
+        self.assertFalse(result["historicalCodeExecuted"])
+        self.assertFalse(result["sourceExecutionProven"])
+        self.assertEqual(result["canonicalWrites"],0)
+        self.assertEqual(self.hub.replay(job["id"])["state"],"MATCH")
+        refused=self.hub.enqueue("HISTORICAL_ZIP_AUDIT",{"source":"data/historical-b010.zip","expected_sha256":"0"*64})
+        self.assertEqual(self.hub.run_one()["state"],"HELD")
+        self.assertIn("R921_ARCHIVE_SHA256_MISMATCH_HELD",self.hub.get(refused["id"])["error"])
+        self.assertEqual(self.hub.replay(refused["id"])["state"],"REPLAY_NOT_ADMISSIBLE")
+        with zipfile.ZipFile(source,"a") as z:
+            z.writestr("evidence/next.json", b'{"revision":2}')
+        self.assertEqual(self.hub.replay(job["id"])["state"],"REPLAY_FAILED")
+
+        for name,rows,error in [
+            ("zip-slip",[("../escape.py",b"x")],"R921_UNSAFE_ARCHIVE_ENTRY_HELD"),
+            ("windows-collision",[("Omega/Run.py",b"a"),("omega/run.PY",b"b")],"R921_CASEFOLD_PATH_COLLISION_HELD"),
+            ("windows-separator",[(r"omega\\runtime.py",b"x")],"R921_UNSAFE_ARCHIVE_ENTRY_HELD"),
+        ]:
+            target=self.root / "data" / (name+".zip")
+            with zipfile.ZipFile(target,"w") as z:
+                for entry,payload in rows:z.writestr(entry,payload)
+            queued=self.hub.enqueue("HISTORICAL_ZIP_AUDIT",{"source":"data/"+name+".zip"})
+            reply=self.hub.run_one()
+            self.assertEqual(reply["state"],"HELD",name)
+            self.assertIn(error,reply["error"],name)
+            self.assertEqual(self.hub.replay(queued["id"])["state"],"REPLAY_NOT_ADMISSIBLE")
+        # No files are extracted or executed, and all 4 corrupted cases retain receipts.
+        self.assertFalse((self.root / "escape.py").exists())
+
     def test_counts_fail_closed(self):
         import json
         (self.root/"data"/"ledger.json").write_text(json.dumps([{"id":"x","tier":"VERIFIED_OR_INTERNALLY_TESTED"}]))
