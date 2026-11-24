@@ -82,6 +82,15 @@ assert.ok(source.includes('familyRoute(c.Menu)'),'capability route button absent
 assert.ok(source.includes("familyRoute(g['Menu Binding'])"),'gate route button absent');
 assert.ok(source.includes('filtered.some((s:Software)=>s.ID===chosen.ID)'),'stale software detail after filtering');
 assert.ok(source.includes('filtered.length===0'),'missing empty-result state');
+assert.ok(source.includes("focusStage(chosen['Upgrade Sequence'])"),'software-to-stage navigation absent');
+assert.ok(source.includes('stageResults.map'),'searchable upgrade sequence missing');
+assert.ok(source.includes('controlResults.map'),'searchable control matrix missing');
+assert.ok(source.includes("setStageQuery(nextStage(s['Next Sequence']))"),'next-stage navigation absent');
+for(const seq of registry.sequences){
+ const next=seq['Next Sequence']==='LOOP-TO-SEQ-001'?'SEQ-001':seq['Next Sequence'];
+ if(next)assert.ok(registry.sequences.some(x=>x.SEQ===next),'broken next-stage ledger link '+seq.SEQ);
+}
+assert.equal(registry.sequences.filter(x=>x['Next Sequence']==='LOOP-TO-SEQ-001').length,1,'one explicit cycle restart');
 assert.equal(registry.gates.filter(x=>x['Blocks Packaging?']==='YES').length,10);
 assert.equal(registry.gates.filter(x=>x['Blocks Packaging?']==='NO').length,2);
 console.log('R926 PASS · exact 100 software/12 menus/36 settings/18 capabilities/144 phases/12 gates · 44-route native containment · one system route ownership · conservative proof classification');

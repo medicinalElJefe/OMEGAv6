@@ -17,6 +17,8 @@ export default function OmegaOneSystemLedgerR926({onNavigate}:{onNavigate:(route
  const [menu,setMenu]=useState('ALL');
  const [disposition,setDisposition]=useState('ALL');
  const [search,setSearch]=useState('');
+ const [stageQuery,setStageQuery]=useState('');
+ const [controlQuery,setControlQuery]=useState('');
  const [picked,setPicked]=useState<string>('SYS-001');
  const term=search.trim().toLowerCase();
  const chosen=all.find((s:Software)=>s.ID===picked);
@@ -27,6 +29,10 @@ export default function OmegaOneSystemLedgerR926({onNavigate}:{onNavigate:(route
  ),[menu,disposition,term]);
  const familyRoute=(menuName:string)=>menuList.find((m:Menu)=>m.name===menuName)?.route;
  const stageOwners=(sequence:string,primaryFamily:string)=>all.filter((s:Software)=>s['Software / Artifact']===primaryFamily||s['Upgrade Sequence']===sequence);
+ const stageResults=original.sequences.filter(s=>!stageQuery.trim()||searchable(s.SEQ,s['Phase Name'],s['Domain / Menu'],s['Primary Software Family'],s['Growth Upgrade'],s['Proof Gate']).includes(stageQuery.trim().toLowerCase()));
+ const controlResults=original.settings.filter(s=>!controlQuery.trim()||searchable(s['Option ID'],s['Option / Toggle'],s['Top Menu'],s['Capability Output'],s['Requires Proof Gate']).includes(controlQuery.trim().toLowerCase()));
+ const focusStage=(sequence:string)=>{setStageQuery(sequence);setTab('SEQUENCE');};
+ const nextStage=(sequence:string)=>sequence==='LOOP-TO-SEQ-001'?'SEQ-001':sequence;
  const tabs:Tab[]=['SOFTWARE','MENUS','CONTROLS','CAPABILITIES','SEQUENCE','GATES'];
  const evidence='SOURCE CHARTED · no independent runtime acceptance inferred from menu membership';
  const nav=(route:string)=>onNavigate(route);
@@ -67,6 +73,7 @@ export default function OmegaOneSystemLedgerR926({onNavigate}:{onNavigate:(route
       <p><strong>OMEGA7 route:</strong> {chosen.navigationRoute}</p>
       <small style={{display:'block',marginBottom:10}}>Source-registered workspace relation. This does not establish that this individual historical executable was ported or invoked.</small>
       <button type='button' style={click} onClick={()=>nav(chosen.navigationRoute)}>Open mapped OMEGA7 workspace</button>
+      <button type='button' style={{...click,marginLeft:8,marginTop:6}} onClick={()=>focusStage(chosen['Upgrade Sequence'])}>Inspect {chosen['Upgrade Sequence']} stage</button>
      </>}
      {(!chosen||!filtered.some((s:Software)=>s.ID===chosen.ID))&&<p role='status'>Select a family from the current results to inspect its source contract and route.</p>}
     </aside>
@@ -79,14 +86,19 @@ export default function OmegaOneSystemLedgerR926({onNavigate}:{onNavigate:(route
     <button type='button' style={{...click,marginLeft:6}} onClick={()=>{setMenu(m.name);setTab('SOFTWARE')}}>Inspect families</button>
    </div>)}
   </div>}
-  {tab==='CONTROLS'&&<div style={{display:'grid',gap:9,marginTop:12}}>
-   {original.settings.map(s=><article key={s['Option ID']} style={{background:'#173447',padding:12,borderRadius:8}}>
+  {tab==='CONTROLS'&&<div style={{marginTop:12}}>
+   <label>Find a control<input style={{...input,width:'100%',marginTop:5}} value={controlQuery} onChange={e=>setControlQuery(e.target.value)} placeholder='Filter 36 controls by owner, name or proof gate'/></label>
+   <p role='status'>{controlResults.length} / 36 controls match</p>
+   <div style={{display:'grid',gap:9}}>
+   {controlResults.length===0&&<p>No controls match this search.</p>}
+   {controlResults.map(s=><article key={s['Option ID']} style={{background:'#173447',padding:12,borderRadius:8}}>
     <strong>{s['Option ID']} · {s['Option / Toggle']}</strong> <small>({s['Top Menu']})</small>
     <p>{s['Capability Output']} · State: {s['State Space Used']}</p>
     <small>Default {s.Default}; gate {s['Requires Proof Gate']}; acceptance: {s['Acceptance Check']}</small>
     <p style={{marginBottom:8,color:'#d6b36e'}}>Charted intended control; actual safe mutation must be exercised through the governing executor.</p>
     {familyRoute(s['Top Menu'])&&<button type='button' style={click} onClick={()=>nav(familyRoute(s['Top Menu'])!)}>Open governing {s['Top Menu']} workspace</button>}
    </article>)}
+   </div>
   </div>}
   {tab==='CAPABILITIES'&&<div style={{display:'grid',gap:9,marginTop:12}}>
    {original.capabilities.map(c=><article key={c['Capability ID']} style={{background:'#173447',padding:12,borderRadius:8}}>
@@ -95,11 +107,17 @@ export default function OmegaOneSystemLedgerR926({onNavigate}:{onNavigate:(route
     {familyRoute(c.Menu)&&<button type='button' style={{...click,display:'block',marginTop:9}} onClick={()=>nav(familyRoute(c.Menu)!)}>Open governing {c.Menu} workspace</button>}
    </article>)}
   </div>}
-  {tab==='SEQUENCE'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:8,marginTop:12}}>
-   {original.sequences.map(s=><article key={s.SEQ} style={{background:'#173447',padding:10,borderRadius:8}}>
-    <strong>{s.SEQ} · {s['Phase Name']}</strong><p>{s['Growth Upgrade']}</p><small>Input: {s.Input} · Proof: {s['Proof Gate']} · Next: {s['Next Sequence']}</small>
+  {tab==='SEQUENCE'&&<div style={{marginTop:12}}>
+   <label>Find upgrade stage<input style={{...input,width:'100%',marginTop:5}} value={stageQuery} onChange={e=>setStageQuery(e.target.value)} placeholder='Search sequence number, phase, family, domain or proof gate'/></label>
+   <p role='status'>{stageResults.length} / 144 upgrade stages match <button type='button' style={{...click,marginLeft:10}} onClick={()=>setStageQuery('')}>Show all stages</button></p>
+   {stageResults.length===0&&<p>No upgrade stages match this search.</p>}
+   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:8}}>
+   {stageResults.map(s=><article key={s.SEQ} style={{background:'#173447',padding:10,borderRadius:8}}>
+    <strong>{s.SEQ} · {s['Phase Name']}</strong><p>{s['Growth Upgrade']}</p><small>Primary family: {s['Primary Software Family']} · Tier: {s['State Tier']}</small><p><small>Dependency: {s.Dependency} · Completion: {s['Completion Test']} · Proof: {s['Proof Gate']} · Next: {s['Next Sequence']}</small></p>
+    {s['Next Sequence']&&original.sequences.some(n=>n.SEQ===nextStage(s['Next Sequence']))&&<button type='button' style={{...click,display:'block',marginTop:8}} onClick={()=>setStageQuery(nextStage(s['Next Sequence']))}>{s['Next Sequence']==='LOOP-TO-SEQ-001'?'Review cycle from SEQ-001':'Continue to '+s['Next Sequence']}</button>}
     {stageOwners(s.SEQ,s['Primary Software Family']).map((owner:Software)=><button type='button' key={owner.ID} style={{...click,display:'block',marginTop:8}} onClick={()=>nav(owner.navigationRoute)}>Open {owner.ID} · {owner.navigationRoute}</button>)}
    </article>)}
+   </div>
   </div>}
   {tab==='GATES'&&<div style={{display:'grid',gap:9,marginTop:12}}>
    {original.gates.map(g=><article key={g['Gate ID']} style={{background:'#173447',padding:12,borderRadius:8}}>
