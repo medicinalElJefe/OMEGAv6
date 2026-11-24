@@ -56,6 +56,7 @@ def _query_v35_index(root: Path,args:dict,safe_under,*,expected_sha256:str,expec
         raise ValueError("R954_PAGE_BOUND_HELD")
     query_tokens=TOKEN.findall(raw_term)
     if raw_term.strip() and (not query_tokens or len(query_tokens)>8 or
+       any(tok.upper() in {"AND","OR","NOT","NEAR"} for tok in query_tokens) or
        "".join(query_tokens).lower()!=re.sub(r"\s+","",raw_term).lower()):
         raise ValueError("R954_FTS_SAFE_TERMS_REQUIRED_HELD")
     # Bound and quote each literal FTS5 token; no user-provided MATCH syntax.
