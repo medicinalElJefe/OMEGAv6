@@ -10,7 +10,7 @@ import {activeProjectIdR87,attachWorkflowToProjectR87,createProjectR87,getProjec
 import UltimateCapabilityMembraneR108 from './UltimateCapabilityMembraneR108';
 import './omegaIntentWorkbenchR85.css';
 
-type Props={record:any;address:number;currentPanel:string;onAddress:(n:number)=>void;onNavigate:(p:string)=>void;variant?:'HOME'|'STRIP'};
+type Props={record:any;address:number;currentPanel:string;onAddress:(n:number)=>void;onNavigate:(p:string)=>void;variant?:'HOME'|'STRIP';initialGoal?:string};
 
 const enc=new TextEncoder();
 async function hashJson(x:any){const d=await crypto.subtle.digest('SHA-256',enc.encode(JSON.stringify(x)));return [...new Uint8Array(d)].map(v=>v.toString(16).padStart(2,'0')).join('')}
@@ -18,10 +18,10 @@ function downloadJson(name:string,data:any){const url=URL.createObjectURL(new Bl
 function phase(address:number){return Math.floor(Math.max(0,address)/144)%12+1}
 function packetCore(record:any){return{address:record?.address,stateId:record?.stateId,identity:record?.identity,metrics:record?.metrics,psc:record?.psc,predict:record?.predict,autoPing:record?.autoPing}}
 
-export default function OmegaIntentWorkbenchR85({record,address,currentPanel,onAddress,onNavigate,variant='HOME'}:Props){
+export default function OmegaIntentWorkbenchR85({record,address,currentPanel,onAddress,onNavigate,variant='HOME',initialGoal=''}:Props){
  const[session,setSession]=useState<WorkflowSessionR85|null>(()=>readWorkflowR85());
  const[intent,setIntent]=useState<WorkflowIntentR85>('REPAIR');
- const[goal,setGoal]=useState('');
+ const[goal,setGoal]=useState(()=>initialGoal.slice(0,8192));
  const[working,setWorking]=useState(false);
  const[operations,setOperations]=useState<OmegaOperationR86[]>(()=>readOperationLedgerR86());
  const[projects,setProjects]=useState(()=>readProjectsR87());
