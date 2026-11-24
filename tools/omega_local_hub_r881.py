@@ -120,7 +120,7 @@ def audit_historical_release_set_r938(root: Path, args: dict):
         if not file.exists():
             missing.append(filename)
             continue
-        file=safe_under(root,str(file.relative_to(root)),True)
+        file=safe_under(root,file.relative_to(root).as_posix(),True)
         if not file.is_file():
             raise ValueError("R938_SOURCE_MEMBER_NOT_FILE_HELD")
         actual_size=file.stat().st_size

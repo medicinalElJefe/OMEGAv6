@@ -66,7 +66,7 @@ class LocalHubTests(unittest.TestCase):
         queued=self.hub.enqueue("HISTORICAL_RELEASE_SET_AUDIT",args)
         receipt=self.hub.run_one()
         self.assertEqual(receipt["id"],queued["id"])
-        self.assertEqual(receipt["state"],"COMPLETED")
+        self.assertEqual(receipt["state"],"COMPLETED",f"R938 valid source held: {receipt.get('error')}")
         result=receipt["result"]
         self.assertEqual(result["expectedParts"],2)
         self.assertEqual(result["locatedParts"],2)
