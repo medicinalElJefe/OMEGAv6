@@ -216,6 +216,55 @@ class LocalHubTests(unittest.TestCase):
         self.assertIn("R905_",held["error"])
         self.assertFalse((self.root/"art"/"not-created.svg").exists())
 
+    def test_r912_complete_ancestor_chain_and_checkpoint_tamper_refusal(self):
+        root=self.hub.enqueue("SPHERE_TENSOR_EXPORT",{
+            "seeds":[{"cell":0,"lane":0,"mass":16384}],"steps":4,
+            "cell_axis":0,"lane_axis":1,"destination":"chain-root.csv"})
+        first=self.hub.run_one()
+        self.assertEqual(first["state"],"COMPLETED")
+        middle=self.hub.enqueue("SPHERE_TENSOR_CONTINUE",{
+            "export_job_id":root["id"],"destination":"chain-middle.csv",
+            "steps":1,"cell_axis":0,"lane_axis":1})
+        second=self.hub.run_one()
+        self.assertEqual(second["state"],"COMPLETED")
+        leaf=self.hub.enqueue("SPHERE_TENSOR_CONTINUE",{
+            "export_job_id":middle["id"],"destination":"chain-leaf.csv",
+            "steps":1,"cell_axis":0,"lane_axis":1})
+        third=self.hub.run_one()
+        self.assertEqual(third["state"],"COMPLETED")
+        audit_job=self.hub.enqueue("SPHERE_TENSOR_AUDIT_LINEAGE",{"export_job_id":leaf["id"]})
+        audit=self.hub.run_one()
+        self.assertEqual(audit["state"],"COMPLETED")
+        lineage=audit["result"]
+        self.assertEqual(lineage["depth"],3)
+        self.assertEqual(lineage["rootExportJobId"],root["id"])
+        self.assertEqual([x["jobId"] for x in lineage["entries"]],[leaf["id"],middle["id"],root["id"]])
+        self.assertTrue(all(x["mass"]==16384 for x in lineage["entries"]))
+        self.assertFalse(lineage["signedProvenance"])
+        original=self.root/"chain-root.csv"
+        content=original.read_bytes()
+        try:
+            original.write_bytes(content+b"X")
+            denied=self.hub.enqueue("SPHERE_TENSOR_AUDIT_LINEAGE",{"export_job_id":leaf["id"]})
+            held=self.hub.run_one()
+            self.assertEqual(held["state"],"HELD")
+            self.assertIn("R905_",held["error"])
+            continued=self.hub.enqueue("SPHERE_TENSOR_CONTINUE",{
+                "export_job_id":leaf["id"],"destination":"cannot-continue.csv",
+                "steps":1,"cell_axis":0,"lane_axis":1})
+            blocked=self.hub.run_one()
+            self.assertEqual(blocked["state"],"HELD")
+            self.assertFalse((self.root/"cannot-continue.csv").exists())
+            render=self.hub.enqueue("SPHERE_TENSOR_RENDER",{
+                "export_job_id":leaf["id"],"destination":"cannot-render.svg"})
+            self.assertEqual(self.hub.run_one()["state"],"HELD")
+            self.assertFalse((self.root/"cannot-render.svg").exists())
+            with self.assertRaises(ValueError):
+                self.hub.verified_csv_artifact(leaf["id"])
+        finally:original.write_bytes(content)
+        after=self.hub.enqueue("SPHERE_TENSOR_AUDIT_LINEAGE",{"export_job_id":leaf["id"]})
+        self.assertEqual(self.hub.run_one()["state"],"COMPLETED")
+
     def test_r906_verified_sparse_checkpoint_continuation_and_lineage(self):
         original=self.hub.enqueue("SPHERE_TENSOR_EXPORT",{
             "seeds":[{"cell":0,"lane":0,"mass":4096}],"steps":4,
