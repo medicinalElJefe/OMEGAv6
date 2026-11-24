@@ -79,7 +79,7 @@
     }
   ],
   "unverified": [
-    "Complete historical 24-bin workstation integration into OMEGA7",
+    "24-bin manifest and SHA audit built, but full workstation runnable parity and payload-byte conservation unverified",
     "V61.3 missing distribution part",
     "100-system menu and executor parity against every ledger row",
     "GPU compute and native Windows renderer proof across historical builds",
@@ -104,5 +104,67 @@
       "independentInnerStateCarry": false,
       "livePcProof": false
     }
-  ]
+  ],
+  "duplexRuntime": {
+    "id": "R924_HISTORICAL_24_BIN_INVERSE_OUTVERSE_CORRELATION",
+    "expectedPayloadBins": 24,
+    "pairedAuthorities": 12,
+    "outerPartCount": 20,
+    "laws": [
+      "OBJECTIVE",
+      "INFORMATION",
+      "IDENTITY",
+      "BOUNDARY",
+      "RELATIONSHIP",
+      "TRANSFORMATION",
+      "RESOURCE",
+      "CONTINUITY",
+      "EVIDENCE",
+      "EVALUATION",
+      "EXPRESSION",
+      "RECURSION"
+    ],
+    "implementation": "tools/omega_local_hub_r881.py:correlate_duplex24_r924",
+    "ui": "src7/workspaces/OmegaLocalHubPanelR884.tsx",
+    "operation": "HISTORICAL_DUPLEX24_CORRELATE",
+    "validates": [
+      "manifest identities",
+      "case-protected relative paths",
+      "historical outer ZIP SHA-256",
+      "ZIP entry counts",
+      "missing-part disclosures",
+      "24 archive member names"
+    ],
+    "doesNotProve": [
+      "payload BIN contents independently rehashed",
+      "native executable equivalence",
+      "24 compiled AI models",
+      "hardware/GPU availability",
+      "Canon promotion"
+    ]
+  },
+  "crossEngineCorrelation": {
+    "id": "R925_B010_X_R902_X_R924_DURABLE_CORRELATION",
+    "operation": "CORRELATE_HISTORICAL_FIELD",
+    "inputs": [
+      "HISTORICAL_B010_EXECUTE",
+      "SPHERE_TENSOR_STEP",
+      "HISTORICAL_DUPLEX24_CORRELATE (optional)"
+    ],
+    "requires": [
+      "completed persisted job receipts",
+      "SHA-256 results integrity",
+      "exact B010 frame-chain digest",
+      "traversalAddress equals R902 seed.cell",
+      "R902 mass conservation",
+      "bounded 20,736D address",
+      "historical source authority unchanged"
+    ],
+    "output": "OMEGA_CROSS_ENGINE_CORRELATION_R925",
+    "nestedStateComponents": 429981696,
+    "canonicalWrites": 0,
+    "physicalProof": false,
+    "gpuComputeProven": false,
+    "productionProof": false
+  }
 }
