@@ -32,6 +32,7 @@ export default function DriveHistoricalRecoveryR936({onAuditRelease}:{onAuditRel
   {filtered.map(g=><details key={g.id} data-r936-release={g.id} style={{borderTop:'1px solid #60758c',padding:'10px 0'}}>
    <summary><strong>{g.label}</strong> · {g.parts.length}/{g.expectedParts} matching named parts · {displaySize(g.parts.reduce((n,p)=>n+p.bytes,0))} indexed</summary>
    <p><a href={g.folderUrl} target='_blank' rel='noreferrer'>Open original Drive folder</a> · {g.sourceState.replaceAll('_',' ').toLowerCase()}</p>
+   {g.reportedEvidence&&'partDigestManifest' in g.reportedEvidence&&<p>Historical recorded SHA-256 expectations: {g.parts.filter(p=>'sha256' in p).length} part digests from {g.reportedEvidence.partDigestManifest}. These must match current local bytes before source-authority claims.</p>}
    {onAuditRelease&&<button type='button' data-r941-select-release={g.id} onClick={()=>onAuditRelease(g.id)}>Prepare authenticated local audit of {g.id}</button>}
    {g.reportedEvidence&&<p>Historical evidence: {g.reportedEvidence.manifest} · {g.reportedEvidence.evidenceState.replaceAll('_',' ').toLowerCase()}{'masterSha256' in g.reportedEvidence&&<code style={{display:'block',overflowWrap:'anywhere'}}>Expected reconstructed master SHA-256: {g.reportedEvidence.masterSha256}</code>}</p>}
    <ol>{g.parts.map(p=><li key={p.driveId}><a href={fileUrl(p.driveId)} target='_blank' rel='noreferrer'>{p.filename}</a> · {displaySize(p.bytes)} · source ID <code>{p.driveId}</code></li>)}</ol>

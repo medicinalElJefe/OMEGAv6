@@ -22,6 +22,15 @@ for(const g of index.groups){
   ids.add(p.driveId);names.add(p.filename);
  }
 }
+for(const id of ['B043','V35']){
+ const group=index.groups.find(g=>g.id===id);
+ assert.equal(group.parts.filter(p=>/^[a-f0-9]{64}$/.test(p.sha256||'')).length,group.expectedParts,'historical SHA completeness '+id);
+ assert.match(group.reportedEvidence.partDigestManifest,/MANIFEST/);
+ assert.match(group.reportedEvidence.partDigestState,/NOT_CURRENT_DRIVE_BYTE_VERIFICATION/);
+}
+const unpinned=index.groups.filter(g=>!['B043','V35'].includes(g.id));
+assert.equal(unpinned.length,4);
+for(const group of unpinned)assert.ok(group.parts.every(p=>!p.sha256),'nonexistent historical digest invented '+group.id);
 const reconstructed=index.groups.find(g=>g.id==='B043');
 assert.match(reconstructed.reportedEvidence.masterSha256,/^[a-f0-9]{64}$/);
 assert.match(reconstructed.reportedEvidence.evidenceState,/HISTORICAL_REPORT_NOT_CURRENT/);
