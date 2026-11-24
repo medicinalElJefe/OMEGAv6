@@ -25,4 +25,27 @@ assert.ok(browser.includes("R778 '+label+' native Atlas link reopened")&&browser
 assert.ok(css.includes('.o7-native-toolbar [data-r778-native-link]')&&css.includes('min-height:44px'),'R778 direct link mobile touch contract missing');
 assert.equal(pkg.scripts['test:r778'],'node tests/r778-native-workspace-link-invariants.mjs');
 assert.ok(pkg.scripts['check:static'].includes('npm run test:r778'));
+// R917: Command Center must invoke the existing, ledger-aligned project
+// workflow, not a second command router or shadow Canon authority.
+const command=readFileSync('src7/workspaces/CommandWorkspaceR439.tsx','utf8');
+const workflow=readFileSync('src/OmegaIntentWorkbenchR85.tsx','utf8');
+assert.ok(command.includes("import OmegaIntentWorkbenchR85 from '../../src/OmegaIntentWorkbenchR85'"),
+ 'R917 Command Center must load inherited project execution engine');
+assert.ok(command.includes("data-r917-command-workflow='R85_R86_R87_R108'") &&
+ command.includes("<OmegaIntentWorkbenchR85 record={record} address={address} currentPanel='Command Center'"),
+ 'R917 must pass the current canonical record and address to existing workflow');
+assert.ok(command.includes('onAddress={commitAddress}') &&
+ command.includes('onNavigate={onNavigate}') &&
+ command.includes('initialGoal={prompt.trim()}'),
+ 'R917 workflow must inherit existing navigation, transitions, and operator goal');
+assert.ok(command.includes("localState.write('omega.v6.address',bounded)") &&
+ command.includes("omega7-address-changed"),
+ 'R917 must use existing canonical address synchronisation');
+assert.ok(workflow.includes("initialGoal?:string") &&
+ workflow.includes("useState(()=>initialGoal.slice(0,8192))"),
+ 'R917 workflow should take initial request as a goal without auto-executing it');
+assert.ok(workflow.includes('startWorkflowR85(') &&
+ workflow.includes('attachWorkflowToProjectR87(') &&
+ workflow.includes('applyOperationToWorkflowR86('),
+ 'R917 must preserve inherited workflow/project/operation authority');
 console.log('R778 NATIVE WORKSPACE LINK PASS · 44 registered native route round trips · no untrusted URL route · shareable Atlas link and reload in desktop/mobile browser · Canon address excluded');
