@@ -635,6 +635,63 @@ class LocalHubTests(unittest.TestCase):
             self.assertEqual(self.hub.replay(queued["id"])["state"],"REPLAY_NOT_ADMISSIBLE")
         self.assertEqual((self.root/".omega"/"b010-r922-").exists(),before)
 
+
+    def test_r924_full_duplex_24_bin_20_part_manifest_hash_correlations(self):
+        import json
+        import zipfile
+        import hashlib
+        laws=hubmod.R924_LAWS
+        self.assertEqual(len(laws),12)
+        assert len(set(laws))==12
+        payloads=[]
+        for i in range(1,25):
+            side="INVERSE" if i<=12 else "OUTVERSE"
+            payloads.append({"index":i,"name":f"P{i:02d}.bin",
+               "space":side,"authority":side+"_"+laws[(i-1)%12],
+               "sha256":hashlib.sha256(str(i).encode()).hexdigest()})
+        parts=[]
+        all_names=[p["name"] for p in payloads]
+        for n in range(1,21):
+            name=f"OMEGA_V61_3_PART_{n:02d}.zip"
+            dest=self.root/"data"/name
+            included=all_names[(n-1):(n)] if n<=19 else all_names[19:]
+            with zipfile.ZipFile(dest,"w",compression=zipfile.ZIP_STORED) as z:
+                for item in included:
+                    z.writestr("OMEGA_SETUP/"+item,b"payload-not-executed")
+            parts.append({"file":name,"bytes":dest.stat().st_size,
+                          "sha256":hubmod.sha_file(dest),"entries":len(included)})
+        manifest=self.root/"data"/"release.json"
+        manifest.write_text(json.dumps({"outer_parts":parts,"payloads":payloads}),encoding="utf-8")
+        args={"manifest":"data/release.json","archive_folder":"data"}
+        job=self.hub.enqueue("HISTORICAL_DUPLEX24_CORRELATE",args)
+        result=self.hub.run_one()
+        self.assertEqual(result["id"],job["id"])
+        self.assertEqual(result["state"],"COMPLETED")
+        matrix=result["result"]
+        self.assertEqual(matrix["schema"],"OMEGA_HISTORICAL_DUPLEX24_CORRELATION_R924")
+        self.assertEqual(matrix["state"],"COMPLETE_OUTER_DISTRIBUTION_HASHES_SOURCE_ONLY")
+        self.assertEqual(matrix["verifiedOuterParts"],20)
+        self.assertEqual(matrix["payloadsLocatedByName"],24)
+        self.assertEqual(len(matrix["duplexPairs"]),12)
+        self.assertFalse(matrix["payloadBytesAllIndependentlyVerified"])
+        self.assertFalse(matrix["productionReady"])
+        self.assertEqual(matrix["canonicalWrites"],0)
+        self.assertEqual(self.hub.replay(job["id"])["state"],"MATCH")
+        (self.root/"data"/"OMEGA_V61_3_PART_05.zip").unlink()
+        partial=self.hub.enqueue("HISTORICAL_DUPLEX24_CORRELATE",args)
+        held=self.hub.run_one()
+        self.assertEqual(held["id"],partial["id"])
+        self.assertEqual(held["result"]["state"],"INCOMPLETE_ARCHIVE_SET_HELD")
+        self.assertEqual(held["result"]["verifiedOuterParts"],19)
+        self.assertEqual(held["result"]["missingParts"],["OMEGA_V61_3_PART_05.zip"])
+        self.assertEqual(self.hub.replay(job["id"])["state"],"DRIFT")
+        payloads[13]["authority"]="OUTVERSE_FAKE"
+        manifest.write_text(json.dumps({"outer_parts":parts,"payloads":payloads}),encoding="utf-8")
+        bad=self.hub.enqueue("HISTORICAL_DUPLEX24_CORRELATE",args)
+        rejected=self.hub.run_one()
+        self.assertEqual(rejected["state"],"HELD")
+        self.assertIn("R924_BIN_AUTHORITY_OR_SHA_HELD",rejected["error"])
+
     def test_counts_fail_closed(self):
         import json
         (self.root/"data"/"ledger.json").write_text(json.dumps([{"id":"x","tier":"VERIFIED_OR_INTERNALLY_TESTED"}]))
