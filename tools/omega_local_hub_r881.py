@@ -129,8 +129,95 @@ def audit_historical_zip_r921(root: Path, args: dict):
             "sourceExecutionProven":False,"empiricalTruthProven":False,
             "proofTier":"OBSERVATION_OF_LOCAL_ARCHIVE_BYTES"}
 
-READ_ONLY_REPLAY = frozenset({"HASH_TREE", "CSV_STATS", "VERIFY_LEDGER_SPLIT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_AUDIT_LINEAGE", "HISTORICAL_ZIP_AUDIT"})
-OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "LOCAL_INFER", "LOCAL_CHAT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_EXPORT", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_CONTINUE", "SPHERE_TENSOR_RENDER", "SPHERE_TENSOR_AUDIT_LINEAGE", "HISTORICAL_ZIP_AUDIT", "RESIDUAL_RESTORE"})
+
+# An independently inspected, byte-exact historical engine donor.
+# This does not imply trusted physical observations, R237 admission or GPU acceptance.
+B010_ARCHIVE_SHA256_R922="bb8df3a47008db98cf2348241e1bff035dd6ff5beacb5e5553a5693e41907d4e"
+R922_AXES=frozenset(("view_mode","embodiment","scale","domain","color_profile","truth_mode","quality","time_authority"))
+def execute_b010_r922(root:Path,args:dict):
+    """Operator-authored execution of the exact reviewed B010 ZIP, no extraction.
+    
+    Run an independent donor state machine in a disposable private workspace.
+    Never write into the current OMEGA Canon, SPHERE fabric or source archive.
+    """
+    if not isinstance(args,dict) or set(args)-{"source","steps","axes"}:
+        raise ValueError("R922_B010_ARGUMENT_SCHEMA_HELD")
+    rel=args.get("source")
+    steps=args.get("steps",1)
+    axes=args.get("axes",{})
+    if not isinstance(rel,str) or not rel.lower().endswith(".zip") or type(steps) is not int or not 1<=steps<=12:
+        raise ValueError("R922_B010_INPUT_BOUND_HELD")
+    if (not isinstance(axes,dict) or set(axes)-R922_AXES or
+        any(not isinstance(v,str) or len(v)>32 for v in axes.values())):
+        raise ValueError("R922_B010_AXES_SCHEMA_HELD")
+    archive=safe_under(root,rel,True)
+    if archive.stat().st_size>512*1024*1024 or sha_file(archive)!=B010_ARCHIVE_SHA256_R922:
+        raise ValueError("R922_B010_EXACT_SOURCE_SHA256_REQUIRED_HELD")
+    # Independently confirm ZIP members and refusal boundaries BEFORE importing
+    # Python code. The pinned SHA identifies the reviewed donor, never new code.
+    audited=audit_historical_zip_r921(root,{"source":rel,"expected_sha256":B010_ARCHIVE_SHA256_R922})
+    required={"omega/runtime_core.py","omega/state/packet.py","omega/traversal/packet.py",
+              "omega/calculus/transition.py","omega/validation/acceptance.py"}
+    if not required.issubset(x["path"] for x in audited["firstMembers"]):
+        # The firstMembers display slice is not a complete inventory; validate
+        # existence independently without relying on that lossy UI sample.
+        with zipfile.ZipFile(archive) as original:
+            if not required.issubset(original.namelist()):
+                raise ValueError("R922_B010_REQUIRED_SOURCE_MEMBERS_HELD")
+    import importlib
+    import sys
+    import tempfile
+    if any(name=="omega" or name.startswith("omega.") for name in sys.modules):
+        raise ValueError("R922_EXISTING_OMEGA_PYTHON_MODULE_NAMESPACE_HELD")
+    from pathlib import Path as _Path
+    private=root/".omega"
+    private.mkdir(parents=True,exist_ok=True)
+    sys.path.insert(0,str(archive))
+    try:
+        from_module=importlib.import_module("omega.runtime_core")
+        with tempfile.TemporaryDirectory(prefix="b010-r922-",dir=str(private)) as temporary:
+            base=_Path(temporary)
+            runtime=from_module.OmegaRuntimeCore(workspace=":memory:",evidence_root=base/"evidence",
+                              checkpoint_root=base/"checkpoints",stream_root=base/"world")
+            try:
+                if axes:
+                    runtime.set_axes(**axes)
+                frames=[]
+                for _ in range(steps):
+                    result=runtime.step(render_settings={"width":1920,"height":1080})
+                    if result.get("acceptance",{}).get("passed") is not True:
+                        raise ValueError("R922_B010_RUNTIME_ACCEPTANCE_HELD")
+                    frames.append({"frame":result["state"]["frame"],
+                        "statePacketSha256":result["state_packet_digest"],
+                        "traversalPacketSha256":result["traversal_packet_digest"],
+                        "transitionSha256":result["transition_digest"],
+                        "renderControlSha256":result["render_control_packet_digest"],
+                        "acceptanceSha256":result["acceptance"]["digest"],
+                        "traversalAddress":result["traversal_packet"]["address"],
+                        "selectedOperator":result["transition"]["selected"]})
+                commands=runtime.audit_commands()
+                if commands.get("missing")!=[]:
+                    raise ValueError("R922_B010_COMMAND_BINDINGS_HELD")
+                selected_axes=runtime.axes.__dict__.copy()
+            finally:
+                runtime.close()
+    finally:
+        sys.path.remove(str(archive))
+        for key in [k for k in sys.modules if k=="omega" or k.startswith("omega.")]:
+            del sys.modules[key]
+    return {"schema":"OMEGA_VERIFIED_HISTORICAL_B010_EXECUTION_R922",
+            "state":"HISTORICAL_DONOR_RUNTIME_EXECUTED_NOT_CANON_ADMITTED",
+            "archiveSha256":B010_ARCHIVE_SHA256_R922,
+            "archiveMemberTreeSha256":audited["memberTreeSha256"],
+            "steps":steps,"axes":selected_axes,
+            "frames":frames,"frameChainSha256":sha_bytes(json_bytes(frames)),
+            "commandBindings":commands.get("count"),"missingCommandBindings":commands.get("missing"),
+            "historicalSourceExecuted":True,"currentCanonWrites":0,
+            "gpuComputeProven":False,"nativePcAccepted":False,
+            "scientificTruthProven":False,"currentProductionAcceptance":False}
+
+READ_ONLY_REPLAY = frozenset({"HASH_TREE", "CSV_STATS", "VERIFY_LEDGER_SPLIT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_AUDIT_LINEAGE", "HISTORICAL_ZIP_AUDIT", "HISTORICAL_B010_EXECUTE"})
+OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "LOCAL_INFER", "LOCAL_CHAT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_EXPORT", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_CONTINUE", "SPHERE_TENSOR_RENDER", "SPHERE_TENSOR_AUDIT_LINEAGE", "HISTORICAL_ZIP_AUDIT", "HISTORICAL_B010_EXECUTE", "RESIDUAL_RESTORE"})
 STATUS = frozenset({"QUEUED", "WAIT_EVENT", "RUNNING", "COMPLETED", "FAILED", "HELD", "CANCELLED"})
 def utc_ms(): return int(time.time() * 1000)
 def sha_file(path: Path) -> str:
@@ -392,6 +479,8 @@ class Hub:
     def execute(self,operation,args):
         if operation=="HISTORICAL_ZIP_AUDIT":
             return audit_historical_zip_r921(self.root,args)
+        if operation=="HISTORICAL_B010_EXECUTE":
+            return execute_b010_r922(self.root,args)
         if operation=="LOCAL_CHAT":
             return self.execute_local_chat_r916(args)
         if operation=="RESIDUAL_RESTORE": raise ValueError("R195_RESIDUAL_SOURCE_AND_AUTHORITY_REQUIRED")
