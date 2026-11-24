@@ -8,6 +8,7 @@
       "workspace": "src7/workspaces/CommandWorkspaceR439.tsx",
       "dependencySpecifiers": [
         "../../src/OmegaCommandDeck",
+        "../../src/OmegaIntentWorkbenchR85",
         "../../src/OmegaRichText",
         "../../src/corpusRuntime",
         "../../src/fullOverallModeOrchestratorR79",
