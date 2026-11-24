@@ -88,6 +88,32 @@ def audit_historical_zip_r921(root: Path, args: dict):
             infos=archive.infolist()
             if len(infos)>5000:
                 raise ValueError("R921_ARCHIVE_MEMBER_COUNT_HELD")
+            # ZipInfo normalizes backslashes to slashes on Windows during
+            # parsing. Check original central-directory filename bytes before
+            # trusting that normalized view: hostile names must never be
+            # promoted to valid archive members through OS-dependent parsing.
+            with source.open("rb") as raw_archive:
+                raw_archive.seek(archive.start_dir)
+                for info in infos:
+                    header=raw_archive.read(46)
+                    if len(header)!=46 or header[:4]!=bytes.fromhex("504b0102"):
+                        raise ValueError("R921_INVALID_ARCHIVE_OR_CRC_HELD")
+                    name_size=int.from_bytes(header[28:30],"little")
+                    extra_size=int.from_bytes(header[30:32],"little")
+                    comment_size=int.from_bytes(header[32:34],"little")
+                    raw_name=raw_archive.read(name_size)
+                    if len(raw_name)!=name_size:
+                        raise ValueError("R921_INVALID_ARCHIVE_OR_CRC_HELD")
+                    raw_archive.seek(extra_size+comment_size,1)
+                    if (not raw_name or bytes.fromhex("5c") in raw_name or
+                        b":" in raw_name or bytes([0]) in raw_name):
+                        raise ValueError("R921_UNSAFE_ARCHIVE_ENTRY_HELD")
+                    try:
+                        original=raw_name.decode("utf-8" if info.flag_bits&0x800 else "cp437")
+                    except UnicodeError as exc:
+                        raise ValueError("R921_UNSAFE_ARCHIVE_ENTRY_HELD") from exc
+                    if original!=info.filename:
+                        raise ValueError("R921_UNSAFE_ARCHIVE_ENTRY_HELD")
             for info in infos:
                 name=unicodedata.normalize("NFC",info.filename)
                 parts=PurePosixPath(name).parts
