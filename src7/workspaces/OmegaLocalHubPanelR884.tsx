@@ -156,7 +156,7 @@ export default function OmegaLocalHubPanelR884(){
    }
    if(operation==='HASH_TREE')args.path=source||'.';
    if(operation==='HISTORICAL_ZIP_AUDIT'){
-    if(!source.trim().toLowerCase().endsWith('.zip')||source.includes('\\\\')||source.startsWith('/')||source.includes('..'))throw Error('Select an existing ZIP relative to the approved local workspace root.');
+    if(!source.trim().toLowerCase().endsWith('.zip')||source.includes('\\')||source.startsWith('/')||source.includes('..'))throw Error('Select an existing ZIP relative to the approved local workspace root.');
     args.source=source.trim();
     if(archiveExpectedSha.trim()){
      if(!/^[a-f0-9]{64}$/.test(archiveExpectedSha.trim()))throw Error('Optional expected archive SHA-256 must be exactly 64 lowercase hex characters.');
