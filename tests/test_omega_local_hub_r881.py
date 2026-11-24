@@ -552,6 +552,46 @@ class LocalHubTests(unittest.TestCase):
                 self.assertEqual(res.status,202)
                 data=json.load(res)
                 self.assertEqual(data["job"]["state"],"QUEUED")
+            # R914 malformed or ambiguous framing returns a stable JSON
+            # refusal, not an uncaught exception or partial execution.
+            import http.client
+            cases=(
+                (("Content-Length","not-a-number"),400,"INVALID_REQUEST_FRAMING_HELD"),
+                (("Content-Length","-1"),400,"INVALID_REQUEST_FRAMING_HELD"),
+                (("Content-Length","99999999999999999999999"),400,"INVALID_REQUEST_FRAMING_HELD"),
+                (("Content-Length",str(hubmod.MAX_BODY+1)),413,"BODY_SIZE_HELD"),
+            )
+            for header,status,state in cases:
+                with self.subTest(header=header):
+                    client=http.client.HTTPConnection("127.0.0.1",port,timeout=2)
+                    try:
+                        client.putrequest("POST","/api/hub/jobs")
+                        client.putheader("X-Omega-Local-Token",token)
+                        client.putheader(*header)
+                        client.endheaders()
+                        response=client.getresponse()
+                        self.assertEqual(response.status,status)
+                        self.assertEqual(json.loads(response.read())["state"],state)
+                    finally:client.close()
+            for variant in ("duplicate","transfer"):
+                with self.subTest(variant=variant):
+                    client=http.client.HTTPConnection("127.0.0.1",port,timeout=2)
+                    try:
+                        client.putrequest("POST","/api/hub/jobs")
+                        client.putheader("X-Omega-Local-Token",token)
+                        client.putheader("Content-Length","2")
+                        if variant=="duplicate":
+                            client.putheader("Content-Length","2")
+                        else:
+                            client.putheader("Transfer-Encoding","chunked")
+                        client.endheaders()
+                        response=client.getresponse()
+                        self.assertEqual(response.status,400)
+                        self.assertEqual(json.loads(response.read())["state"],"INVALID_REQUEST_FRAMING_HELD")
+                    finally:client.close()
+            with urllib.request.urlopen(urllib.request.Request(endpoint,headers=valid),timeout=2) as res:
+                self.assertEqual(res.status,200)
+                self.assertEqual(json.load(res)["schema"],hubmod.SCHEMA)
         finally:
             proc.terminate()
             try:proc.communicate(timeout=4)
