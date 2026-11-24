@@ -146,11 +146,13 @@
         "../../src/UniversalQualityControl",
         "../../src/corpusRuntime",
         "../../src/platformAdapter",
+        "../../src/recoveredSoftwareExecutionR512",
         "../../src/sourceBackedModeRuntimeR21",
         "../OmegaOneSystemLedgerR926",
         "../capabilityRegistry",
         "./CanonicalSessionReplayPanelR679",
         "./NativeDecisionTruthPanelR681",
+        "./OmegaLocalHubPanelR884",
         "./OperationalModesPanelR671",
         "./OperatorGraphPanelR676"
       ],
