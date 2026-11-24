@@ -44,6 +44,42 @@ class LocalHubTests(unittest.TestCase):
     def test_hub_db_location_must_be_private(self):
         with self.assertRaisesRegex(ValueError,"DB_MUST_RESIDE_IN_PRIVATE_HUB_DIR"):
             hubmod.Hub(self.root,self.root/"data"/"database.sqlite")
+    def test_r954_original_v35_indexed_query_and_refusal(self):
+        import sqlite3,hashlib,importlib.util
+        module_file=MODULE.parent/"omega_v35_atlas_r954.py"
+        spec=importlib.util.spec_from_file_location("omega_v35_atlas_r954",module_file)
+        module=importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        path=self.root/"data"/"psc_finished_atlas.sqlite"
+        with sqlite3.connect(path) as db:
+            db.execute("CREATE TABLE rows(row_id INTEGER PRIMARY KEY,source_file TEXT,sheet TEXT,row_number INTEGER,row_json TEXT,row_text TEXT,domain TEXT,root TEXT,function TEXT,gate TEXT)")
+            db.execute('CREATE VIRTUAL TABLE rows_fts USING fts5(row_text,source_file,sheet,domain,root,function,gate,content="rows",content_rowid="row_id")')
+            values=[(1,"a.csv","Tab1",2,'{"name":"water"}',"water motion","water domain","Parent","LocateRoot","STAY"),
+                    (2,"a.csv","Tab1",3,'{"name":"water"}',"water field","water domain","Parent","LocateRoot","TURN"),
+                    (3,"b.csv","Tab2",4,'{"name":"stone"}',"stone form","stone domain","Child","Constraint","STAY")]
+            db.executemany("INSERT INTO rows VALUES(?,?,?,?,?,?,?,?,?,?)",values)
+            db.execute("INSERT INTO rows_fts(rows_fts) VALUES('rebuild')")
+        digest=hashlib.sha256(path.read_bytes()).hexdigest()
+        args={"source":"data/psc_finished_atlas.sqlite","term":"water","limit":1,"cursor":0}
+        first=module._query_v35_index(self.root,args,hubmod.safe_under,expected_sha256=digest,expected_bytes=path.stat().st_size,expected_rows=3)
+        self.assertEqual(first["returned"],1)
+        self.assertTrue(first["hasMore"])
+        self.assertEqual(first["records"][0]["rowId"],1)
+        self.assertEqual(first["sourceIndex"],"FTS5")
+        next_page=module._query_v35_index(self.root,{**args,"cursor":first["nextCursor"]},hubmod.safe_under,expected_sha256=digest,expected_bytes=path.stat().st_size,expected_rows=3)
+        self.assertEqual([r["rowId"] for r in next_page["records"]],[2])
+        self.assertEqual(next_page["hasMore"],False)
+        self.assertEqual(next_page["canonicalWrites"],0)
+        self.assertFalse(next_page["historicalExecutorParityProven"])
+        with self.assertRaisesRegex(ValueError,"R954_ORIGINAL_SQLITE_SIZE_HELD"):
+            module.query_v35_original_atlas_r954(self.root,args,hubmod.safe_under)
+        with self.assertRaisesRegex(ValueError,"R954_FTS_SAFE_TERMS_REQUIRED_HELD"):
+            module._query_v35_index(self.root,{**args,"term":"water OR stone"},hubmod.safe_under,expected_sha256=digest,expected_bytes=path.stat().st_size,expected_rows=3)
+        with self.assertRaisesRegex(ValueError,"R954_PAGE_BOUND_HELD"):
+            module._query_v35_index(self.root,{**args,"limit":500},hubmod.safe_under,expected_sha256=digest,expected_bytes=path.stat().st_size,expected_rows=3)
+        with self.assertRaisesRegex(ValueError,"R954_GATE_SOURCE_VALUE_HELD"):
+            module._query_v35_index(self.root,{**args,"gate":"PROVEN"},hubmod.safe_under,expected_sha256=digest,expected_bytes=path.stat().st_size,expected_rows=3)
+
     def test_r947_original_b043_stream_assembler_no_overwrite_and_refusal(self):
         import hashlib, json, zipfile
         spec=importlib.util.spec_from_file_location(

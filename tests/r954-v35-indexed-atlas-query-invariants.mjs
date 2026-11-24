@@ -1,0 +1,25 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const src=readFileSync('tools/omega_v35_atlas_r954.py','utf8');
+const hub=readFileSync('tools/omega_local_hub_r881.py','utf8');
+const ui=readFileSync('src7/workspaces/OmegaLocalHubPanelR884.tsx','utf8');
+const tests=readFileSync('tests/test_omega_local_hub_r881.py','utf8');
+const proof=JSON.parse(readFileSync('audit/omega-v35-original-atlas-db-r954.json','utf8'));
+for(const marker of ['ORIGINAL_SHA256 = "24a03b232ebd35d755fe2f7152e04067c9e5755d0593dcc525a727480601fb38"','ORIGINAL_ROWS = 149679',
+'_query_v35_index','R954_ORIGINAL_SQLITE_SHA256_HELD','PRAGMA quick_check','rows_fts MATCH ?','originalChartedRowsNotIndependentScientificObservations":True','canonicalWrites":0'])assert.ok(src.includes(marker),'R954 original indexed query missing '+marker);
+assert.match(hub,/READ_ONLY_REPLAY = .*"HISTORICAL_V35_ATLAS_QUERY"/);
+assert.match(hub,/OPS = .*"HISTORICAL_V35_ATLAS_QUERY"/);
+assert.ok(hub.includes('query_v35_original_atlas_r954(self.root,args,safe_under)'));
+assert.ok(ui.includes("operation==='HISTORICAL_V35_ATLAS_QUERY'"));
+assert.ok(ui.includes('data-r954-original-atlas'));
+assert.ok(ui.includes('setAtlasCursor(String(atlasReceipt?.nextCursor))'),'source paging unavailable');
+assert.ok(tests.includes('test_r954_original_v35_indexed_query_and_refusal'));
+assert.equal(proof.originalRows,149679);
+assert.equal(proof.originalFtsRows,149679);
+assert.equal(proof.sqliteQuickCheck,'PASS');
+assert.equal(proof.sourceSqliteSha256,'24a03b232ebd35d755fe2f7152e04067c9e5755d0593dcc525a727480601fb38');
+assert.equal(proof.originalEvidenceLedgerEntries,7);
+assert.equal(proof.originalSourceWorkbookRowsNotIndependentObservations,true);
+assert.equal(proof.nativeGpuProof,false);
+assert.equal(proof.canonicalWrites,0);
+console.log('R954 PASS: original verified 149,679-row FTS5 SQLite indexed query, bounded pagination, local hub and conservative source authority.');

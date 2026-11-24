@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R953 original V35 20/20 ZIP SHA/CRC and 17 payload + 3 expansion SHA accepted; 79/156 numbered source ZIPs now independently byte verified; R951 B053 R7 70 original tests PASS and R949 B043 62 isolated tests PASS; full OMEGA7/GPU/installer proof held",
+  "latestGovernedWork": "R954 original V35 149,679-row FTS5 SQLite query with exact pinned source hash, read-only bounded pages and gate/domain filters; 79/156 original ZIPs byte verified; OMEGA7 runtime/native GPU proof still held",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -389,6 +389,11 @@
       "revision": "R953",
       "conservation": "Full original V35 20-part SHA/CRC and its 17 main runtime payload plus 3 expansion SHA verified",
       "accepted": "ORIGINAL_V35_SOURCE_BYTES_ONLY_RUNTIME_AND_INSTALLER_HELD"
+    },
+    {
+      "revision": "R954",
+      "conservation": "Full original V35 383MB atlas SQLite, FTS5 149679 rows and source-address metadata read-only query adapter",
+      "accepted": "ORIGINAL_SOURCE_INDEXED_QUERY_ONLY_NO_EMPIRICAL_OR_NATIVE_PARITY"
     }
   ],
   "independentArchiveUnverifiedOtherListedParts": 77,
@@ -396,5 +401,6 @@
   "isolatedB043ModuleProof": "audit/omega-b043-module-test-evidence-r949.json",
   "reconstructedB053R7SourceEvidence": "audit/omega-b053-r7-full-source-acceptance-r950.json",
   "originalB053R7ModuleEvidence": "audit/omega-b053-r7-isolated-module-parity-r951.json",
-  "recoveredV35SourceEvidence": "audit/omega-v35-full-source-acceptance-r953.json"
+  "recoveredV35SourceEvidence": "audit/omega-v35-full-source-acceptance-r953.json",
+  "v35OriginalAtlasSqliteEvidence": "audit/omega-v35-original-atlas-db-r954.json"
 }

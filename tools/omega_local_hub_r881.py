@@ -56,6 +56,16 @@ def load_local_inference_adapter_r899():
     return adapter
 
 
+def load_v35_atlas_query_r954():
+    import importlib.util
+    source=Path(__file__).resolve().with_name("omega_v35_atlas_r954.py")
+    if not source.is_file(): raise ValueError("R954_ORIGINAL_ATLAS_SOURCE_MODULE_REQUIRED_HELD")
+    spec=importlib.util.spec_from_file_location("_omega_v35_atlas_r954",source)
+    module=importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def load_b043_reconstruction_r947():
     import importlib.util
     source=Path(__file__).resolve().with_name("omega_b043_reconstruct_r947.py")
@@ -476,8 +486,8 @@ def correlate_duplex24_r924(root:Path,args:dict):
             "productionReady":False,"gpuComputeProven":False,
             "basis":"HISTORICAL_SOURCE_AND_LOCAL_FILE_HASHES_NOT_RUNTIME_PARITY"}
 
-READ_ONLY_REPLAY = frozenset({"HASH_TREE", "CSV_STATS", "VERIFY_LEDGER_SPLIT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_AUDIT_LINEAGE", "HISTORICAL_ZIP_AUDIT", "HISTORICAL_RELEASE_SET_AUDIT", "HISTORICAL_B010_EXECUTE", "HISTORICAL_DUPLEX24_CORRELATE", "CORRELATE_HISTORICAL_FIELD"})
-OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "LOCAL_INFER", "LOCAL_CHAT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_EXPORT", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_CONTINUE", "SPHERE_TENSOR_RENDER", "SPHERE_TENSOR_AUDIT_LINEAGE", "HISTORICAL_ZIP_AUDIT", "HISTORICAL_RELEASE_SET_AUDIT", "HISTORICAL_B043_RECONSTRUCT", "HISTORICAL_B010_EXECUTE", "HISTORICAL_DUPLEX24_CORRELATE", "CORRELATE_HISTORICAL_FIELD", "RESIDUAL_RESTORE"})
+READ_ONLY_REPLAY = frozenset({"HASH_TREE", "CSV_STATS", "VERIFY_LEDGER_SPLIT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_AUDIT_LINEAGE", "HISTORICAL_ZIP_AUDIT", "HISTORICAL_RELEASE_SET_AUDIT", "HISTORICAL_V35_ATLAS_QUERY", "HISTORICAL_B010_EXECUTE", "HISTORICAL_DUPLEX24_CORRELATE", "CORRELATE_HISTORICAL_FIELD"})
+OPS = frozenset({"HASH_TREE", "CSV_STATS", "COPY_ARTIFACT", "EXPORT_MANIFEST", "VERIFY_LEDGER_SPLIT", "VERIFY_LEDGER_SET", "LOCAL_INFER", "LOCAL_CHAT", "SPHERE_TENSOR_STEP", "SPHERE_TENSOR_EXPORT", "SPHERE_TENSOR_VERIFY", "SPHERE_TENSOR_CONTINUE", "SPHERE_TENSOR_RENDER", "SPHERE_TENSOR_AUDIT_LINEAGE", "HISTORICAL_ZIP_AUDIT", "HISTORICAL_RELEASE_SET_AUDIT", "HISTORICAL_V35_ATLAS_QUERY", "HISTORICAL_B043_RECONSTRUCT", "HISTORICAL_B010_EXECUTE", "HISTORICAL_DUPLEX24_CORRELATE", "CORRELATE_HISTORICAL_FIELD", "RESIDUAL_RESTORE"})
 STATUS = frozenset({"QUEUED", "WAIT_EVENT", "RUNNING", "COMPLETED", "FAILED", "HELD", "CANCELLED"})
 def utc_ms(): return int(time.time() * 1000)
 def sha_file(path: Path) -> str:
@@ -830,6 +840,8 @@ class Hub:
             return audit_historical_zip_r921(self.root,args)
         if operation=="HISTORICAL_RELEASE_SET_AUDIT":
             return audit_historical_release_set_r938(self.root,args)
+        if operation=="HISTORICAL_V35_ATLAS_QUERY":
+            return load_v35_atlas_query_r954().query_v35_original_atlas_r954(self.root,args,safe_under)
         if operation=="HISTORICAL_B043_RECONSTRUCT":
             return load_b043_reconstruction_r947().reconstruct_b043_r947(self.root,args,safe_under)
         if operation=="HISTORICAL_B010_EXECUTE":
