@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R957 original V35 149679-row FTS5 rowid-index optimization, exact gate/domain parity and bounded microbenchmark; R956 authenticated source-safe staging; full OMEGA7 native/UI and production proof held",
+  "latestGovernedWork": "R958 explicit closure of three V35 SQLite fixture connections and Windows cleanup regression; Windows portable-studio job passed on 4c164b6; full candidate workflows, archive executor parity, actual device and production proof remain held",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -409,6 +409,11 @@
       "revision": "R957",
       "conservation": "Original V35 FTS5 rowid-pushdown query avoids dependent gate-index scans and temp sort, with source-result parity and bounded local performance evidence",
       "accepted": "LOCAL_QUERY_PLAN_PERFORMANCE_MEASUREMENT_NOT_DEVICE_OR_RUNTIME_ACCEPTANCE"
+    },
+    {
+      "revision": "R958",
+      "conservation": "Explicit SQLite fixture connection closure and Windows cleanup regression; exact R958 Windows portable-studio job passed (138458932652); inherited verify and native repair passed; browser parity and R241 full workflow pending at observation",
+      "accepted": "BOUNDED_WINDOWS_CI_JOB_PROOF_NOT_NATIVE_DEVICE_OR_RELEASE_ACCEPTANCE"
     }
   ],
   "independentArchiveUnverifiedOtherListedParts": 77,
