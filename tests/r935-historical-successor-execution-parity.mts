@@ -79,3 +79,22 @@ assert.equal(restoring,RECOVERED_SYSTEM_SUMMARY_R512.restorationRequired);
 assert.equal(working+gated+archived+restoring,100);
 assert.equal(archived,11,'donor package never promoted to executable');
 console.log('R935 PASS · 100 historical families · deterministic R512 successor capsules · true native route and proof-bound authority · 11 DONORs held.');
+
+ // R978 real source-mode execution: absent values cannot be substituted by 0.
+const {evaluateSourceBackedModes}=await import('../src/sourceBackedModeRuntimeR21');
+const emptyModes=evaluateSourceBackedModes({});
+assert.equal(emptyModes.length,20);
+assert.ok(emptyModes.every(row=>row.state==='GATED_MISSING_INPUTS'&&row.value===null));
+const explicitZero=evaluateSourceBackedModes({metrics:{continuity:0,plasticity:0,contradiction:0,burden:0}});
+assert.equal(explicitZero.find(row=>row.id==='M001')?.state,'EXECUTED_EXACT');
+assert.equal(explicitZero.find(row=>row.id==='M001')?.value,0);
+for(const invalid of [null,'0',NaN,Infinity,undefined]){
+ const rows=evaluateSourceBackedModes({metrics:{continuity:invalid,plasticity:0,contradiction:0,burden:0}});
+ const m=rows.find(row=>row.id==='M001');assert.equal(m?.state,'GATED_MISSING_INPUTS');assert.deepEqual(m?.missing,['CΩ']);assert.equal(m?.value,null);
+}
+const invalidCoords=evaluateSourceBackedModes({coordinates:{d:12,p:0,r:0,l:0}});
+assert.equal(invalidCoords.find(row=>row.id==='M015')?.state,'GATED_MISSING_INPUTS');
+assert.equal(invalidCoords.find(row=>row.id==='M016')?.state,'GATED_MISSING_INPUTS');
+const validCoords=evaluateSourceBackedModes({coordinates:{d:0,p:0,r:0,l:0}});
+assert.equal(validCoords.find(row=>row.id==='M020')?.state,'EXECUTED_EXACT');
+assert.equal(evaluateSourceBackedModes({autoPing:{dataNext:20736}}).find(row=>row.id==='M011')?.state,'GATED_MISSING_INPUTS');

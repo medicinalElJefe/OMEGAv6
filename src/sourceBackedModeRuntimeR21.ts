@@ -21,6 +21,12 @@ export type SourceBackedModeResult={
   id:string;name:string;state:SourceBackedModeState;formula:string;source:string;value:number|string|null;inputs:string[];missing:string[];detail:string;
 };
 
+// R978: absence is not zero; preserve the donor formulas but admit only
+// explicitly supplied finite numeric channels and valid canonical coordinates.
+const strictFinite=(x:unknown):x is number=>typeof x==='number'&&Number.isFinite(x);
+const validAddress=(x:unknown):x is number=>strictFinite(x)&&Number.isInteger(x)&&x>=0&&x<20736;
+const validAxis=(x:unknown)=>strictFinite(x)&&Number.isInteger(x)&&x>=0&&x<12;
+const validCategory=(x:unknown)=>typeof x==='string'&&x.trim().length>0&&x!=='UNKNOWN';
 const EPS=1e-9;
 const finite=(x:any)=>Number.isFinite(Number(x));
 const num=(x:any)=>finite(x)?Number(x):0;
@@ -47,8 +53,33 @@ export function canonicalFullCanonTermsR308(record:any){
 
 export function evaluateSourceBackedModes(record:any):SourceBackedModeResult[]{
   const C=num(record?.metrics?.continuity),Phi=num(record?.metrics?.plasticity),q=num(record?.metrics?.contradiction),Lambda=num(record?.metrics?.burden),scar=num(record?.metrics?.scar),evidence=num(record?.metrics?.evidence);
-  const prev=corpusState((Number(record?.address||0)+20735)%20736),angle=num(record?.geometry?.phi)*Math.PI*2,canon=canonicalFullCanonTermsR308(record);
-  const exact=(id:string,name:string,formula:string,source:string,value:number|string,inputs:string[],detail:string):SourceBackedModeResult=>({id,name,state:'EXECUTED_EXACT',formula,source,value:typeof value==='number'?fmt(value):value,inputs,missing:[],detail});
+  const prev=validAddress(record?.address)?corpusState((record.address+20735)%20736):null,angle=num(record?.geometry?.phi)*Math.PI*2,canon=canonicalFullCanonTermsR308(record);
+  const m=record?.metrics,c=record?.coordinates;
+  const requirements:Record<string,Array<[string,boolean]>>={
+   M001:[['CΩ',strictFinite(m?.continuity)],['Φ',strictFinite(m?.plasticity)],['q',strictFinite(m?.contradiction)],['Λ',strictFinite(m?.burden)]],
+   M002:[['CΩ',strictFinite(m?.continuity)],['Scar',strictFinite(m?.scar)],['q',strictFinite(m?.contradiction)]],
+   M003:[['predict.mode188_gate',validCategory(m?.mode188)]],
+   M004:[['CΩ',strictFinite(m?.continuity)],['Φ',strictFinite(m?.plasticity)],['q',strictFinite(m?.contradiction)],['Λ',strictFinite(m?.burden)]],
+   M005:[['q',strictFinite(m?.contradiction)],['Λ',strictFinite(m?.burden)],['CΩ',strictFinite(m?.continuity)]],
+   M006:[['CΩ',strictFinite(m?.continuity)],['Λ',strictFinite(m?.burden)]],
+   M007:[['q',strictFinite(m?.contradiction)],['CΩ',strictFinite(m?.continuity)]],
+   M008:[['Λ',strictFinite(m?.burden)],['CΩ',strictFinite(m?.continuity)],['Φ',strictFinite(m?.plasticity)]],
+   M009:[['Previous_Scar',strictFinite(prev?.metrics?.scar)],['Angle_Rad',strictFinite(record?.geometry?.phi)],['q',strictFinite(m?.contradiction)],['CΩ',strictFinite(m?.continuity)]],
+   M010:[['CΩ packet channel',strictFinite(m?.continuity)]],
+   M011:[['autoPing.dataNext',validAddress(record?.autoPing?.dataNext)]],
+   M012:[['predict.decision',validCategory(m?.decision)]],
+   M013:[['Φ',strictFinite(m?.plasticity)]],
+   M014:[['Evidence_Weight',strictFinite(m?.evidence)]],
+   M015:[['d',validAxis(c?.d)],['p',validAxis(c?.p)],['r',validAxis(c?.r)],['l',validAxis(c?.l)]],
+   M016:[['d',validAxis(c?.d)],['p',validAxis(c?.p)]],
+   M020:[['d',validAxis(c?.d)],['p',validAxis(c?.p)],['r',validAxis(c?.r)],['l',validAxis(c?.l)]]
+  };
+  const admitted=(row:SourceBackedModeResult):SourceBackedModeResult=>{
+   if(row.state==='GATED_MISSING_INPUTS')return row;
+   const missing=(requirements[row.id]||[]).filter(([,ok])=>!ok).map(([name])=>name);
+   return missing.length?{...row,state:'GATED_MISSING_INPUTS',value:null,missing,detail:'Required source packet channels absent or invalid; no default value admitted.'}:row;
+  };
+  const exact=(id:string,name:string,formula:string,source:string,value:number|string,inputs:string[],detail:string):SourceBackedModeResult=>typeof value==='number'&&!Number.isFinite(value)?{id,name,state:'GATED_MISSING_INPUTS',formula,source,value:null,inputs,missing:['finite formula result'],detail:'Formula output is nonfinite; execution result refused.'}:({id,name,state:'EXECUTED_EXACT',formula,source,value:typeof value==='number'?fmt(value):value,inputs,missing:[],detail});
   const packet=(id:string,name:string,formula:string,source:string,value:number|string,inputs:string[],detail:string,state:SourceBackedModeState='SOURCE_PACKET'):SourceBackedModeResult=>({id,name,state,formula,source,value:typeof value==='number'?fmt(value):value,inputs,missing:[],detail});
   const gated=(id:string,name:string,formula:string,source:string,inputs:string[],missing:string[],detail:string):SourceBackedModeResult=>({id,name,state:'GATED_MISSING_INPUTS',formula,source,value:null,inputs,missing,detail});
   return [
@@ -60,7 +91,7 @@ export function evaluateSourceBackedModes(record:any):SourceBackedModeResult[]{
     exact('M006','Host-Centered Runtime','HCR=CΩ_host/(Λ_host+ε)','phase2 Mode Ledger',C/(Lambda+EPS),['CΩ','Λ'],'Exact host-centered continuity-to-burden ratio using the current packet.'),
     exact('M007','Contradiction Turbulence','Turb=q/(CΩ+ε)','phase2 Mode Ledger',q/(C+EPS),['q','CΩ'],'Exact instability pressure ratio.'),
     exact('M008','Burden Compression','B=Λ/(CΩ+Φ+ε)','phase2 Mode Ledger',Lambda/(C+Phi+EPS),['Λ','CΩ','Φ'],'Exact load/compression ratio.'),
-    exact('M009','Scar Carry Trigonometry','Scar_next=Previous_Scar·0.972+|sin(Angle_Rad)|·q·(1-CΩ)','Full Canon Formula_Ledger',num(prev.metrics.scar)*.972+Math.abs(Math.sin(angle))*q*(1-C),['Previous_Scar','Angle_Rad','q','CΩ'],'Previous scar is taken from the immediately prior canonical state; Angle_Rad is reconstructed from the packet phase geometry.'),
+    exact('M009','Scar Carry Trigonometry','Scar_next=Previous_Scar·0.972+|sin(Angle_Rad)|·q·(1-CΩ)','Full Canon Formula_Ledger',num(prev?.metrics?.scar)*.972+Math.abs(Math.sin(angle))*q*(1-C),['Previous_Scar','Angle_Rad','q','CΩ'],'Previous scar is taken from the immediately prior canonical state; Angle_Rad is reconstructed from the packet phase geometry.'),
     packet('M010','Continuity-Field Runtime','CΩ = retained lawful links / total links','phase2 Mode Ledger',C,['CΩ packet channel'],'The current packet contains the resulting CΩ channel but not the underlying link-count ledger, so the packet value is exposed without pretending to recompute the ratio.'),
     packet('M011','Traversal Engine','Next=argmax(S_i) / admitted route','phase2 Mode Ledger',Number(record?.autoPing?.dataNext)+1,['autoPing.dataNext'],'The hosted runtime carries a deterministic admitted route produced by the canonical route logic. Candidate score vectors are not fabricated.', 'DERIVED_RUNTIME'),
     packet('M012','Guidance Field','STAY / TURN / ESCALATE source decision','phase2 Mode Ledger',String(record?.metrics?.decision||'UNKNOWN'),['predict.decision'],'Exact categorical source decision. The donor ledger names max(S,T,E), but the three raw candidate score channels are not separately present.'),
@@ -72,7 +103,7 @@ export function evaluateSourceBackedModes(record:any):SourceBackedModeResult[]{
     gated('M018','Gamma Admission Loop','Γ=Novelty·Fit·Proof','phase2 Mode Ledger',['Novelty','Fit','Proof'],['Novelty','Fit','Proof'],'Admission formula retained; missing calibrated inputs keep it gated.'),
     gated('M019','Renderer Cluster','R=Σ(layer_i·weight_i)','phase2 Mode Ledger',['layer_i','weight_i'],['authoritative layer weights'],'Renderer-composition law retained; the current packet does not supply the complete calibrated layer-weight vector.'),
     exact('M020','Unified Coherence full blend','MAX(0,MIN(1,(Base_Coherence+Mother_Mode+Father_Mode+Water_Basin)/4))','OMEGA FULL CANON MODE WITH ATLAS / Formula_Ledger',canon.unifiedCoherence,['Base_Coherence','Mother_Mode','Father_Mode','Water_Basin'],'R308 restores the exact Full Canon normalized blend from its declared formal atlas inputs. It remains distinct from M001 and carries formal-model authority only.')
-  ];
+  ].map(admitted);
 }
 
 export function sourceBackedModeSummary(record:any){

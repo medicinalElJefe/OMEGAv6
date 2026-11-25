@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R977 validated portable Creation Studio scene packet, local legacy migration, exact SHA-256 scene continuity and source identity; candidate pending",
+  "latestGovernedWork": "R978 source mode input admission: missing, malformed or nonfinite packet channels no longer silently authorize exact results; R977 all nine exact-head CI workflows passed; R978 candidate pending",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -508,6 +508,11 @@
     {
       "revision": "R977",
       "conservation": "R881 creation studio now validates full project metadata, canonical address, material, mode, geometry source and asset references before apply. Local save and portable import/export share integrity-checked scene packet, legacy valid project migration, bounded size, no embedded asset bytes or new state authority; real encode/decode round-trip and tamper rejection tests.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R978",
+      "conservation": "Existing R21 donor formula evaluation retained, explicit per-mode source input gates for 17 implemented/read-through modes, missing coordinates and invalid route addresses held, nonfinite formula outputs refused, valid zeros retained. Actual runtime negative and positive regression fixtures. R311 separately scoped runtime unchanged; 179 catalog not represented as 179 executable modes.",
       "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
     }
   ],
