@@ -46,7 +46,12 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
  const [commandPreviousSoftware,setCommandPreviousSoftware]=useState<readonly R512RecoveredSystemResolution[]>([]);
  const [activeRecovered,setActiveRecovered]=useState<RecoveredExecutionCapsuleR512|null>(null);
  const recoveredFocusEpoch=useRef(0);
- useEffect(()=>{let live=true;const epoch=recoveredFocusEpoch.current;try{const raw=sessionStorage.getItem('omega.r512.executionCapsule');if(raw)void import('./recoveredSystemSearchR512').then(m=>{if(!live||epoch!==recoveredFocusEpoch.current)return;const focus=m.restoreRecoveredFocusR969(JSON.parse(raw));setActiveRecovered(focus);if(!focus)sessionStorage.removeItem('omega.r512.executionCapsule')}).catch(()=>{});}catch{}return()=>{live=false}},[]);
+ const clearRecoveredExecution=()=>{
+  recoveredFocusEpoch.current++;
+  setActiveRecovered(null);
+  try{sessionStorage.removeItem('omega.r512.executionCapsule')}catch{}
+ };
+ useEffect(()=>{let live=true;const epoch=recoveredFocusEpoch.current;try{const raw=sessionStorage.getItem('omega.r512.executionCapsule');if(raw)void import('./recoveredSystemSearchR512').then(m=>{if(!live||epoch!==recoveredFocusEpoch.current)return;const focus=m.restoreRecoveredFocusR969(JSON.parse(raw));setActiveRecovered(focus);if(!focus)sessionStorage.removeItem('omega.r512.executionCapsule')}).catch(()=>{if(live&&epoch===recoveredFocusEpoch.current)clearRecoveredExecution()});}catch{}return()=>{live=false;recoveredFocusEpoch.current++}},[]);
  const domainCaps=useMemo(()=>state.domain==='HOME'?OMEGA7_CAPABILITIES:omega7CapabilitiesForDomain(state.domain),[state.domain]);
  const results=useMemo(()=>state.query?searchOmega7Capabilities(state.query):domainCaps,[state.query,domainCaps]);
  const healthRows=Object.entries(state.health);
@@ -92,11 +97,13 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
    dispatch({type:'SELECT_ROUTE',route:cap.legacyRoute});
   };
   restore();
-  window.addEventListener('popstate',restore);
-  return()=>window.removeEventListener('popstate',restore);
+  const restoreFromHistory=()=>{clearRecoveredExecution();restore()};
+  window.addEventListener('popstate',restoreFromHistory);
+  return()=>window.removeEventListener('popstate',restoreFromHistory);
  },[dispatch]);
 
  const switchDomain=(domain:Omega7Domain)=>{
+  clearRecoveredExecution();
   returnDomainRef.current=null;
   const href=nativeHistoryHrefR779(null,OMEGA7_NATIVE_ROUTES);
   if(new URLSearchParams(window.location.search).has('omega7route'))window.history.pushState({omega7Route:null},'',href);
@@ -104,6 +111,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
   dispatch({type:'SELECT_ROUTE',route:null});
  };
  const backToDomain=()=>{
+  clearRecoveredExecution();
   const destination=returnDomainRef.current||state.domain;
   returnDomainRef.current=null;
   const href=nativeHistoryHrefR779(null,OMEGA7_NATIVE_ROUTES);
@@ -111,9 +119,10 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
   dispatch({type:'DOMAIN',domain:destination});
   dispatch({type:'SELECT_ROUTE',route:null});
  };
- const open=(route:string)=>{
+ const open=(route:string,preserveRecoveredFocus=false)=>{
   const cap=OMEGA7_CAPABILITIES.find(x=>x.legacyRoute===route);
   if(!cap)return;
+  if(!preserveRecoveredFocus)clearRecoveredExecution();
   if(!state.selectedRoute&&returnDomainRef.current===null)returnDomainRef.current=state.domain;
   setLibraryOpen(false);
   if(isOmega7NativeRoute(cap.legacyRoute)){
@@ -133,14 +142,16 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
   setActiveRecovered(capsule);
   try{sessionStorage.setItem('omega.r512.executionCapsule',JSON.stringify(capsule))}catch{}
   window.dispatchEvent(new CustomEvent('omega-r512-execute-capability',{detail:capsule}));
-  open(capsule.route);
+  open(capsule.route,true);
  };
  const launchRecovered=(entry:(typeof R486_VISIBLE_CAPABILITIES)[number])=>launchCapsule(recoveredExecutionCapsuleR512(entry));
- const launchRecoveredSystem=(entry:R512RecoveredSystemResolution)=>void import('./recoveredSystemSearchR512').then(m=>launchCapsule(m.recoveredSystemExecutionCapsuleR512(entry)));
- const clearRecoveredExecution=()=>{
-  recoveredFocusEpoch.current++;
-  setActiveRecovered(null);
-  try{sessionStorage.removeItem('omega.r512.executionCapsule')}catch{}
+ const launchRecoveredSystem=(entry:R512RecoveredSystemResolution)=>{
+  clearRecoveredExecution();
+  const requestedEpoch=recoveredFocusEpoch.current;
+  void import('./recoveredSystemSearchR512').then(m=>{
+   if(requestedEpoch!==recoveredFocusEpoch.current)return;
+   launchCapsule(m.recoveredSystemExecutionCapsuleR512(entry));
+  }).catch(()=>{if(requestedEpoch===recoveredFocusEpoch.current)clearRecoveredExecution()});
  };
 
  return <div className='o7-app' data-omega7='true' data-depth={state.depth.toLowerCase()}>

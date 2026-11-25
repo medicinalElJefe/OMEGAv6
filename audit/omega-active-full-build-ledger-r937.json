@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R984 repair actual mobile Modes disclosure leak from R983 R241 shard 9; explicit closed-body suppression and responsive recovered formula controls; inherited browser acceptance unchanged",
+  "latestGovernedWork": "R985 historical launch intent precedence and route-scoped focus lifecycle; R984 seven workflows passed and two pending at inspection",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -543,6 +543,11 @@
     {
       "revision": "R984",
       "conservation": "R983 R241 prove-r241 job 139578911215 failed R313 disclosure shard 9: mobile/Modes closed details #1 leaks 1/6 direct content regions. Recovered calculator now owns one scoped body hidden by explicit closed-details selector, open grid responsive layout, 44px controls and bounded fields. Existing interaction/disclosure tests unchanged; source invariant added. Cloud Bridge verify and Windows smoke jobs passed, user parity was still running when checked.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R985",
+      "conservation": "Existing OMEGA7 root epoch now guards delayed historical launcher before actuation, invalidates stale restoration on unmount, and clears historic focus on explicit ordinary route/domain/back/popstate navigation. Only deliberate capsule route preserves focus. Existing native host route binding and authority kept; source regression checks added. R984 exact-head R241 interaction, Cloud Bridge verify and Windows smoke passed, disclosure/user parity pending when checked.",
       "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
     }
   ],
