@@ -77,3 +77,35 @@ assert.equal(sweepCoordinateR893(twelve,cycleLength-1).inner,SIZE-1);
 assert.equal(sweepCoordinateR893(twelve,cycleLength-1).member,twelve[11]);
 console.log('R893 EXHAUSTIVE 12x20736 PASS: all 248,832 unique logical coordinates and exact cycle boundary (not executor ticks).');
 console.log('R893 PASS: 960 independently addressed state operations, dimension wrap at 20,736, priority, capacity atomicity, bounded 1–64 batch and zero cloud calls.');
+
+// R972: execute the entire 12-agent cycle, not merely the address mapping.
+const executed=createFabric();let executionCursor=0,executionCount=0,exchangeCount=0,phaseCount=0;
+const executionCoverage=new Uint8Array(cycleLength);
+while(executionCursor<cycleLength){
+ const batch=autonomousSweepR893(executed,twelve,executionCursor,Math.min(64,cycleLength-executionCursor));
+ assert.equal(batch.mode,'LOCAL_DETERMINISTIC_FULL_INNER_SWEEP');
+ assert.equal(batch.receipts.length,batch.visits.length);
+ for(let i=0;i<batch.visits.length;i++){
+  const visit=batch.visits[i],receipt=batch.receipts[i],expected=sweepCoordinateR893(twelve,executionCursor+i);
+  assert.equal(visit.agent,expected.member);assert.equal(visit.inner,expected.inner);
+  assert.equal(receipt.agent,visit.agent);assert.equal(receipt.inner,visit.inner);
+  assert.equal(receipt.tick,++executionCount);assert.equal(visit.receiptTick,receipt.tick);
+  const flat=visit.inner*12+expected.memberIndex;
+  assert.equal(executionCoverage[flat],0);executionCoverage[flat]=1;
+  assert.ok(Number.isFinite(receipt.after)&&receipt.after>=0&&receipt.after<=1);
+  if(receipt.kind==='EXCHANGE'||receipt.kind==='PHASE_EXCHANGE'){
+   const before=receipt.kind==='EXCHANGE'?receipt.peerBefore:receipt.neighborBefore;
+   const after=receipt.kind==='EXCHANGE'?receipt.peerAfter:receipt.neighborAfter;
+   assert.ok(Math.abs(receipt.after+after-receipt.before-before)<=1e-12);
+   if(receipt.kind==='EXCHANGE')exchangeCount++;else phaseCount++;
+  }
+ }
+ assert.equal(batch.nextStepCursor,executionCursor+batch.visits.length);
+ executionCursor=batch.nextStepCursor;
+}
+assert.equal(executionCount,cycleLength);assert.equal(executed.tick,cycleLength);
+assert.equal(executed.sequence,cycleLength);assert.equal(executed.queue.length,0);
+assert.equal(executed.active.size,12);assert.ok(exchangeCount>0&&phaseCount>0);
+assert.equal(executionCoverage.reduce((sum,v)=>sum+v,0),cycleLength);
+assert.equal(executed.receipts.length,512);
+console.log('R972 actual full-cycle execution PASS: '+executionCount+' operations; '+exchangeCount+' peer and '+phaseCount+' phase exchanges.');

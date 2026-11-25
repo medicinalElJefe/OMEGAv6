@@ -25,5 +25,8 @@ const held=autonomousTickR891(full,blockedMembers,inner,0,1);
 assert.equal(held.mode,'HELD_CAPACITY');assert.equal(held.receipts.length,0);assert.equal(full.tick,0);assert.equal(full.queue.length,0);assert.equal(stateValue(full,blockedMembers[0],inner),priorValue);
 assert.equal(full.active.size,512);
 for(const args of [[f,[],inner,0,1],[f,[root,root],inner,0,1],[f,members,-1,0,1],[f,members,inner,-1,1],[f,members,inner,0,13]])assert.throws(()=>autonomousTickR891(...args),RangeError);
+const overflow=createFabric();
+assert.throws(()=>autonomousTickR891(overflow,members,inner,Number.MAX_SAFE_INTEGER,1),RangeError);
+assert.equal(overflow.tick,0);assert.equal(overflow.sequence,0);assert.equal(overflow.active.size,0);assert.equal(overflow.queue.length,0);
 const ui=readFileSync('src/SphereAgentInstrumentR887.tsx','utf8');for(const s of ['autonomousTickR891','Run local agent autonomy','Pause local agent autonomy','autonomousCursor','collectiveMembersR890(selected,collectiveCount)'])assert.ok(ui.includes(s),'UI missing '+s);
 console.log('R891 PASS: bounded autonomous decisions, fair identities, operator priority, exact cap refusal and no cloud/canonical actions.');

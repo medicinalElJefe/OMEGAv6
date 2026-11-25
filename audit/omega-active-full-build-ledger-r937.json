@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R971 bounded Float64 shared snapshot for complete collective relation engine; no pair coverage reduction; CI pending",
+  "latestGovernedWork": "R972 complete 248832-operation execution acceptance test and safe cursor refusal; R971 nine workflows passed; candidate CI pending",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -478,6 +478,11 @@
     {
       "revision": "R971",
       "conservation": "Pairwise full-state analysis reads 248832 distinct values once instead of 2737152 state lookups at 12 agents; same bivariate Welford order and output; temporary buffers bounded to 1990656 bytes; counted-read and exact output equality tests, invalid singleton refusal.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R972",
+      "conservation": "Actual R893 scheduler full 12×20736 operation cycle regression, every visit and receipt identity, tick order, independent exchange conservation, bounded active state and receipt ring; selected scheduler safe integer overflow refusal before mutation.",
       "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
     }
   ],

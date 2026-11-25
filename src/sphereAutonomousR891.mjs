@@ -8,6 +8,7 @@ export function autonomousTickR891(fabric,members,inner,cursor=0,budget=1,phaseE
  if(!Number.isSafeInteger(inner)||inner<0||inner>=SIZE||!Number.isSafeInteger(cursor)||cursor<0||!Number.isSafeInteger(budget)||budget<1||budget>12)throw new RangeError('Invalid autonomous tick coordinate/budget');
  // Operator-authored queue has strict precedence: do not silently overwrite or reorder work.
  if(fabric.queue.length){const receipts=stepFabric(fabric,Math.min(budget,fabric.queue.length));return{schema:R891_SCHEMA,mode:'OPERATOR_QUEUE_FIRST',receipts,nextCursor:cursor,cloudCalls:0,canonicalWrites:0}}
+ if(cursor>Number.MAX_SAFE_INTEGER-Math.min(budget,members.length))throw new RangeError('Autonomous cursor requires explicit safe reset before overflow');
  const receipts=[];let nextCursor=cursor;
  for(let iteration=0;iteration<Math.min(budget,members.length);iteration++){
   const id=members[nextCursor%members.length],peers=neighbors(id).filter(n=>members.includes(n));
