@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R967 repair R966 coordinate isolation regression: explicit phase authorization only in all-inner sweep, preserve selected-inner legacy operation; CI pending",
+  "latestGovernedWork": "R968 serialize interactive SPHERE mutation against asynchronous durable checkpoint operations; R967 exact-head nine workflows passed; R968 acceptance pending",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -459,6 +459,11 @@
       "revision": "R967",
       "conservation": "R966 failed six workflows; Cloud Bridge log identified R891 selected-coordinate isolation regression. Restore legacy default, authorize phase coupling explicitly from R893 full sweep; retain existing tests and R966 conservation tests.",
       "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R968",
+      "conservation": "Existing SPHERE instrument pauses autonomy on durable save and guards scheduled/manual state mutations and legacy checkpoint paths during durable transactions; selected-inner isolation versus full sweep phase coupling disclosed; original tests retained and regression source checks added",
+      "accepted": "CANDIDATE_SOURCE_ONLY_BROWSER_ACCEPTANCE_PENDING"
     }
   ],
   "independentArchiveUnverifiedOtherListedParts": 77,

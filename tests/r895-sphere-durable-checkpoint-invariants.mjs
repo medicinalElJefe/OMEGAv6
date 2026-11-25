@@ -30,6 +30,8 @@ peer.memory.push({taskId:1,tick:1,agent:root,inner:0,kind:'EXCHANGE',peer:root+1
 assert.throws(()=>validateDurableR895(forged,session),/memory receipt/);
 const ui=readFileSync('src/SphereAgentInstrumentR887.tsx','utf8');
 for(const token of ['saveDurableR895','restoreDurableR895','Save full-state durable checkpoint','Restore full-state durable checkpoint','data-r895-exact-inner-value','Full-state checkpoints use atomic IndexedDB'])assert.ok(ui.includes(token),token+' missing');
+for(const token of ['setInterval(()=>{if(durableBusy.current)return','const saveCheckpoint=()=>{if(durableBusy.current)return','const restoreCheckpoint=()=>{if(durableBusy.current)return','setDurablePending(true);setRunning(false);try{const receipt=await saveDurableR895','disabled={durablePending} aria-pressed={running}','if(durableBusy.current)return;setActiveInner(innerPage*144+i)'])
+ assert.ok(ui.includes(token),'R968 durable operation isolation missing: '+token);
 const source=readFileSync('src/sphereDurableCheckpointR895.mjs','utf8');
 for(const token of ['structuredClone(fabric)','indexedDB.open(DB,1)','tx.objectStore(STORE).put(record,KEY)','tx.oncomplete','R895_MAX_VALUES','validateDurableR895(record.fabric,record.session)'])assert.ok(source.includes(token),token+' missing');
 assert.ok(!source.includes('api.post'),'R895 persistence never creates cloud tasks');
