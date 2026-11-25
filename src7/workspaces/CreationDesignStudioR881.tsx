@@ -44,8 +44,8 @@ function sourceEdgesR884(points:readonly Pos[]):number[]{
 }
 function project(p:Pos,rotation:number):[number,number]{
  const a=rotation*Math.PI/180,c=Math.cos(a),s=Math.sin(a),x=p.x*c+p.z*s,z=-p.x*s+p.z*c;
- const scale=250/(2.1-z*.4);
- return[500+x*scale,330-p.y*scale];
+ const scale=1/(1.7-z*.35);
+ return[500+x*scale*500,330-p.y*scale*330];
 }
 function svgSource(points:readonly Pos[],mode:Mode,rotation:number,color:string,title:string){
  let contents='';
@@ -84,6 +84,7 @@ function renderWebGL(canvas:HTMLCanvasElement,points:readonly Pos[],rotation:num
  const scratch=document.createElement('canvas');scratch.width=canvas.width;scratch.height=canvas.height;
  const gl=scratch.getContext('webgl2',{preserveDrawingBuffer:true,antialias:false});
  if(!gl)return false;
+ try{
  const vert='#version 300 es\nin vec3 position;uniform float angle;uniform float size;void main(){float c=cos(angle),s=sin(angle);vec3 p=vec3(position.x*c+position.z*s,position.y,-position.x*s+position.z*c);float scale=1.0/(1.7-p.z*.35);gl_Position=vec4(p.x*scale,p.y*scale,.0,1.0);gl_PointSize=size;}';
  const frag='#version 300 es\nprecision mediump float;uniform vec3 tint;uniform float isLine;out vec4 outColor;void main(){if(isLine<.5){vec2 xy=gl_PointCoord-vec2(.5);if(dot(xy,xy)>.25)discard;}outColor=vec4(tint,.8);}';
  const shader=(type:number,source:string)=>{const s=gl.createShader(type);if(!s)return null;gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))return null;return s};
@@ -104,17 +105,21 @@ function renderWebGL(canvas:HTMLCanvasElement,points:readonly Pos[],rotation:num
  target.clearRect(0,0,canvas.width,canvas.height);target.drawImage(scratch,0,0);
  gl.deleteBuffer(buffer);gl.deleteProgram(program);gl.deleteShader(vs);gl.deleteShader(fs);
  return true;
+ }finally{gl.getExtension('WEBGL_lose_context')?.loseContext();}
 }
 const panel:React.CSSProperties={background:'#101f32',border:'1px solid #405a72',padding:'14px',borderRadius:12};
 const input:React.CSSProperties={background:'#152940',color:'#e9f5ff',border:'1px solid #55738f',padding:'7px',borderRadius:6,width:'100%'};
 export default function CreationDesignStudioR881({address,onAddress}:{address:number;onAddress:(n:number)=>void}){
  const canvas=useRef<HTMLCanvasElement>(null),points=useMemo(()=>Array.from({length:20736},(_,i)=>pointFromAddress(i)),[]);
  const [mode,setMode]=useState<Mode>('atlas3d'),[rotation,setRotation]=useState(22),[color,setColor]=useState('#5fcecb');
+ const [renderer,setRenderer]=useState<'BROWSER_WEBGL2_RENDER'|'BROWSER_CANVAS2D_RENDER'>('BROWSER_CANVAS2D_RENDER');
  const [title,setTitle]=useState('New Canon composition'),[prompt,setPrompt]=useState(''),[message,setMessage]=useState('');
  const [receipts,setReceipts]=useState<Receipt[]>([]),[project,setProject]=useState('Untitled');
  const [assets,setAssets]=useState<{name:string;sha256:string;byteSize:number;proofTier:'OBS';source:string}[]>([]);
- useEffect(()=>{if(!canvas.current)return;const ok=renderWebGL(canvas.current,points,rotation,mode,color);rendererIsWebgl.current=ok;
-  if(!ok){const ctx=canvas.current.getContext('2d');if(ctx){ctx.fillStyle='#07111e';ctx.fillRect(0,0,canvas.current.width,canvas.current.height);ctx.fillStyle=color;for(const p of points){const [x,y]=project(p,rotation);ctx.fillRect(x,y,1,1)}}}
+ useEffect(()=>{if(!canvas.current)return;let ok=false;try{ok=renderWebGL(canvas.current,points,rotation,mode,color)}catch{ok=false}rendererIsWebgl.current=ok;setRenderer(ok?'BROWSER_WEBGL2_RENDER':'BROWSER_CANVAS2D_RENDER');
+  if(!ok){const ctx=canvas.current.getContext('2d');if(ctx){ctx.fillStyle='#07111e';ctx.fillRect(0,0,canvas.current.width,canvas.current.height);ctx.fillStyle=color;ctx.strokeStyle=color;ctx.lineWidth=.45;ctx.globalAlpha=.75;
+   if(mode==='tessellation'){const edges=sourceEdgesR884(points);ctx.beginPath();for(let i=0;i<edges.length;i+=2){const [ax,ay]=project(points[edges[i]],rotation),[bx,by]=project(points[edges[i+1]],rotation);ctx.moveTo(ax,ay);ctx.lineTo(bx,by)}ctx.stroke()}
+   else{const radius=mode==='pointillism'?.58:mode==='atlas3d'?1.25:.95;ctx.beginPath();for(const p of points){const [x,y]=project(visualPositionR884(p,mode),rotation);ctx.moveTo(x+radius,y);ctx.arc(x,y,radius,0,2*Math.PI)}ctx.fill()}ctx.globalAlpha=1;}}
  },[points,rotation,mode,color]);
  const log=async(name:string,bytes:Uint8Array|string,type:string,source='CF-D0001/2/3')=>{
   const data=typeof bytes==='string'?new TextEncoder().encode(bytes):bytes;
@@ -142,8 +147,8 @@ export default function CreationDesignStudioR881({address,onAddress}:{address:nu
  const exportCsv=()=>log('omega-canon-r881.csv','rowId,d,p,r,l,x,y,z,proofTier,source\n'+points.map(p=>[p.rowId,p.d,p.p,p.r,p.l,p.x,p.y,p.z,'DER','CF-D0001/2/3'].join(',')).join('\n')+'\n','text/csv');
  const exportJson=()=>log('omega-canon-r881.json',JSON.stringify({schema:'OMEGA_FULL_ATLAS_R881',title,prompt,project,proofTier:'DER',source:'CF-D0001/2/3',physicalMeasurement:false,rows:points}), 'application/json');
  const exportXlsx=()=>log('omega-canon-r881.xlsx',makeXlsx(points),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
- const exportPng=()=>canvas.current?.toBlob(async blob=>{if(!blob)return;await log('omega-canon-r881.png',new Uint8Array(await blob.arrayBuffer()),'image/png','BROWSER_WEBGL2_RENDER');},'image/png');
- const exportManifest=()=>log('omega-master-truth-run-manifest.json',JSON.stringify({schema:'OMEGA_MASTER_TRUTH_RUN_MANIFEST_R881',project,title,prompt,renderAuthority:'BROWSER_WEBGL2',fontAuthority:'BROWSER_SYSTEM_UI',source:'CF-D0001/2/3',proofTier:'DER',nodeCount:20736,physicalMeasurement:false,localPcAccepted:false,assets,exports:receipts},null,2),'application/json','BROWSER_EXPORT_LEDGER');
+ const exportPng=()=>canvas.current?.toBlob(async blob=>{if(!blob)return;await log('omega-canon-r881.png',new Uint8Array(await blob.arrayBuffer()),'image/png',renderer);},'image/png');
+ const exportManifest=()=>log('omega-master-truth-run-manifest.json',JSON.stringify({schema:'OMEGA_MASTER_TRUTH_RUN_MANIFEST_R881',project,title,prompt,renderAuthority:renderer,fontAuthority:'BROWSER_SYSTEM_UI',source:'CF-D0001/2/3',proofTier:'DER',nodeCount:20736,physicalMeasurement:false,localPcAccepted:false,assets,exports:receipts},null,2),'application/json','BROWSER_EXPORT_LEDGER');
  const saveProject=()=>{const data={project,title,prompt,mode,rotation,color,address,assets};try{localStorage.setItem('omega.r881.project.'+project,JSON.stringify(data));setMessage('Saved locally in this browser: '+project)}catch{setMessage('Local browser storage unavailable')}}; 
  const loadProject=()=>{try{const v=JSON.parse(localStorage.getItem('omega.r881.project.'+project)||'null');if(!v){setMessage('No local project found: '+project);return}setTitle(v.title);setPrompt(v.prompt);setMode(v.mode);setRotation(v.rotation);setColor(v.color);onAddress(v.address);setAssets(v.assets||[]);setMessage('Loaded browser-local project: '+project)}catch{setMessage('Project could not be opened')}};
  const pickFiles=async(e:React.ChangeEvent<HTMLInputElement>)=>{const list=Array.from(e.target.files||[]);for(const f of list){const result=await byteReceiptR881(new Uint8Array(await f.arrayBuffer()),{source:'USER_SELECTED_FILE',proofTier:'OBS'});setAssets(old=>[...old,{name:f.name,sha256:result.sha256,byteSize:result.byteSize,proofTier:'OBS',source:'USER_SELECTED_FILE'}]);}e.target.value='';};
@@ -154,7 +159,7 @@ export default function CreationDesignStudioR881({address,onAddress}:{address:nu
     <label>Project name<input style={input} value={project} onChange={e=>setProject(e.target.value)}/></label>
     <label>Composition title<input style={input} value={title} onChange={e=>setTitle(e.target.value)}/></label>
     <label>Mode<select style={input} value={mode} onChange={e=>setMode(e.target.value as Mode)}><option value='atlas3d'>20,736 node sphere (WebGL2)</option><option value='mandala'>Mandala / phase</option><option value='tessellation'>Tessellation field</option><option value='pointillism'>Pointillism field</option></select></label>
-    <label>Atlas address<input style={input} type='number' min={0} max={20735} value={address} onChange={e=>onAddress(Math.max(0,Math.min(20735,Number(e.target.value)||0)))}/></label>
+    <label>Atlas address<input style={input} type='number' min={0} max={20735} value={address} onChange={e=>onAddress(Math.max(0,Math.min(20735,Math.floor(Number(e.target.value)||0))))}/></label>
     <div>Current D/P/R/L: {Object.values(coordinatesR881(address)).slice(1).join(' / ')} · antipode {antipodeR881(address)}</div>
     <label>Rotation {rotation}°<input style={input} type='range' min={0} max={360} value={rotation} onChange={e=>setRotation(Number(e.target.value))}/></label>
     <label>Line/point color<input style={input} type='color' value={color} onChange={e=>setColor(e.target.value)}/></label>
@@ -169,7 +174,7 @@ export default function CreationDesignStudioR881({address,onAddress}:{address:nu
      <button onClick={exportSvg}>SVG</button><button onClick={exportPng}>PNG</button><button onClick={exportCsv}>CSV</button><button onClick={exportJson}>JSON</button><button onClick={exportXlsx}>XLSX</button><button onClick={exportManifest}>Proof manifest</button>
     </div>
     <p role='status'>{message||'Renderer output is an indexed visual projection, not physical or geographic evidence.'}</p>
-    <details open><summary>Provenance / verification</summary><p>All generated points: DER · address definition CF-D0001–0003. Font: system-ui browser. Visual geometry: renderer-defined. WebGL2 raster pixels: browser-dependent; the export receipt applies to the bytes actually exported.</p><p>REC-011 ORION_GATE: HOLD_RULE_SOURCE_NEEDED. R170 policy: POLICY_BLOCKED_BRANCH_HELD. TIT: OPEN_CANDIDATE. No elevation or native-PC acceptance.</p><pre style={{maxHeight:160,overflow:'auto',fontSize:11}}>{JSON.stringify({nodeCount:20736,project,assets,receipts},null,2)}</pre></details>
+    <details open><summary>Provenance / verification</summary><p>All generated points: DER · address definition CF-D0001–0003. Font: system-ui browser. Visual geometry: renderer-defined. Raster backend: {renderer}. Browser-dependent pixels; the export receipt applies to the bytes actually exported.</p><p>REC-011 ORION_GATE: HOLD_RULE_SOURCE_NEEDED. R170 policy: POLICY_BLOCKED_BRANCH_HELD. TIT: OPEN_CANDIDATE. No elevation or native-PC acceptance.</p><pre style={{maxHeight:160,overflow:'auto',fontSize:11}}>{JSON.stringify({nodeCount:20736,project,assets,receipts},null,2)}</pre></details>
    </div>
   </div>
  </section>;

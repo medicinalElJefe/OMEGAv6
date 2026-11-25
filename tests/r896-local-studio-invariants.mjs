@@ -166,4 +166,7 @@ for(const marker of ['importLocalToken','file.name!==\'hub-r881.token\'','file.s
  assert.ok(localHubPanel.includes(marker),'R898 governed local token file intake missing: '+marker);
 assert.ok(!localHubPanel.includes('localStorage.setItem')&&!localHubPanel.includes('sessionStorage.setItem'),
  'R898 token may not persist to browser storage');
+const studio=readFileSync('src7/workspaces/CreationDesignStudioR881.tsx','utf8');
+for(const marker of ["BROWSER_CANVAS2D_RENDER","'image/png',renderer","renderAuthority:renderer","WEBGL_lose_context","project(visualPositionR884(p,mode),rotation)","ctx.lineTo(bx,by)","Math.floor(Number(e.target.value)||0)","return[500+x*scale*500,330-p.y*scale*330]"])
+ assert.ok(studio.includes(marker),'R965 studio render or receipt parity missing: '+marker);
 console.log('R896 LOCAL STUDIO PASS: read-only loopback-only, SPA fallback, unavailable APIs, no-runtime double-click and real Windows smoke contracts.');
