@@ -170,3 +170,13 @@ const studio=readFileSync('src7/workspaces/CreationDesignStudioR881.tsx','utf8')
 for(const marker of ["BROWSER_CANVAS2D_RENDER","'image/png',renderer","renderAuthority:renderer","WEBGL_lose_context","project(visualPositionR884(p,mode),rotation)","ctx.lineTo(bx,by)","Math.floor(Number(e.target.value)||0)","return[500+x*scale*500,330-p.y*scale*330]"])
  assert.ok(studio.includes(marker),'R965 studio render or receipt parity missing: '+marker);
 console.log('R896 LOCAL STUDIO PASS: read-only loopback-only, SPA fallback, unavailable APIs, no-runtime double-click and real Windows smoke contracts.');
+
+ // R976 numerical and source integration acceptance: same source sample, same
+ // material mapping across backends. No change to source geometry or address.
+const {spiralChromaR976}=await import('../src/system/creationCanonR881.mjs');
+assert.equal(spiralChromaR976('#ff0000',1,0,0),'#ff0000');
+assert.match(spiralChromaR976('#ff0000',1,0,180),/^#([0-9a-f]{2})\1\1$/);
+assert.equal(spiralChromaR976('#808080',.2,.4,137),'#808080');
+assert.equal(spiralChromaR976('#5fcecb',.3,.4,0),spiralChromaR976('#5fcecb',.3,.4,360));
+for(const invalid of [['red',0,0,0],['#ff0000',NaN,0,0],['#ff0000',0,0,361]])assert.throws(()=>spiralChromaR976(...invalid),RangeError);
+for(const marker of ['spiralChromaR976','materialColorR976(color,p,spiral,phase)','materialColorR976(color,points[edges[i]],spiral,phase)','representation:{mode,rotation,color,spiral,materialPhase}','geometryInvariant:true','gl.vertexAttribPointer(colorLoc','setSpiral(v.spiral===true)'])assert.ok(studio.includes(marker),'R976 studio material continuity missing: '+marker);

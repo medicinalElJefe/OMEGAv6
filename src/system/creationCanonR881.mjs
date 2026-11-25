@@ -195,3 +195,16 @@ export async function byteReceiptR881(text,meta={}){
  const hash=await crypto.subtle.digest('SHA-256',bytes);
  return Object.freeze({schema:'OMEGA_BYTE_RECEIPT_R881',sha256:Array.from(new Uint8Array(hash)).map(n=>n.toString(16).padStart(2,'0')).join(''),byteSize:bytes.byteLength,proofTier:meta.proofTier||'DER',source:meta.source||'R881',physicalProof:false});
 }
+
+// R976: scene-invariant spiral chroma, in linear light. Input coordinates
+// belong to the source geometry, not the camera or the screen. No state writes.
+export function spiralChromaR976(color,x,y,phase=0){
+ if(typeof color!=='string'||!/^#[0-9a-f]{6}$/i.test(color)||![x,y,phase].every(Number.isFinite)||phase<0||phase>360)throw new RangeError('Invalid spiral material input');
+ const decode=v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4;
+ const encode=v=>v<=.0031308?12.92*v:1.055*v**(1/2.4)-.055;
+ const rgb=[1,3,5].map(i=>decode(parseInt(color.slice(i,i+2),16)/255));
+ const luminance=.2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2];
+ const angle=Math.atan2(y,x),radius=Math.hypot(x,y);
+ const chroma=.5+.5*Math.cos(angle-4*Math.PI*radius+phase*Math.PI/180);
+ return '#'+rgb.map(v=>Math.round(255*Math.max(0,Math.min(1,encode(luminance+(v-luminance)*chroma)))).toString(16).padStart(2,'0')).join('');
+}
