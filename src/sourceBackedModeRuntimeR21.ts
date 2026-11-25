@@ -122,3 +122,21 @@ export function compileSourceTraversal(startAddress:number,maxSteps=64){
   }
   return{start,path,closed,boundary:'Trajectory follows the canonical autoPing.dataNext route only. No interpolated state is presented as source data.'};
 }
+
+// R979: bounded, reproducible coverage of the actual R21 contracts.
+// The 179-entry catalog and 62 lenses are not substituted for executors.
+export function chartSourceModeFieldR979(start:number,count:number){
+ if(!Number.isSafeInteger(start)||start<0||start>=20736||!Number.isSafeInteger(count)||count<1||count>144||start+count>20736)throw new RangeError('Invalid canonical chart range');
+ return Array.from({length:count},(_,offset)=>{
+  const address=start+offset,record=corpusState(address);
+  return {address,stateId:record.stateId,coordinates:record.coordinates,modes:evaluateSourceBackedModes(record)};
+ });
+}
+export function modeChartCSVHeaderR979(rows:SourceBackedModeResult[]){
+ return ['address','state_id','d','p','r','l',...rows.flatMap(row=>[row.id+'_state',row.id+'_value',row.id+'_missing'])].join(',');
+}
+const csvR979=(value:unknown)=>'"'+String(value??'').replace(/"/g,'""')+'"';
+export function modeChartCSVRowR979(row:ReturnType<typeof chartSourceModeFieldR979>[number]){
+ const {d,p,r,l}=row.coordinates;
+ return [row.address,row.stateId,d,p,r,l,...row.modes.flatMap(mode=>[csvR979(mode.state),csvR979(mode.value),csvR979(mode.missing.join('; '))])].join(',');
+}

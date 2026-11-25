@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R978 source mode input admission: missing, malformed or nonfinite packet channels no longer silently authorize exact results; R977 all nine exact-head CI workflows passed; R978 candidate pending",
+  "latestGovernedWork": "R979 actual all-address source-mode chart and missing-value trace correction; candidate verification pending",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -513,6 +513,11 @@
     {
       "revision": "R978",
       "conservation": "Existing R21 donor formula evaluation retained, explicit per-mode source input gates for 17 implemented/read-through modes, missing coordinates and invalid route addresses held, nonfinite formula outputs refused, valid zeros retained. Actual runtime negative and positive regression fixtures. R311 separately scoped runtime unchanged; 179 catalog not represented as 179 executable modes.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R979",
+      "conservation": "Bounded 144-address batch chart over existing R21 evaluator; explicit 20736-address CSV operator in current Modes panel, 414720 contract evaluations, held input lists preserved, status counts, null no longer treated as numeric trace; full corpus coverage acceptance test. Registry-only catalog and Canon lenses remain separate; no new formulas invented.",
       "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
     }
   ],

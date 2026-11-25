@@ -98,3 +98,20 @@ assert.equal(invalidCoords.find(row=>row.id==='M016')?.state,'GATED_MISSING_INPU
 const validCoords=evaluateSourceBackedModes({coordinates:{d:0,p:0,r:0,l:0}});
 assert.equal(validCoords.find(row=>row.id==='M020')?.state,'EXECUTED_EXACT');
 assert.equal(evaluateSourceBackedModes({autoPing:{dataNext:20736}}).find(row=>row.id==='M011')?.state,'GATED_MISSING_INPUTS');
+
+ // R979 chart runs the actual hosted corpus, not generated surrogate values.
+const {initCorpusPack,corpusState}=await import('../src/corpusRuntime');
+const {chartSourceModeFieldR979,modeChartCSVHeaderR979,modeChartCSVRowR979}=await import('../src/sourceBackedModeRuntimeR21');
+await initCorpusPack();
+let chartCount=0;const chartStates=new Map<string,number>();
+for(let start=0;start<20736;start+=144){
+ const batch=chartSourceModeFieldR979(start,144);
+ for(const row of batch){assert.equal(row.address,chartCount++);assert.equal(row.stateId,row.address+1);assert.equal(row.modes.length,20);for(const mode of row.modes){chartStates.set(mode.state,(chartStates.get(mode.state)||0)+1);if(mode.state==='GATED_MISSING_INPUTS')assert.equal(mode.value,null)}}
+}
+assert.equal(chartCount,20736);assert.equal([...chartStates.values()].reduce((a,b)=>a+b,0),414720);
+const firstChart=chartSourceModeFieldR979(0,1)[0];
+assert.deepEqual(firstChart.modes,evaluateSourceBackedModes(corpusState(0)));
+assert.equal(modeChartCSVHeaderR979(firstChart.modes).split(',').length,66);
+assert.ok(modeChartCSVRowR979(firstChart).startsWith('0,1,0,0,0,0,'));
+for(const args of [[-1,1],[0,145],[20735,2],[0,0]])assert.throws(()=>chartSourceModeFieldR979(args[0],args[1]),RangeError);
+console.log('R979 full canonical mode chart:',Object.fromEntries(chartStates));
