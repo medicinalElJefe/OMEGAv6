@@ -249,6 +249,25 @@ class LocalHubTests(unittest.TestCase):
                 expected_count=2,expected_sha256=digest(master),expected_bytes=len(master))
         self.assertFalse((self.root/"data"/module.MASTER).exists())
 
+    def test_r963_archive_index_validates_missing_parts_before_hashing(self):
+        import json
+        from unittest.mock import patch
+        folder=self.root/"data"/"r963-parts"
+        folder.mkdir()
+        entry={"index":1,"filename":"part1.zip","bytes":22,"driveId":"TEST_SOURCE_ID_01"}
+        second={**entry,"index":2,"filename":"part2.zip","driveId":"TEST_SOURCE_ID_02"}
+        path=self.root/"data"/"r963-index.json"
+        args={"manifest":"data/r963-index.json","archive_folder":"data/r963-parts","release":"TEST"}
+        for rows,error in (
+            ([entry,{**second,"sha256":"bad"}],"R938_SOURCE_INDEX_DIGEST_SCHEMA_HELD"),
+            ([entry,{**second,"driveId":entry["driveId"]}],"R938_DUPLICATE_DRIVE_SOURCE_HELD"),
+            ([{**entry,"index":True},second],"R938_SOURCE_INDEX_ORDER_HELD")):
+            path.write_text(json.dumps({"schema":"OMEGA_DRIVE_HISTORICAL_ARCHIVE_SOURCE_INDEX_R936",
+                "groups":[{"id":"TEST","expectedParts":2,"parts":rows}]}),encoding="utf-8")
+            with patch.object(hubmod,"sha_file",side_effect=AssertionError("unexpected hash")):
+                with self.assertRaisesRegex(ValueError,error):
+                    hubmod.audit_historical_release_set_r938(self.root,args)
+
     def test_r938_full_release_source_set_batch_hash_and_fail_closed(self):
         import hashlib
         import json

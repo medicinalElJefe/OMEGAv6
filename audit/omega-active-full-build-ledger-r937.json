@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R962 canonical historical executor capsule authority and exact multi-term search across 100 software families; regression pending",
+  "latestGovernedWork": "R963 full archive index preflight validates absent parts and unique Drive identities before source hashing; bind receipt to parsed manifest bytes; R962 exact-head nine workflows passed; R963 tests pending",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -434,6 +434,11 @@
       "revision": "R962",
       "conservation": "All historical execution capsules resolve from canonical registry by system ID; caller cannot override route or execution state; exact ID search ranking and conjunctive term matching; regression covers all 100 families",
       "accepted": "CANDIDATE_SOURCE_ONLY_NOT_INDEPENDENT_HISTORICAL_EXECUTOR_PARITY"
+    },
+    {
+      "revision": "R963",
+      "conservation": "Batch archive audit prevalidates every declared part including absent sources, rejects duplicate Drive identity and boolean index, binds index receipt to exact parsed bytes; regression included",
+      "accepted": "CANDIDATE_SOURCE_ONLY_NOT_ARCHIVE_BYTE_RECOVERY"
     }
   ],
   "independentArchiveUnverifiedOtherListedParts": 77,

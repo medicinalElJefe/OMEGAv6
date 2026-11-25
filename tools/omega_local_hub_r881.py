@@ -108,7 +108,10 @@ def audit_historical_release_set_r938(root: Path, args: dict):
     manifest_path=safe_under(root,manifest_name,True)
     if manifest_path.stat().st_size>262144:
         raise ValueError("R938_SOURCE_INDEX_SIZE_HELD")
-    manifest=json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest_bytes=manifest_path.read_bytes()
+    if len(manifest_bytes)>262144:
+        raise ValueError("R938_SOURCE_INDEX_SIZE_HELD")
+    manifest=json.loads(manifest_bytes.decode("utf-8"))
     if not isinstance(manifest,dict) or manifest.get("schema")!="OMEGA_DRIVE_HISTORICAL_ARCHIVE_SOURCE_INDEX_R936":
         raise ValueError("R938_SOURCE_INDEX_SCHEMA_HELD")
     groups=manifest.get("groups")
@@ -131,8 +134,10 @@ def audit_historical_release_set_r938(root: Path, args: dict):
     verified=[]
     missing=[]
     seen=set()
+    validated=[]
+    seen_drive_ids=set()
     for position,entry in enumerate(entries,1):
-        if not isinstance(entry,dict) or entry.get("index")!=position:
+        if not isinstance(entry,dict) or type(entry.get("index")) is not int or entry["index"]!=position:
             raise ValueError("R938_SOURCE_INDEX_ORDER_HELD")
         filename=entry.get("filename")
         size=entry.get("bytes")
@@ -146,6 +151,15 @@ def audit_historical_release_set_r938(root: Path, args: dict):
             any(ch not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-" for ch in drive_id)):
             raise ValueError("R938_SOURCE_INDEX_MEMBER_HELD")
         seen.add(filename.casefold())
+        if drive_id in seen_drive_ids:
+            raise ValueError("R938_DUPLICATE_DRIVE_SOURCE_HELD")
+        seen_drive_ids.add(drive_id)
+        expected_sha=entry.get("sha256")
+        if expected_sha is not None and (not isinstance(expected_sha,str) or len(expected_sha)!=64 or
+            any(ch not in "0123456789abcdef" for ch in expected_sha)):
+            raise ValueError("R938_SOURCE_INDEX_DIGEST_SCHEMA_HELD")
+        validated.append((position,filename,size,drive_id,expected_sha))
+    for position,filename,size,drive_id,expected_sha in validated:
         file=base/filename
         if not file.exists():
             missing.append(filename)
@@ -169,20 +183,15 @@ def audit_historical_release_set_r938(root: Path, args: dict):
                 member_count=len(infos)
         except (zipfile.BadZipFile,EOFError) as exc:
             raise ValueError("R938_ZIP_METADATA_INVALID_HELD") from exc
-        expected_sha=entry.get("sha256")
-        if expected_sha is not None:
-            if (not isinstance(expected_sha,str) or len(expected_sha)!=64 or
-                any(ch not in "0123456789abcdef" for ch in expected_sha)):
-                raise ValueError("R938_SOURCE_INDEX_DIGEST_SCHEMA_HELD")
-            if sha!=expected_sha:
-                raise ValueError("R938_RELEASE_PART_SHA256_MISMATCH_HELD")
+        if expected_sha is not None and sha!=expected_sha:
+            raise ValueError("R938_RELEASE_PART_SHA256_MISMATCH_HELD")
         verified.append({"index":position,"filename":filename,"driveId":drive_id,
                          "bytes":actual_size,"observedSha256":sha,"zipMemberCount":member_count,
                          "sourceDigestMatched":expected_sha is not None})
     all_located=not missing
     pinned=sum(1 for row in verified if row["sourceDigestMatched"])
     return {"schema":"OMEGA_HISTORICAL_RELEASE_SET_AUDIT_R938",
-            "release":release_id,"sourceIndexSha256":sha_file(manifest_path),
+            "release":release_id,"sourceIndexSha256":hashlib.sha256(manifest_bytes).hexdigest(),
             "expectedParts":expected,"locatedParts":len(verified),
             "missingParts":missing,"verifiedLocalBytes":sum(x["bytes"] for x in verified),
             "originalSourceDigestsMatched":pinned,
