@@ -1,4 +1,4 @@
-import {corpusState} from './corpusRuntime';
+import {corpusState,corpusScarAtR981,isCorpusReady} from './corpusRuntime';
 import {evaluateMode188DriveRuntimeR311,missingMode188InputsR980} from './mode188DriveRuntimeR311';
 
 export const R21_MODE_AUTHORITY={
@@ -53,7 +53,7 @@ export function canonicalFullCanonTermsR308(record:any){
 
 export function evaluateSourceBackedModes(record:any):SourceBackedModeResult[]{
   const C=num(record?.metrics?.continuity),Phi=num(record?.metrics?.plasticity),q=num(record?.metrics?.contradiction),Lambda=num(record?.metrics?.burden),scar=num(record?.metrics?.scar),evidence=num(record?.metrics?.evidence);
-  const prev=validAddress(record?.address)?corpusState((record.address+20735)%20736):null,angle=num(record?.geometry?.phi)*Math.PI*2,canon=canonicalFullCanonTermsR308(record);
+  const previousScar=validAddress(record?.address)&&isCorpusReady()?corpusScarAtR981((record.address+20735)%20736):null,angle=num(record?.geometry?.phi)*Math.PI*2,canon=canonicalFullCanonTermsR308(record);
   const m=record?.metrics,c=record?.coordinates;
   const requirements:Record<string,Array<[string,boolean]>>={
    M001:[['CΩ',strictFinite(m?.continuity)],['Φ',strictFinite(m?.plasticity)],['q',strictFinite(m?.contradiction)],['Λ',strictFinite(m?.burden)]],
@@ -64,7 +64,7 @@ export function evaluateSourceBackedModes(record:any):SourceBackedModeResult[]{
    M006:[['CΩ',strictFinite(m?.continuity)],['Λ',strictFinite(m?.burden)]],
    M007:[['q',strictFinite(m?.contradiction)],['CΩ',strictFinite(m?.continuity)]],
    M008:[['Λ',strictFinite(m?.burden)],['CΩ',strictFinite(m?.continuity)],['Φ',strictFinite(m?.plasticity)]],
-   M009:[['Previous_Scar',strictFinite(prev?.metrics?.scar)],['Angle_Rad',strictFinite(record?.geometry?.phi)],['q',strictFinite(m?.contradiction)],['CΩ',strictFinite(m?.continuity)]],
+   M009:[['Previous_Scar',strictFinite(previousScar)],['Angle_Rad',strictFinite(record?.geometry?.phi)],['q',strictFinite(m?.contradiction)],['CΩ',strictFinite(m?.continuity)]],
    M010:[['CΩ packet channel',strictFinite(m?.continuity)]],
    M011:[['autoPing.dataNext',validAddress(record?.autoPing?.dataNext)]],
    M012:[['predict.decision',validCategory(m?.decision)]],
@@ -91,7 +91,7 @@ export function evaluateSourceBackedModes(record:any):SourceBackedModeResult[]{
     exact('M006','Host-Centered Runtime','HCR=CΩ_host/(Λ_host+ε)','phase2 Mode Ledger',C/(Lambda+EPS),['CΩ','Λ'],'Exact host-centered continuity-to-burden ratio using the current packet.'),
     exact('M007','Contradiction Turbulence','Turb=q/(CΩ+ε)','phase2 Mode Ledger',q/(C+EPS),['q','CΩ'],'Exact instability pressure ratio.'),
     exact('M008','Burden Compression','B=Λ/(CΩ+Φ+ε)','phase2 Mode Ledger',Lambda/(C+Phi+EPS),['Λ','CΩ','Φ'],'Exact load/compression ratio.'),
-    exact('M009','Scar Carry Trigonometry','Scar_next=Previous_Scar·0.972+|sin(Angle_Rad)|·q·(1-CΩ)','Full Canon Formula_Ledger',num(prev?.metrics?.scar)*.972+Math.abs(Math.sin(angle))*q*(1-C),['Previous_Scar','Angle_Rad','q','CΩ'],'Previous scar is taken from the immediately prior canonical state; Angle_Rad is reconstructed from the packet phase geometry.'),
+    exact('M009','Scar Carry Trigonometry','Scar_next=Previous_Scar·0.972+|sin(Angle_Rad)|·q·(1-CΩ)','Full Canon Formula_Ledger',num(previousScar)*.972+Math.abs(Math.sin(angle))*q*(1-C),['Previous_Scar','Angle_Rad','q','CΩ'],'Previous scar is taken from the immediately prior canonical state; Angle_Rad is reconstructed from the packet phase geometry.'),
     packet('M010','Continuity-Field Runtime','CΩ = retained lawful links / total links','phase2 Mode Ledger',C,['CΩ packet channel'],'The current packet contains the resulting CΩ channel but not the underlying link-count ledger, so the packet value is exposed without pretending to recompute the ratio.'),
     packet('M011','Traversal Engine','Next=argmax(S_i) / admitted route','phase2 Mode Ledger',Number(record?.autoPing?.dataNext)+1,['autoPing.dataNext'],'The hosted runtime carries a deterministic admitted route produced by the canonical route logic. Candidate score vectors are not fabricated.', 'DERIVED_RUNTIME'),
     packet('M012','Guidance Field','STAY / TURN / ESCALATE source decision','phase2 Mode Ledger',String(record?.metrics?.decision||'UNKNOWN'),['predict.decision'],'Exact categorical source decision. The donor ledger names max(S,T,E), but the three raw candidate score channels are not separately present.'),

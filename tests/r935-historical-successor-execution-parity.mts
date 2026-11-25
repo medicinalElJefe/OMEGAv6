@@ -100,8 +100,9 @@ assert.equal(validCoords.find(row=>row.id==='M020')?.state,'EXECUTED_EXACT');
 assert.equal(evaluateSourceBackedModes({autoPing:{dataNext:20736}}).find(row=>row.id==='M011')?.state,'GATED_MISSING_INPUTS');
 
  // R979 chart runs the actual hosted corpus, not generated surrogate values.
-const {initCorpusPack,corpusState}=await import('../src/corpusRuntime');
+const {initCorpusPack,corpusState,corpusScarAtR981}=await import('../src/corpusRuntime');
 const {chartSourceModeFieldR979,modeChartCSVHeaderR979,modeChartCSVRowR979}=await import('../src/sourceBackedModeRuntimeR21');
+assert.throws(()=>corpusScarAtR981(-1));
 await initCorpusPack();
 let chartCount=0;const chartStates=new Map<string,number>();
 for(let start=0;start<20736;start+=144){
@@ -129,18 +130,27 @@ assert.equal(explicitR311(0,0,0,0).decision,'ESCALATE');
 assert.equal(explicitR311(0,1,0,0).decision,'STAY');
 assert.equal(explicitR311(9,1,0,0).decision,'TURN');
 assert.equal(explicitR311(10,10,.6,0).decision,'ESCALATE');
-let driveChecks=0,driveHeld=0;const driveDecisions:Record<string,number>={};
+let driveChecks=0,driveHeld=0,scarChecks=0;const driveDecisions:Record<string,number>={};
 for(let start=0;start<20736;start+=144){
  for(const row of chartSourceModeFieldR979(start,144)){
   driveChecks++;
+  const packet=corpusState(row.address);
+  assert.equal(corpusScarAtR981(row.address),packet.metrics.scar,'R981 direct scar channel must equal original packet at every address');
+  const prev=corpusState((row.address+20735)%20736);
+  const expectedScar=Number((prev.metrics.scar*.972+Math.abs(Math.sin(packet.geometry.phi*Math.PI*2))*packet.metrics.contradiction*(1-packet.metrics.continuity)).toFixed(6));
+  assert.equal(row.modes.find(mode=>mode.id==='M009')?.value,expectedScar);scarChecks++;
   if(!row.mode188Drive){driveHeld++;assert.ok(row.mode188Missing.length);continue}
-  const d=row.mode188Drive,packet=corpusState(row.address),C=packet.metrics.continuity,L=packet.metrics.burden,q=packet.metrics.contradiction,D=packet.coordinates.d+1;
+  const d=row.mode188Drive,C=packet.metrics.continuity,L=packet.metrics.burden,q=packet.metrics.contradiction,D=packet.coordinates.d+1;
   const ratio=C/(L+q+.35*L*q+.05);
   const expected=ratio>=1.05&&D!==10&&D!==11?'STAY':ratio<.75||(D===11&&q>.5)?'ESCALATE':'TURN';
   assert.ok(Math.abs(d.sratio-ratio)<=1e-8);assert.equal(d.decision,expected);
   driveDecisions[expected]=(driveDecisions[expected]||0)+1;
  }
 }
-assert.equal(driveChecks,20736);
+assert.equal(driveChecks,20736);assert.equal(scarChecks,20736);
+assert.throws(()=>corpusScarAtR981(20736),RangeError);
+const sourceModesR981=readFileSync('src/sourceBackedModeRuntimeR21.ts','utf8');
+assert.ok(sourceModesR981.includes('corpusScarAtR981((record.address+20735)%20736)'));
+assert.ok(!sourceModesR981.includes('corpusState((record.address+20735)%20736)'));
 assert.equal(driveHeld+Object.values(driveDecisions).reduce((a,b)=>a+b,0),20736);
 console.log('R980 independent R311 full field comparison:',{driveChecks,driveHeld,driveDecisions});
