@@ -32,3 +32,17 @@
 .sbm21-authorities>footer{display:flex;gap:7px;align-items:flex-start;padding:8px 10px;border-top:1px solid #203237;color:#748b88;font:7px/1.45 ui-monospace,monospace}.sbm21-authorities>footer svg{width:13px;flex:0 0 auto;color:#65c7b7}
 @media(max-width:1100px){.sbm21-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:760px){.sbm21-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.sbm21-authority-grid{grid-template-columns:1fr}.sbm21-authorities>header{align-items:flex-start;flex-direction:column}.sbm21-authorities>header>div{align-items:flex-start;flex-wrap:wrap}.sbm21-authorities>header button{width:100%;justify-content:center}}
+
+/* R984: native disclosure remains closed even when author CSS overrides child display. */
+
+.sbm21-catalog[data-r982-donor-formula]:not([open]) > :not(summary){display:none!important}
+.sbm21-catalog[data-r982-donor-formula] > summary{cursor:pointer;padding:12px;min-height:44px;box-sizing:border-box;font-weight:600;overflow-wrap:anywhere}
+.sbm21-catalog[data-r982-donor-formula][open] > .sbm21-donor-body{display:grid;gap:10px;padding:12px;min-width:0;border-top:1px solid #203237}
+.sbm21-donor-body .sbm21-donor-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:8px;min-width:0}
+.sbm21-donor-body label{display:grid;gap:5px;min-width:0;max-width:100%;padding:8px;overflow-wrap:anywhere}
+.sbm21-donor-body label:has(> input[type=checkbox]){display:flex;align-items:center;flex-wrap:wrap}
+.sbm21-donor-body input[type=checkbox]{width:auto;flex:0 0 auto}
+.sbm21-donor-body input:not([type=checkbox]),.sbm21-donor-body select{box-sizing:border-box;width:100%;min-width:0;max-width:100%;min-height:44px;font-size:inherit}
+.sbm21-donor-body select{background:#081419;color:#dfe9e7;border:1px solid #31504d;border-radius:6px}
+.sbm21-donor-body button{min-height:44px;max-width:100%;white-space:normal;overflow-wrap:anywhere}
+.sbm21-donor-body pre,.sbm21-donor-body output{min-width:0;max-width:100%;white-space:pre-wrap;overflow-wrap:anywhere}
