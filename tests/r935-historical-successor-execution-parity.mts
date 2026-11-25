@@ -154,3 +154,31 @@ assert.ok(sourceModesR981.includes('corpusScarAtR981((record.address+20735)%2073
 assert.ok(!sourceModesR981.includes('corpusState((record.address+20735)%20736)'));
 assert.equal(driveHeld+Object.values(driveDecisions).reduce((a,b)=>a+b,0),20736);
 console.log('R980 independent R311 full field comparison:',{driveChecks,driveHeld,driveDecisions});
+
+ // R982 source variants execute only with explicit input provenance and values.
+const {DONOR_FORMULA_HOOKS_R982,evaluateDonorFormulaR982}=await import('../src/sourceBackedModeRuntimeR21');
+const fixturesR982:Array<[string,Record<string,unknown>,number]>=[
+ ['RAFT',{Recovery:1,Anchor:2,Forecast:3,Transform:4},10],
+ ['GAMMA',{Novelty:.5,Fit:.5,Proof:.5},.125],
+ ['RENDER',{layers:[2,4],weights:[.5,.25]},2],
+ ['PROOF',{Verified:3,Claimed:4},.75],
+ ['SCAR',{Impact:2,Persistence:3,Lesson:4},24],
+ ['EVOLVE',{Continuity:3,Plasticity:2,Contradiction:1},4],
+ ['SHORTCUT',{Outcome:8,Cost:2},4],
+ ['BALANCE',{Symmetry:3,Asymmetry:2,Epsilon:1},1],
+ ['MEMETIC',{Clarity:.5,Repeatability:.5,Continuity:4},1],
+ ['MOTHER_PHASE2',{Continuity:3,Care:2,Burden:2,Epsilon:1},2],
+ ['FATHER_PHASE2',{Proof:4,Aim:2,Contradiction:1,Burden:2,Epsilon:1},2]
+];
+assert.equal(DONOR_FORMULA_HOOKS_R982.length,fixturesR982.length);
+for(const [id,inputs,expected] of fixturesR982){
+ const receipt=evaluateDonorFormulaR982(id,inputs,'Explicit numerical test fixture');
+ assert.equal(receipt.value,expected);assert.equal(receipt.admissionGranted,false);assert.equal(receipt.canonicalMutation,false);
+ assert.throws(()=>evaluateDonorFormulaR982(id,inputs,''));
+ for(const key of Object.keys(inputs))assert.throws(()=>evaluateDonorFormulaR982(id,{...inputs,[key]:null},'fixture'));
+}
+assert.throws(()=>evaluateDonorFormulaR982('RENDER',{layers:[1,2],weights:[1]},'fixture'),/counts differ/);
+assert.throws(()=>evaluateDonorFormulaR982('PROOF',{Verified:4,Claimed:3},'fixture'));
+assert.throws(()=>evaluateDonorFormulaR982('SHORTCUT',{Outcome:1,Cost:0},'fixture'));
+assert.throws(()=>evaluateDonorFormulaR982('GAMMA',{Novelty:Number.MAX_VALUE,Fit:2,Proof:1},'fixture'),/Nonfinite/);
+assert.equal(evaluateSourceBackedModes({}).find(x=>x.id==='M017')?.state,'GATED_MISSING_INPUTS');

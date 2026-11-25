@@ -142,3 +142,61 @@ export function modeChartCSVRowR979(row:ReturnType<typeof chartSourceModeFieldR9
  const {d,p,r,l}=row.coordinates;
  return [row.address,row.stateId,d,p,r,l,...row.modes.flatMap(mode=>[csvR979(mode.state),csvR979(mode.value),csvR979(mode.missing.join('; '))]),csvR979(row.mode188Drive?'FORMULA_EXACT_PACKET_INPUTS':'GATED_MISSING_INPUTS'),csvR979(row.mode188Drive?.sratio),csvR979(row.mode188Drive?.decision),csvR979(row.mode188Drive?.packetGate),csvR979(row.mode188Drive?.agreesWithComparablePacketGate),csvR979(row.mode188Missing.join('; '))].join(',');
 }
+
+// R982: additional exact hooks recovered from phase2 Mode Ledger.
+// These are parameterized computations, not empirical or canonical admission.
+// Distinct variant IDs avoid confusing the earlier Mother/Father formulas
+// with the R308 formal blend or the R311 workbook decision law.
+export const DONOR_FORMULA_HOOKS_R982=Object.freeze([
+ {id:'RAFT',name:'RAFT-188',formula:'R+A+F+T',fields:['Recovery','Anchor','Forecast','Transform']},
+ {id:'GAMMA',name:'Gamma admission score',formula:'Novelty*Fit*Proof',fields:['Novelty','Fit','Proof']},
+ {id:'RENDER',name:'Renderer layer composition',formula:'Σ(layer_i*weight_i)',fields:['layers','weights']},
+ {id:'PROOF',name:'Proof ledger ratio',formula:'Verified/Claimed',fields:['Verified','Claimed']},
+ {id:'SCAR',name:'Scar ledger product',formula:'Impact*Persistence*Lesson',fields:['Impact','Persistence','Lesson']},
+ {id:'EVOLVE',name:'Continuance/Evolution',formula:'CΩ+Φ-q',fields:['Continuity','Plasticity','Contradiction']},
+ {id:'SHORTCUT',name:'Shortcut operator',formula:'Outcome/Cost',fields:['Outcome','Cost']},
+ {id:'BALANCE',name:'Symmetry/asymmetry balance',formula:'Sym/(Asym+ε)',fields:['Symmetry','Asymmetry','Epsilon']},
+ {id:'MEMETIC',name:'Memetic encoding',formula:'Clarity*Repeatability*CΩ',fields:['Clarity','Repeatability','Continuity']},
+ {id:'MOTHER_PHASE2',name:'Deep Mother — phase2 variant',formula:'CΩ*Care/(Λ+ε)',fields:['Continuity','Care','Burden','Epsilon']},
+ {id:'FATHER_PHASE2',name:'High Father — phase2 variant',formula:'Proof*Aim/(q+Λ+ε)',fields:['Proof','Aim','Contradiction','Burden','Epsilon']}
+] as const);
+export function evaluateDonorFormulaR982(id:string,raw:Record<string,unknown>,inputSource:string){
+ const spec=DONOR_FORMULA_HOOKS_R982.find(x=>x.id===id);
+ if(!spec)throw new Error('Unknown donor formula variant');
+ if(typeof inputSource!=='string'||!inputSource.trim()||inputSource.length>512)throw new Error('Explicit input provenance required');
+ if(!raw||typeof raw!=='object'||Array.isArray(raw))throw new Error('Explicit formula input object required');
+ const values:Record<string,number|number[]>={};
+ for(const field of spec.fields){
+  const value=raw[field];
+  if(field==='layers'||field==='weights'){
+   if(!Array.isArray(value)||value.length<1||value.length>20736||!value.every(strictFinite))throw new Error('Invalid or missing '+field);
+   values[field]=Array.from(value);
+  }else{
+   if(!strictFinite(value))throw new Error('Invalid or missing '+field);
+   values[field]=value;
+  }
+ }
+ const n=(key:string)=>values[key] as number;
+ const ratio=(a:number,b:number)=>{if(!Number.isFinite(b)||b===0)throw new Error('Undefined or nonfinite denominator');return a/b};
+ let result:number;
+ switch(id){
+  case 'RAFT':result=n('Recovery')+n('Anchor')+n('Forecast')+n('Transform');break;
+  case 'GAMMA':result=n('Novelty')*n('Fit')*n('Proof');break;
+  case 'RENDER':{
+   const layers=values.layers as number[],weights=values.weights as number[];
+   if(layers.length!==weights.length)throw new Error('Layer and weight counts differ');
+   result=0;for(let i=0;i<layers.length;i++)result+=layers[i]*weights[i];break;
+  }
+  case 'PROOF':if(!Number.isSafeInteger(n('Verified'))||!Number.isSafeInteger(n('Claimed'))||n('Verified')<0||n('Claimed')<1||n('Verified')>n('Claimed'))throw new Error('Invalid verified/claimed counts');result=ratio(n('Verified'),n('Claimed'));break;
+  case 'SCAR':result=n('Impact')*n('Persistence')*n('Lesson');break;
+  case 'EVOLVE':result=n('Continuity')+n('Plasticity')-n('Contradiction');break;
+  case 'SHORTCUT':if(n('Cost')<=0)throw new Error('Positive cost required');result=ratio(n('Outcome'),n('Cost'));break;
+  case 'BALANCE':if(n('Epsilon')<=0)throw new Error('Positive epsilon required');result=ratio(n('Symmetry'),n('Asymmetry')+n('Epsilon'));break;
+  case 'MEMETIC':result=n('Clarity')*n('Repeatability')*n('Continuity');break;
+  case 'MOTHER_PHASE2':if(n('Epsilon')<=0)throw new Error('Positive epsilon required');result=ratio(n('Continuity')*n('Care'),n('Burden')+n('Epsilon'));break;
+  case 'FATHER_PHASE2':if(n('Epsilon')<=0)throw new Error('Positive epsilon required');result=ratio(n('Proof')*n('Aim'),n('Contradiction')+n('Burden')+n('Epsilon'));break;
+  default:throw new Error('Unknown donor formula variant');
+ }
+ if(!Number.isFinite(result))throw new Error('Nonfinite formula result');
+ return {schema:'OMEGA_DONOR_FORMULA_SCENARIO_R982',id:spec.id,name:spec.name,formula:spec.formula,source:'dewey_canon_phase2_objective_workbook.xlsx / Mode Ledger',inputSource:inputSource.trim(),inputs:values,value:result,evidence:'OPERATOR_SUPPLIED_FORMULA_SCENARIO',canonicalMutation:false,admissionGranted:false,empirical:false} as const;
+}

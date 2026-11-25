@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R981 eliminate redundant predecessor packet reconstruction from historical scar calculus; full 20736-address scalar and M009 parity acceptance; candidate CI pending",
+  "latestGovernedWork": "R982 recover eleven explicit phase2 equation hooks into current Modes runtime and operator calculator with scoped provenance and exact formula fixtures; R981 exact-head nine workflows passed; candidate pending",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -528,6 +528,11 @@
     {
       "revision": "R981",
       "conservation": "Use original normalized psc.Scar_Score channel directly for previous-state dependency, avoiding one complete predecessor packet reconstruction per evaluation (20736 per full chart). Preserve arithmetic order, address wrap, and missing-input gate; exact full field scalar parity and original M009 formula comparison, no new cache or authority. Timing not measured.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R982",
+      "conservation": "Phase2 Mode Ledger recovered from dewey_canon_phase2_objective_workbook.xlsx; actual explicit RAFT, Gamma, renderer weighted sum, proof ledger, scar product, evolution, shortcut, balance, memetic, phase2 Mother and Father formulas integrated in existing R21 runtime and UI. Scenario provenance, bounded vectors, finite inputs, denominator and proof-count checks, 11 positive fixtures and per-input negative tests; no admission or canonical mutation; canonical held modes and R308/R311 variants remain separate.",
       "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
     }
   ],
