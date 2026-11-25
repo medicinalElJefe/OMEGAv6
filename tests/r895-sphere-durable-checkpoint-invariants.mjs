@@ -14,6 +14,18 @@ assert.ok(copied.fabric.active instanceof Map);
 assert.equal(copied.fabric.active.get(root).values.size,20736);
 assert.equal(copied.fabric.active.get(root).values.get(20735),baseline(root,20735),'float64 survives structured clone');
 assert.equal(validateDurableR895(copied.fabric,copied.session).modifiedValues,248832);
+// R974: existing coordinates remain writable at the durable limit, but a
+// new coordinate is refused before dequeue, activation, tick or epoch mutation.
+const capped=structuredClone(fabric);
+submitTask(capped,{agent:root,kind:'RELAX',inner:0});
+assert.equal(stepFabric(capped,1).length,1);
+submitTask(capped,{agent:root+12,kind:'RELAX',inner:0});
+const beforeRefusal=structuredClone(capped);
+assert.throws(()=>stepFabric(capped,1),/Durable state budget exceeded/);
+assert.deepEqual(capped,beforeRefusal);
+const overflow=createFabric();overflow.sequence=Number.MAX_SAFE_INTEGER;
+assert.throws(()=>submitTask(overflow,{agent:root,kind:'OBSERVE'}),/sequence exhausted/);
+assert.equal(overflow.queue.length,0);
 const extra=getAgent(fabric,root+12);extra.values.set(0,.123);
 assert.throws(()=>validateDurableR895(fabric,session),/budget exceeded/);
 fabric.active.delete(extra.id);

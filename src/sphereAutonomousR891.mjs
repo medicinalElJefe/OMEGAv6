@@ -1,6 +1,6 @@
 // R891 deterministic bounded autonomy: explicit local-only scheduling for independently addressable agents.
 // No remote inference, network, durable persistence, or new CanonState writer.
-import {AGENTS,SIZE,neighbors,stateValue,submitTask,stepFabric,phaseSampleR918} from './sphereAgentFabricR887.mjs';
+import {AGENTS,SIZE,neighbors,stateValue,submitTask,stepFabric,phaseSampleR918,taskStateCapacityR974} from './sphereAgentFabricR887.mjs';
 export const R891_SCHEMA='OMEGA_SPHERE_AUTONOMOUS_LOCAL_R891';
 export function autonomousTickR891(fabric,members,inner,cursor=0,budget=1,phaseExchange=false){
  if(typeof phaseExchange!=='boolean')throw new RangeError('Explicit phase exchange flag required');
@@ -24,7 +24,9 @@ export function autonomousTickR891(fabric,members,inner,cursor=0,budget=1,phaseE
   const participants=kind==='EXCHANGE'?[id,target]:[id];
   const missing=participants.filter(n=>!fabric.active.has(n)).length;
   if(fabric.active.size+missing>512)return{schema:R891_SCHEMA,mode:'HELD_CAPACITY',receipts,nextCursor,cloudCalls:0,canonicalWrites:0,refusal:'No agent state or queue was mutated for the refused task'};
-  submitTask(fabric,{agent:id,kind,inner,target:kind==='EXCHANGE'?target:null,weight:.20,...(kind==='PHASE_EXCHANGE'?{phase}:{})});
+  const task={agent:id,kind,inner,target:kind==='EXCHANGE'?target:null,weight:.20,...(kind==='PHASE_EXCHANGE'?{phase}:{})};
+  if(!taskStateCapacityR974(fabric,task).allowed)return{schema:R891_SCHEMA,mode:'HELD_CAPACITY',receipts,nextCursor,cloudCalls:0,canonicalWrites:0,refusal:'Durable state budget exceeded; refused before queue mutation'};
+  submitTask(fabric,task);
   receipts.push(...stepFabric(fabric,1));nextCursor++;
  }
  return{schema:R891_SCHEMA,mode:'LOCAL_DETERMINISTIC_AUTONOMY',receipts,nextCursor,cloudCalls:0,canonicalWrites:0}

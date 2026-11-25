@@ -1,8 +1,8 @@
 // R895: atomic IndexedDB exact-float64 state persistence for a bounded complete 12-agent × 20,736 inner-state sweep.
 // No silent truncation, no automatic cloud work, and no second CanonState writer.
-import {AGENTS,SIZE,neighbors,phaseNeighborR919} from './sphereAgentFabricR887.mjs';
+import {AGENTS,SIZE,neighbors,phaseNeighborR919,MAX_PERSISTABLE_VALUES_R974} from './sphereAgentFabricR887.mjs';
 export const R895_SCHEMA='OMEGA_SPHERE_DURABLE_CHECKPOINT_R895';
-export const R895_MAX_VALUES=12*SIZE;
+export const R895_MAX_VALUES=MAX_PERSISTABLE_VALUES_R974;
 const DB='omega-sphere-durable-r895',STORE='checkpoints',KEY='latest';
 const idx=(x,max)=>Number.isSafeInteger(x)&&x>=0&&x<max;
 const finite=(x)=>typeof x==='number'&&Number.isFinite(x);
