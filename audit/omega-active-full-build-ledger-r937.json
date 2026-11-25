@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R969 canonicalize both historical capability launch and persisted focus; R968 exact head nine workflows passed; candidate verification pending",
+  "latestGovernedWork": "R970 repair R969 inherited R512 host integration contract failure; preserve canonical restoration and filter binding within native host; CI pending",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -468,6 +468,11 @@
     {
       "revision": "R969",
       "conservation": "Canonical capability-lineage launch lookup; persisted focus re-resolved against original system/capability registries before use, asynchronous restore cannot overwrite newer launch/clear, unrelated routes do not receive stale launch binding; 100-system forged-storage regression checks",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R970",
+      "conservation": "R969 Cloud Bridge failed R512 source integration assertion. Restore existing root softwareLaunch interface and enforce route-scoped binding at native host boundary; retain inherited assertion and add regression for stale binding.",
       "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
     }
   ],

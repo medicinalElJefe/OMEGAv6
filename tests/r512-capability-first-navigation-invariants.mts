@@ -117,6 +117,8 @@ for(const token of [
  "autoOpen={Boolean(softwareLaunch&&softwareLaunch.route===route)}"
 ])assert.ok(native.includes(token),'R512 native executor actuation missing '+token);
 
+assert.ok(native.includes('const boundLaunch=softwareLaunch?.route===route?softwareLaunch:null'),'R970 route-scoped focus must be resolved inside the native host');
+assert.ok(native.includes("data-r512-binding={boundLaunch?.recoveredId||''}"),'R970 unrelated routes must not expose a stale historical binding');
 const css=fs.readFileSync('src7/omega7.css','utf8');
 for(const token of [
  "R512 · CAPABILITY-FIRST NAVIGATION + RESOLVED HISTORICAL EXECUTION",
