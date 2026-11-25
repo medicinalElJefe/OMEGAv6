@@ -357,6 +357,9 @@ async function prove(browser,label,viewport){
   assert.equal((await durableLab.locator('[data-r895-exact-inner-value]').innerText()).split('Exact selected state: ')[1],'0');
   console.log('R895 FULL-CAPACITY '+label.toUpperCase()+' PASS: real IndexedDB restores all 248,832 float64 values across 12 logical agents.');
 
+  const savedAddressText=await durableLab.locator('[data-r895-global-address]').innerText();
+  const savedAddress=savedAddressText.match(/Global nested address: ([\d,]+) \//)?.[1].replaceAll(',','');
+  assert.ok(savedAddress,'full-capacity fixture must expose its existing selected address');
   // R895 GLOBAL ADDRESS: navigate the entire 5,159,780,352-coordinate
   // address universe without allocating 248,832 agents or their states.
   const jump=durableLab.getByLabel('Global nested address');
@@ -375,6 +378,20 @@ async function prove(browser,label,viewport){
   await durableLab.getByRole('alert').getByText(/Global address navigation refused/).waitFor({state:'visible',timeout:8000});
   assert.match(await durableLab.locator('[data-r895-global-address]').innerText(),/Global nested address: 0 \/ 5,159,780,351/);
   console.log('R895 GLOBAL ADDRESS '+label.toUpperCase()+' PASS: first/last exact nested addresses, shell/inner projection, invalid address refusal.');
+  // R975: maximum global address is outside the 12 consecutive fixture
+  // agents. A capacity refusal must preserve the current analytical result.
+  await jump.fill('5159780351');
+  await durableLab.getByRole('button',{name:'Go to exact nested address'}).click();
+  await durableLab.getByRole('button',{name:'Analyze full collective field'}).click();
+  const heldAnalysis=await durableLab.locator('[data-r895-field-result]').innerText();
+  const heldState=await durableLab.locator('[data-r895-exact-inner-value]').innerText();
+  await durableLab.getByRole('button',{name:'Local update'}).click();
+  await durableLab.getByRole('alert').getByText(/Durable state budget exceeded/).waitFor({state:'visible',timeout:8000});
+  assert.equal(await durableLab.locator('[data-r895-field-result]').innerText(),heldAnalysis);
+  assert.equal(await durableLab.locator('[data-r895-exact-inner-value]').innerText(),heldState);
+  // Return to a materialized coordinate: mutation is legal at capacity.
+  await jump.fill(savedAddress);
+  await durableLab.getByRole('button',{name:'Go to exact nested address'}).click();
   // R895 FIELD BROWSER: entire 12 × 20,736 lazy state field is read through
   // the actual operator control, with an explicitly invalidated stale result.
   await durableLab.getByLabel('Collective member count').selectOption('12');

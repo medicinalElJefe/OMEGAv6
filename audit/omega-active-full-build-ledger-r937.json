@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R974 shared durable state admission before execution; exact capacity and integer checks; R973 nine workflows passed; candidate pending",
+  "latestGovernedWork": "R975 reconcile R974 capacity admission with real browser mutation and stale analytics proof; R241 failure traced to full-capacity fixture selecting unmaterialized agent; candidate CI pending",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -493,6 +493,11 @@
     {
       "revision": "R974",
       "conservation": "Shared R887/R895 persistable-state budget; preflight exact new coordinates before task dequeue or autonomous submission; preserve existing coordinate writes at limit; reject sequence/tick/epoch overflow; regression verifies no mutation on refusal.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R975",
+      "conservation": "R241 R895 browser failed waiting for stale analysis after capacity-refused update. Manual task preflight refuses before enqueue; actual completed tick invalidates analytics even on partial batch error; browser proves refused new allocation preserves analysis and existing allocated coordinate mutation invalidates it; inherited route proof retained.",
       "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
     }
   ],
