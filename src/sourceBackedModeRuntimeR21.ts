@@ -169,7 +169,7 @@ export function evaluateDonorFormulaR982(id:string,raw:Record<string,unknown>,in
  for(const field of spec.fields){
   const value=raw[field];
   if(field==='layers'||field==='weights'){
-   if(!Array.isArray(value)||value.length<1||value.length>20736||!value.every(strictFinite))throw new Error('Invalid or missing '+field);
+   if(!Array.isArray(value)||value.length<1||value.length>20736||!Array.from(value).every(strictFinite))throw new Error('Invalid or missing '+field);
    values[field]=Array.from(value);
   }else{
    if(!strictFinite(value))throw new Error('Invalid or missing '+field);
@@ -199,4 +199,52 @@ export function evaluateDonorFormulaR982(id:string,raw:Record<string,unknown>,in
  }
  if(!Number.isFinite(result))throw new Error('Nonfinite formula result');
  return {schema:'OMEGA_DONOR_FORMULA_SCENARIO_R982',id:spec.id,name:spec.name,formula:spec.formula,source:'dewey_canon_phase2_objective_workbook.xlsx / Mode Ledger',inputSource:inputSource.trim(),inputs:values,value:result,evidence:'OPERATOR_SUPPLIED_FORMULA_SCENARIO',canonicalMutation:false,admissionGranted:false,empirical:false} as const;
+}
+
+// R983: bind only identically named source channels. Operator-supplied
+// constants remain scenarios; evidence weight is not Proof and forecast
+// signal is not automatically the RAFT forecast term.
+export const DONOR_PACKET_BINDINGS_R983=Object.freeze({
+ EVOLVE:Object.freeze({Continuity:'metrics.continuity',Plasticity:'metrics.plasticity',Contradiction:'metrics.contradiction'}),
+ BALANCE:Object.freeze({Symmetry:'geometry.symmetry',Asymmetry:'geometry.asymmetry'}),
+ MEMETIC:Object.freeze({Continuity:'metrics.continuity'}),
+ MOTHER_PHASE2:Object.freeze({Continuity:'metrics.continuity',Burden:'metrics.burden'}),
+ FATHER_PHASE2:Object.freeze({Contradiction:'metrics.contradiction',Burden:'metrics.burden'})
+});
+export function donorPacketBindingsR983(id:string):Readonly<Record<string,string>>{
+ return Object.prototype.hasOwnProperty.call(DONOR_PACKET_BINDINGS_R983,id)?DONOR_PACKET_BINDINGS_R983[id as keyof typeof DONOR_PACKET_BINDINGS_R983]:Object.freeze({});
+}
+export function evaluateBoundDonorR983(id:string,record:any,extra:Record<string,unknown>,inputSource:string){
+ const bindings=donorPacketBindingsR983(id),boundFields=Object.keys(bindings);
+ if(!boundFields.length)throw new Error('No established packet binding for this variant');
+ if(!validAddress(record?.address))throw new RangeError('Invalid canonical source address');
+ const spec=DONOR_FORMULA_HOOKS_R982.find(x=>x.id===id)!;
+ if(!extra||typeof extra!=='object'||Array.isArray(extra))throw new Error('Explicit additional input object required');
+ const inputs:Record<string,unknown>={},provenance:Record<string,string>={},missing:string[]=[];
+ for(const key of Object.keys(extra)){
+  if(Object.prototype.hasOwnProperty.call(bindings,key))throw new Error('Cannot override source-bound channel '+key);
+  if(!(spec.fields as readonly string[]).includes(key))throw new Error('Unknown formula input '+key);
+ }
+ for(const field of spec.fields){
+  const binding=bindings[field];
+  if(binding){
+   const [section,key]=binding.split('.');
+   inputs[field]=record?.[section]?.[key];
+   provenance[field]='CANONICAL_PACKET:'+binding;
+  }else{
+   inputs[field]=extra[field];
+   provenance[field]='OPERATOR_SCENARIO:'+inputSource;
+  }
+  if(!strictFinite(inputs[field]))missing.push(field);
+ }
+ const base={address:record.address,id,formula:spec.formula,source:'dewey_canon_phase2_objective_workbook.xlsx / Mode Ledger',inputProvenance:provenance,canonicalMutation:false,admissionGranted:false,empirical:false} as const;
+ if(missing.length)return {...base,state:'GATED_MISSING_INPUTS' as const,missing,value:null};
+ const additional=spec.fields.filter(field=>!bindings[field]);
+ const receipt=evaluateDonorFormulaR982(id,inputs,additional.length?inputSource:'Canonical source-derived packet channels');
+ return {...base,state:additional.length?'SOURCE_AND_SCENARIO_INPUTS' as const:'FORMULA_EXACT_PACKET_INPUTS' as const,missing:[],value:receipt.value};
+}
+export function chartBoundDonorFieldR983(id:string,start:number,count:number,extra:Record<string,unknown>,inputSource:string){
+ if(!Number.isSafeInteger(start)||start<0||!Number.isSafeInteger(count)||count<1||count>144||start+count>20736)throw new RangeError('Invalid canonical chart range');
+ if(!Object.keys(donorPacketBindingsR983(id)).length)throw new Error('No established packet binding for this variant');
+ return Array.from({length:count},(_,offset)=>evaluateBoundDonorR983(id,corpusState(start+offset),extra,inputSource));
 }

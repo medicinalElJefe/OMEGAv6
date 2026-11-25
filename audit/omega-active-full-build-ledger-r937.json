@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R982 recover eleven explicit phase2 equation hooks into current Modes runtime and operator calculator with scoped provenance and exact formula fixtures; R981 exact-head nine workflows passed; candidate pending",
+  "latestGovernedWork": "R983 connect five recovered source formulas to existing canonical packet channels, explicit scenario dependencies retained, bounded full-field export with provenance and independent 20736-address EVOLVE parity; R982 CI pending at inspection",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -533,6 +533,11 @@
     {
       "revision": "R982",
       "conservation": "Phase2 Mode Ledger recovered from dewey_canon_phase2_objective_workbook.xlsx; actual explicit RAFT, Gamma, renderer weighted sum, proof ledger, scar product, evolution, shortcut, balance, memetic, phase2 Mother and Father formulas integrated in existing R21 runtime and UI. Scenario provenance, bounded vectors, finite inputs, denominator and proof-count checks, 11 positive fixtures and per-input negative tests; no admission or canonical mutation; canonical held modes and R308/R311 variants remain separate.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R983",
+      "conservation": "R982 formula engine reused for EVOLVE, BALANCE, MEMETIC, MOTHER_PHASE2 and FATHER_PHASE2 source-channel bindings. No evidence weight as proof, no guessed RAFT terms, no overrides of bound fields. Current address execution and bounded complete 20736-address portable field export with input provenance. All-field independent evolution checks, missing/override/range rejection, sparse vector hole validation. Canonical writes and admission remain false.",
       "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
     }
   ],

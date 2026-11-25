@@ -119,6 +119,8 @@ console.log('R979 full canonical mode chart:',Object.fromEntries(chartStates));
 
  // R980: independent reference for the original workbook threshold order.
 const {evaluateMode188DriveRuntimeR311,missingMode188InputsR980}=await import('../src/mode188DriveRuntimeR311');
+const {evaluateBoundDonorR983,chartBoundDonorFieldR983,donorPacketBindingsR983}=await import('../src/sourceBackedModeRuntimeR21');
+let evolveChecks=0;
 for(const bad of [undefined,null,'0',NaN,Infinity,-1]){
  const record={coordinates:{d:0},metrics:{continuity:bad,burden:0,contradiction:0}};
  assert.deepEqual(missingMode188InputsR980(record),['CΩ']);
@@ -135,6 +137,8 @@ for(let start=0;start<20736;start+=144){
  for(const row of chartSourceModeFieldR979(start,144)){
   driveChecks++;
   const packet=corpusState(row.address);
+  const evolve=evaluateBoundDonorR983('EVOLVE',packet,{},'');
+  assert.equal(evolve.state,'FORMULA_EXACT_PACKET_INPUTS');assert.equal(evolve.value,packet.metrics.continuity+packet.metrics.plasticity-packet.metrics.contradiction);evolveChecks++;
   assert.equal(corpusScarAtR981(row.address),packet.metrics.scar,'R981 direct scar channel must equal original packet at every address');
   const prev=corpusState((row.address+20735)%20736);
   const expectedScar=Number((prev.metrics.scar*.972+Math.abs(Math.sin(packet.geometry.phi*Math.PI*2))*packet.metrics.contradiction*(1-packet.metrics.continuity)).toFixed(6));
@@ -147,7 +151,7 @@ for(let start=0;start<20736;start+=144){
   driveDecisions[expected]=(driveDecisions[expected]||0)+1;
  }
 }
-assert.equal(driveChecks,20736);assert.equal(scarChecks,20736);
+assert.equal(driveChecks,20736);assert.equal(scarChecks,20736);assert.equal(evolveChecks,20736);
 assert.throws(()=>corpusScarAtR981(20736),RangeError);
 const sourceModesR981=readFileSync('src/sourceBackedModeRuntimeR21.ts','utf8');
 assert.ok(sourceModesR981.includes('corpusScarAtR981((record.address+20735)%20736)'));
@@ -182,3 +186,16 @@ assert.throws(()=>evaluateDonorFormulaR982('PROOF',{Verified:4,Claimed:3},'fixtu
 assert.throws(()=>evaluateDonorFormulaR982('SHORTCUT',{Outcome:1,Cost:0},'fixture'));
 assert.throws(()=>evaluateDonorFormulaR982('GAMMA',{Novelty:Number.MAX_VALUE,Fit:2,Proof:1},'fixture'),/Nonfinite/);
 assert.equal(evaluateSourceBackedModes({}).find(x=>x.id==='M017')?.state,'GATED_MISSING_INPUTS');
+
+const packetR983=corpusState(0),balanceR983=evaluateBoundDonorR983('BALANCE',packetR983,{Epsilon:1e-9},'Explicit test epsilon');
+assert.equal(balanceR983.value,packetR983.geometry.symmetry/(packetR983.geometry.asymmetry+1e-9));
+assert.equal(balanceR983.state,'SOURCE_AND_SCENARIO_INPUTS');
+assert.equal(balanceR983.admissionGranted,false);
+assert.equal(evaluateBoundDonorR983('FATHER_PHASE2',packetR983,{Aim:1,Epsilon:.01},'fixture').state,'GATED_MISSING_INPUTS');
+assert.throws(()=>evaluateBoundDonorR983('EVOLVE',packetR983,{Continuity:1},'fixture'),/override source-bound/);
+assert.throws(()=>evaluateBoundDonorR983('GAMMA',packetR983,{},'fixture'),/No established packet binding/);
+assert.deepEqual(donorPacketBindingsR983('toString'),{});
+assert.throws(()=>chartBoundDonorFieldR983('EVOLVE',20735,2,{},''),RangeError);
+assert.deepEqual(chartBoundDonorFieldR983('EVOLVE',0,1,{},'')[0],evaluateBoundDonorR983('EVOLVE',packetR983,{},''));
+assert.equal(chartBoundDonorFieldR983('EVOLVE',20735,1,{},'')[0].address,20735);
+assert.throws(()=>evaluateDonorFormulaR982('RENDER',{layers:new Array(2),weights:[1,2]},'fixture'),/Invalid or missing layers/);
