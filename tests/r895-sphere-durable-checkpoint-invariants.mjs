@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync,readdirSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
-import {agentId,createFabric,getAgent,baseline,SIZE} from '../src/sphereAgentFabricR887.mjs';
+import {agentId,createFabric,getAgent,baseline,SIZE,submitTask,stepFabric} from '../src/sphereAgentFabricR887.mjs';
 import {R895_SCHEMA,R895_MAX_VALUES,validateDurableR895} from '../src/sphereDurableCheckpointR895.mjs';
 assert.equal(R895_MAX_VALUES,248832);
 const fabric=createFabric(),root=agentId(4,137),session={agent:root,memberCount:12,stepCursor:7291,batch:64,mode:'ALL_20736',selectedInner:731};
@@ -28,6 +28,23 @@ forged.tick=1;forged.sequence=1;
 peer.memory.push({taskId:1,tick:1,agent:root,inner:0,kind:'EXCHANGE',peer:root+1,
  before:.8,after:.8,peerBefore:.8,peerAfter:.1,conservationResidual:0});
 assert.throws(()=>validateDurableR895(forged,session),/memory receipt/);
+// R973: validate real executor receipts, then exercise independent corruptions.
+const real=createFabric();
+for(let i=0;i<3;i++){submitTask(real,{agent:root,kind:'OBSERVE',inner:i});stepFabric(real,1)}
+submitTask(real,{agent:root,kind:'OBSERVE',inner:4});
+assert.equal(validateDurableR895(real,session).fabric.tick,3);
+const wrongOwner=structuredClone(real);
+wrongOwner.active.get(root).memory[0].agent=root+1;
+assert.throws(()=>validateDurableR895(wrongOwner,session),/memory receipt/);
+const duplicate=structuredClone(real);
+duplicate.receipts[1]=duplicate.receipts[0];
+assert.throws(()=>validateDurableR895(duplicate,session),/ledger receipt/);
+const reordered=structuredClone(real);
+reordered.active.get(root).memory.reverse();
+assert.throws(()=>validateDurableR895(reordered,session),/memory receipt/);
+const replay=structuredClone(real);
+replay.queue[0].id=2;
+assert.throws(()=>validateDurableR895(replay,session),/pending task/);
 const ui=readFileSync('src/SphereAgentInstrumentR887.tsx','utf8');
 for(const token of ['saveDurableR895','restoreDurableR895','Save full-state durable checkpoint','Restore full-state durable checkpoint','data-r895-exact-inner-value','Full-state checkpoints use atomic IndexedDB'])assert.ok(ui.includes(token),token+' missing');
 for(const token of ['setInterval(()=>{if(durableBusy.current)return','const saveCheckpoint=()=>{if(durableBusy.current)return','const restoreCheckpoint=()=>{if(durableBusy.current)return','setDurablePending(true);setRunning(false);try{const receipt=await saveDurableR895','disabled={durablePending} aria-pressed={running}','if(durableBusy.current)return;setActiveInner(innerPage*144+i)'])

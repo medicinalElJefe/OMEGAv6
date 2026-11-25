@@ -12,6 +12,16 @@ function receipt(r,sequence,tick){
   (r.kind!=='EXCHANGE'||(idx(r.peer,AGENTS)&&neighbors(r.agent).includes(r.peer)&&unit(r.peerBefore)&&unit(r.peerAfter)&&finite(r.conservationResidual)&&Math.abs(r.conservationResidual)<=1e-9&&Math.abs((r.after+r.peerAfter)-(r.before+r.peerBefore)-r.conservationResidual)<=1e-9))&&
   (r.kind!=='PHASE_EXCHANGE'||(idx(r.phase,12)&&Math.floor(r.phase/4)!==1&&idx(r.neighborInner,SIZE)&&r.neighborInner===phaseNeighborR919(r.inner,r.phase)&&unit(r.neighborBefore)&&unit(r.neighborAfter)&&finite(r.conservationResidual)&&Math.abs(r.conservationResidual)<=1e-9&&Math.abs((r.after+r.neighborAfter)-(r.before+r.neighborBefore)-r.conservationResidual)<=1e-9)));
 }
+// Receipt windows are chronological suffixes. A receipt cannot be attributed
+// to another agent, replayed inside a window, or overlap a pending task.
+function receiptWindowR973(rows,sequence,tick,owner=null){
+ let previousTick=0,previousTask=0;
+ for(const r of rows){
+  if(!receipt(r,sequence,tick)||(owner!==null&&r.agent!==owner)||r.tick<=previousTick||r.taskId<=previousTask)return false;
+  previousTick=r.tick;previousTask=r.taskId;
+ }
+ return true;
+}
 export function validateDurableR895(fabric,session){
  if(!fabric||!(fabric.active instanceof Map)||!Array.isArray(fabric.queue)||!Array.isArray(fabric.receipts)||fabric.active.size>512||fabric.queue.length>1024||fabric.receipts.length>512||!Number.isSafeInteger(fabric.tick)||fabric.tick<0||!Number.isSafeInteger(fabric.sequence)||fabric.sequence<fabric.tick)throw new Error('Invalid or over-budget fabric');
  if(!session||!idx(session.agent,AGENTS)||!Number.isSafeInteger(session.memberCount)||session.memberCount<1||session.memberCount>12||!Number.isSafeInteger(session.stepCursor)||session.stepCursor<0||!Number.isSafeInteger(session.batch)||session.batch<1||session.batch>64||!['SELECTED_INNER','ALL_20736'].includes(session.mode)||!idx(session.selectedInner,SIZE))throw new Error('Invalid autonomous checkpoint session');
@@ -20,15 +30,16 @@ export function validateDurableR895(fabric,session){
   if(!idx(id,AGENTS)||ids.has(id)||!a||a.id!==id||a.mode!=='IDLE'||!Number.isSafeInteger(a.epoch)||a.epoch<0||!(a.values instanceof Map)||a.values.size>SIZE||!Array.isArray(a.memory)||a.memory.length>32||!Array.isArray(a.inbox)||a.inbox.length>32)throw new Error('Invalid durable agent');
   ids.add(id);values+=a.values.size;if(values>R895_MAX_VALUES)throw new Error('Durable state budget exceeded; no values discarded');
   for(const [inner,value] of a.values){if(!idx(inner,SIZE)||!unit(value))throw new Error('Invalid durable inner-state float64')}
-  if(!a.memory.every(r=>receipt(r,fabric.sequence,fabric.tick)))throw new Error('Invalid durable memory receipt');
+  if(!receiptWindowR973(a.memory,fabric.sequence,fabric.tick,id))throw new Error('Invalid durable memory receipt');
   for(const m of a.inbox)if(!m||!idx(m.from,AGENTS)||m.to!==id||!idx(m.inner,SIZE)||!finite(m.delta)||!Number.isSafeInteger(m.epoch)||m.epoch<0||m.epoch>fabric.tick)throw new Error('Invalid durable peer inbox');
  }
- const tasks=new Set();
+ const tasks=new Set();let priorTask=0;
+ const lastCompleted=fabric.receipts.at(-1)?.taskId??0;
  for(const t of fabric.queue){
-  if(!t||!Number.isSafeInteger(t.id)||t.id<1||t.id>fabric.sequence||tasks.has(t.id)||!idx(t.agent,AGENTS)||!idx(t.inner,SIZE)||!['OBSERVE','RELAX','EXCHANGE','PHASE_EXCHANGE'].includes(t.kind)||!unit(t.weight)||(t.kind==='EXCHANGE'&&(!idx(t.target,AGENTS)||!neighbors(t.agent).includes(t.target)))||(t.kind==='PHASE_EXCHANGE'&&(!idx(t.phase,12)||Math.floor(t.phase/4)===1||t.target!==null)))throw new Error('Invalid durable pending task');
-  tasks.add(t.id);
+  if(!t||!Number.isSafeInteger(t.id)||t.id<1||t.id>fabric.sequence||tasks.has(t.id)||t.id<=Math.max(priorTask,lastCompleted)||!idx(t.agent,AGENTS)||!idx(t.inner,SIZE)||!['OBSERVE','RELAX','EXCHANGE','PHASE_EXCHANGE'].includes(t.kind)||!unit(t.weight)||(t.kind==='EXCHANGE'&&(!idx(t.target,AGENTS)||!neighbors(t.agent).includes(t.target)))||(t.kind==='PHASE_EXCHANGE'&&(!idx(t.phase,12)||Math.floor(t.phase/4)===1||t.target!==null)))throw new Error('Invalid durable pending task');
+  tasks.add(t.id);priorTask=t.id;
  }
- if(!fabric.receipts.every(r=>receipt(r,fabric.sequence,fabric.tick)))throw new Error('Invalid durable ledger receipt');
+ if(!receiptWindowR973(fabric.receipts,fabric.sequence,fabric.tick))throw new Error('Invalid durable ledger receipt');
  return{schema:R895_SCHEMA,fabric,session:{agent:session.agent,memberCount:session.memberCount,stepCursor:session.stepCursor,batch:session.batch,mode:session.mode,selectedInner:session.selectedInner},activeAgents:fabric.active.size,modifiedValues:values};
 }
 // Corruption detection only. This digest is not an authentication signature.

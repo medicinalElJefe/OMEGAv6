@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R972 complete 248832-operation execution acceptance test and safe cursor refusal; R971 nine workflows passed; candidate CI pending",
+  "latestGovernedWork": "R973 durable continuity validates chronological receipt windows, agent ownership and queue replay refusal; R972 source verification passed; candidate pending",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -483,6 +483,11 @@
     {
       "revision": "R972",
       "conservation": "Actual R893 scheduler full 12×20736 operation cycle regression, every visit and receipt identity, tick order, independent exchange conservation, bounded active state and receipt ring; selected scheduler safe integer overflow refusal before mutation.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R973",
+      "conservation": "R895 exact durable validation rejects misattributed agent memory, duplicate/reordered receipts, and queued task IDs overlapping completed receipt history; actual executor fixtures plus independent negative controls; no persistence format or authority replacement.",
       "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
     }
   ],
