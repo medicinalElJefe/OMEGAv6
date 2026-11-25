@@ -44,7 +44,9 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
  const [previousSoftwareQuery,setPreviousSoftwareQuery]=useState('');
  const [previousSoftwareResults,setPreviousSoftwareResults]=useState<readonly R512RecoveredSystemResolution[]>([]);
  const [commandPreviousSoftware,setCommandPreviousSoftware]=useState<readonly R512RecoveredSystemResolution[]>([]);
- const [activeRecovered,setActiveRecovered]=useState<RecoveredExecutionCapsuleR512|null>(()=>{try{const raw=sessionStorage.getItem('omega.r512.executionCapsule');return raw?JSON.parse(raw):null}catch{return null}});
+ const [activeRecovered,setActiveRecovered]=useState<RecoveredExecutionCapsuleR512|null>(null);
+ const recoveredFocusEpoch=useRef(0);
+ useEffect(()=>{let live=true;const epoch=recoveredFocusEpoch.current;try{const raw=sessionStorage.getItem('omega.r512.executionCapsule');if(raw)void import('./recoveredSystemSearchR512').then(m=>{if(!live||epoch!==recoveredFocusEpoch.current)return;const focus=m.restoreRecoveredFocusR969(JSON.parse(raw));setActiveRecovered(focus);if(!focus)sessionStorage.removeItem('omega.r512.executionCapsule')}).catch(()=>{});}catch{}return()=>{live=false}},[]);
  const domainCaps=useMemo(()=>state.domain==='HOME'?OMEGA7_CAPABILITIES:omega7CapabilitiesForDomain(state.domain),[state.domain]);
  const results=useMemo(()=>state.query?searchOmega7Capabilities(state.query):domainCaps,[state.query,domainCaps]);
  const healthRows=Object.entries(state.health);
@@ -127,6 +129,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
  };
 
  const launchCapsule=(capsule:RecoveredExecutionCapsuleR512)=>{
+  recoveredFocusEpoch.current++;
   setActiveRecovered(capsule);
   try{sessionStorage.setItem('omega.r512.executionCapsule',JSON.stringify(capsule))}catch{}
   window.dispatchEvent(new CustomEvent('omega-r512-execute-capability',{detail:capsule}));
@@ -135,6 +138,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
  const launchRecovered=(entry:(typeof R486_VISIBLE_CAPABILITIES)[number])=>launchCapsule(recoveredExecutionCapsuleR512(entry));
  const launchRecoveredSystem=(entry:R512RecoveredSystemResolution)=>void import('./recoveredSystemSearchR512').then(m=>launchCapsule(m.recoveredSystemExecutionCapsuleR512(entry)));
  const clearRecoveredExecution=()=>{
+  recoveredFocusEpoch.current++;
   setActiveRecovered(null);
   try{sessionStorage.removeItem('omega.r512.executionCapsule')}catch{}
  };
@@ -172,7 +176,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
       <dl><div><dt>Executor</dt><dd>{activeRecovered.capabilityId}</dd></div><div><dt>Domain</dt><dd>{activeRecovered.executionDomain}</dd></div><div><dt>State</dt><dd>{activeRecovered.state.replaceAll('_',' ')}</dd></div><div><dt>Action</dt><dd>{(activeRecovered.launchKind||'EXECUTE').replaceAll('_',' ')}</dd></div><div><dt>Source</dt><dd>{(activeRecovered.sourceKind||'CAPABILITY_LINEAGE').replaceAll('_',' ')}</dd></div><div><dt>Proof</dt><dd>{activeRecovered.receiptAuthority} / {activeRecovered.admissionAuthority}</dd></div></dl>
       <button onClick={clearRecoveredExecution}>Clear focus</button>
      </aside>}
-     <Omega7NativeSurface route={state.selectedRoute} onNavigate={open} onLaunchRecoveredSystem={launchRecoveredSystem} depth={state.depth} softwareLaunch={activeRecovered}/>
+     <Omega7NativeSurface route={state.selectedRoute} onNavigate={open} onLaunchRecoveredSystem={launchRecoveredSystem} depth={state.depth} softwareLaunch={activeRecovered?.route===state.selectedRoute?activeRecovered:null}/>
     </section>:
     <>
      {state.domain!=='HOME'&&<section className='o7-intro o7-intro-r512 o7-intro-r519'>

@@ -92,6 +92,9 @@ export type RecoveredExecutionCapsuleR512={
 };
 
 export function recoveredExecutionCapsuleR512(x:(typeof R486_VISIBLE_CAPABILITIES)[number],createdAt=new Date().toISOString()):RecoveredExecutionCapsuleR512{
+ const canonical=R486_VISIBLE_CAPABILITIES.find(row=>row.id===x.id);
+ if(!canonical)throw new Error('R512_UNKNOWN_CAPABILITY_LINEAGE_HELD');
+ x=canonical;
  return Object.freeze({
   schema:'OMEGA_RECOVERED_EXECUTION_CAPSULE_R512',
   recoveredId:x.id,recoveredName:x.name,route:x.route,operation:x.operation,capabilityId:x.capabilityId,

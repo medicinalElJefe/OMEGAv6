@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R968 serialize interactive SPHERE mutation against asynchronous durable checkpoint operations; R967 exact-head nine workflows passed; R968 acceptance pending",
+  "latestGovernedWork": "R969 canonicalize both historical capability launch and persisted focus; R968 exact head nine workflows passed; candidate verification pending",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -464,6 +464,11 @@
       "revision": "R968",
       "conservation": "Existing SPHERE instrument pauses autonomy on durable save and guards scheduled/manual state mutations and legacy checkpoint paths during durable transactions; selected-inner isolation versus full sweep phase coupling disclosed; original tests retained and regression source checks added",
       "accepted": "CANDIDATE_SOURCE_ONLY_BROWSER_ACCEPTANCE_PENDING"
+    },
+    {
+      "revision": "R969",
+      "conservation": "Canonical capability-lineage launch lookup; persisted focus re-resolved against original system/capability registries before use, asynchronous restore cannot overwrite newer launch/clear, unrelated routes do not receive stale launch binding; 100-system forged-storage regression checks",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
     }
   ],
   "independentArchiveUnverifiedOtherListedParts": 77,
