@@ -23,13 +23,14 @@ export default function OmegaOneSystemLedgerR926({onNavigate,onLaunchRecoveredSy
  const [controlQuery,setControlQuery]=useState('');
  const [picked,setPicked]=useState<string>('SYS-001');
  const term=search.trim().toLowerCase();
- const chosen=all.find((s:Software)=>s.ID===picked);
- const successor=chosen?RECOVERED_SYSTEM_EXECUTION_R512.find(row=>row.systemId===chosen.ID):null;
  const filtered=useMemo(()=>all.filter((s:Software)=>
    (menu==='ALL'||s['Menu ID']===menu)&&
    (disposition==='ALL'||s.Disposition===disposition)&&
    (!term||searchable(s.ID,s.Family,s['Software / Artifact'],s['One-System Role'],s['Menu Setting'],s['Primary Capability'],s.Disposition,s['Upgrade Sequence']).includes(term))
  ),[menu,disposition,term]);
+ const chosen=filtered.find((s:Software)=>s.ID===picked)??filtered[0];
+ const successor=chosen?RECOVERED_SYSTEM_EXECUTION_R512.find(row=>row.systemId===chosen.ID):null;
+ const resetSoftwareFilters=()=>{setMenu('ALL');setDisposition('ALL');setSearch('');};
  const familyRoute=(menuName:string)=>menuList.find((m:Menu)=>m.name===menuName)?.route;
  const stageOwners=(sequence:string,primaryFamily:string)=>all.filter((s:Software)=>s['Software / Artifact']===primaryFamily||s['Upgrade Sequence']===sequence);
  const stageResults=original.sequences.filter(s=>!stageQuery.trim()||searchable(s.SEQ,s['Phase Name'],s['Domain / Menu'],s['Primary Software Family'],s['Growth Upgrade'],s['Proof Gate']).includes(stageQuery.trim().toLowerCase()));
@@ -61,7 +62,7 @@ export default function OmegaOneSystemLedgerR926({onNavigate,onLaunchRecoveredSy
     <p><a href={activeBuild.canonicalAdvancementIssue} target='_blank' rel='noreferrer' style={{color:'#bdeafa'}}>Canonical advancement and production proof ledger</a> · candidate work is recorded here, production acceptance is recorded only after verified deployment.</p>
    </div>
    <h3 style={{marginBottom:0}}>12 conserved workstreams</h3>
-   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(225px,1fr))',gap:9}}>
+   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,225px),1fr))',gap:9}}>
     {activeBuild.workstreams.map(w=><article key={w.id} data-r937-workstream={w.id} style={{padding:12,background:'#193747',border:'1px solid #547184',borderRadius:9}}>
      <small>{w.id} · {w.evidenceState.replaceAll('_',' ')} · not release accepted</small>
      <h4 style={{margin:'7px 0'}}>{w.name}</h4><small style={{display:'block',overflowWrap:'anywhere'}}>Source: {w.primarySource}</small>
@@ -82,11 +83,12 @@ export default function OmegaOneSystemLedgerR926({onNavigate,onLaunchRecoveredSy
     <label>Master menu<select style={{...input,width:'100%'}} value={menu} onChange={e=>setMenu(e.target.value)}><option value='ALL'>All 12 menus</option>{menuList.map((m:Menu)=><option key={m.id} value={m.name}>{m.name}</option>)}</select></label>
     <label>Disposition<select style={{...input,width:'100%'}} value={disposition} onChange={e=>setDisposition(e.target.value)}><option value='ALL'>All dispositions</option>{['KEEP','MERGE','DONOR'].map(d=><option key={d}>{d}</option>)}</select></label>
    </div>
+   <button type='button' style={click} onClick={resetSoftwareFilters}>Show all software</button>
    <p role='status'>{filtered.length} / 100 charted families match · selecting an item shows its exact original role and mapped OMEGA7 workspace.</p>
-   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(275px,1fr))',gap:12}}>
+   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,275px),1fr))',gap:12}}>
     <div style={{maxHeight:460,overflowY:'auto',display:'grid',alignContent:'start',gap:6}}>
-     {filtered.length===0&&<p role='status'>No matching software families. Adjust the search or filters.</p>}
-     {filtered.map((s:Software)=><button key={s.ID} type='button' onClick={()=>setPicked(s.ID)} aria-pressed={picked===s.ID} style={{...click,textAlign:'left',background:picked===s.ID?'#276982':'#142f40'}}>
+     {filtered.length===0&&<p role='status'>No matching software families. Adjust the search or filters. <button type='button' style={click} onClick={resetSoftwareFilters}>Clear filters</button></p>}
+     {filtered.map((s:Software)=><button key={s.ID} type='button' onClick={()=>setPicked(s.ID)} aria-pressed={chosen?.ID===s.ID} style={{...click,textAlign:'left',background:chosen?.ID===s.ID?'#276982':'#142f40'}}>
       <span style={{display:'flex',justifyContent:'space-between',gap:8}}><strong>{s.ID} · {s['Software / Artifact']}</strong><small style={{color:dispositionColors[s.Disposition]||'#bbb'}}>{s.Disposition}</small></span>
       <small>{s['One-System Role']} · {s['Menu ID']}</small>
      </button>)}
@@ -108,11 +110,11 @@ export default function OmegaOneSystemLedgerR926({onNavigate,onLaunchRecoveredSy
     </aside>
    </div>
   </>}
-  {tab==='MENUS'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:10,marginTop:15}}>
+  {tab==='MENUS'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,240px),1fr))',gap:10,marginTop:15}}>
    {menuList.map((m:Menu)=><div key={m.id} style={{background:'#173447',padding:12,borderRadius:8}}>
     <h3>{m.name}</h3><p>{all.filter(s=>s['Menu ID']===m.name).length} software families · {original.settings.filter(s=>s['Top Menu']===m.name).length} controls · route: {m.route}</p>
     <button type='button' style={click} onClick={()=>nav(m.route)}>Open {m.route}</button>
-    <button type='button' style={{...click,marginLeft:6}} onClick={()=>{setMenu(m.name);setTab('SOFTWARE')}}>Inspect families</button>
+    <button type='button' style={{...click,marginLeft:6}} onClick={()=>{setSearch('');setDisposition('ALL');setMenu(m.name);setTab('SOFTWARE')}}>Inspect families</button>
    </div>)}
   </div>}
   {tab==='CONTROLS'&&<div style={{marginTop:12}}>

@@ -111,4 +111,9 @@ for(const seq of registry.sequences){
 assert.equal(registry.sequences.filter(x=>x['Next Sequence']==='LOOP-TO-SEQ-001').length,1,'one explicit cycle restart');
 assert.equal(registry.gates.filter(x=>x['Blocks Packaging?']==='YES').length,10);
 assert.equal(registry.gates.filter(x=>x['Blocks Packaging?']==='NO').length,2);
+assert.ok(source.includes('filtered.find((s:Software)=>s.ID===picked)??filtered[0]'),'filtered selection fallback absent');
+assert.ok(source.includes('aria-pressed={chosen?.ID===s.ID}'),'selection and details disagree');
+assert.ok(source.includes("setSearch('');setDisposition('ALL');setMenu(m.name)"),'menu shortcut retains stale filters');
+assert.ok(source.includes('onClick={resetSoftwareFilters}'),'filter recovery missing');
+assert.ok(source.includes('minmax(min(100%,275px),1fr)'),'narrow viewport grid overflow guard missing');
 console.log('R926 PASS · exact 100 software/12 menus/36 settings/18 capabilities/144 phases/12 gates · 44-route native containment · one system route ownership · conservative proof classification');

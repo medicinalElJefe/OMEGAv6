@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R963 full archive index preflight validates absent parts and unique Drive identities before source hashing; bind receipt to parsed manifest bytes; R962 exact-head nine workflows passed; R963 tests pending",
+  "latestGovernedWork": "R964 historical software interface selection continuity, menu filter reset and narrow viewport layout; R963 exact-head nine workflows passed; R964 tests pending",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -439,6 +439,11 @@
       "revision": "R963",
       "conservation": "Batch archive audit prevalidates every declared part including absent sources, rejects duplicate Drive identity and boolean index, binds index receipt to exact parsed bytes; regression included",
       "accepted": "CANDIDATE_SOURCE_ONLY_NOT_ARCHIVE_BYTE_RECOVERY"
+    },
+    {
+      "revision": "R964",
+      "conservation": "Existing 100-family software workspace now selects first visible result when selected family is filtered out, synchronizes pressed state, resets stale menu filters, adds clear-filter recovery and responsive minimum tracks",
+      "accepted": "CANDIDATE_UI_SOURCE_ONLY_BROWSER_ACCEPTANCE_PENDING"
     }
   ],
   "independentArchiveUnverifiedOtherListedParts": 77,
