@@ -19,7 +19,7 @@ export function autonomousSweepR893(fabric,members,stepCursor=0,budget=12){
  const receipts=[],visits=[];let nextStepCursor=stepCursor,mode='LOCAL_DETERMINISTIC_FULL_INNER_SWEEP';
  for(let i=0;i<budget;i++){
   const coord=sweepCoordinateR893(members,nextStepCursor);
-  const result=autonomousTickR891(fabric,members,coord.inner,coord.memberIndex,1);
+  const result=autonomousTickR891(fabric,members,coord.inner,coord.memberIndex,1,true);
   if(result.receipts.length)receipts.push(...result.receipts);
   if(result.mode==='HELD_CAPACITY'){mode=result.mode;break}
   if(result.mode==='OPERATOR_QUEUE_FIRST'){mode=result.mode;break}

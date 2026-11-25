@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R966 integrate conservative inner-phase exchange into existing autonomous collective scheduling and independently verify peer conservation in durable receipts; R965 nine exact-head workflows passed; R966 regression pending",
+  "latestGovernedWork": "R967 repair R966 coordinate isolation regression: explicit phase authorization only in all-inner sweep, preserve selected-inner legacy operation; CI pending",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -454,6 +454,11 @@
       "revision": "R966",
       "conservation": "Existing scheduler compares inner phase gradient against collective peer contrast and executes strongest eligible phase or peer exchange; durable receipt validates computed peer conservation; regression exercises live inner-phase sweep and forged receipt refusal",
       "accepted": "CANDIDATE_SOURCE_ONLY_NOT_COMPLETE_MODE_OR_DEVICE_PARITY"
+    },
+    {
+      "revision": "R967",
+      "conservation": "R966 failed six workflows; Cloud Bridge log identified R891 selected-coordinate isolation regression. Restore legacy default, authorize phase coupling explicitly from R893 full sweep; retain existing tests and R966 conservation tests.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
     }
   ],
   "independentArchiveUnverifiedOtherListedParts": 77,

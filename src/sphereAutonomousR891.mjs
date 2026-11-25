@@ -2,7 +2,8 @@
 // No remote inference, network, durable persistence, or new CanonState writer.
 import {AGENTS,SIZE,neighbors,stateValue,submitTask,stepFabric,phaseSampleR918} from './sphereAgentFabricR887.mjs';
 export const R891_SCHEMA='OMEGA_SPHERE_AUTONOMOUS_LOCAL_R891';
-export function autonomousTickR891(fabric,members,inner,cursor=0,budget=1){
+export function autonomousTickR891(fabric,members,inner,cursor=0,budget=1,phaseExchange=false){
+ if(typeof phaseExchange!=='boolean')throw new RangeError('Explicit phase exchange flag required');
  if(!fabric||!Array.isArray(members)||members.length<1||members.length>12||new Set(members).size!==members.length||members.some(x=>!Number.isSafeInteger(x)||x<0||x>=AGENTS))throw new RangeError('Autonomous group must have 1–12 distinct valid agent IDs');
  if(!Number.isSafeInteger(inner)||inner<0||inner>=SIZE||!Number.isSafeInteger(cursor)||cursor<0||!Number.isSafeInteger(budget)||budget<1||budget>12)throw new RangeError('Invalid autonomous tick coordinate/budget');
  // Operator-authored queue has strict precedence: do not silently overwrite or reorder work.
@@ -14,7 +15,7 @@ export function autonomousTickR891(fabric,members,inner,cursor=0,budget=1){
   let target=null,contrast=0;
   for(const p of peers){const d=Math.abs(own-stateValue(fabric,p,inner));if(d>contrast){contrast=d;target=p}}
   let phase=null,localContrast=0;
-  for(const candidate of [0,1,2,3,8,9,10,11]){
+  for(const candidate of (phaseExchange?[0,1,2,3,8,9,10,11]:[])){
    const sample=phaseSampleR918(fabric,id,inner,candidate);
    if(sample.gradientMagnitude>localContrast){localContrast=sample.gradientMagnitude;phase=candidate}
   }
