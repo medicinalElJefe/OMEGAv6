@@ -1,5 +1,5 @@
 import {corpusState} from './corpusRuntime';
-import {evaluateMode188DriveRuntimeR311} from './mode188DriveRuntimeR311';
+import {evaluateMode188DriveRuntimeR311,missingMode188InputsR980} from './mode188DriveRuntimeR311';
 
 export const R21_MODE_AUTHORITY={
   schema:'OMEGA_SOURCE_BACKED_MODES_R21',
@@ -129,14 +129,16 @@ export function chartSourceModeFieldR979(start:number,count:number){
  if(!Number.isSafeInteger(start)||start<0||start>=20736||!Number.isSafeInteger(count)||count<1||count>144||start+count>20736)throw new RangeError('Invalid canonical chart range');
  return Array.from({length:count},(_,offset)=>{
   const address=start+offset,record=corpusState(address);
-  return {address,stateId:record.stateId,coordinates:record.coordinates,modes:evaluateSourceBackedModes(record)};
+  const missing=missingMode188InputsR980(record);
+  const mode188Drive=missing.length?null:evaluateMode188DriveRuntimeR311(record);
+  return {address,stateId:record.stateId,coordinates:record.coordinates,modes:evaluateSourceBackedModes(record),mode188Drive,mode188Missing:missing};
  });
 }
 export function modeChartCSVHeaderR979(rows:SourceBackedModeResult[]){
- return ['address','state_id','d','p','r','l',...rows.flatMap(row=>[row.id+'_state',row.id+'_value',row.id+'_missing'])].join(',');
+ return ['address','state_id','d','p','r','l',...rows.flatMap(row=>[row.id+'_state',row.id+'_value',row.id+'_missing']),'R311_state','R311_ratio','R311_decision','R311_packet_gate','R311_agrees','R311_missing'].join(',');
 }
 const csvR979=(value:unknown)=>'"'+String(value??'').replace(/"/g,'""')+'"';
 export function modeChartCSVRowR979(row:ReturnType<typeof chartSourceModeFieldR979>[number]){
  const {d,p,r,l}=row.coordinates;
- return [row.address,row.stateId,d,p,r,l,...row.modes.flatMap(mode=>[csvR979(mode.state),csvR979(mode.value),csvR979(mode.missing.join('; '))])].join(',');
+ return [row.address,row.stateId,d,p,r,l,...row.modes.flatMap(mode=>[csvR979(mode.state),csvR979(mode.value),csvR979(mode.missing.join('; '))]),csvR979(row.mode188Drive?'FORMULA_EXACT_PACKET_INPUTS':'GATED_MISSING_INPUTS'),csvR979(row.mode188Drive?.sratio),csvR979(row.mode188Drive?.decision),csvR979(row.mode188Drive?.packetGate),csvR979(row.mode188Drive?.agreesWithComparablePacketGate),csvR979(row.mode188Missing.join('; '))].join(',');
 }

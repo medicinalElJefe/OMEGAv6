@@ -111,7 +111,36 @@ for(let start=0;start<20736;start+=144){
 assert.equal(chartCount,20736);assert.equal([...chartStates.values()].reduce((a,b)=>a+b,0),414720);
 const firstChart=chartSourceModeFieldR979(0,1)[0];
 assert.deepEqual(firstChart.modes,evaluateSourceBackedModes(corpusState(0)));
-assert.equal(modeChartCSVHeaderR979(firstChart.modes).split(',').length,66);
+assert.equal(modeChartCSVHeaderR979(firstChart.modes).split(',').length,72);
 assert.ok(modeChartCSVRowR979(firstChart).startsWith('0,1,0,0,0,0,'));
 for(const args of [[-1,1],[0,145],[20735,2],[0,0]])assert.throws(()=>chartSourceModeFieldR979(args[0],args[1]),RangeError);
 console.log('R979 full canonical mode chart:',Object.fromEntries(chartStates));
+
+ // R980: independent reference for the original workbook threshold order.
+const {evaluateMode188DriveRuntimeR311,missingMode188InputsR980}=await import('../src/mode188DriveRuntimeR311');
+for(const bad of [undefined,null,'0',NaN,Infinity,-1]){
+ const record={coordinates:{d:0},metrics:{continuity:bad,burden:0,contradiction:0}};
+ assert.deepEqual(missingMode188InputsR980(record),['CΩ']);
+ assert.throws(()=>evaluateMode188DriveRuntimeR311(record),/required packet inputs invalid/);
+}
+assert.throws(()=>evaluateMode188DriveRuntimeR311({coordinates:{d:12},metrics:{continuity:0,burden:0,contradiction:0}}),/required packet inputs invalid/);
+const explicitR311=(d:number,C:number,q:number,burden:number)=>evaluateMode188DriveRuntimeR311({coordinates:{d},metrics:{continuity:C,contradiction:q,burden}});
+assert.equal(explicitR311(0,0,0,0).decision,'ESCALATE');
+assert.equal(explicitR311(0,1,0,0).decision,'STAY');
+assert.equal(explicitR311(9,1,0,0).decision,'TURN');
+assert.equal(explicitR311(10,10,.6,0).decision,'ESCALATE');
+let driveChecks=0,driveHeld=0;const driveDecisions:Record<string,number>={};
+for(let start=0;start<20736;start+=144){
+ for(const row of chartSourceModeFieldR979(start,144)){
+  driveChecks++;
+  if(!row.mode188Drive){driveHeld++;assert.ok(row.mode188Missing.length);continue}
+  const d=row.mode188Drive,packet=corpusState(row.address),C=packet.metrics.continuity,L=packet.metrics.burden,q=packet.metrics.contradiction,D=packet.coordinates.d+1;
+  const ratio=C/(L+q+.35*L*q+.05);
+  const expected=ratio>=1.05&&D!==10&&D!==11?'STAY':ratio<.75||(D===11&&q>.5)?'ESCALATE':'TURN';
+  assert.ok(Math.abs(d.sratio-ratio)<=1e-8);assert.equal(d.decision,expected);
+  driveDecisions[expected]=(driveDecisions[expected]||0)+1;
+ }
+}
+assert.equal(driveChecks,20736);
+assert.equal(driveHeld+Object.values(driveDecisions).reduce((a,b)=>a+b,0),20736);
+console.log('R980 independent R311 full field comparison:',{driveChecks,driveHeld,driveDecisions});

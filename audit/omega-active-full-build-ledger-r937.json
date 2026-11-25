@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R979 actual all-address source-mode chart and missing-value trace correction; candidate verification pending",
+  "latestGovernedWork": "R980 separate exact Drive Mode 188 inputs and decision included in full R979 chart; 20736 additional checks with independent workbook reference; candidate CI pending",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -518,6 +518,11 @@
     {
       "revision": "R979",
       "conservation": "Bounded 144-address batch chart over existing R21 evaluator; explicit 20736-address CSV operator in current Modes panel, 414720 contract evaluations, held input lists preserved, status counts, null no longer treated as numeric trace; full corpus coverage acceptance test. Registry-only catalog and Canon lenses remain separate; no new formulas invented.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R980",
+      "conservation": "R311 rejects absent, coercible, negative or invalid domain inputs before computing ratio, rejects nonfinite denominator/ratio; R979 chart includes separate R311 state, ratio, decision, source gate comparison and held channels, UI reports independent counts; tests independently compare workbook law on full canonical field. No ORION threshold substitution or M002 conflation.",
       "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
     }
   ],
