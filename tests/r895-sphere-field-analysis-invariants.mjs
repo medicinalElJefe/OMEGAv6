@@ -64,6 +64,18 @@ assert.ok(Math.abs(positive.pairs[0].correlation-1)<1e-11,'identical linear fiel
 assert.ok(Math.abs(positive.pairs[1].correlation+1)<1e-11,'inverted linear fields correlate -1');
 assert.ok(Math.abs(positive.pairs[2].correlation+1)<1e-11,'inverted pair correlates -1');
 assert.equal(first.values.size,SIZE);
+// Count underlying reads with a Map subclass, not wall-clock timing.
+class CountingMap extends Map{
+ reads=0;
+ get(key){this.reads++;return super.get(key)}
+}
+const counted=createFabric();counted.active=new CountingMap();
+const countedRelations=analyzeCollectiveRelationsR895(counted,members);
+assert.equal(counted.active.reads,members.length*SIZE,'R971 reads each distinct logical value exactly once');
+assert.deepEqual(countedRelations,relations,'bounded snapshot preserves all numerical pair outputs');
+assert.equal(counted.active.size,0);
+const malformed=createFabric();getAgent(malformed,id).values.set(0,NaN);
+assert.throws(()=>analyzeCollectiveRelationsR895(malformed,[id]),/Invalid paired logical state/);
 const reversed=analyzeCollectiveRelationsR895(related,[thirdId,secondId,id]);
 assert.equal(reversed.pairCount,3);
 assert.ok(reversed.pairs.every(p=>Number.isFinite(p.correlation)),'reverse breadth-first membership must preserve all populated correlations');
