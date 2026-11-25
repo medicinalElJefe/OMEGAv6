@@ -23,6 +23,11 @@ assert.throws(()=>validateDurableR895(fabric,{...session,memberCount:13}),/sessi
 assert.throws(()=>validateDurableR895(fabric,{...session,stepCursor:-1}),/session/);
 assert.throws(()=>validateDurableR895(fabric,{...session,batch:65}),/session/);
 assert.throws(()=>validateDurableR895(fabric,{...session,mode:'UNBOUNDED'}),/session/);
+const forged=createFabric(),peer=getAgent(forged,root);
+forged.tick=1;forged.sequence=1;
+peer.memory.push({taskId:1,tick:1,agent:root,inner:0,kind:'EXCHANGE',peer:root+1,
+ before:.8,after:.8,peerBefore:.8,peerAfter:.1,conservationResidual:0});
+assert.throws(()=>validateDurableR895(forged,session),/memory receipt/);
 const ui=readFileSync('src/SphereAgentInstrumentR887.tsx','utf8');
 for(const token of ['saveDurableR895','restoreDurableR895','Save full-state durable checkpoint','Restore full-state durable checkpoint','data-r895-exact-inner-value','Full-state checkpoints use atomic IndexedDB'])assert.ok(ui.includes(token),token+' missing');
 const source=readFileSync('src/sphereDurableCheckpointR895.mjs','utf8');

@@ -9,7 +9,7 @@ const finite=(x)=>typeof x==='number'&&Number.isFinite(x);
 const unit=(x)=>finite(x)&&x>=0&&x<=1;
 function receipt(r,sequence,tick){
  return Boolean(r&&typeof r==='object'&&Number.isSafeInteger(r.taskId)&&r.taskId>=1&&r.taskId<=sequence&&idx(r.agent,AGENTS)&&idx(r.inner,SIZE)&&['OBSERVE','RELAX','EXCHANGE','PHASE_EXCHANGE'].includes(r.kind)&&Number.isSafeInteger(r.tick)&&r.tick>=1&&r.tick<=tick&&unit(r.before)&&unit(r.after)&&
-  (r.kind!=='EXCHANGE'||(idx(r.peer,AGENTS)&&neighbors(r.agent).includes(r.peer)&&unit(r.peerBefore)&&unit(r.peerAfter)&&finite(r.conservationResidual)&&Math.abs(r.conservationResidual)<=1e-9))&&
+  (r.kind!=='EXCHANGE'||(idx(r.peer,AGENTS)&&neighbors(r.agent).includes(r.peer)&&unit(r.peerBefore)&&unit(r.peerAfter)&&finite(r.conservationResidual)&&Math.abs(r.conservationResidual)<=1e-9&&Math.abs((r.after+r.peerAfter)-(r.before+r.peerBefore)-r.conservationResidual)<=1e-9))&&
   (r.kind!=='PHASE_EXCHANGE'||(idx(r.phase,12)&&Math.floor(r.phase/4)!==1&&idx(r.neighborInner,SIZE)&&r.neighborInner===phaseNeighborR919(r.inner,r.phase)&&unit(r.neighborBefore)&&unit(r.neighborAfter)&&finite(r.conservationResidual)&&Math.abs(r.conservationResidual)<=1e-9&&Math.abs((r.after+r.neighborAfter)-(r.before+r.neighborBefore)-r.conservationResidual)<=1e-9)));
 }
 export function validateDurableR895(fabric,session){

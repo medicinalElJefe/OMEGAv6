@@ -13,6 +13,20 @@ assert.equal(sweepCoordinateR893(members,0).inner,0);assert.equal(sweepCoordinat
 assert.equal(sweepCoordinateR893(members,3*SIZE-1).inner,SIZE-1);
 assert.equal(sweepCoordinateR893(members,3*SIZE).inner,0);
 assert.equal(sweepCoordinateR893(members,3*SIZE).completedCycles,1);
+// R966: a singleton with a known inner gradient executes a conservative
+// phase exchange through the existing scheduler, not a separate state store.
+const phaseFabric=createFabric();
+const phaseAgent=getAgent(phaseFabric,root);
+for(let inner=0;inner<SIZE;inner++)phaseAgent.values.set(inner,0);
+phaseAgent.values.set(0,1);
+const phaseRun=autonomousSweepR893(phaseFabric,[root],0,1);
+assert.equal(phaseRun.receipts[0].kind,'PHASE_EXCHANGE');
+assert.equal(phaseRun.visits[0].inner,0);
+assert.equal(phaseRun.nextStepCursor,1);
+const phaseReceipt=phaseRun.receipts[0];
+assert.ok(Math.abs(phaseReceipt.after+phaseReceipt.neighborAfter-1)<1e-12);
+assert.equal(phaseReceipt.conservationResidual,0);
+assert.equal(stateValue(phaseFabric,root,phaseReceipt.neighborInner),phaseReceipt.neighborAfter);
 const boundary=createFabric();
 let b=autonomousSweepR893(boundary,members,3*SIZE-2,4);
 assert.deepEqual(b.visits.map(x=>x.inner),[20735,20735,0,0]);
