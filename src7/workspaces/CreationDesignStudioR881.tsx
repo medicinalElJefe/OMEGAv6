@@ -1,6 +1,6 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {zipSync,strToU8} from 'fflate';
-import {rowIdR881,coordinatesR881,antipodeR881,byteReceiptR881,PROOF,spiralChromaR976} from '../../src/system/creationCanonR881.mjs';
+import {rowIdR881,coordinatesR881,antipodeR881,byteReceiptR881,PROOF,spiralChromaR976,validateStudioProjectR977,encodeStudioProjectR977,decodeStudioProjectR977,STUDIO_PROJECT_MAX_BYTES_R977} from '../../src/system/creationCanonR881.mjs';
 
 type Mode='atlas3d'|'mandala'|'tessellation'|'pointillism';
 type Pos={rowId:number;d:number;p:number;r:number;l:number;x:number;y:number;z:number};
@@ -118,6 +118,8 @@ export default function CreationDesignStudioR881({address,onAddress}:{address:nu
  const [spiral,setSpiral]=useState(false),[materialPhase,setMaterialPhase]=useState(0);
  const [renderer,setRenderer]=useState<'BROWSER_WEBGL2_RENDER'|'BROWSER_CANVAS2D_RENDER'>('BROWSER_CANVAS2D_RENDER');
  const [title,setTitle]=useState('New Canon composition'),[prompt,setPrompt]=useState(''),[message,setMessage]=useState('');
+ const [projectBusy,setProjectBusy]=useState(false);
+ const projectBusyRef=useRef(false);
  const [receipts,setReceipts]=useState<Receipt[]>([]),[project,setProject]=useState('Untitled');
  const [assets,setAssets]=useState<{name:string;sha256:string;byteSize:number;proofTier:'OBS';source:string}[]>([]);
  useEffect(()=>{if(!canvas.current)return;let ok=false;try{ok=renderWebGL(canvas.current,points,rotation,mode,color,spiral,materialPhase)}catch{ok=false}rendererIsWebgl.current=ok;setRenderer(ok?'BROWSER_WEBGL2_RENDER':'BROWSER_CANVAS2D_RENDER');
@@ -153,8 +155,13 @@ export default function CreationDesignStudioR881({address,onAddress}:{address:nu
  const exportXlsx=()=>log('omega-canon-r881.xlsx',makeXlsx(points),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
  const exportPng=()=>canvas.current?.toBlob(async blob=>{if(!blob)return;await log('omega-canon-r881.png',new Uint8Array(await blob.arrayBuffer()),'image/png',renderer);},'image/png');
  const exportManifest=()=>log('omega-master-truth-run-manifest.json',JSON.stringify({schema:'OMEGA_MASTER_TRUTH_RUN_MANIFEST_R881',project,title,prompt,renderAuthority:renderer,representation:{mode,rotation,color,spiral,materialPhase},fontAuthority:'BROWSER_SYSTEM_UI',source:'CF-D0001/2/3',proofTier:'DER',nodeCount:20736,physicalMeasurement:false,localPcAccepted:false,assets,exports:receipts},null,2),'application/json','BROWSER_EXPORT_LEDGER');
- const saveProject=()=>{const data={project,title,prompt,mode,rotation,color,spiral,materialPhase,address,assets};try{localStorage.setItem('omega.r881.project.'+project,JSON.stringify(data));setMessage('Saved locally in this browser: '+project)}catch{setMessage('Local browser storage unavailable')}}; 
- const loadProject=()=>{try{const v=JSON.parse(localStorage.getItem('omega.r881.project.'+project)||'null');if(!v){setMessage('No local project found: '+project);return}setTitle(v.title);setPrompt(v.prompt);setMode(v.mode);setRotation(v.rotation);setColor(v.color);setSpiral(v.spiral===true);setMaterialPhase(Number.isFinite(v.materialPhase)&&v.materialPhase>=0&&v.materialPhase<=360?v.materialPhase:0);onAddress(v.address);setAssets(v.assets||[]);setMessage('Loaded browser-local project: '+project)}catch{setMessage('Project could not be opened')}};
+ const snapshotProject=()=>validateStudioProjectR977({project,title,prompt,mode,rotation,color,spiral,materialPhase,address,assets});
+ const applyProject=(v:ReturnType<typeof validateStudioProjectR977>)=>{setProject(v.project);setTitle(v.title);setPrompt(v.prompt);setMode(v.mode as Mode);setRotation(v.rotation);setColor(v.color);setSpiral(v.spiral===true);setMaterialPhase(v.materialPhase);onAddress(v.address);setAssets(v.assets.map(a=>({...a,proofTier:'OBS' as const})));setReceipts([])};
+ const projectOperation=async(action:()=>Promise<void>)=>{if(projectBusyRef.current)return;projectBusyRef.current=true;setProjectBusy(true);try{await action()}catch(e){setMessage('Project operation refused: '+(e instanceof Error?e.message:String(e)))}finally{projectBusyRef.current=false;setProjectBusy(false)}};
+ const saveProject=()=>void projectOperation(async()=>{const scene=snapshotProject();const packet=await encodeStudioProjectR977(scene);localStorage.setItem('omega.r881.project.'+scene.project,packet);setMessage('Saved integrity-checked project locally: '+scene.project)});
+ const loadProject=()=>void projectOperation(async()=>{const raw=localStorage.getItem('omega.r881.project.'+project);if(!raw){setMessage('No local project found: '+project);return}if(raw.length>STUDIO_PROJECT_MAX_BYTES_R977)throw new Error('Project exceeds 2 MiB');const parsed=JSON.parse(raw);const scene=parsed?.schema?await decodeStudioProjectR977(raw):validateStudioProjectR977(parsed);applyProject(scene);setMessage('Loaded browser-local project: '+scene.project+(parsed?.schema?' · SHA-256 checked':' · legacy metadata validated; resave to upgrade'))});
+ const exportProject=()=>void projectOperation(async()=>{await log('omega-creation-project-r977.json',await encodeStudioProjectR977(snapshotProject()),'application/json','STUDIO_PROJECT_PACKET')});
+ const importProject=(file:File|null)=>{if(!file)return;void projectOperation(async()=>{if(file.size>STUDIO_PROJECT_MAX_BYTES_R977)throw new Error('Project exceeds 2 MiB');const scene=await decodeStudioProjectR977(await file.text());applyProject(scene);setMessage('Imported integrity-checked project: '+scene.project+' · asset references only; save locally to retain')})};
  const pickFiles=async(e:React.ChangeEvent<HTMLInputElement>)=>{const list=Array.from(e.target.files||[]);for(const f of list){const result=await byteReceiptR881(new Uint8Array(await f.arrayBuffer()),{source:'USER_SELECTED_FILE',proofTier:'OBS'});setAssets(old=>[...old,{name:f.name,sha256:result.sha256,byteSize:result.byteSize,proofTier:'OBS',source:'USER_SELECTED_FILE'}]);}e.target.value='';};
  return <section data-r881-creation-studio='REAL_COMPUTED_20736' style={{...panel,color:'#e9f5ff'}}>
   <header><b>Creation & Design Studio · 20,736-address instrument</b><p>Source-defined directional geometry · all 20,736 points computed · WebGL2 with Canvas fallback · DER, not measured physics. R237 no promotion beyond evidence.</p></header>
@@ -171,7 +178,9 @@ export default function CreationDesignStudioR881({address,onAddress}:{address:nu
     {spiral&&<label>Material phase {materialPhase}°<input style={input} type='range' min={0} max={360} value={materialPhase} onChange={e=>setMaterialPhase(Number(e.target.value))}/></label>}
     <small>Material phase changes color only, using source coordinates and linear-light luminance. Geometry, addresses and camera remain unchanged.</small>
     <label>Creative prompt<textarea style={input} rows={3} value={prompt} onChange={e=>setPrompt(e.target.value)}/></label>
-    <div style={{display:'flex',gap:8}}><button onClick={saveProject}>Save project</button><button onClick={loadProject}>Open project</button></div>
+    <div style={{display:'flex',flexWrap:'wrap',gap:8}}><button disabled={projectBusy} onClick={saveProject}>Save project</button><button disabled={projectBusy} onClick={loadProject}>Open project</button><button disabled={projectBusy} onClick={exportProject}>Export project</button></div>
+    <label>Import project packet<input style={input} type='file' accept='.json,application/json' disabled={projectBusy} onChange={e=>{const file=e.target.files?.[0]||null;e.target.value='';importProject(file)}}/></label>
+    <small>Project packets preserve source address and representation with SHA-256 corruption detection, not authentication. Asset bytes are not embedded.</small>
     <label>Attach local asset for checksum<input style={input} type='file' multiple onChange={pickFiles}/></label>
     <small>Asset bytes remain with you; only filename, length, and hash are stored as project metadata.</small>
    </div>

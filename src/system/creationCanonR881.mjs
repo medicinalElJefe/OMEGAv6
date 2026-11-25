@@ -208,3 +208,49 @@ export function spiralChromaR976(color,x,y,phase=0){
  const chroma=.5+.5*Math.cos(angle-4*Math.PI*radius+phase*Math.PI/180);
  return '#'+rgb.map(v=>Math.round(255*Math.max(0,Math.min(1,encode(luminance+(v-luminance)*chroma)))).toString(16).padStart(2,'0')).join('');
 }
+
+// R977: recoverable scene representation, not a second geometry/state writer.
+// The fixed source geometry is reconstructed by the existing studio kernel.
+export const STUDIO_PROJECT_SCHEMA_R977='OMEGA_CREATION_PROJECT_R977';
+export const STUDIO_PROJECT_MAX_BYTES_R977=2*1024*1024;
+export function validateStudioProjectR977(raw){
+ if(!raw||typeof raw!=='object'||Array.isArray(raw))throw new Error('Invalid studio project');
+ if(raw.schema!==undefined&&raw.schema!==STUDIO_PROJECT_SCHEMA_R977)throw new Error('Unsupported studio project schema');
+ const legacy=raw.schema===undefined;
+ const str=(value,max,label)=>{if(typeof value!=='string'||value.length>max)throw new Error('Invalid project '+label);return value};
+ const degree=(value,label)=>{if(!Number.isFinite(value)||value<0||value>360)throw new Error('Invalid project '+label);return value};
+ const project=str(raw.project,256,'name'),title=str(raw.title,1024,'title'),prompt=str(raw.prompt,65536,'prompt');
+ if(!project.trim())throw new Error('Project name required');
+ if(!['atlas3d','mandala','tessellation','pointillism'].includes(raw.mode))throw new Error('Invalid project mode');
+ const rotation=degree(raw.rotation,'rotation'),color=str(raw.color,7,'color');
+ if(!/^#[0-9a-f]{6}$/i.test(color))throw new Error('Invalid project color');
+ const address=coordinatesR881(raw.address).rowId;
+ const spiral=legacy&&raw.spiral===undefined?false:raw.spiral;
+ if(typeof spiral!=='boolean')throw new Error('Invalid project spiral flag');
+ const materialPhase=degree(legacy&&raw.materialPhase===undefined?0:raw.materialPhase,'material phase');
+ if(!legacy&&(raw.geometrySource!=='CF-D0001/2/3'||raw.nodeCount!==20736))throw new Error('Project geometry authority mismatch');
+ const list=legacy&&raw.assets===undefined?[]:raw.assets;
+ if(!Array.isArray(list)||list.length>1024)throw new Error('Invalid project asset inventory');
+ const assets=list.map(a=>{
+  if(!a||typeof a!=='object'||!Number.isSafeInteger(a.byteSize)||a.byteSize<0||typeof a.sha256!=='string'||!/^[a-f0-9]{64}$/.test(a.sha256)||a.proofTier!=='OBS'||a.source!=='USER_SELECTED_FILE')throw new Error('Invalid project asset reference');
+  return Object.freeze({name:str(a.name,1024,'asset name'),sha256:a.sha256,byteSize:a.byteSize,proofTier:'OBS',source:'USER_SELECTED_FILE'});
+ });
+ return Object.freeze({schema:STUDIO_PROJECT_SCHEMA_R977,geometrySource:'CF-D0001/2/3',nodeCount:20736,project,title,prompt,mode:raw.mode,rotation,color,spiral,materialPhase,address,assets:Object.freeze(assets)});
+}
+export async function encodeStudioProjectR977(raw){
+ const scene=validateStudioProjectR977(raw);
+ const data=JSON.stringify(scene);
+ const proof=await byteReceiptR881(data,{source:'CF-D0001/2/3',proofTier:'DER'});
+ const text=JSON.stringify({schema:STUDIO_PROJECT_SCHEMA_R977,scene,sha256:proof.sha256});
+ if(new TextEncoder().encode(text).length>STUDIO_PROJECT_MAX_BYTES_R977)throw new Error('Project packet exceeds 2 MiB');
+ return text;
+}
+export async function decodeStudioProjectR977(text){
+ if(typeof text!=='string'||text.length>STUDIO_PROJECT_MAX_BYTES_R977||new TextEncoder().encode(text).length>STUDIO_PROJECT_MAX_BYTES_R977)throw new Error('Project packet absent or oversized');
+ const packet=JSON.parse(text);
+ if(!packet||packet.schema!==STUDIO_PROJECT_SCHEMA_R977||packet.scene?.schema!==STUDIO_PROJECT_SCHEMA_R977||typeof packet.sha256!=='string'||!/^[a-f0-9]{64}$/.test(packet.sha256))throw new Error('Invalid project packet envelope');
+ const scene=validateStudioProjectR977(packet.scene);
+ const proof=await byteReceiptR881(JSON.stringify(scene),{source:'CF-D0001/2/3',proofTier:'DER'});
+ if(proof.sha256!==packet.sha256)throw new Error('Project integrity mismatch');
+ return scene;
+}

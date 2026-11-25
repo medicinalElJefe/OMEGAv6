@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R976 source-coordinate linear-light spiral material integrated into current Creation Studio WebGL2/Canvas/SVG, persistent representation and export manifest; exact candidate verification pending",
+  "latestGovernedWork": "R977 validated portable Creation Studio scene packet, local legacy migration, exact SHA-256 scene continuity and source identity; candidate pending",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -503,6 +503,11 @@
     {
       "revision": "R976",
       "conservation": "Scene-invariant spiral chromatic/monochrome material phase control on existing 20736-node geometry; shared linear-light luminance-preserving mix before 8-bit quantization; same per-node/edge material function in WebGL2, Canvas and SVG; project restore and JSON/manifest representation parameters; numerical and source integration checks. No new renderer authority.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R977",
+      "conservation": "R881 creation studio now validates full project metadata, canonical address, material, mode, geometry source and asset references before apply. Local save and portable import/export share integrity-checked scene packet, legacy valid project migration, bounded size, no embedded asset bytes or new state authority; real encode/decode round-trip and tamper rejection tests.",
       "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
     }
   ],

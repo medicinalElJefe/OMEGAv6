@@ -180,3 +180,16 @@ assert.equal(spiralChromaR976('#808080',.2,.4,137),'#808080');
 assert.equal(spiralChromaR976('#5fcecb',.3,.4,0),spiralChromaR976('#5fcecb',.3,.4,360));
 for(const invalid of [['red',0,0,0],['#ff0000',NaN,0,0],['#ff0000',0,0,361]])assert.throws(()=>spiralChromaR976(...invalid),RangeError);
 for(const marker of ['spiralChromaR976','materialColorR976(color,p,spiral,phase)','materialColorR976(color,points[edges[i]],spiral,phase)','representation:{mode,rotation,color,spiral,materialPhase}','geometryInvariant:true','gl.vertexAttribPointer(colorLoc','setSpiral(v.spiral===true)'])assert.ok(studio.includes(marker),'R976 studio material continuity missing: '+marker);
+
+const {validateStudioProjectR977,encodeStudioProjectR977,decodeStudioProjectR977}=await import('../src/system/creationCanonR881.mjs');
+const legacyStudio={project:'Continuity',title:'A scene',prompt:'',mode:'mandala',rotation:22,color:'#5fcecb',address:20735,assets:[]};
+const migratedStudio=validateStudioProjectR977(legacyStudio);
+assert.equal(migratedStudio.spiral,false);assert.equal(migratedStudio.materialPhase,0);assert.equal(migratedStudio.address,20735);
+const fullStudio=validateStudioProjectR977({...migratedStudio,spiral:true,materialPhase:137,assets:[{name:'source.png',sha256:'a'.repeat(64),byteSize:42,proofTier:'OBS',source:'USER_SELECTED_FILE'}]});
+const studioPacket=await encodeStudioProjectR977(fullStudio);
+assert.deepEqual(await decodeStudioProjectR977(studioPacket),fullStudio);
+const editedStudio=JSON.parse(studioPacket);editedStudio.scene.rotation=23;
+await assert.rejects(()=>decodeStudioProjectR977(JSON.stringify(editedStudio)),/integrity mismatch/);
+for(const change of [{address:20736},{mode:'unknown'},{rotation:Infinity},{materialPhase:-1},{spiral:'true'},{color:'invalid'},{geometrySource:'other'},{assets:[{name:'fake'}]}])assert.throws(()=>validateStudioProjectR977({...fullStudio,...change}));
+assert.ok(Object.isFrozen(fullStudio)&&Object.isFrozen(fullStudio.assets)&&Object.isFrozen(fullStudio.assets[0]));
+for(const marker of ['encodeStudioProjectR977(scene)','decodeStudioProjectR977(raw)','applyProject(scene)','Export project','Import project packet','asset references only','setReceipts([])'])assert.ok(studio.includes(marker),'R977 project continuity missing: '+marker);
