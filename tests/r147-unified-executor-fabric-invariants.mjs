@@ -55,6 +55,35 @@ const altered=await dispatchRunR147(typedRuntime,typedCreated.run.id,{...typedIn
 assert.equal(altered.code,'R209_SAI_INSPECTION_EXACT_DISPATCH_HELD');
 const typedReturn=await dispatchRunR147(typedRuntime,typedCreated.run.id,typedInput,{queueHybrid:async job=>{assert.deepEqual(job.steps,typedSteps);assert.equal(job.targetDeviceId,host.id);return{ok:true,job:{id:'sai-r209-typed-host',inputFingerprint:'8'.repeat(64)}}}});
 assert.equal(typedReturn.ok,true);assert.equal(typedReturn.run.state,'AVAILABLE');assert.equal((await readResultR147(typedRuntime,typedCreated.run.id)).hostDispatchReservation.state,'BOUND');
+const {compileSaiCloudSource}=await import('../src/execution/saiCloudCorpus.js');
+const {inspectionSHA}=await import('../src/execution/saiHostInspectionR209.js');
+const regions=[],assets=new Map(),encoder=new TextEncoder();
+const assetHash=async s=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',encoder.encode(s)))].map(x=>x.toString(16).padStart(2,'0')).join('');
+const makeRow=address=>({address,stateId:address+1,coordinates:[Math.floor(address/1728),Math.floor(address%1728/144),Math.floor(address%144/12),address%12],metrics:{continuity:.5+(address%12)/30,plasticity:.6,contradiction:.2,burden:.2,scar:.3+(address%12)/40,evidence:.5,rsc:.5,geometry:.5,stability:.6,decision:'STAY',mode188:'STAY'},autoPing:{dataNext:(address+1)%20736,previous:(address+20735)%20736,hourglassMirror:address,mode188Plus:(address+188)%20736},motion:.5,modes:Array.from({length:20},(_,i)=>['M'+String(i+1).padStart(3,'0'),'EXECUTED_EXACT',.5,[]]),mode188:{sratio:1,decision:'STAY',packetGate:'STAY'}});
+for(let i=0;i<144;i++){const file='region-'+String(i).padStart(3,'0')+'.json',body=JSON.stringify({schema:'OMEGA_SAI_PROJECTED_REGION_V1',region:i,rows:Array.from({length:144},(_,j)=>makeRow(i*144+j))});assets.set(file,body);regions.push({region:i,file,bytes:encoder.encode(body).length,sha256:await assetHash(body)})}
+assets.set('manifest.json',JSON.stringify({schema:'OMEGA_SAI_PROJECTED_SOURCE_V1',stateCount:20736,regionCount:144,lanesPerRegion:144,catalogCount:179,modeContracts:Array.from({length:20},(_,i)=>({id:'M'+String(i+1).padStart(3,'0'),formula:'fixture'})),sources:{fixture:true},coreR2Min:.98,medianR2:.99,boundary:'FIXTURE ONLY',regions}));
+const fixtureAssets={fetch:async request=>{const name=new URL(request.url).pathname.split('/').at(-1);return assets.has(name)?new Response(assets.get(name)):new Response('',{status:404})}};
+const packet=await compileSaiCloudSource(fixtureAssets,{kind:'TRAIN_REGIONAL',address:188,epochs:24});
+assert.equal(packet.dataset.rows.length,144);assert.equal(packet.dataset.rows[0].address,144);
+const trainingRuntime=new Runtime(),trainingCreated=await createRunR146(trainingRuntime,{contract:contract('SAI','SAI Lab'),metadata:{saiCloudTraining:true,sourcePacket:packet}});
+await transitionRunR146(trainingRuntime,trainingCreated.run.id,{state:'AUTHORIZED'});
+let trainingOut=await dispatchRunR147(trainingRuntime,trainingCreated.run.id,{executorId:'LOCAL_RUNTIME',sourceSha256:'f'.repeat(64)});
+assert.equal(trainingOut.code,'SAI_CLOUD_SOURCE_PROMPT_MISMATCH');
+trainingOut=await dispatchRunR147(trainingRuntime,trainingCreated.run.id,{executorId:'LOCAL_RUNTIME',sourceSha256:packet.packetSha256});
+assert.equal(trainingOut.ok,true);assert.equal(trainingOut.run.state,'VERIFIED');assert.equal(trainingOut.result.payload.session.epoch,24);assert.equal(trainingOut.result.payload.evaluation.predictions.length,144);assert.equal(trainingOut.result.payload.foundationWeightsChanged,false);
+const synthesis=await compileSaiCloudSource(fixtureAssets,{kind:'SYNTHESIS',address:188,query:'Evaluate continuity'});
+assert.equal(synthesis.witnesses.length,4);
+let providerPrompt='';const synthRuntime=new Runtime({AI:{run:async(model,input)=>{providerPrompt=input.messages[1].content;return{response:'fixture model result'}}}});
+const synthCreated=await createRunR146(synthRuntime,{contract:contract('SAI','SAI Lab'),metadata:{saiCloudExecution:true,sourcePacket:synthesis}});
+await transitionRunR146(synthRuntime,synthCreated.run.id,{state:'AUTHORIZED'});
+const synthOut=await dispatchRunR147(synthRuntime,synthCreated.run.id,{executorId:'WORKERS_AI',sourceSha256:synthesis.packetSha256,prompt:'untrusted override'});
+assert.equal(synthOut.ok,true);assert.equal(providerPrompt,synthesis.prompt);
+const originalRegion=assets.get('region-001.json');assets.set('region-001.json',originalRegion+' ');
+await assert.rejects(()=>compileSaiCloudSource(fixtureAssets,{kind:'SYNTHESIS',address:188,query:'inspect'}),/DIGEST_MISMATCH/);assets.set('region-001.json',originalRegion);
+const staleHost={...host,lastSeen:Date.now()-60000,online:true};assert.equal((await executorDirectoryR147(new Runtime({},[staleHost]))).executors.HYBRID_HOST.state,'DEVICE_PROOF_REQUIRED');
+const existingResult=await readResultR147(hyRuntime,hyRun.id);
+await syncHybridReturnR147(hyRuntime,{id:'job-r147',status:'FAILED',returnPacket:{resultFingerprint:'9'.repeat(64)}},null);
+assert.equal((await readResultR147(hyRuntime,hyRun.id)).result.resultFingerprint,existingResult.result.resultFingerprint);
 const pluginRuntime=new Runtime(),pluginRun=await authorized(pluginRuntime,'PLUGIN','Plugins');out=await dispatchRunR147(pluginRuntime,pluginRun.id,{});assert.equal(out.ok,false);assert.equal(out.code,'R147_PLUGIN_CONCRETE_ADAPTER_REQUIRED');assert.equal((await readRunR146(pluginRuntime,pluginRun.id)).state,'AUTHORIZED');
 
 for(const law of ['ONE_DURABLE_RUN_ONE_EXECUTOR_BINDING_AT_A_TIME','QUEUEING_IS_NOT_INVOCATION','HYBRID_AGENT_CLAIM_ADVANCES_AVAILABLE_TO_INVOKED','HYBRID_RETURN_REQUIRES_R141_CLOSURE_BEFORE_VERIFIED','SWARM_EXECUTION_QUORUM_IS_NOT_TRUTH_CONSENSUS','PLUGIN_REGISTRY_PRESENCE_IS_NOT_PROVIDER_EXECUTION','R125_REMAINS_THE_ONLY_CANONSTATE_ADMISSION_AUTHORITY'])must(R147_LAWS.includes(law),'law missing '+law);

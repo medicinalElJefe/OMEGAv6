@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import {saiCorpusAssets} from './scripts/saiCorpusAssets';
 import react from '@vitejs/plugin-react';
 import { createHash } from 'node:crypto';
 import { writeFile } from 'node:fs/promises';
@@ -85,7 +86,7 @@ function exactCaseSourceResolutionR896(){
 }
 
 export default defineConfig({
-  plugins: [react(),governedBuildReceipt(),initialEntryBudgetR1991(),exactCaseSourceResolutionR896()],
+  plugins: [react(),governedBuildReceipt(),initialEntryBudgetR1991(),exactCaseSourceResolutionR896(),saiCorpusAssets()],
   build: {
     outDir: 'dist',
     sourcemap: true,

@@ -1,6 +1,8 @@
 import {readRunR146,replayRunR146,transitionRunR146} from './durableOperationExecutionR146.js';
 import {runtimeStorageR168} from './runtimeStorageR168.js';
 import {checkSaiInspectionDispatch} from './saiHostInspectionR209.js';
+import {validateSaiCloudPacket} from './saiCloudCorpus.js';
+import {startUserTrainingR995,advanceUserTrainingR995,verifyUserTrainingR995,evaluateUserTrainingR995} from '../saiRelationalLearningR992.mjs';
 import {manifestR185,planTemporalPerformanceR185,readTemporalPerformanceR185,recordTemporalPerformanceR185} from './temporalRelativityPerformanceR185.js';
 import {lookupVerifiedReuseR194,manifestR194,publishVerifiedReuseR194} from './verifiedContentReuseR194.js';
 import {assembleDifferentialPartitionsR195,manifestR195,planDifferentialPartitionsR195,publishDifferentialPartitionsR195} from './differentialPartitionExecutionR195.js';
@@ -15,7 +17,7 @@ export const R147_EXECUTORS=Object.freeze([
  {id:'AUTONOMIC_SWARM',domains:['AI','SAI','PROOF','BUILD','LOCAL'],mode:'ASYNCHRONOUS_SWARM',authority:'R125_SWARM_RECEIPT_NOT_CANON'},
  {id:'FEDERATION_CHAIN',domains:['AI','SAI','PROOF','LOCAL'],mode:'SYNCHRONOUS_SPECIALIST_CHAIN',authority:'R115_PROPOSE_SCREEN_RETURN_NOT_CANON'},
  {id:'LOCAL_PROOF',domains:['PROOF'],mode:'SYNCHRONOUS_DETERMINISTIC',authority:'R146_REPLAY_INTEGRITY_ONLY'},
- {id:'LOCAL_RUNTIME',domains:['LOCAL'],mode:'SYNCHRONOUS_DETERMINISTIC',authority:'LOCAL_RUNTIME_RETURN_NOT_CANON'},
+ {id:'LOCAL_RUNTIME',domains:['LOCAL','SAI'],mode:'SYNCHRONOUS_DETERMINISTIC',authority:'LOCAL_RUNTIME_RETURN_NOT_CANON'},
  {id:'CONTENT_CACHE',domains:['AI','SAI','PROOF','LOCAL'],mode:'SYNCHRONOUS_DETERMINISTIC_REUSE',authority:'R194_EXACT_VERIFIED_CONTENT_RETRIEVAL_NOT_FRESH_EXECUTION'},
  {id:'PLUGIN_CONNECTOR',domains:['PLUGIN'],mode:'EXTERNAL_CONNECTOR',authority:'PROVIDER_RECEIPT_REQUIRED'}
 ]);
@@ -62,7 +64,7 @@ const jsonBody=async response=>{if(!response)return null;try{return await respon
 function packetCandidate(body){return body?.packet||body?.proposal||body?.screened_packet||body?.result||body}
 function validProposal(packet){return packet?.schema==='OMEGA_PACKET_v1'&&packet?.source_node==='omega-genesis'&&Boolean(packet?.packet_id)&&Boolean(packet?.state_id)&&packet?.geometry&&Number(packet?.wavelength_nm)>0&&Array.isArray(packet?.lineage)}
 function validScreen(packet){return packet?.schema==='OMEGA_PACKET_v1'&&packet?.source_node==='omega-optical'&&Boolean(packet?.packet_id)&&packet?.geometry&&Number(packet?.wavelength_nm)>0&&packet?.scalar_metrics&&packet?.proof&&Array.isArray(packet?.lineage)}
-function currentDevices(devices=[]){const t=Date.now();return devices.filter(x=>x&&!x.revoked&&(x.online===true||t-Number(x.lastSeen||0)<30000))}
+function currentDevices(devices=[]){const t=Date.now();return devices.filter(x=>x&&!x.revoked&&x.online!==false&&Number.isFinite(Number(x.lastSeen))&&Number(x.lastSeen)>0&&t-Number(x.lastSeen)>=-5000&&t-Number(x.lastSeen)<30000)}
 function capSet(device){return new Set(Array.isArray(device?.capabilities)?device.capabilities:[])}
 function executionDomain(run){return txt(run?.contract?.executionDomain,32).toUpperCase()}
 const storage=runtime=>runtimeStorageR168(runtime);
@@ -88,7 +90,7 @@ export async function executorDirectoryR147(runtime,env=runtime?.env||{}){
    AUTONOMIC_SWARM:{state:env?.OMEGA_SWARM_AUTONOMIC?'AVAILABLE':'UNAVAILABLE',domains:['AI','SAI','PROOF','BUILD','LOCAL'],hierarchy:'1→12→144→1728→20736 lanes'},
    FEDERATION_CHAIN:{state:env?.OMEGA_GENESIS_MACHINE?.fetch&&env?.OMEGA_OPTICAL_MACHINE?.fetch?'AVAILABLE':'UNAVAILABLE',domains:['AI','SAI','PROOF','LOCAL'],roles:['PROPOSE','SCREEN']},
    LOCAL_PROOF:{state:'AVAILABLE',domains:['PROOF']},
-   LOCAL_RUNTIME:{state:'AVAILABLE',domains:['LOCAL']},
+   LOCAL_RUNTIME:{state:'AVAILABLE',domains:['LOCAL','SAI'],saiOperation:'SOURCE_PROJECTED_REGIONAL_R995_TRAINING'},
    CONTENT_CACHE:{state:'AVAILABLE',domains:['AI','SAI','PROOF','LOCAL'],requires:'R194_EXACT_VERIFIED_CONTENT_HIT',freshExecution:false},
    PLUGIN_CONNECTOR:{state:'DISCOVERED',domains:['PLUGIN'],providerExecutionRequiresConcreteAdapter:true}
   },
@@ -101,7 +103,7 @@ export async function executorDirectoryR147(runtime,env=runtime?.env||{}){
 
 export async function selectExecutorR147(runtime,run,input={}){
  const directory=await executorDirectoryR147(runtime),domain=executionDomain(run),requested=txt(input.executorId,64).toUpperCase(),strategy=txt(input.strategy,32).toUpperCase();
- const eligible=R147_EXECUTORS.filter(x=>x.id!=='CONTENT_CACHE'&&x.domains.includes(domain)).map(x=>x.id);
+ const eligible=R147_EXECUTORS.filter(x=>x.id!=='CONTENT_CACHE'&&x.domains.includes(domain)&&(domain!=='SAI'||x.id!=='LOCAL_RUNTIME'||run.metadata?.saiCloudTraining===true)).map(x=>x.id);
  let executorId=requested&&eligible.includes(requested)?requested:null;
  if(!executorId){
   if(domain==='HYBRID'||domain==='BUILD')executorId='HYBRID_HOST';
@@ -146,6 +148,17 @@ async function runLocalProof(runtime,run,input){
 }
 
 async function runLocalRuntime(runtime,run,input){
+ if(run.metadata?.saiCloudTraining===true){
+  const p=run.metadata.sourcePacket;
+  run=await ensureAvailable(runtime,run,'LOCAL_RUNTIME','Recovered R995 supervised optimizer available in the canonical Worker');const inv=await invoke(runtime,run,'LOCAL_RUNTIME');if(!inv.ok)return inv;
+  try{
+   const start=startUserTrainingR995(p.dataset,{seed:37,targetEpochs:p.epochs,learningRate:.08,authorized:true});
+   const session=verifyUserTrainingR995(advanceUserTrainingR995(start,p.epochs)),evaluation=evaluateUserTrainingR995(session);
+   const payload={operation:'SAI_TRAIN_REGIONAL',sourceSha256:p.packetSha256,manifestSha256:p.manifestSha256,region:p.region,regionSha256:p.regionSha256,featureNames:p.featureNames,target:p.target,session,evaluation,foundationModelLoaded:false,foundationWeightsChanged:false,empirical:false};
+   const saved=await persistResult(runtime,run.id,'LOCAL_RUNTIME',payload,'R995_SOURCE_PROJECTED_SUPERVISED_RETURN_NOT_EMPIRICAL');
+   await returned(runtime,run.id,'LOCAL_RUNTIME',saved.resultFingerprint,'R995 replay and reference evaluation');const verified=await verifyNormal(runtime,run.id,'LOCAL_RUNTIME',saved.resultFingerprint,'R995 replay and reference evaluation');return{ok:verified.ok,status:verified.status||200,run:verified.run,result:saved};
+  }catch(error){const failed=await transitionRunR146(runtime,run.id,{state:'FAILED',reason:'Scoped R995 source training failed',evidence:{proofRef:'SAI_R995_TRAINING_FAILED',providerReceipt:txt(error?.message||error,1000)}});return{ok:false,status:502,code:'SAI_R995_TRAINING_FAILED',run:failed.run}}
+ }
  run=await ensureAvailable(runtime,run,'LOCAL_RUNTIME','Bounded canonical runtime inspection executor is present');const inv=await invoke(runtime,run,'LOCAL_RUNTIME');if(!inv.ok)return inv;const operation=txt(input.localOperation||'READ_RUN',40).toUpperCase();let payload;if(operation==='READ_RUN')payload={operation,run:await readRunR146(runtime,sid(input.targetRunId)||run.id)};else if(operation==='REPLAY')payload={operation,replay:await replayRunR146(runtime,sid(input.targetRunId)||run.id)};else payload={operation:'MANIFEST',revision:R147_REVISION,laws:R147_LAWS,executors:R147_EXECUTORS};const saved=await persistResult(runtime,run.id,'LOCAL_RUNTIME',payload,'DETERMINISTIC_RUNTIME_RETURN_ONLY');await returned(runtime,run.id,'LOCAL_RUNTIME',saved.resultFingerprint,'R147 bounded local runtime');const verified=await verifyNormal(runtime,run.id,'LOCAL_RUNTIME',saved.resultFingerprint,'R147 bounded local runtime');return{ok:verified.ok,status:verified.status||200,run:verified.run,result:saved};
 }
 
@@ -178,7 +191,7 @@ async function queueHybrid(runtime,run,input,callbacks){
  if(input.targetDeviceId!=null&&(!requestedTarget||!hosts.some(h=>h.id===requestedTarget)))return{ok:false,status:409,code:'R147_EXPLICIT_HOST_NOT_CURRENT',run};
  const targetId=requestedTarget||hosts[0].id,domain=executionDomain(run);
  if(run.metadata?.saiHostInspection){
-  if(domain!=='HYBRID'||!await checkSaiInspectionDispatch(run.metadata.saiHostInspection,input))return{ok:false,status:409,code:'R209_SAI_INSPECTION_EXACT_DISPATCH_HELD',run};
+  if(domain!=='HYBRID'||(await replayRunR146(runtime,run.id))?.ok!==true||!await checkSaiInspectionDispatch(run.metadata.saiHostInspection,input))return{ok:false,status:409,code:'R209_SAI_INSPECTION_EXACT_DISPATCH_HELD',run};
   const target=hosts.find(h=>h.id===targetId);
   if(!target||!['INDEX','HASH_TREE'].every(op=>capSet(target).has(op)))return{ok:false,status:409,code:'R209_SAI_INSPECTION_HOST_CAPABILITY_HELD',run};
  }
@@ -202,7 +215,12 @@ export async function dispatchRunR147(runtime,id,input={},callbacks={}){
  locks.add(id);try{return await dispatchOnceR147(runtime,id,input,callbacks)}finally{locks.delete(id)}
 }
 async function dispatchOnceR147(runtime,id,input={},callbacks={}){
- let run=await readRunR146(runtime,id);if(!run)return{ok:false,status:404,code:'R147_RUN_NOT_FOUND'};if(!['AUTHORIZED','AVAILABLE'].includes(run.state))return{ok:false,status:409,code:'R147_DISPATCH_REQUIRES_AUTHORIZED_OR_AVAILABLE',run};if(await binding(runtime,run.id)||await storage(runtime).get(HOST_RESERVATION_PREFIX+run.id))return{ok:false,status:409,code:'R147_DISPATCH_ALREADY_BOUND_OR_RESERVED',run};if(run.metadata?.saiCloudExecution===true&&(executionDomain(run)!=='SAI'||input.executorId!=='WORKERS_AI'||typeof run.metadata.sourcePrompt!=='string'||input.prompt!==run.metadata.sourcePrompt))return{ok:false,status:409,code:'SAI_CLOUD_SOURCE_PROMPT_MISMATCH',run};const plan=await selectExecutorR147(runtime,run,input);if(!plan.executorId)return{ok:false,status:409,code:'R147_NO_ELIGIBLE_EXECUTOR',plan};if(plan.state==='UNAVAILABLE'||plan.state==='DEVICE_PROOF_REQUIRED')return{ok:false,status:503,code:'R147_EXECUTOR_UNAVAILABLE',plan,run};
+ let run=await readRunR146(runtime,id);if(!run)return{ok:false,status:404,code:'R147_RUN_NOT_FOUND'};if(!['AUTHORIZED','AVAILABLE'].includes(run.state))return{ok:false,status:409,code:'R147_DISPATCH_REQUIRES_AUTHORIZED_OR_AVAILABLE',run};if(await binding(runtime,run.id)||await storage(runtime).get(HOST_RESERVATION_PREFIX+run.id))return{ok:false,status:409,code:'R147_DISPATCH_ALREADY_BOUND_OR_RESERVED',run};if(run.metadata?.saiCloudExecution===true||run.metadata?.saiCloudTraining===true){
+  const p=run.metadata.sourcePacket,replay=await replayRunR146(runtime,run.id),training=run.metadata.saiCloudTraining===true;
+  if(executionDomain(run)!=='SAI'||replay?.ok!==true||replay?.intentBound!==true||!await validateSaiCloudPacket(p)||input.sourceSha256!==p.packetSha256||p.kind!==(training?'TRAIN_REGIONAL':'SYNTHESIS')||input.executorId!==(training?'LOCAL_RUNTIME':'WORKERS_AI'))return{ok:false,status:409,code:'SAI_CLOUD_SOURCE_PROMPT_MISMATCH',run};
+  // Replace every client-supplied execution parameter with the authorized server packet.
+  input=training?{executorId:'LOCAL_RUNTIME',localOperation:'SAI_TRAIN_REGIONAL',sourceSha256:p.packetSha256}:{executorId:'WORKERS_AI',prompt:p.prompt,maxTokens:900,temperature:.2,sourceSha256:p.packetSha256};
+ }const plan=await selectExecutorR147(runtime,run,input);if(!plan.executorId)return{ok:false,status:409,code:'R147_NO_ELIGIBLE_EXECUTOR',plan};if(plan.state==='UNAVAILABLE'||plan.state==='DEVICE_PROOF_REQUIRED')return{ok:false,status:503,code:'R147_EXECUTOR_UNAVAILABLE',plan,run};
  const started=Date.now();let out;
  if(plan.executorId==='WORKERS_AI')out=await runWorkersAI(runtime,run,input,runtime.env||{},plan.temporalPerformance?.multiAxis);
  else if(plan.executorId==='LOCAL_PROOF')out=await runLocalProof(runtime,run,input);
@@ -221,6 +239,7 @@ async function dispatchOnceR147(runtime,id,input={},callbacks={}){
 export async function syncHybridClaimR147(runtime,job){const link=job?.id?await artifactLink(runtime,'HYBRID_JOB',job.id):null;if(!link?.runId)return null;const run=await readRunR146(runtime,link.runId);if(!run)return null;if(run.state==='AVAILABLE'){const moved=await transitionRunR146(runtime,run.id,{state:'INVOKED',reason:`Authenticated Hybrid agent claimed linked job ${job.id}`,evidence:{proofRef:'R147_AUTHENTICATED_HYBRID_AGENT_CLAIM',resultFingerprint:job.inputFingerprint||null}});return moved.run||run}return run}
 export async function syncHybridReturnR147(runtime,job,closure){
  const link=job?.id?await artifactLink(runtime,'HYBRID_JOB',job.id):null;if(!link?.runId)return null;let run=await readRunR146(runtime,link.runId);if(!run)return null;
+ if(['VERIFIED','FAILED','REJECTED','STALE','UNAVAILABLE'].includes(run.state))return run;
  const bind=await binding(runtime,run.id),fingerprint=txt(job?.returnPacket?.resultFingerprint||job?.resultFingerprint,256)||await sha({jobId:job.id,status:job.status,returnPacket:job.returnPacket||null});const saved=await persistResult(runtime,run.id,'HYBRID_HOST',{jobId:job.id,status:job.status,returnPacket:job.returnPacket||null,closure:closure||null},'R141_EXACT_HOST_RETURN_REQUIRED');
  if(run.state==='AVAILABLE'){const inv=await transitionRunR146(runtime,run.id,{state:'INVOKED',reason:'Hybrid result arrived after an unobserved claim; host return proves the job was executed but not yet verified',evidence:{proofRef:'R147_HYBRID_RETURN_IMPLIES_PRIOR_INVOCATION'}});run=inv.run||run}
  if(job?.status==='FAILED'&&run.state==='INVOKED'){const failed=await transitionRunR146(runtime,run.id,{state:'FAILED',reason:`Hybrid host returned failed linked job ${job.id}`,evidence:{proofRef:'R147_HYBRID_FAILED_RETURN',resultFingerprint:fingerprint,providerReceipt:saved.resultFingerprint,r141Closure:closure||null}});run=failed.run||run;try{await recordTemporalPerformanceR185(runtime,{run,executorId:'HYBRID_HOST',ok:false,status:502,latencyMs:bind?.createdAt?Date.now()-Number(bind.createdAt):0,phase:'ASYNC_HOST_FAILED_RETURN',verified:false,terminal:true})}catch{}return run}
