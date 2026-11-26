@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "Cloud/SAI/Hybrid candidate 06097c8 completed all 11 exact-head workflows; successor binds Worker-packaged full projected atlas, source-backed modes, real R995 regional training, server-authorized source synthesis and immutable durable intent. CI pending. Historical, native and deployment gates retained.",
+  "latestGovernedWork": "R997 exact-head 306be8d7 11/11 CI baseline; connect R996 cloud-trained regional source returns to offline SAI, preserving exact checkpoint replay across sorted serialization, prompt-source binding, verified transfer envelope and local revalidation. Candidate CI pending.",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -603,6 +603,11 @@
     {
       "revision": "R996",
       "conservation": "Existing cloud R116/R146/R147/R141 and full OMEGA7 Hybrid retained. 06097c82ba927bd0704e8fe1a5ca395099aaccf0: all 11 exact-head GitHub workflows completed successfully. Successor builds the original embedded source-derived field into 144 SHA-bound regions, uses real source-backed mode outputs, verifies server-side evidence before invoking existing cloud model or R995 optimizer, binds immutable run metadata to R146 genesis, guards terminal host receipts. Fixture and actual build checks required; no native or production proof claimed.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R997",
+      "conservation": "R996 cloud and R995 local learning connected without new execution or Canon authority. Fix object-key-order dependence in optimizer replay; enforce source-derived prompt semantics and training region schema; bind exported regional checkpoint to R146 verified run/replay and R147 exact return; offline import replays model and evaluations and preserves source transfer bytes in local storage. Offline digest does not authenticate origin. Tests cover sorted return, altered prompt, altered weights/evaluation, missing intent proof. Exact-head predecessor 306be8d7 11/11 CI passed.",
       "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
     }
   ],

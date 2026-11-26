@@ -1,5 +1,5 @@
-import {inspectionSHA} from './saiHostInspectionR209.js';
-import {validateDatasetR995} from '../saiRelationalLearningR992.mjs';
+import {inspectionSHA,stableInspectionJSON} from './saiHostInspectionR209.js';
+import {validateDatasetR995,verifyUserTrainingR995,evaluateUserTrainingR995} from '../saiRelationalLearningR992.mjs';
 const HEX=/^[a-f0-9]{64}$/;
 const ROOT='https://omega-assets.internal/omega-sai-source/';
 const validAddress=x=>Number.isSafeInteger(x)&&x>=0&&x<20736;
@@ -53,12 +53,59 @@ export async function compileSaiCloudSource(assets,request){
  for(const [relation,address] of relations){const r=await source.row(address);witnesses.push({relation,address,stateId:r.stateId,coordinates:r.coordinates,metrics:r.metrics,regionSha256:m.regions[Math.floor(address/144)].sha256})}
  const packet={...base,kind:'SYNTHESIS',query,center,regionSha256:m.regions[region].sha256,witnesses,modeContracts:m.modeContracts,boundary:m.boundary};
  const packetSha256=await inspectionSHA(packet);
- const prompt=JSON.stringify({task:query,sourcePacket:{...packet,packetSha256},limitations:['Numeric channels are retained fitted source projections; formula evaluation is exact only over those inputs. Original donor documents are not retrieved.','Preserve evidence boundaries, disagreements and missing inputs. Model output cannot authorize native or canonical changes.']});
+ const prompt=sourcePromptR997(packet,packetSha256);
  if(prompt.length>12000)throw Error('SAI_SOURCE_PROMPT_TOO_LARGE');
  return {...packet,packetSha256,prompt};
 }
-export async function validateSaiCloudPacket(packet){
- if(!packet||packet.schema!=='OMEGA_SAI_SERVER_SOURCE_V1'||!HEX.test(packet.packetSha256)||!HEX.test(packet.manifestSha256)||packet.canonicalMutation!==false||packet.empirical!==false)return false;
- const {packetSha256,prompt,...body}=packet;
- return await inspectionSHA(body)===packetSha256;
+function sourcePromptR997(packet,packetSha256){
+ const query=packet.query;
+ // Stable object order also survives serialization by the durable runtime.
+ return stableInspectionJSON({task:query,sourcePacket:{...packet,packetSha256},limitations:['Numeric channels are retained fitted source projections; formula evaluation is exact only over those inputs. Original donor documents are not retrieved.','Preserve evidence boundaries, disagreements and missing inputs. Model output cannot authorize native or canonical changes.']});
 }
+export async function validateSaiCloudPacket(packet){
+ try{
+ if(!packet||packet.schema!=='OMEGA_SAI_SERVER_SOURCE_V1'||!HEX.test(packet.packetSha256)||!HEX.test(packet.manifestSha256)||packet.canonicalMutation!==false||packet.empirical!==false||!validAddress(packet.address)||packet.stateId!==packet.address+1||!HEX.test(packet.regionSha256)||packet.sourceKind!=='RELEASE_PACKAGED_SOURCE_DERIVED_PROJECTION')return false;
+ const {packetSha256,prompt,...body}=packet;
+ if(await inspectionSHA(body)!==packetSha256)return false;
+ if(packet.kind==='SYNTHESIS'){
+  if(typeof prompt!=='string'||prompt.length>12000||safeQuery(packet.query)!==packet.query)return false;
+  // Legacy serialized prompts with differing object-key order remain valid,
+  // but no altered prompt content can pass the original source digest.
+  return stableInspectionJSON(JSON.parse(prompt))===sourcePromptR997(body,packetSha256);
+ }
+ if(packet.kind!=='TRAIN_REGIONAL'||prompt!==undefined||packet.epochs!==24||packet.region!==Math.floor(packet.address/144)||packet.target!=='scar'||stableInspectionJSON(packet.featureNames)!==stableInspectionJSON(featureNames))return false;
+ const data=validateDatasetR995(packet.dataset);
+ return data.source==='SOURCE_PROJECTED_SCAR_REGION_'+packet.region+'_'+packet.regionSha256&&data.rows.length===144&&data.rows.every((row,i)=>row.address===packet.region*144+i)&&stableInspectionJSON(data)===stableInspectionJSON(packet.dataset);
+ }catch{return false}
+}
+// A portable bundle is a corruption-detecting, independently replayable
+// record, NOT a signature or proof of a live authenticated cloud endpoint.
+// The caller must separately obtain current R146 replay from that endpoint.
+export const R997_TRANSFER='OMEGA_SAI_CLOUD_LOCAL_TRANSFER_R997';
+export async function verifyRegionalReturnR997(packet,result){
+ if(!await validateSaiCloudPacket(packet)||packet.kind!=='TRAIN_REGIONAL')throw Error('R997 source packet refused');
+ if(!result||result.schema!=='OMEGA_EXECUTOR_RESULT_R147'||result.executorId!=='LOCAL_RUNTIME'||!/^run_[a-f0-9]{32}$/.test(result.runId)||!HEX.test(result.resultFingerprint)||result.canonicalMutation!==false||result.canonicalAdmissionAuthority!=='R125')throw Error('R997 executor return refused');
+ const {resultFingerprint,...body}=result;
+ if(await inspectionSHA(body)!==resultFingerprint)throw Error('R997 return digest mismatch');
+ const p=result.payload;
+ if(!p||p.operation!=='SAI_TRAIN_REGIONAL'||p.sourceSha256!==packet.packetSha256||p.manifestSha256!==packet.manifestSha256||p.region!==packet.region||p.regionSha256!==packet.regionSha256||p.target!==packet.target||stableInspectionJSON(p.featureNames)!==stableInspectionJSON(packet.featureNames)||p.foundationModelLoaded!==false||p.foundationWeightsChanged!==false||p.empirical!==false)throw Error('R997 source/return binding mismatch');
+ const session=verifyUserTrainingR995(p.session);
+ if(session.status!=='COMPLETE'||session.epoch!==packet.epochs||session.targetEpochs!==packet.epochs||session.seed!==37||session.learningRate!==.08||stableInspectionJSON(session.dataset)!==stableInspectionJSON(packet.dataset))throw Error('R997 training source or configuration mismatch');
+ const evaluation=evaluateUserTrainingR995(session);
+ if(stableInspectionJSON(evaluation)!==stableInspectionJSON(p.evaluation))throw Error('R997 evaluation replay mismatch');
+ return {session,evaluation,runId:result.runId,sourceSha256:packet.packetSha256,resultFingerprint,authority:'REPLAYED_PROJECTED_SOURCE_COMPUTATION_NOT_CANON',canonicalMutation:false};
+}
+export async function encodeRegionalTransferR997(packet,result,run,replay){
+ if(run?.id!==result?.runId||run?.state!=='VERIFIED'||run?.contract?.executionDomain!=='SAI'||run?.metadata?.saiCloudTraining!==true||stableInspectionJSON(run.metadata.sourcePacket)!==stableInspectionJSON(packet)||replay?.ok!==true||replay?.intentBound!==true||replay?.headMatch!==true||replay.runId!==run.id||replay.storedHeadSha256!==run.headSha256||!HEX.test(run.headSha256)||run.events?.at(-1)?.evidence?.resultFingerprint!==result.resultFingerprint)throw Error('R997 durable replay binding refused');
+ await verifyRegionalReturnR997(packet,result);
+ const body={schema:R997_TRANSFER,sourcePacket:packet,result,runId:run.id,headSha256:run.headSha256,authority:'EXPORTED_CLOUD_RECORD_REQUIRES_LIVE_AUTHENTICATION_FOR_ORIGIN',canonicalMutation:false};
+ return JSON.stringify({body,sha256:await inspectionSHA(body)});
+}
+export async function decodeRegionalTransferR997(text){
+ if(typeof text!=='string'||text.length>1048576||new TextEncoder().encode(text).length>1048576)throw Error('R997 transfer size refused');
+ const envelope=JSON.parse(text),body=envelope?.body;
+ if(body?.schema!==R997_TRANSFER||body.canonicalMutation!==false||body.authority!=='EXPORTED_CLOUD_RECORD_REQUIRES_LIVE_AUTHENTICATION_FOR_ORIGIN'||!HEX.test(body.headSha256)||body.runId!==body.result?.runId||!HEX.test(envelope.sha256)||await inspectionSHA(body)!==envelope.sha256)throw Error('R997 transfer digest or schema mismatch');
+ const verified=await verifyRegionalReturnR997(body.sourcePacket,body.result);
+ return {...verified,headSha256:body.headSha256,originAuthenticated:false,transferText:text};
+}
+

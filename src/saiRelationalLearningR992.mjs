@@ -254,7 +254,7 @@ export function verifyUserTrainingR995(s){
  const initial=startUserTrainingR995(s.dataset,{seed:s.seed,targetEpochs:s.targetEpochs,learningRate:s.learningRate,authorized:true});
  if(s.epoch>initial.targetEpochs)throw Error('Invalid supervised epoch');
  const expected=s.epoch?advance995(initial,s.epoch):initial;
- if(JSON.stringify(expected)!==JSON.stringify(s))throw Error('Supervised checkpoint replay mismatch');return expected;
+ if(orderedCheckpointJSONR997(expected)!==orderedCheckpointJSONR997(s))throw Error('Supervised checkpoint replay mismatch');return expected;
 }
 export function advanceUserTrainingR995(s,epochs=4){return advance995(trusted995.has(s)?s:verifyUserTrainingR995(s),epochs)}
 export function evaluateUserTrainingR995(s){
@@ -271,4 +271,11 @@ export function evaluateUserTrainingR995(s){
   partitions[kind]={...auditFinishR994(a),initialMse:auditFinishR994(baseline).mse};
  }
  return {schema:'OMEGA_SAI_USER_EVALUATION_R995',source:v.dataset.source,parameterCount:PARAMS,epoch:v.epoch,bestEpoch:v.bestEpoch,partitions,predictions:predictions.sort((a,b)=>a.address-b.address),evidenceClass:'USER_SUPPLIED_LABELS_INTERNAL_EXECUTION',empiricalVerified:false,canonicalMutation:false};
+}
+
+ // R997: object property ordering is a representation detail, not model
+ // identity. Keep array order, field values, and the entire replay contract.
+function orderedCheckpointJSONR997(value){
+ const normalize=v=>Array.isArray(v)?v.map(normalize):v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().map(k=>[k,normalize(v[k])])):v;
+ return JSON.stringify(normalize(value));
 }

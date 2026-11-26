@@ -55,7 +55,7 @@ const altered=await dispatchRunR147(typedRuntime,typedCreated.run.id,{...typedIn
 assert.equal(altered.code,'R209_SAI_INSPECTION_EXACT_DISPATCH_HELD');
 const typedReturn=await dispatchRunR147(typedRuntime,typedCreated.run.id,typedInput,{queueHybrid:async job=>{assert.deepEqual(job.steps,typedSteps);assert.equal(job.targetDeviceId,host.id);return{ok:true,job:{id:'sai-r209-typed-host',inputFingerprint:'8'.repeat(64)}}}});
 assert.equal(typedReturn.ok,true);assert.equal(typedReturn.run.state,'AVAILABLE');assert.equal((await readResultR147(typedRuntime,typedCreated.run.id)).hostDispatchReservation.state,'BOUND');
-const {compileSaiCloudSource}=await import('../src/execution/saiCloudCorpus.js');
+const {compileSaiCloudSource,validateSaiCloudPacket,verifyRegionalReturnR997,encodeRegionalTransferR997,decodeRegionalTransferR997}=await import('../src/execution/saiCloudCorpus.js');
 const {inspectionSHA}=await import('../src/execution/saiHostInspectionR209.js');
 const regions=[],assets=new Map(),encoder=new TextEncoder();
 const assetHash=async s=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',encoder.encode(s)))].map(x=>x.toString(16).padStart(2,'0')).join('');
@@ -71,8 +71,23 @@ let trainingOut=await dispatchRunR147(trainingRuntime,trainingCreated.run.id,{ex
 assert.equal(trainingOut.code,'SAI_CLOUD_SOURCE_PROMPT_MISMATCH');
 trainingOut=await dispatchRunR147(trainingRuntime,trainingCreated.run.id,{executorId:'LOCAL_RUNTIME',sourceSha256:packet.packetSha256});
 assert.equal(trainingOut.ok,true);assert.equal(trainingOut.run.state,'VERIFIED');assert.equal(trainingOut.result.payload.session.epoch,24);assert.equal(trainingOut.result.payload.evaluation.predictions.length,144);assert.equal(trainingOut.result.payload.foundationWeightsChanged,false);
+const trainingReplay997=await (await import('../src/execution/durableOperationExecutionR146.js')).replayRunR146(trainingRuntime,trainingCreated.run.id);
+const local997=await verifyRegionalReturnR997(packet,trainingOut.result);
+assert.equal(local997.session.epoch,24);
+const transfer997=await encodeRegionalTransferR997(packet,trainingOut.result,trainingOut.run,trainingReplay997);
+const decoded997=await decodeRegionalTransferR997(transfer997);
+assert.deepEqual(decoded997.session,local997.session);assert.deepEqual(decoded997.evaluation,local997.evaluation);assert.equal(decoded997.originAuthenticated,false);
+const changed997=JSON.parse(transfer997);changed997.body.result.payload.session.bestWeights[0]+=.1;
+await assert.rejects(()=>decodeRegionalTransferR997(JSON.stringify(changed997)),/digest/);
+const changedEvaluation997=structuredClone(trainingOut.result);changedEvaluation997.payload.evaluation.partitions.test.mse+=.01;delete changedEvaluation997.resultFingerprint;changedEvaluation997.resultFingerprint=await inspectionSHA(changedEvaluation997);
+await assert.rejects(()=>verifyRegionalReturnR997(packet,changedEvaluation997),/evaluation replay/);
+await assert.rejects(()=>encodeRegionalTransferR997(packet,trainingOut.result,trainingOut.run,{...trainingReplay997,intentBound:false}),/durable replay/);
+
 const synthesis=await compileSaiCloudSource(fixtureAssets,{kind:'SYNTHESIS',address:188,query:'Evaluate continuity'});
 assert.equal(synthesis.witnesses.length,4);
+assert.equal(await validateSaiCloudPacket(synthesis),true);
+assert.equal(await validateSaiCloudPacket({...synthesis,prompt:JSON.stringify({task:'altered'})}),false);
+assert.equal(await validateSaiCloudPacket(JSON.parse(JSON.stringify(synthesis))),true);
 let providerPrompt='';const synthRuntime=new Runtime({AI:{run:async(model,input)=>{providerPrompt=input.messages[1].content;return{response:'fixture model result'}}}});
 const synthCreated=await createRunR146(synthRuntime,{contract:contract('SAI','SAI Lab'),metadata:{saiCloudExecution:true,sourcePacket:synthesis}});
 await transitionRunR146(synthRuntime,synthCreated.run.id,{state:'AUTHORIZED'});
