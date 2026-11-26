@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R993 resumable training sessions with exact optimizer replay, bounded yielding and pause, integrity-checked transfer and full 20736 prediction field; R992 9/9 CI passed",
+  "latestGovernedWork": "R994 complete replay-bound SAI field evaluation, independent reference inference, disjoint split metrics and 144 region residual inspection, SHA-bound export; R993 3 workflows passed 6 pending at inspection",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -588,6 +588,11 @@
     {
       "revision": "R993",
       "conservation": "R992 optimizer shared unchanged with immutable R993 training session (current vs best weights, completed epochs, metric history). Four-epoch browser yielding, explicit pause/resume, SHA local and portable checkpoint and actual deterministic replay verification; held-out test only after completion; legacy inference checkpoint preserved without false resume claim. Direct 31+49 replay exactly equals original 80 epochs, tamper refused and 20736 field predictions matched. Existing SAI route and tests conserved; CI pending.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R994",
+      "conservation": "Existing R992/R993 training preserved, all 20736 addresses independently evaluated with matching CPU reference, partitioned train/validation/test/19968 unused and 12 domain/144 region statistics; exact replay-bound model and audit export with SHA receipts. Direct full numerical evaluation and altered result refusal passed. Synthetic only; no Canon promotion, empirical or general intelligence claim. CI pending.",
       "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
     }
   ],

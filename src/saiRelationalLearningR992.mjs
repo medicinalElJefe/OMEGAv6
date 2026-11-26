@@ -136,3 +136,64 @@ export function chartPredictionsR993(weights,start,count){
   return {address:row.address,prediction,target:row.target,residual:prediction-row.target,source:row.source};
  });
 }
+
+// R994: exhaustive, replay-bound inference evaluation. Training/validation/test
+// membership remains separate from all other addresses. The independent
+// reference evaluates the same MLP without calling its forward implementation.
+export const R994_AUDIT='OMEGA_SAI_RELATIONAL_FIELD_AUDIT_R994';
+const auditKindsR994=['TRAIN','VALIDATION','TEST','UNUSED'];
+function referencePredictionR994(weights,features){
+ const hidden=Array.from({length:HIDDEN},(_,j)=>{
+  const row=weights.slice(j*(WIDTH+1),(j+1)*(WIDTH+1));
+  return Math.tanh(features.reduce((sum,value,i)=>sum+value*row[i],row[WIDTH]));
+ });
+ return hidden.reduce((sum,value,j)=>sum+value*weights[HIDDEN*(WIDTH+1)+j],weights[PARAMS-1]);
+}
+function auditAccumulatorR994(){return {count:0,sumSquared:0,sumAbsolute:0,sumResidual:0,maxAbsolute:0,worstAddress:null}}
+function auditAddR994(a,address,residual){
+ const absolute=Math.abs(residual);
+ a.count++;a.sumSquared+=residual*residual;a.sumAbsolute+=absolute;a.sumResidual+=residual;
+ if(a.worstAddress===null||absolute>a.maxAbsolute){a.maxAbsolute=absolute;a.worstAddress=address}
+}
+function auditFinishR994(a){
+ if(!a.count)return {count:0,mse:null,mae:null,bias:null,maxAbsolute:null,worstAddress:null};
+ return {count:a.count,mse:a.sumSquared/a.count,mae:a.sumAbsolute/a.count,bias:a.sumResidual/a.count,maxAbsolute:a.maxAbsolute,worstAddress:a.worstAddress};
+}
+export function evaluateFieldR994(session){
+ // No legacy best-weight-only checkpoint can assert exact training lineage.
+ const verified=trustedSessionsR993.has(session)?session:verifySessionR993(session);
+ const model=completeTrainingR993(verified),ds=datasetR992(verified.seed);
+ const memberships=new Map();
+ for(const [key,rows] of [['TRAIN',ds.train],['VALIDATION',ds.validation],['TEST',ds.test]])
+  for(const row of rows){if(memberships.has(row.address))throw new Error('Dataset split overlap');memberships.set(row.address,key)}
+ const split=Object.fromEntries(auditKindsR994.map(k=>[k,auditAccumulatorR994()]));
+ const domains=Array.from({length:12},()=>auditAccumulatorR994());
+ const nodeRegions=Array.from({length:144},()=>auditAccumulatorR994());
+ const full=auditAccumulatorR994();
+ let maximumReferenceDifference=0;
+ for(let start=0;start<BASE;start+=144){
+  const rows=chartPredictionsR993(model.weights,start,144);
+  for(const row of rows){
+   const features=exampleR992(row.address).features,reference=referencePredictionR994(model.weights,features);
+   const difference=Math.abs(reference-row.prediction);
+   if(!Number.isFinite(row.prediction)||!Number.isFinite(row.residual)||!Number.isFinite(difference)||difference>1e-12)throw new Error('Independent inference mismatch at '+row.address);
+   maximumReferenceDifference=Math.max(maximumReferenceDifference,difference);
+   const kind=memberships.get(row.address)??'UNUSED';
+   auditAddR994(split[kind],row.address,row.residual);
+   auditAddR994(domains[Math.floor(row.address/1728)],row.address,row.residual);
+   auditAddR994(nodeRegions[Math.floor(row.address/144)],row.address,row.residual);
+   auditAddR994(full,row.address,row.residual);
+  }
+ }
+ const splitMetrics=Object.fromEntries(auditKindsR994.map(k=>[k,auditFinishR994(split[k])]));
+ if(full.count!==BASE||splitMetrics.TRAIN.count!==512||splitMetrics.VALIDATION.count!==128||splitMetrics.TEST.count!==128||splitMetrics.UNUSED.count!==19968)throw new Error('Evaluation coverage mismatch');
+ // MSE sums may differ in last bits because dataset order is shuffled.
+ for(const [kind,name] of [['TRAIN','train'],['VALIDATION','validation'],['TEST','test']])
+  if(Math.abs(splitMetrics[kind].mse-model.final[name])>1e-12)throw new Error('Split evaluation return mismatch: '+kind);
+ return {schema:R994_AUDIT,model:R992_MODEL,source:model.source,backend:model.backend,seed:verified.seed,epochs:verified.epoch,bestEpoch:verified.bestEpoch,parameterCount:PARAMS,coverage:BASE,maximumReferenceDifference,tolerance:1e-12,full:auditFinishR994(full),split:splitMetrics,domains:domains.map((a,domain)=>({domain,...auditFinishR994(a)})),nodeRegions:nodeRegions.map((a,node)=>({node,firstAddress:node*144,lastAddress:node*144+143,...auditFinishR994(a)})),evidenceClass:'SYNTHETIC_EXACT_EXECUTION',canonicalMutation:false,empirical:false};
+}
+export function verifyFieldAuditR994(session,audit){
+ const expected=evaluateFieldR994(session);
+ if(JSON.stringify(expected)!==JSON.stringify(audit))throw new Error('Field audit return mismatch');
+ return expected;
+}

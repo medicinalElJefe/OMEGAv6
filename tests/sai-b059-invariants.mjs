@@ -91,3 +91,20 @@ assert.throws(()=>chartPredictionsR993(trained992.weights,20735,2),RangeError);
 const learningUi993=read('src/SaiRelationalLearningR992.tsx');
 for(const token of ['Pause training','Resume training','verifySessionR993(packet.payload)','advanceTrainingR993(current,4)','Export 20,736 prediction field'])assert.ok(learningUi993.includes(token),'missing R993 UI '+token);
 console.log('R993 PASS: exact 31+49 epoch continuation equals uninterrupted R992; tamper rejection and exhaustive addressed prediction export parity.');
+
+// R994 real complete-field evaluation and independent forward implementation.
+const {evaluateFieldR994,verifyFieldAuditR994}=await import('../src/saiRelationalLearningR992.mjs');
+const audit994=evaluateFieldR994(finished993);
+assert.equal(audit994.coverage,20736);
+assert.equal(audit994.maximumReferenceDifference,0);
+assert.deepEqual(Object.values(audit994.split).map(row=>row.count),[512,128,128,19968]);
+assert.equal(audit994.domains.length,12);assert.ok(audit994.domains.every(row=>row.count===1728));
+assert.equal(audit994.nodeRegions.length,144);assert.ok(audit994.nodeRegions.every(row=>row.count===144));
+assert.ok(Math.abs(audit994.split.TEST.mse-trained992.final.test)<1e-12);
+assert.ok(Math.abs(audit994.full.mse-Object.values(audit994.split).reduce((sum,row)=>sum+row.mse*row.count,0)/20736)<1e-12);
+assert.deepEqual(verifyFieldAuditR994(JSON.parse(JSON.stringify(finished993)),JSON.parse(JSON.stringify(audit994))),audit994);
+const changed994=JSON.parse(JSON.stringify(audit994));changed994.split.UNUSED.count--;
+assert.throws(()=>verifyFieldAuditR994(finished993,changed994),/return mismatch/);
+assert.throws(()=>evaluateFieldR994(partial993),/requires completed/);
+assert.ok(learningUi993.includes('Verify full prediction field')&&learningUi993.includes('Export verified field audit'));
+console.log('R994 PASS: '+JSON.stringify({coverage:audit994.coverage,split:audit994.split,reference:audit994.maximumReferenceDifference}));
