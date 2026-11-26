@@ -79,3 +79,45 @@ assert.match(execFileSync(process.execPath,['scripts/verify_workflow_topology_r1
 for(const removed of ['r894-exact-continuity-proof.yml','r895-exact-portable-proof.yml','r895-full-inherited-integration.yml'])
  assert.ok(!workflowNames.includes(removed),'temporary candidate workflow must not survive release candidate: '+removed);
 console.log('R895 PASS: 248,832 exact float64 modified values (12 full 20,736D agents), atomic durable storage contract, fail-closed bounds and restored Map identity.');
+
+ // R987: exact byte roundtrip and real executor continuation, including
+ // a pending operator command, nonzero cursor, peer/phase exchanges and wrap.
+const {encodeDurablePortableR987,decodeDurablePortableR987}=await import('../src/sphereDurableCheckpointR895.mjs');
+const {collectiveMembersR890}=await import('../src/sphereCollectiveR890.mjs');
+const {autonomousSweepR893}=await import('../src/sphereFullInnerSweepR893.mjs');
+const replayMembers=collectiveMembersR890(root,12),live=createFabric();
+let cursor=0;
+for(let i=0;i<16;i++)cursor=autonomousSweepR893(live,replayMembers,cursor,64).nextStepCursor;
+submitTask(live,{agent:root,kind:'OBSERVE',inner:42});
+const savedSession={...session,stepCursor:cursor};
+const bytes=await encodeDurablePortableR987(live,savedSession);
+const decoded=await decodeDurablePortableR987(bytes);
+assert.deepEqual(decoded.fabric,live);
+assert.deepEqual(decoded.session,savedSession);
+assert.equal(await encodeDurablePortableR987(decoded.fabric,decoded.session),bytes);
+const malformed=JSON.parse(bytes);
+const rawAgents=malformed.fabric.active.__omega_r895_map__;
+rawAgents.push(rawAgents[0]);
+await assert.rejects(()=>decodeDurablePortableR987(JSON.stringify(malformed)),/duplicate portable map key/);
+const nestedDuplicate=JSON.parse(bytes);
+const valueRows=nestedDuplicate.fabric.active.__omega_r895_map__.find(([,a])=>a.values.__omega_r895_map__.length>0)[1].values.__omega_r895_map__;
+valueRows.push(valueRows[0]);
+await assert.rejects(()=>decodeDurablePortableR987(JSON.stringify(nestedDuplicate)),/duplicate portable map key/);
+const invalidPair=JSON.parse(bytes);invalidPair.fabric.active.__omega_r895_map__[0].push('extra');
+await assert.rejects(()=>decodeDurablePortableR987(JSON.stringify(invalidPair)),/portable map key/);
+const alteredCensus=JSON.parse(bytes);alteredCensus.modifiedValues++;
+await assert.rejects(()=>decodeDurablePortableR987(JSON.stringify(alteredCensus)),/census mismatch/);
+const alteredSession=JSON.parse(bytes);alteredSession.session.stepCursor++;
+await assert.rejects(()=>decodeDurablePortableR987(JSON.stringify(alteredSession)),/integrity mismatch/);
+let restoredCursor=decoded.session.stepCursor;
+const priorityA=autonomousSweepR893(live,replayMembers,cursor,64),priorityB=autonomousSweepR893(decoded.fabric,replayMembers,restoredCursor,64);
+assert.equal(priorityA.mode,'OPERATOR_QUEUE_FIRST');assert.deepEqual(priorityA,priorityB);
+assert.equal(priorityA.nextStepCursor,cursor);
+let replayCount=0;
+for(let i=0;i<32;i++){
+ const a=autonomousSweepR893(live,replayMembers,cursor,64),b=autonomousSweepR893(decoded.fabric,replayMembers,restoredCursor,64);
+ assert.deepEqual(a,b);cursor=a.nextStepCursor;restoredCursor=b.nextStepCursor;replayCount+=a.receipts.length;
+}
+assert.equal(replayCount,2048);assert.equal(cursor,restoredCursor);assert.deepEqual(decoded.fabric,live);
+assert.equal(await encodeDurablePortableR987(decoded.fabric,{...session,stepCursor:cursor}),await encodeDurablePortableR987(live,{...session,stepCursor:cursor}));
+console.log('R987 PASS: actual portable state roundtrip and 2,048 identical resumed operations plus queued operator priority; malformed maps/census/digest rejected.');

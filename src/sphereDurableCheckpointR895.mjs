@@ -57,24 +57,43 @@ async function integrityDigestR895(record){
 export const R895_PORTABLE_MAX_BYTES=40*1024*1024;
 const portableMap=(key,value)=>value instanceof Map?{__omega_r895_map__:[...value.entries()]}:value;
 const unportableMap=(key,value)=>{
- if(value&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).length===1&&Array.isArray(value.__omega_r895_map__))
-  return new Map(value.__omega_r895_map__);
+ if(value&&typeof value==='object'&&!Array.isArray(value)&&Object.prototype.hasOwnProperty.call(value,'__omega_r895_map__')){
+  const rows=value.__omega_r895_map__;
+  if(Object.keys(value).length!==1||!Array.isArray(rows)||rows.length>SIZE)throw new Error('Invalid portable map envelope');
+  const result=new Map();
+  for(const row of rows){
+   if(!Array.isArray(row)||row.length!==2||!Number.isSafeInteger(row[0])||row[0]<0||result.has(row[0]))throw new Error('Invalid or duplicate portable map key');
+   result.set(row[0],row[1]);
+  }
+  return result;
+ }
  return value;
 };
-export async function exportDurablePortableR895(){
- const saved=await restoreDurableR895();
+// R987: the same portable codec is shared by file transfer and deterministic
+// replay acceptance; it never depends on a browser database to verify bytes.
+export async function encodeDurablePortableR987(fabric,session){
+ const saved=validateDurableR895(structuredClone(fabric),session);
  const record={...saved,integrity:await integrityDigestR895(saved)};
  const data=JSON.stringify(record,portableMap);
  if(new TextEncoder().encode(data).length>R895_PORTABLE_MAX_BYTES)throw new Error('Portable checkpoint exceeds 40 MiB limit');
  return data;
 }
-export async function importDurablePortableR895(data){
- if(typeof data!=='string'||new TextEncoder().encode(data).length>R895_PORTABLE_MAX_BYTES||data.length<20)throw new Error('Portable checkpoint absent or oversized');
- let candidate;try{candidate=JSON.parse(data,unportableMap)}catch{throw new Error('Portable checkpoint JSON invalid')}
+export async function exportDurablePortableR895(){
+ const saved=await restoreDurableR895();
+ return encodeDurablePortableR987(saved.fabric,saved.session);
+}
+export async function decodeDurablePortableR987(data){
+ if(typeof data!=='string'||data.length>R895_PORTABLE_MAX_BYTES||data.length<20||new TextEncoder().encode(data).length>R895_PORTABLE_MAX_BYTES)throw new Error('Portable checkpoint absent or oversized');
+ let candidate;try{candidate=JSON.parse(data,unportableMap)}catch(e){throw new Error('Portable checkpoint JSON invalid: '+(e instanceof Error?e.message:String(e)))}
  if(!candidate||candidate.schema!==R895_SCHEMA)throw new Error('Portable checkpoint schema mismatch');
  const record=validateDurableR895(candidate.fabric,candidate.session);
+ if(candidate.activeAgents!==record.activeAgents||candidate.modifiedValues!==record.modifiedValues)throw new Error('Portable checkpoint census mismatch');
  if(typeof candidate.integrity!=='string'||!/^[a-f0-9]{64}$/.test(candidate.integrity)||candidate.integrity!==await integrityDigestR895(record))
   throw new Error('Portable checkpoint integrity mismatch; import refused');
+ return record;
+}
+export async function importDurablePortableR895(data){
+ const record=await decodeDurablePortableR987(data);
  // Save validates a fresh structured clone and only replaces the stored record in
  // one IndexedDB transaction after all import checks succeed.
  return saveDurableR895(record.fabric,record.session);
