@@ -220,3 +220,21 @@ const shellProject=validateStudioProjectR977({...fullStudio,mode:'dodecahedron'}
 assert.deepEqual(await decodeStudioProjectR977(await encodeStudioProjectR977(shellProject)),shellProject);
 for(const marker of ["mode==='dodecahedron'?Array.from({length:20736}","dodecaShellPointR988(i)","dodecaShellObjR988()","OBJ shell mesh"])assert.ok(studio.includes(marker),'R988 studio binding missing '+marker);
 console.log('R988 dodecahedron PASS: regular topology, 20,736 distinct face samples, 12 closed OBJ meshes and project roundtrip.');
+
+ // R989: exact wire topology from the same OBJ mesh, and cached unit sample
+ // coordinates shared across radial scales without changing address identity.
+const {dodecaShellEdgesR989,dodecaSampleCacheCountR989}=await import('../src/system/creationCanonR881.mjs');
+assert.equal(dodecaSampleCacheCountR989(),1728);
+const wire989=dodecaShellEdgesR989();
+assert.equal(wire989.length,360);
+assert.equal(new Set(wire989.map(e=>e.shell+':'+e.edge)).size,360);
+for(const e of wire989){
+ const scale=dodecaShellScaleR988(e.shell);
+ assert.deepEqual([e.vertexA,e.vertexB],topo.edges[e.edge]);
+ assert.deepEqual([e.from.x,e.from.y,e.from.z],topo.vertices[e.vertexA].map(x=>x*scale));
+ assert.deepEqual([e.to.x,e.to.y,e.to.z],topo.vertices[e.vertexB].map(x=>x*scale));
+ assert.ok(Object.isFrozen(e)&&Object.isFrozen(e.from)&&Object.isFrozen(e.to));
+}
+assert.ok(Object.isFrozen(wire989));
+for(const marker of ['for(const edge of dodecaShellEdgesR989())','wirePositions','gl.drawArrays(gl.LINES,0,wirePositions.length/3)','data-shell=','meshEdgeCount:mode','R988_FORMAL_SHELL_PROJECTION','makeXlsx(points,geometrySource)'])assert.ok(studio.includes(marker),'R989 renderer or export topology binding missing '+marker);
+console.log('R989 PASS: 360 shell edges share exact OBJ coordinates, 1,728 immutable unit samples, renderer integration markers.');

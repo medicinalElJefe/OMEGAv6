@@ -294,8 +294,13 @@ export const DODECA_TOPOLOGY_R988=buildDodecaR988();
 export function dodecaShellScaleR988(p){
  numberIn(p,1,12,'DODECA_SHELL');return Math.cbrt((p-.5)/12)/DODECA_TOPOLOGY_R988.circumradius;
 }
-export function dodecaShellPointR988(rowId){
- const c=coordinatesR881(rowId),{n,u,v}=dodecaBasesR988[c.d-1];
+// R989: cache only immutable unit-shell samples; never cache mutable state.
+// Identical operation order before the final shell multiplication.
+const dodecaFaceSamplesR989=new Array(1728);
+function faceSampleR989(c){
+ const key=(c.d-1)*144+(c.r-1)*12+c.l-1;
+ if(dodecaFaceSamplesR989[key])return dodecaFaceSamplesR989[key];
+ const {n,u,v}=dodecaBasesR988[c.d-1];
  const a=(c.r-6.5)/6,b=(c.l-6.5)/6,angle=Math.atan2(b,a),rho=Math.max(Math.abs(a),Math.abs(b));
  const dir=u.map((x,i)=>x*Math.cos(angle)+v[i]*Math.sin(angle));
  let boundary=Infinity;
@@ -304,10 +309,29 @@ export function dodecaShellPointR988(rowId){
   const m=DODECA_NORMALS_R988[i],den=dotR988(m,dir);
   if(den>1e-12)boundary=Math.min(boundary,(1-dotR988(m,n))/den);
  }
- const scale=dodecaShellScaleR988(c.p);
- const xyz=n.map((x,i)=>(x+rho*boundary*dir[i])*scale);
- return Object.freeze({...c,x:xyz[0],y:xyz[1],z:xyz[2]});
+ const xyz=Object.freeze(n.map((x,i)=>x+rho*boundary*dir[i]));
+ dodecaFaceSamplesR989[key]=xyz;
+ return xyz;
 }
+export function dodecaShellPointR988(rowId){
+ const c=coordinatesR881(rowId),base=faceSampleR989(c),scale=dodecaShellScaleR988(c.p);
+ return Object.freeze({...c,x:base[0]*scale,y:base[1]*scale,z:base[2]*scale});
+}
+// Each wire edge is taken from the same vertex/face topology as OBJ.
+export function dodecaShellEdgesR989(){
+ const {vertices,edges}=DODECA_TOPOLOGY_R988,out=[];
+ for(let shell=1;shell<=12;shell++){
+  const scale=dodecaShellScaleR988(shell);
+  const positions=vertices.map(v=>Object.freeze({x:v[0]*scale,y:v[1]*scale,z:v[2]*scale}));
+  for(let edge=0;edge<edges.length;edge++){
+   const [a,b]=edges[edge];
+   out.push(Object.freeze({shell,edge,vertexA:a,vertexB:b,from:positions[a],to:positions[b]}));
+  }
+ }
+ return Object.freeze(out);
+}
+export function dodecaSampleCacheCountR989(){return dodecaFaceSamplesR989.filter(Boolean).length}
+
 export function dodecaShellObjR988(){
  const {vertices,faces}=DODECA_TOPOLOGY_R988,lines=['# OMEGA R988 regular dodecahedron shells; formal geometry only'];
  for(let p=1;p<=12;p++){

@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R988 regular dodecahedron shell projection integrated in existing studio and OBJ mesh export; all 20736 face samples checked directly; R987 7 workflows passed, 2 pending at inspection",
+  "latestGovernedWork": "R989 unify actual 360 shell mesh edges across existing SVG/WebGL/Canvas renderer paths, exact cache optimization and geometry-tagged data exports; R988 9/9 CI passed",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -563,6 +563,11 @@
     {
       "revision": "R988",
       "conservation": "Derived exact regular dodecahedron half-space topology (12 pentagonal faces, 20 vertices, 30 equal edges), twelve concentric shells, D/P/R/L face/shell/sample binding, all 20736 unique addresses rendered via existing SVG/WebGL/Canvas and source exports, closed OBJ mesh, project mode persistence. Full geometric parity tests, direct numeric plane and uniqueness check. No claim of physical topology or recovered historical face assignment.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R989",
+      "conservation": "R988 regular geometry unchanged: direct old/new Object.is parity for all 20,736 coordinate triples and IDs in controlled JS evaluation; immutable 1,728 unit face samples eliminate 11/12 repeated ray-boundary constructions. 360 actual polyhedral edges from shared OBJ vertex topology drawn in existing SVG, WebGL2 and Canvas, explicit shader varying precision, geometry source tagged in CSV/XLSX/JSON. Full CI and browser parity pending; no measured timing claim.",
       "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
     }
   ],

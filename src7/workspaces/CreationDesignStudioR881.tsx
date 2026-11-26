@@ -1,6 +1,6 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {zipSync,strToU8} from 'fflate';
-import {rowIdR881,coordinatesR881,antipodeR881,byteReceiptR881,PROOF,spiralChromaR976,validateStudioProjectR977,encodeStudioProjectR977,decodeStudioProjectR977,STUDIO_PROJECT_MAX_BYTES_R977,dodecaShellPointR988,dodecaShellObjR988} from '../../src/system/creationCanonR881.mjs';
+import {rowIdR881,coordinatesR881,antipodeR881,byteReceiptR881,PROOF,spiralChromaR976,validateStudioProjectR977,encodeStudioProjectR977,decodeStudioProjectR977,STUDIO_PROJECT_MAX_BYTES_R977,dodecaShellPointR988,dodecaShellObjR988,dodecaShellEdgesR989} from '../../src/system/creationCanonR881.mjs';
 
 type Mode='atlas3d'|'mandala'|'tessellation'|'pointillism'|'dodecahedron';
 type Pos={rowId:number;d:number;p:number;r:number;l:number;x:number;y:number;z:number};
@@ -42,12 +42,12 @@ function sourceEdgesR884(points:readonly Pos[]):number[]{
  }
  return edges;
 }
-function project(p:Pos,rotation:number):[number,number]{
+function project(p:Pick<Pos,'x'|'y'|'z'>,rotation:number):[number,number]{
  const a=rotation*Math.PI/180,c=Math.cos(a),s=Math.sin(a),x=p.x*c+p.z*s,z=-p.x*s+p.z*c;
  const scale=1/(1.7-z*.35);
  return[500+x*scale*500,330-p.y*scale*330];
 }
-const materialColorR976=(color:string,p:Pos,spiral:boolean,phase:number)=>spiral?spiralChromaR976(color,p.x,p.y,phase):color;
+const materialColorR976=(color:string,p:Pick<Pos,'x'|'y'|'z'>,spiral:boolean,phase:number)=>spiral?spiralChromaR976(color,p.x,p.y,phase):color;
 function svgSource(points:readonly Pos[],mode:Mode,rotation:number,color:string,title:string,spiral=false,phase=0){
  let contents='';
  if(mode==='tessellation'){
@@ -62,14 +62,18 @@ function svgSource(points:readonly Pos[],mode:Mode,rotation:number,color:string,
    return '<circle cx="'+x.toFixed(3)+'" cy="'+y.toFixed(3)+'" r="'+radius+'" fill="'+materialColorR976(color,p,spiral,phase)+'" fill-opacity=".75" data-row="'+p.rowId+'"/>';
   }).join('');
  }
- const metadata={schema:'OMEGA_STUDIO_SVG_R884',title,mode,rotation,color,material:{spiral,phase,geometryInvariant:true},source:'CF-D0001/2/3',proofTier:'DER',provenance:'DER',nodeCount:20736,physicalMeasurement:false,fontAuthority:'BROWSER_SYSTEM_UI',renderer:'SVG',topology:mode==='dodecahedron'?'R988_REGULAR_DODECAHEDRON_SHELLS':'SOURCE_DEFINITIONAL_PRESENTATION'};
+ if(mode==='dodecahedron')for(const edge of dodecaShellEdgesR989()){
+  const [ax,ay]=project(edge.from,rotation),[bx,by]=project(edge.to,rotation);
+  contents+='<path d="M'+ax.toFixed(3)+' '+ay.toFixed(3)+' L'+bx.toFixed(3)+' '+by.toFixed(3)+'" fill="none" stroke="'+materialColorR976(color,edge.from,spiral,phase)+'" stroke-width=".7" data-shell="'+edge.shell+'" data-edge="'+edge.edge+'"/>';
+ }
+ const metadata={schema:'OMEGA_STUDIO_SVG_R884',title,mode,rotation,color,material:{spiral,phase,geometryInvariant:true},source:'CF-D0001/2/3',proofTier:'DER',provenance:'DER',nodeCount:20736,physicalMeasurement:false,fontAuthority:'BROWSER_SYSTEM_UI',renderer:'SVG',topology:mode==='dodecahedron'?'R988_REGULAR_DODECAHEDRON_SHELLS':'SOURCE_DEFINITIONAL_PRESENTATION',meshEdgeCount:mode==='dodecahedron'?360:0};
  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 660"><metadata>'+svgEsc(JSON.stringify(metadata))+'</metadata><rect width="1000" height="660" fill="#07111e"/><g data-proof-tier="DER" data-source="CF-D0001/2/3" data-no-physical-measurement="true">'+contents+'</g></svg>';
 }
 const saveBlob=(name:string,blob:Blob)=>{const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
 const xmlEsc=svgEsc;
-function makeXlsx(points:readonly Pos[]){
+function makeXlsx(points:readonly Pos[],geometrySource='CF-D0001/2/3'){
  const rows=['<row r="1">'+['RowID','D','P','R','L','X','Y','Z','Proof Tier','Source'].map((h,i)=>'<c r="'+String.fromCharCode(65+i)+'1" t="inlineStr"><is><t>'+h+'</t></is></c>').join('')+'</row>'];
- for(let k=0;k<points.length;k++){const p=points[k],cells=[p.rowId,p.d,p.p,p.r,p.l,p.x,p.y,p.z,'DER','CF-D0001/2/3'];
+ for(let k=0;k<points.length;k++){const p=points[k],cells=[p.rowId,p.d,p.p,p.r,p.l,p.x,p.y,p.z,'DER',geometrySource];
   rows.push('<row r="'+(k+2)+'">'+cells.map((v,i)=>{const a=String.fromCharCode(65+i)+(k+2);return typeof v==='number'?'<c r="'+a+'"><v>'+v+'</v></c>':'<c r="'+a+'" t="inlineStr"><is><t>'+xmlEsc(v)+'</t></is></c>'}).join('')+'</row>');
  }
  const files:Record<string,Uint8Array>={
@@ -86,8 +90,8 @@ function renderWebGL(canvas:HTMLCanvasElement,points:readonly Pos[],rotation:num
  const gl=scratch.getContext('webgl2',{preserveDrawingBuffer:true,antialias:false});
  if(!gl)return false;
  try{
- const vert='#version 300 es\nin vec3 position;in vec3 materialColor;out vec3 vTint;uniform float angle;uniform float size;void main(){vTint=materialColor;float c=cos(angle),s=sin(angle);vec3 p=vec3(position.x*c+position.z*s,position.y,-position.x*s+position.z*c);float scale=1.0/(1.7-p.z*.35);gl_Position=vec4(p.x*scale,p.y*scale,.0,1.0);gl_PointSize=size;}';
- const frag='#version 300 es\nprecision mediump float;in vec3 vTint;uniform float isLine;out vec4 outColor;void main(){if(isLine<.5){vec2 xy=gl_PointCoord-vec2(.5);if(dot(xy,xy)>.25)discard;}outColor=vec4(vTint,.8);}';
+ const vert='#version 300 es\nin vec3 position;in vec3 materialColor;out mediump vec3 vTint;uniform float angle;uniform float size;void main(){vTint=materialColor;float c=cos(angle),s=sin(angle);vec3 p=vec3(position.x*c+position.z*s,position.y,-position.x*s+position.z*c);float scale=1.0/(1.7-p.z*.35);gl_Position=vec4(p.x*scale,p.y*scale,.0,1.0);gl_PointSize=size;}';
+ const frag='#version 300 es\nprecision mediump float;in mediump vec3 vTint;uniform float isLine;out vec4 outColor;void main(){if(isLine<.5){vec2 xy=gl_PointCoord-vec2(.5);if(dot(xy,xy)>.25)discard;}outColor=vec4(vTint,.8);}';
  const shader=(type:number,source:string)=>{const s=gl.createShader(type);if(!s)return null;gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))return null;return s};
  const vs=shader(gl.VERTEX_SHADER,vert),fs=shader(gl.FRAGMENT_SHADER,frag);if(!vs||!fs)return false;
  const program=gl.createProgram();if(!program)return false;gl.attachShader(program,vs);gl.attachShader(program,fs);gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))return false;
@@ -104,6 +108,17 @@ function renderWebGL(canvas:HTMLCanvasElement,points:readonly Pos[],rotation:num
  const colorBuffer=gl.createBuffer();if(!colorBuffer)return false;gl.bindBuffer(gl.ARRAY_BUFFER,colorBuffer);gl.bufferData(gl.ARRAY_BUFFER,colors,gl.STATIC_DRAW);const colorLoc=gl.getAttribLocation(program,'materialColor');gl.enableVertexAttribArray(colorLoc);gl.vertexAttribPointer(colorLoc,3,gl.FLOAT,false,0,0);
  gl.uniform1f(gl.getUniformLocation(program,'isLine'),isLine?1:0);
  gl.drawArrays(isLine?gl.LINES:gl.POINTS,0,positions.length/3);
+ if(mode==='dodecahedron'){
+  const shellEdges=dodecaShellEdgesR989(),wirePositions=new Float32Array(shellEdges.length*6),wireColors=new Float32Array(shellEdges.length*6);
+  shellEdges.forEach((edge,i)=>{
+   wirePositions.set([edge.from.x,edge.from.y,edge.from.z,edge.to.x,edge.to.y,edge.to.z],i*6);
+   const tint=materialColorR976(color,edge.from,spiral,phase),rgb=[0,1,2].map(j=>parseInt(tint.slice(1+2*j,3+2*j),16)/255);
+   wireColors.set([...rgb,...rgb],i*6);
+  });
+  gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,wirePositions,gl.STATIC_DRAW);gl.vertexAttribPointer(loc,3,gl.FLOAT,false,0,0);
+  gl.bindBuffer(gl.ARRAY_BUFFER,colorBuffer);gl.bufferData(gl.ARRAY_BUFFER,wireColors,gl.STATIC_DRAW);gl.vertexAttribPointer(colorLoc,3,gl.FLOAT,false,0,0);
+  gl.uniform1f(gl.getUniformLocation(program,'isLine'),1);gl.drawArrays(gl.LINES,0,wirePositions.length/3);
+ }
  gl.finish();const target=canvas.getContext('2d');if(!target)return false;
  target.clearRect(0,0,canvas.width,canvas.height);target.drawImage(scratch,0,0);
  gl.deleteBuffer(colorBuffer);gl.deleteBuffer(buffer);gl.deleteProgram(program);gl.deleteShader(vs);gl.deleteShader(fs);
@@ -127,7 +142,9 @@ export default function CreationDesignStudioR881({address,onAddress}:{address:nu
  useEffect(()=>{if(!canvas.current)return;let ok=false;try{ok=renderWebGL(canvas.current,points,rotation,mode,color,spiral,materialPhase)}catch{ok=false}rendererIsWebgl.current=ok;setRenderer(ok?'BROWSER_WEBGL2_RENDER':'BROWSER_CANVAS2D_RENDER');
   if(!ok){const ctx=canvas.current.getContext('2d');if(ctx){ctx.fillStyle='#07111e';ctx.fillRect(0,0,canvas.current.width,canvas.current.height);ctx.fillStyle=color;ctx.strokeStyle=color;ctx.lineWidth=.45;ctx.globalAlpha=.75;
    if(mode==='tessellation'){const edges=sourceEdgesR884(points);ctx.beginPath();for(let i=0;i<edges.length;i+=2){const [ax,ay]=project(points[edges[i]],rotation),[bx,by]=project(points[edges[i+1]],rotation);if(spiral){ctx.beginPath();ctx.strokeStyle=materialColorR976(color,points[edges[i]],true,materialPhase)}ctx.moveTo(ax,ay);ctx.lineTo(bx,by);if(spiral)ctx.stroke()}if(!spiral)ctx.stroke()}
-   else{const radius=mode==='pointillism'?.58:mode==='atlas3d'?1.25:.95;ctx.beginPath();for(const p of points){const [x,y]=project(visualPositionR884(p,mode),rotation);if(spiral){ctx.beginPath();ctx.fillStyle=materialColorR976(color,p,true,materialPhase)}ctx.moveTo(x+radius,y);ctx.arc(x,y,radius,0,2*Math.PI);if(spiral)ctx.fill()}if(!spiral)ctx.fill()}ctx.globalAlpha=1;}}
+   else{const radius=mode==='pointillism'?.58:mode==='atlas3d'?1.25:.95;ctx.beginPath();for(const p of points){const [x,y]=project(visualPositionR884(p,mode),rotation);if(spiral){ctx.beginPath();ctx.fillStyle=materialColorR976(color,p,true,materialPhase)}ctx.moveTo(x+radius,y);ctx.arc(x,y,radius,0,2*Math.PI);if(spiral)ctx.fill()}if(!spiral)ctx.fill()}
+   if(mode==='dodecahedron'){ctx.lineWidth=.7;ctx.globalAlpha=1;for(const edge of dodecaShellEdgesR989()){const [ax,ay]=project(edge.from,rotation),[bx,by]=project(edge.to,rotation);ctx.beginPath();ctx.strokeStyle=materialColorR976(color,edge.from,spiral,materialPhase);ctx.moveTo(ax,ay);ctx.lineTo(bx,by);ctx.stroke()}}
+   ctx.globalAlpha=1;}}
  },[points,rotation,mode,color,spiral,materialPhase]);
  const log=async(name:string,bytes:Uint8Array|string,type:string,source='CF-D0001/2/3')=>{
   const data=typeof bytes==='string'?new TextEncoder().encode(bytes):bytes;
@@ -151,10 +168,11 @@ export default function CreationDesignStudioR881({address,onAddress}:{address:nu
   }
   if(bestRow>=0){onAddress(bestRow);setMessage('Atlas node '+bestRow+' selected from the scene; source-defined coordinates '+JSON.stringify(coordinatesR881(bestRow)))}
  };
+ const geometrySource=mode==='dodecahedron'?'CF-D0001/2/3 + R988_FORMAL_SHELL_PROJECTION':'CF-D0001/2/3';
  const exportSvg=()=>log('omega-canon-r881.svg',svgSource(points,mode,rotation,color,title,spiral,materialPhase),'image/svg+xml');
- const exportCsv=()=>log('omega-canon-r881.csv','rowId,d,p,r,l,x,y,z,proofTier,source\n'+points.map(p=>[p.rowId,p.d,p.p,p.r,p.l,p.x,p.y,p.z,'DER','CF-D0001/2/3'].join(',')).join('\n')+'\n','text/csv');
- const exportJson=()=>log('omega-canon-r881.json',JSON.stringify({schema:'OMEGA_FULL_ATLAS_R881',title,prompt,project,representation:{mode,rotation,color,spiral,materialPhase},proofTier:'DER',source:'CF-D0001/2/3',physicalMeasurement:false,rows:points}), 'application/json');
- const exportXlsx=()=>log('omega-canon-r881.xlsx',makeXlsx(points),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+ const exportCsv=()=>log('omega-canon-r881.csv','rowId,d,p,r,l,x,y,z,proofTier,source\n'+points.map(p=>[p.rowId,p.d,p.p,p.r,p.l,p.x,p.y,p.z,'DER',geometrySource].join(',')).join('\n')+'\n','text/csv',geometrySource);
+ const exportJson=()=>log('omega-canon-r881.json',JSON.stringify({schema:'OMEGA_FULL_ATLAS_R881',title,prompt,project,representation:{mode,rotation,color,spiral,materialPhase},proofTier:'DER',source:geometrySource,physicalMeasurement:false,rows:points}), 'application/json',geometrySource);
+ const exportXlsx=()=>log('omega-canon-r881.xlsx',makeXlsx(points,geometrySource),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',geometrySource);
  const exportPng=()=>canvas.current?.toBlob(async blob=>{if(!blob)return;await log('omega-canon-r881.png',new Uint8Array(await blob.arrayBuffer()),'image/png',renderer);},'image/png');
  const exportManifest=()=>log('omega-master-truth-run-manifest.json',JSON.stringify({schema:'OMEGA_MASTER_TRUTH_RUN_MANIFEST_R881',project,title,prompt,renderAuthority:renderer,representation:{mode,rotation,color,spiral,materialPhase},fontAuthority:'BROWSER_SYSTEM_UI',source:'CF-D0001/2/3',proofTier:'DER',nodeCount:20736,physicalMeasurement:false,localPcAccepted:false,assets,exports:receipts},null,2),'application/json','BROWSER_EXPORT_LEDGER');
  const snapshotProject=()=>validateStudioProjectR977({project,title,prompt,mode,rotation,color,spiral,materialPhase,address,assets});
@@ -172,7 +190,7 @@ export default function CreationDesignStudioR881({address,onAddress}:{address:nu
     <label>Project name<input style={input} value={project} onChange={e=>setProject(e.target.value)}/></label>
     <label>Composition title<input style={input} value={title} onChange={e=>setTitle(e.target.value)}/></label>
     <label>Mode<select style={input} value={mode} onChange={e=>setMode(e.target.value as Mode)}><option value='atlas3d'>20,736 node sphere (WebGL2)</option><option value='mandala'>Mandala / phase</option><option value='tessellation'>Tessellation field</option><option value='pointillism'>Pointillism field</option><option value='dodecahedron'>12 regular dodecahedron shells</option></select></label>
-    {mode==='dodecahedron'&&<small>12 concentric regular polyhedra · 12 pentagonal faces, 20 vertices and 30 edges per shell · D/P/R/L map to face/shell/interior sample. OBJ exports all 12 closed meshes; address exports contain 20,736 face samples.</small>}
+    {mode==='dodecahedron'&&<small>12 concentric regular polyhedra · 12 pentagonal faces, 20 vertices and 30 edges per shell · D/P/R/L map to face/shell/interior sample. 360 actual mesh edges rendered alongside the addressed samples. OBJ exports all 12 closed meshes; address exports contain 20,736 face samples.</small>}
     <label>Atlas address<input style={input} type='number' min={0} max={20735} value={address} onChange={e=>onAddress(Math.max(0,Math.min(20735,Math.floor(Number(e.target.value)||0))))}/></label>
     <div>Current D/P/R/L: {Object.values(coordinatesR881(address)).slice(1).join(' / ')} · antipode {antipodeR881(address)}</div>
     <label>Rotation {rotation}°<input style={input} type='range' min={0} max={360} value={rotation} onChange={e=>setRotation(Number(e.target.value))}/></label>
