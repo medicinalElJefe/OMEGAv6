@@ -1,3 +1,4 @@
+import OperationalWorkspaceBridge from '../../src/OperationalWorkspaceBridge';
 import {useEffect,useRef,useState,type CSSProperties} from 'react';
 import {executeR908GpuProjection} from './omegaR908GpuProjection';
 
@@ -479,6 +480,7 @@ export default function OmegaLocalHubPanelR884({initialOperation='HASH_TREE',req
      <details><summary>Source result / history</summary><pre style={{maxHeight:320,overflow:'auto',fontSize:12}}>{JSON.stringify(chosen,null,2)}</pre></details>
     </div>}
    </div>
+   <OperationalWorkspaceBridge/>
    <footer><small>Authority: loopback-only R884 UI, R881 Python daemon. Separate from R125 admission, R141 host return, R146 history, R147 dispatch. No remote shell or autonomous source mutation.</small></footer>
   </section>;
 }
