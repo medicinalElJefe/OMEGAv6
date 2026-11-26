@@ -9,3 +9,7 @@ GET /v1/status audits the workspace pointer and queue, returning the local check
 The panel accepts only OMEGA_EVENT_WORKSPACE_BRIDGE_V1 / LOCAL_OPERATIONAL_ONLY responses with physicalPcAccepted, gpuAccepted and canonPromoted all false. Local operational success is not native-device admission, federation, GPU execution, R125 promotion or R141 return. Existing R170/R237 gates and the 12-workstream integration ledger remain authoritative.
 
 Source-only candidate on the existing integration branch. This does not claim deployment, full historical mode coverage, physical-PC execution, production browser parity or closure of all release gates.
+
+## Shared scoped workbench
+
+The same authenticated service now optionally supports POST `/v1/workbench/catalogue`, `/cell`, `/receipt`, `/preview` and `/commit` (all under `/v1/workbench`). The native workbench and both hosted shells use the existing local evaluator and deterministic job queue. Catalogue returns 179 source rows, 67 bounded forms and 112 unrecovered holds; two evidence-dependent forms preview HOLD with no supplied authenticated evidence. The browser checks response schema, pointer, response size and non-promotion flags, invalidates previews on editing and requires explicit user action to commit. An old service without these routes refuses them. Local workspace update is code-only; never replace a user's current databases. No production or historical parity acceptance is inferred.

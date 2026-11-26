@@ -73,6 +73,8 @@ try{
  if(await hub.locator('input[type=password]').count()!==2)throw Error('Unexpected credential field census');
  if(!await bridge.getByRole('button',{name:'Audit workspace'}).isDisabled())throw Error('Bridge audit enabled without a session token');
  if(await bridge.getByRole('button',{name:'Run certified forward / inverse batch'}).count()!==0)throw Error('Bridge execution exposed without verified status');
+ if(await bridge.getByRole('button',{name:'Load source catalogue'}).count()!==0)throw Error('Catalogue exposed without verified status');
+ if(await bridge.getByRole('button',{name:'Commit scoped receipt'}).count()!==0)throw Error('Mode write exposed without verified status');
  console.log('R884 Hybrid Link local hub available, token memory-only, default unconnected and no PC acceptance PASS');
 }finally{
  await context.close();
