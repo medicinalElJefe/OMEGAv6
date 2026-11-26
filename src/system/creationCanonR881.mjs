@@ -221,7 +221,7 @@ export function validateStudioProjectR977(raw){
  const degree=(value,label)=>{if(!Number.isFinite(value)||value<0||value>360)throw new Error('Invalid project '+label);return value};
  const project=str(raw.project,256,'name'),title=str(raw.title,1024,'title'),prompt=str(raw.prompt,65536,'prompt');
  if(!project.trim())throw new Error('Project name required');
- if(!['atlas3d','mandala','tessellation','pointillism'].includes(raw.mode))throw new Error('Invalid project mode');
+ if(!['atlas3d','mandala','tessellation','pointillism','dodecahedron'].includes(raw.mode))throw new Error('Invalid project mode');
  const rotation=degree(raw.rotation,'rotation'),color=str(raw.color,7,'color');
  if(!/^#[0-9a-f]{6}$/i.test(color))throw new Error('Invalid project color');
  const address=coordinatesR881(raw.address).rowId;
@@ -253,4 +253,68 @@ export async function decodeStudioProjectR977(text){
  const proof=await byteReceiptR881(JSON.stringify(scene),{source:'CF-D0001/2/3',proofTier:'DER'});
  if(proof.sha256!==packet.sha256)throw new Error('Project integrity mismatch');
  return scene;
+}
+
+// R988: regular dodecahedron as the intersection of twelve unit-normal
+// half-spaces. D indexes the face, P the shell, R/L a face-interior sample.
+// This is a formal geometric projection, not historical physical topology.
+const dotR988=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const crossR988=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+const unitR988=a=>{const m=Math.hypot(...a);return a.map(x=>x/m)};
+const phiR988=(1+Math.sqrt(5))/2;
+export const DODECA_NORMALS_R988=Object.freeze([
+ [0,1,phiR988],[0,-1,phiR988],[0,1,-phiR988],[0,-1,-phiR988],
+ [1,phiR988,0],[-1,phiR988,0],[1,-phiR988,0],[-1,-phiR988,0],
+ [phiR988,0,1],[-phiR988,0,1],[phiR988,0,-1],[-phiR988,0,-1]
+].map(n=>Object.freeze(unitR988(n))));
+const dodecaBasesR988=DODECA_NORMALS_R988.map(n=>{
+ const u=unitR988(crossR988(n,Math.abs(n[2])<.85?[0,0,1]:[0,1,0]));
+ return {n,u,v:crossR988(n,u)};
+});
+function buildDodecaR988(){
+ const vertices=[],incidence=[];
+ for(let i=0;i<12;i++)for(let j=i+1;j<12;j++)for(let k=j+1;k<12;k++){
+  const a=DODECA_NORMALS_R988[i],b=DODECA_NORMALS_R988[j],c=DODECA_NORMALS_R988[k];
+  const bc=crossR988(b,c),ca=crossR988(c,a),ab=crossR988(a,b),det=dotR988(a,bc);
+  if(Math.abs(det)<1e-12)continue;
+  const xyz=bc.map((v,axis)=>(v+ca[axis]+ab[axis])/det);
+  if(DODECA_NORMALS_R988.every(n=>dotR988(n,xyz)<=1+1e-10)){
+   vertices.push(Object.freeze(xyz));incidence.push(Object.freeze([i,j,k]));
+  }
+ }
+ const faces=DODECA_NORMALS_R988.map((n,i)=>{
+  const {u,v}=dodecaBasesR988[i];
+  return Object.freeze(incidence.map((f,j)=>f.includes(i)?j:-1).filter(j=>j>=0).sort((a,b)=>Math.atan2(dotR988(vertices[a],v),dotR988(vertices[a],u))-Math.atan2(dotR988(vertices[b],v),dotR988(vertices[b],u))));
+ });
+ const edges=[];for(let i=0;i<vertices.length;i++)for(let j=i+1;j<vertices.length;j++)if(incidence[i].filter(f=>incidence[j].includes(f)).length===2)edges.push(Object.freeze([i,j]));
+ if(vertices.length!==20||edges.length!==30||faces.some(f=>f.length!==5))throw new Error('Regular dodecahedron topology invariant failed');
+ return Object.freeze({vertices:Object.freeze(vertices),faces:Object.freeze(faces),edges:Object.freeze(edges),circumradius:Math.hypot(...vertices[0])});
+}
+export const DODECA_TOPOLOGY_R988=buildDodecaR988();
+export function dodecaShellScaleR988(p){
+ numberIn(p,1,12,'DODECA_SHELL');return Math.cbrt((p-.5)/12)/DODECA_TOPOLOGY_R988.circumradius;
+}
+export function dodecaShellPointR988(rowId){
+ const c=coordinatesR881(rowId),{n,u,v}=dodecaBasesR988[c.d-1];
+ const a=(c.r-6.5)/6,b=(c.l-6.5)/6,angle=Math.atan2(b,a),rho=Math.max(Math.abs(a),Math.abs(b));
+ const dir=u.map((x,i)=>x*Math.cos(angle)+v[i]*Math.sin(angle));
+ let boundary=Infinity;
+ for(let i=0;i<12;i++){
+  if(i===c.d-1)continue;
+  const m=DODECA_NORMALS_R988[i],den=dotR988(m,dir);
+  if(den>1e-12)boundary=Math.min(boundary,(1-dotR988(m,n))/den);
+ }
+ const scale=dodecaShellScaleR988(c.p);
+ const xyz=n.map((x,i)=>(x+rho*boundary*dir[i])*scale);
+ return Object.freeze({...c,x:xyz[0],y:xyz[1],z:xyz[2]});
+}
+export function dodecaShellObjR988(){
+ const {vertices,faces}=DODECA_TOPOLOGY_R988,lines=['# OMEGA R988 regular dodecahedron shells; formal geometry only'];
+ for(let p=1;p<=12;p++){
+  lines.push('o shell_'+p);
+  const scale=dodecaShellScaleR988(p),offset=(p-1)*20+1;
+  for(const v of vertices)lines.push('v '+v.map(x=>x*scale).join(' '));
+  for(const face of faces)lines.push('f '+face.map(i=>i+offset).join(' '));
+ }
+ return lines.join('\n')+'\n';
 }

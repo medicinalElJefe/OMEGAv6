@@ -193,3 +193,30 @@ await assert.rejects(()=>decodeStudioProjectR977(JSON.stringify(editedStudio)),/
 for(const change of [{address:20736},{mode:'unknown'},{rotation:Infinity},{materialPhase:-1},{spiral:'true'},{color:'invalid'},{geometrySource:'other'},{assets:[{name:'fake'}]}])assert.throws(()=>validateStudioProjectR977({...fullStudio,...change}));
 assert.ok(Object.isFrozen(fullStudio)&&Object.isFrozen(fullStudio.assets)&&Object.isFrozen(fullStudio.assets[0]));
 for(const marker of ['encodeStudioProjectR977(scene)','decodeStudioProjectR977(raw)','applyProject(scene)','Export project','Import project packet','asset references only','setReceipts([])'])assert.ok(studio.includes(marker),'R977 project continuity missing: '+marker);
+
+ // R988: actual half-space polyhedral geometry, not an icosahedral point proxy.
+const {DODECA_NORMALS_R988,DODECA_TOPOLOGY_R988,dodecaShellScaleR988,dodecaShellPointR988,dodecaShellObjR988}=await import('../src/system/creationCanonR881.mjs');
+const topo=DODECA_TOPOLOGY_R988, dot988=(a,b)=>a.reduce((sum,x,i)=>sum+x*b[i],0);
+assert.equal(topo.vertices.length,20);assert.equal(topo.edges.length,30);assert.equal(topo.faces.length,12);
+assert.equal(topo.vertices.length-topo.edges.length+topo.faces.length,2);
+const lengths988=topo.edges.map(([a,b])=>Math.hypot(...topo.vertices[a].map((x,i)=>x-topo.vertices[b][i])));
+assert.ok(Math.max(...lengths988)-Math.min(...lengths988)<1e-10);
+for(let i=0;i<12;i++){assert.equal(topo.faces[i].length,5);for(const j of topo.faces[i])assert.ok(Math.abs(dot988(DODECA_NORMALS_R988[i],topo.vertices[j])-1)<1e-10)}
+const seen988=new Set();
+for(let rowId=0;rowId<20736;rowId++){
+ const point=dodecaShellPointR988(rowId),xyz=[point.x,point.y,point.z],scale=dodecaShellScaleR988(point.p);
+ assert.equal(point.rowId,rowId);assert.ok(xyz.every(Number.isFinite));
+ assert.ok(Math.abs(dot988(DODECA_NORMALS_R988[point.d-1],xyz)-scale)<1e-12);
+ for(const n of DODECA_NORMALS_R988)assert.ok(dot988(n,xyz)<=scale+1e-12);
+ seen988.add(xyz.join(','));
+}
+assert.equal(seen988.size,20736);
+const obj988=dodecaShellObjR988().split('\n');
+assert.equal(obj988.filter(x=>x.startsWith('o ')).length,12);
+assert.equal(obj988.filter(x=>x.startsWith('v ')).length,240);
+assert.equal(obj988.filter(x=>x.startsWith('f ')).length,144);
+for(const face of obj988.filter(x=>x.startsWith('f '))){const ids=face.slice(2).split(' ').map(Number);assert.equal(ids.length,5);assert.ok(ids.every(x=>x>=1&&x<=240));assert.equal(new Set(ids.map(x=>Math.floor((x-1)/20))).size,1)}
+const shellProject=validateStudioProjectR977({...fullStudio,mode:'dodecahedron'});
+assert.deepEqual(await decodeStudioProjectR977(await encodeStudioProjectR977(shellProject)),shellProject);
+for(const marker of ["mode==='dodecahedron'?Array.from({length:20736}","dodecaShellPointR988(i)","dodecaShellObjR988()","OBJ shell mesh"])assert.ok(studio.includes(marker),'R988 studio binding missing '+marker);
+console.log('R988 dodecahedron PASS: regular topology, 20,736 distinct face samples, 12 closed OBJ meshes and project roundtrip.');

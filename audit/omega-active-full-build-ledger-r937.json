@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R987 exact portable SPHERE state codec with duplicate map refusal, census validation and real deterministic continuation; R986 verified all nine workflows",
+  "latestGovernedWork": "R988 regular dodecahedron shell projection integrated in existing studio and OBJ mesh export; all 20736 face samples checked directly; R987 7 workflows passed, 2 pending at inspection",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -558,6 +558,11 @@
     {
       "revision": "R987",
       "conservation": "Shared R895 portable encode/decode separates verification from IndexedDB, rejects duplicate/malformed outer and inner map entries before constructing state, checks claimed census and integrity, preserves atomic import. Actual executor save/reopen at nonzero cursor, pending operator priority and 2048 identical continued operations with full state equality, corruption negative fixtures. No state truncation or second writer.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R988",
+      "conservation": "Derived exact regular dodecahedron half-space topology (12 pentagonal faces, 20 vertices, 30 equal edges), twelve concentric shells, D/P/R/L face/shell/sample binding, all 20736 unique addresses rendered via existing SVG/WebGL/Canvas and source exports, closed OBJ mesh, project mode persistence. Full geometric parity tests, direct numeric plane and uniqueness check. No claim of physical topology or recovered historical face assignment.",
       "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
     }
   ],

@@ -1,8 +1,8 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {zipSync,strToU8} from 'fflate';
-import {rowIdR881,coordinatesR881,antipodeR881,byteReceiptR881,PROOF,spiralChromaR976,validateStudioProjectR977,encodeStudioProjectR977,decodeStudioProjectR977,STUDIO_PROJECT_MAX_BYTES_R977} from '../../src/system/creationCanonR881.mjs';
+import {rowIdR881,coordinatesR881,antipodeR881,byteReceiptR881,PROOF,spiralChromaR976,validateStudioProjectR977,encodeStudioProjectR977,decodeStudioProjectR977,STUDIO_PROJECT_MAX_BYTES_R977,dodecaShellPointR988,dodecaShellObjR988} from '../../src/system/creationCanonR881.mjs';
 
-type Mode='atlas3d'|'mandala'|'tessellation'|'pointillism';
+type Mode='atlas3d'|'mandala'|'tessellation'|'pointillism'|'dodecahedron';
 type Pos={rowId:number;d:number;p:number;r:number;l:number;x:number;y:number;z:number};
 type Receipt={name:string;sha256:string;byteSize:number;proofTier:string;source:string};
 const phi=(1+Math.sqrt(5))/2;
@@ -62,7 +62,7 @@ function svgSource(points:readonly Pos[],mode:Mode,rotation:number,color:string,
    return '<circle cx="'+x.toFixed(3)+'" cy="'+y.toFixed(3)+'" r="'+radius+'" fill="'+materialColorR976(color,p,spiral,phase)+'" fill-opacity=".75" data-row="'+p.rowId+'"/>';
   }).join('');
  }
- const metadata={schema:'OMEGA_STUDIO_SVG_R884',title,mode,rotation,color,material:{spiral,phase,geometryInvariant:true},source:'CF-D0001/2/3',proofTier:'DER',provenance:'DER',nodeCount:20736,physicalMeasurement:false,fontAuthority:'BROWSER_SYSTEM_UI',renderer:'SVG',topology:'SOURCE_DEFINITIONAL_PRESENTATION'};
+ const metadata={schema:'OMEGA_STUDIO_SVG_R884',title,mode,rotation,color,material:{spiral,phase,geometryInvariant:true},source:'CF-D0001/2/3',proofTier:'DER',provenance:'DER',nodeCount:20736,physicalMeasurement:false,fontAuthority:'BROWSER_SYSTEM_UI',renderer:'SVG',topology:mode==='dodecahedron'?'R988_REGULAR_DODECAHEDRON_SHELLS':'SOURCE_DEFINITIONAL_PRESENTATION'};
  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 660"><metadata>'+svgEsc(JSON.stringify(metadata))+'</metadata><rect width="1000" height="660" fill="#07111e"/><g data-proof-tier="DER" data-source="CF-D0001/2/3" data-no-physical-measurement="true">'+contents+'</g></svg>';
 }
 const saveBlob=(name:string,blob:Blob)=>{const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
@@ -113,8 +113,10 @@ function renderWebGL(canvas:HTMLCanvasElement,points:readonly Pos[],rotation:num
 const panel:React.CSSProperties={background:'#101f32',border:'1px solid #405a72',padding:'14px',borderRadius:12};
 const input:React.CSSProperties={background:'#152940',color:'#e9f5ff',border:'1px solid #55738f',padding:'7px',borderRadius:6,width:'100%'};
 export default function CreationDesignStudioR881({address,onAddress}:{address:number;onAddress:(n:number)=>void}){
- const canvas=useRef<HTMLCanvasElement>(null),points=useMemo(()=>Array.from({length:20736},(_,i)=>pointFromAddress(i)),[]);
+ const canvas=useRef<HTMLCanvasElement>(null);
+ const sphericalPoints=useMemo(()=>Array.from({length:20736},(_,i)=>pointFromAddress(i)),[]);
  const [mode,setMode]=useState<Mode>('atlas3d'),[rotation,setRotation]=useState(22),[color,setColor]=useState('#5fcecb');
+ const points=useMemo(()=>mode==='dodecahedron'?Array.from({length:20736},(_,i)=>dodecaShellPointR988(i)):sphericalPoints,[mode,sphericalPoints]);
  const [spiral,setSpiral]=useState(false),[materialPhase,setMaterialPhase]=useState(0);
  const [renderer,setRenderer]=useState<'BROWSER_WEBGL2_RENDER'|'BROWSER_CANVAS2D_RENDER'>('BROWSER_CANVAS2D_RENDER');
  const [title,setTitle]=useState('New Canon composition'),[prompt,setPrompt]=useState(''),[message,setMessage]=useState('');
@@ -169,7 +171,8 @@ export default function CreationDesignStudioR881({address,onAddress}:{address:nu
    <div style={{...panel,display:'grid',gap:8,alignContent:'start'}}>
     <label>Project name<input style={input} value={project} onChange={e=>setProject(e.target.value)}/></label>
     <label>Composition title<input style={input} value={title} onChange={e=>setTitle(e.target.value)}/></label>
-    <label>Mode<select style={input} value={mode} onChange={e=>setMode(e.target.value as Mode)}><option value='atlas3d'>20,736 node sphere (WebGL2)</option><option value='mandala'>Mandala / phase</option><option value='tessellation'>Tessellation field</option><option value='pointillism'>Pointillism field</option></select></label>
+    <label>Mode<select style={input} value={mode} onChange={e=>setMode(e.target.value as Mode)}><option value='atlas3d'>20,736 node sphere (WebGL2)</option><option value='mandala'>Mandala / phase</option><option value='tessellation'>Tessellation field</option><option value='pointillism'>Pointillism field</option><option value='dodecahedron'>12 regular dodecahedron shells</option></select></label>
+    {mode==='dodecahedron'&&<small>12 concentric regular polyhedra · 12 pentagonal faces, 20 vertices and 30 edges per shell · D/P/R/L map to face/shell/interior sample. OBJ exports all 12 closed meshes; address exports contain 20,736 face samples.</small>}
     <label>Atlas address<input style={input} type='number' min={0} max={20735} value={address} onChange={e=>onAddress(Math.max(0,Math.min(20735,Math.floor(Number(e.target.value)||0))))}/></label>
     <div>Current D/P/R/L: {Object.values(coordinatesR881(address)).slice(1).join(' / ')} · antipode {antipodeR881(address)}</div>
     <label>Rotation {rotation}°<input style={input} type='range' min={0} max={360} value={rotation} onChange={e=>setRotation(Number(e.target.value))}/></label>
@@ -187,7 +190,7 @@ export default function CreationDesignStudioR881({address,onAddress}:{address:nu
    <div style={{minWidth:0}}>
     <canvas ref={canvas} width={1000} height={660} onClick={e=>pickPoint(e.clientX,e.clientY,e.currentTarget)} tabIndex={0} aria-label='Interactive computed 20,736-node definitional atlas' style={{width:'100%',maxHeight:480,background:'#07111e',borderRadius:10,border:'1px solid #405a72'}}/>
     <div style={{display:'flex',flexWrap:'wrap',gap:8,marginTop:10}}>
-     <button onClick={exportSvg}>SVG</button><button onClick={exportPng}>PNG</button><button onClick={exportCsv}>CSV</button><button onClick={exportJson}>JSON</button><button onClick={exportXlsx}>XLSX</button><button onClick={exportManifest}>Proof manifest</button>
+     <button onClick={exportSvg}>SVG</button><button onClick={exportPng}>PNG</button><button onClick={exportCsv}>CSV</button><button onClick={exportJson}>JSON</button><button onClick={exportXlsx}>XLSX</button>{mode==='dodecahedron'&&<button onClick={()=>void log('omega-r988-dodecahedron-shells.obj',dodecaShellObjR988(),'text/plain','R988_REGULAR_DODECAHEDRON_SHELLS')}>OBJ shell mesh</button>}<button onClick={exportManifest}>Proof manifest</button>
     </div>
     <p role='status'>{message||'Renderer output is an indexed visual projection, not physical or geographic evidence.'}</p>
     <details open><summary>Provenance / verification</summary><p>All generated points: DER · address definition CF-D0001–0003. Font: system-ui browser. Visual geometry: renderer-defined. Raster backend: {renderer}. Browser-dependent pixels; the export receipt applies to the bytes actually exported.</p><p>REC-011 ORION_GATE: HOLD_RULE_SOURCE_NEEDED. R170 policy: POLICY_BLOCKED_BRANCH_HELD. TIT: OPEN_CANDIDATE. No elevation or native-PC acceptance.</p><pre style={{maxHeight:160,overflow:'auto',fontSize:11}}>{JSON.stringify({nodeCount:20736,project,assets,receipts},null,2)}</pre></details>
