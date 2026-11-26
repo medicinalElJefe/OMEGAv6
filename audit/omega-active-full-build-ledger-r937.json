@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R992 actual CPU trainable experimental relational model in existing SAI Lab, disjoint deterministic synthetic address split, full backprop, held-out evaluation, SHA checkpoint and restore; R991 three passed six pending when inspected",
+  "latestGovernedWork": "R993 resumable training sessions with exact optimizer replay, bounded yielding and pause, integrity-checked transfer and full 20736 prediction field; R992 9/9 CI passed",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -583,6 +583,11 @@
     {
       "revision": "R992",
       "conservation": "Expanded 67-section directive §§17–19: existing SAI B059/R331 services preserved. Actual shared 121-parameter tanh relational predictor, eight typed features including neighborhood mean, deterministic 512/128/128 address split, analytic gradients and clipped full-batch descent, validation-selected weights, held-out evaluation and SHA local checkpoint/export. Direct exact-code run with all parameter finite-difference checks and held-out improvement. Synthetic only; no general intelligence or historical weight claim. CI pending.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R993",
+      "conservation": "R992 optimizer shared unchanged with immutable R993 training session (current vs best weights, completed epochs, metric history). Four-epoch browser yielding, explicit pause/resume, SHA local and portable checkpoint and actual deterministic replay verification; held-out test only after completion; legacy inference checkpoint preserved without false resume claim. Direct 31+49 replay exactly equals original 80 epochs, tamper refused and 20736 field predictions matched. Existing SAI route and tests conserved; CI pending.",
       "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
     }
   ],

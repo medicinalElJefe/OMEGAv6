@@ -69,3 +69,25 @@ assert.throws(()=>trainR992({epochs:201}),RangeError);
 assert.ok(Number.isFinite(predictR992(trained992.weights,20735)));
 assert.ok(fabric.includes('<SaiRelationalLearningR992 address={address}/>'));
 console.log('R992 actual CPU relational gradient training PASS: '+JSON.stringify({before:trained992.initial,after:trained992.final,parameters:trained992.parameterCount}));
+
+ // R993 continuation is equivalent to the original uninterrupted optimizer.
+const {startTrainingR993,advanceTrainingR993,verifySessionR993,completeTrainingR993,chartPredictionsR993}=await import('../src/saiRelationalLearningR992.mjs');
+const initial993=startTrainingR993({targetEpochs:80}),partial993=advanceTrainingR993(initial993,31);
+assert.equal(initial993.epoch,0);assert.equal(partial993.epoch,31);assert.ok(Object.isFrozen(partial993.currentWeights));
+assert.equal(partial993.status,'PAUSED');assert.throws(()=>completeTrainingR993(partial993),/requires completed/);
+const restored993=verifySessionR993(JSON.parse(JSON.stringify(partial993)));
+assert.deepEqual(restored993,partial993);
+const finished993=advanceTrainingR993(restored993,49);
+assert.equal(finished993.status,'COMPLETE');
+assert.deepEqual(completeTrainingR993(finished993),trained992);
+assert.deepEqual(advanceTrainingR993(initial993,80),finished993);
+const corrupted993=JSON.parse(JSON.stringify(partial993));corrupted993.currentWeights[0]+=.01;
+assert.throws(()=>verifySessionR993(corrupted993),/replay mismatch/);
+assert.throws(()=>advanceTrainingR993(finished993,1),RangeError);
+let count993=0;
+for(let start=0;start<20736;start+=144){const rows=chartPredictionsR993(trained992.weights,start,144);for(const row of rows){assert.equal(row.address,count993++);assert.equal(row.prediction,predictR992(trained992.weights,row.address));assert.equal(row.residual,row.prediction-row.target)}}
+assert.equal(count993,20736);
+assert.throws(()=>chartPredictionsR993(trained992.weights,20735,2),RangeError);
+const learningUi993=read('src/SaiRelationalLearningR992.tsx');
+for(const token of ['Pause training','Resume training','verifySessionR993(packet.payload)','advanceTrainingR993(current,4)','Export 20,736 prediction field'])assert.ok(learningUi993.includes(token),'missing R993 UI '+token);
+console.log('R993 PASS: exact 31+49 epoch continuation equals uninterrupted R992; tamper rejection and exhaustive addressed prediction export parity.');
