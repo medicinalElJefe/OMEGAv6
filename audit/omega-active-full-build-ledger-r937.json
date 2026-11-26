@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R994 complete replay-bound SAI field evaluation, independent reference inference, disjoint split metrics and 144 region residual inspection, SHA-bound export; R993 3 workflows passed 6 pending at inspection",
+  "latestGovernedWork": "R995 local supervised training with strict CSV intake, explicit authorization, exact checkpoint replay and held-out evaluation on original MLP and optimizer; R994 four workflows passed five pending at inspection",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -593,6 +593,11 @@
     {
       "revision": "R994",
       "conservation": "Existing R992/R993 training preserved, all 20736 addresses independently evaluated with matching CPU reference, partitioned train/validation/test/19968 unused and 12 domain/144 region statistics; exact replay-bound model and audit export with SHA receipts. Direct full numerical evaluation and altered result refusal passed. Synthetic only; no Canon promotion, empirical or general intelligence claim. CI pending.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R995",
+      "conservation": "Actual local CSV supervised learning with 30–768 unique addresses, eight normalized features and supplied labels, source declaration, explicit training permission, deterministic 60/20/20 split, paused/resumed CPU backprop, independent reference evaluation and SHA checkpoint import/export/deletion. Synthetic 120-row direct fixture passed exact 31+49 replay and three refusals. No private memory ingestion, external inference or empirical claim. CI pending.",
       "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
     }
   ],

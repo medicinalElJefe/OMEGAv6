@@ -197,3 +197,78 @@ export function verifyFieldAuditR994(session,audit){
  if(JSON.stringify(expected)!==JSON.stringify(audit))throw new Error('Field audit return mismatch');
  return expected;
 }
+
+// R995: explicit local supervised data; original R992 MLP and R993 optimizer.
+export const R995_HEADER='address,f0,f1,f2,f3,f4,f5,f6,f7,target';
+export const R995_MAX_BYTES=524288;
+const R995_DATA='OMEGA_SAI_USER_DATASET_R995',R995_RUN='OMEGA_SAI_USER_TRAINING_R995';
+const numericR995=/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/;
+export function validateDatasetR995(data){
+ if(!data||data.schema!==R995_DATA||typeof data.source!=='string'||!data.source.trim()||data.source.length>256||/[\x00-\x1f]/.test(data.source)||!Array.isArray(data.rows)||data.rows.length<30||data.rows.length>768)throw Error('Invalid dataset or missing source');
+ const seen=new Set(),rows=[];
+ for(const row of data.rows){
+  if(!row||!validAddress(row.address)||seen.has(row.address)||!Array.isArray(row.features)||row.features.length!==WIDTH||!Array.from(row.features).every(x=>typeof x==='number'&&Number.isFinite(x)&&x>=-1&&x<=1)||typeof row.target!=='number'||!Number.isFinite(row.target)||row.target<0||row.target>1)throw Error('Invalid or duplicate dataset address/features/target');
+  seen.add(row.address);rows.push(Object.freeze({address:row.address,features:Object.freeze(Array.from(row.features,x=>x===0?0:x)),target:row.target===0?0:row.target}));
+ }
+ return Object.freeze({schema:R995_DATA,source:data.source.trim(),rows:Object.freeze(rows.sort((a,b)=>a.address-b.address))});
+}
+export function parseDatasetR995(text,source){
+ if(typeof text!=='string'||text.length>R995_MAX_BYTES||new TextEncoder().encode(text).length>R995_MAX_BYTES)throw Error('Dataset exceeds byte budget');
+ const lines=text.replace(/^\uFEFF/,'').split(/\r?\n/);if(lines.at(-1)==='')lines.pop();
+ if(lines.shift()!==R995_HEADER||lines.length<30||lines.length>768)throw Error('Expected exact CSV header and 30–768 rows');
+ return validateDatasetR995({schema:R995_DATA,source,rows:lines.map((line,i)=>{
+ const c=line.split(',');if(c.length!==10||!/^(0|[1-9]\d*)$/.test(c[0])||c.slice(1).some(x=>!numericR995.test(x)))throw Error('Invalid CSV row '+(i+2));
+ return {address:Number(c[0]),features:c.slice(1,9).map(Number),target:Number(c[9])};
+ })});
+}
+export function splitDatasetR995(data,seed=37){
+ const rows=validateDatasetR995(data).rows.slice(),rand=random(validSeed(seed));
+ for(let i=rows.length-1;i>0;i--){const j=Math.floor(rand()*(i+1));[rows[i],rows[j]]=[rows[j],rows[i]]}
+ const n=Math.floor(rows.length*.6),v=Math.floor(rows.length*.2);
+ return {train:rows.slice(0,n),validation:rows.slice(n,n+v),test:rows.slice(n+v)};
+}
+const trusted995=new WeakMap();
+function snapshot995(s,ds){
+ const next=Object.freeze({...s,currentWeights:Object.freeze(s.currentWeights.slice()),bestWeights:Object.freeze(s.bestWeights.slice()),initial:Object.freeze({...s.initial}),metrics:Object.freeze(s.metrics.map(x=>Object.freeze({...x})))});
+ trusted995.set(next,ds);return next;
+}
+export function startUserTrainingR995(data,{seed=37,targetEpochs=80,learningRate=.08,authorized=false}={}){
+ if(authorized!==true)throw Error('Explicit local training authorization required');
+ validSeed(seed);if(!Number.isSafeInteger(targetEpochs)||targetEpochs<1||targetEpochs>200||typeof learningRate!=='number'||!Number.isFinite(learningRate)||learningRate<=0||learningRate>.2)throw RangeError('Training budget exceeded');
+ const dataset=validateDatasetR995(data),ds=splitDatasetR995(dataset,seed),w=initializeR992(seed);
+ return snapshot995({schema:R995_RUN,dataset,seed,targetEpochs,learningRate,epoch:0,currentWeights:w,bestWeights:w,bestEpoch:0,initial:{train:mse(w,ds.train),validation:mse(w,ds.validation)},metrics:[],status:'READY'},ds);
+}
+function advance995(s,epochs){
+ const ds=trusted995.get(s);if(!ds||!Number.isSafeInteger(epochs)||epochs<1||epochs>200||s.epoch>=s.targetEpochs)throw Error('Invalid supervised continuation');
+ const weights=s.currentWeights.slice(),metrics=s.metrics.slice();let best=s.bestWeights.slice(),bestEpoch=s.bestEpoch,bestValidation=bestEpoch?metrics[bestEpoch-1].validation:s.initial.validation;
+ const stop=Math.min(s.targetEpochs,s.epoch+epochs);
+ for(let epoch=s.epoch+1;epoch<=stop;epoch++){
+  updateEpochR993(weights,ds.train,s.learningRate);const validation=mse(weights,ds.validation);
+  if(validation<bestValidation){bestValidation=validation;best=weights.slice();bestEpoch=epoch}
+  metrics.push({epoch,train:mse(weights,ds.train),validation});
+ }
+ return snapshot995({...s,epoch:stop,currentWeights:weights,bestWeights:best,bestEpoch,metrics,status:stop===s.targetEpochs?'COMPLETE':'PAUSED'},ds);
+}
+export function verifyUserTrainingR995(s){
+ if(!s||s.schema!==R995_RUN||!Number.isSafeInteger(s.epoch)||s.epoch<0||s.epoch>200||!Array.isArray(s.metrics)||s.metrics.length!==s.epoch)throw Error('Invalid supervised checkpoint');
+ const initial=startUserTrainingR995(s.dataset,{seed:s.seed,targetEpochs:s.targetEpochs,learningRate:s.learningRate,authorized:true});
+ if(s.epoch>initial.targetEpochs)throw Error('Invalid supervised epoch');
+ const expected=s.epoch?advance995(initial,s.epoch):initial;
+ if(JSON.stringify(expected)!==JSON.stringify(s))throw Error('Supervised checkpoint replay mismatch');return expected;
+}
+export function advanceUserTrainingR995(s,epochs=4){return advance995(trusted995.has(s)?s:verifyUserTrainingR995(s),epochs)}
+export function evaluateUserTrainingR995(s){
+ const v=trusted995.has(s)?s:verifyUserTrainingR995(s);if(v.status!=='COMPLETE')throw Error('Complete supervised training before test evaluation');
+ const ds=trusted995.get(v),initial=initializeR992(v.seed),partitions={},predictions=[];
+ for(const kind of ['train','validation','test']){
+  const a=auditAccumulatorR994(),baseline=auditAccumulatorR994();
+  for(const row of ds[kind]){
+   const prediction=forward(v.bestWeights,row.features).output,reference=referencePredictionR994(v.bestWeights,row.features),residual=prediction-row.target;
+   if(!Number.isFinite(prediction)||Math.abs(reference-prediction)>1e-12)throw Error('Supervised reference mismatch');
+   auditAddR994(a,row.address,residual);auditAddR994(baseline,row.address,forward(initial,row.features).output-row.target);
+   predictions.push({address:row.address,partition:kind,prediction,target:row.target,residual});
+  }
+  partitions[kind]={...auditFinishR994(a),initialMse:auditFinishR994(baseline).mse};
+ }
+ return {schema:'OMEGA_SAI_USER_EVALUATION_R995',source:v.dataset.source,parameterCount:PARAMS,epoch:v.epoch,bestEpoch:v.bestEpoch,partitions,predictions:predictions.sort((a,b)=>a.address-b.address),evidenceClass:'USER_SUPPLIED_LABELS_INTERNAL_EXECUTION',empiricalVerified:false,canonicalMutation:false};
+}

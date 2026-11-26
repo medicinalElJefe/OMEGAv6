@@ -108,3 +108,21 @@ assert.throws(()=>verifyFieldAuditR994(finished993,changed994),/return mismatch/
 assert.throws(()=>evaluateFieldR994(partial993),/requires completed/);
 assert.ok(learningUi993.includes('Verify full prediction field')&&learningUi993.includes('Export verified field audit'));
 console.log('R994 PASS: '+JSON.stringify({coverage:audit994.coverage,split:audit994.split,reference:audit994.maximumReferenceDifference}));
+
+// R995 explicit synthetic fixture exercising the real local-data path.
+const {R995_HEADER,parseDatasetR995,splitDatasetR995,startUserTrainingR995,advanceUserTrainingR995,verifyUserTrainingR995,evaluateUserTrainingR995}=await import('../src/saiRelationalLearningR992.mjs');
+const csv995=[R995_HEADER,...Array.from({length:120},(_,i)=>{const x=exampleR992(i*137);return [x.address,...x.features,x.target].join(',')})].join('\n');
+const data995=parseDatasetR995(csv995,'SYNTHETIC_TEST_FIXTURE_R995');
+const split995=splitDatasetR995(data995,37);
+assert.deepEqual(Object.values(split995).map(rows=>rows.length),[72,24,24]);
+assert.equal(new Set(Object.values(split995).flat().map(row=>row.address)).size,120);
+assert.throws(()=>startUserTrainingR995(data995),/authorization/);
+const begin995=startUserTrainingR995(data995,{authorized:true}),partial995=advanceUserTrainingR995(begin995,31);
+assert.throws(()=>evaluateUserTrainingR995(partial995),/Complete/);
+const end995=advanceUserTrainingR995(verifyUserTrainingR995(JSON.parse(JSON.stringify(partial995))),49);
+assert.deepEqual(end995,advanceUserTrainingR995(begin995,80));
+const eval995=evaluateUserTrainingR995(end995);assert.equal(eval995.predictions.length,120);assert.ok(eval995.partitions.test.mse<eval995.partitions.test.initialMse);
+const corrupt995=JSON.parse(JSON.stringify(partial995));corrupt995.currentWeights[0]+=.01;assert.throws(()=>verifyUserTrainingR995(corrupt995),/replay mismatch/);
+assert.throws(()=>parseDatasetR995(csv995+'\n'+csv995.split('\n')[1],'fixture'),/duplicate/);
+assert.ok(learningUi993.includes('<SaiUserTrainingR995/>'));
+console.log('R995 PASS: local supervision, address-disjoint partitions, exact replay and refusals.');
