@@ -37,7 +37,7 @@ export default function HybridLinkR32({status,record,showOperationalWorkspace=tr
   <HybridExperienceLedgerR255/>
   <HybridParallelDevelopmentR262/>
   <HybridHostEffectsR212/>
-  <HybridCommandDeckR237 showOperationalWorkspace={showOperationalWorkspace}/>
+  {showOperationalWorkspace?<HybridCommandDeckR237/>:<HybridCommandDeckR237 showOperationalWorkspace={false}/>}
   <HybridProofClosureR141/>
   <MissionLineageReviewR209/>
 
