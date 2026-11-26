@@ -141,7 +141,7 @@ for(const token of [
  'if(requestedEpoch!==recoveredFocusEpoch.current)return',
  'if(!preserveRecoveredFocus)clearRecoveredExecution()',
  'open(capsule.route,true)',
- 'const restoreFromHistory=()=>{clearRecoveredExecution();restore()}',
+ 'const restore=(event?:PopStateEvent)=>{\n   if(event)clearRecoveredExecution();',
  'return()=>{live=false;recoveredFocusEpoch.current++}',
  'const switchDomain=(domain:Omega7Domain)=>{\n  clearRecoveredExecution()',
  'const backToDomain=()=>{\n  clearRecoveredExecution()'

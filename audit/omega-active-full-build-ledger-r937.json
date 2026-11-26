@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R985 historical launch intent precedence and route-scoped focus lifecycle; R984 seven workflows passed and two pending at inspection",
+  "latestGovernedWork": "R986 repair all six R985 blocking workflows caused by R779 callback regression; retain R985 navigation semantics and add executable initial/popstate/cleanup checks",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -548,6 +548,11 @@
     {
       "revision": "R985",
       "conservation": "Existing OMEGA7 root epoch now guards delayed historical launcher before actuation, invalidates stale restoration on unmount, and clears historic focus on explicit ordinary route/domain/back/popstate navigation. Only deliberate capsule route preserves focus. Existing native host route binding and authority kept; source regression checks added. R984 exact-head R241 interaction, Cloud Bridge verify and Windows smoke passed, disclosure/user parity pending when checked.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R986",
+      "conservation": "All six failed R985 jobs share exact R779 assertion missing window.addEventListener('popstate',restore). Restore same registered and unregistered callback; optional event distinguishes initial hydration from browser navigation and clears stale focus only for popstate. Preserve original R779 assertions; update R985 source marker to equivalent callback behavior; add executable registered callback test for initial Atlas restore, popstate Memory/domain route, listener cleanup. Full CI pending.",
       "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
     }
   ],

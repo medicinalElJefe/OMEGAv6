@@ -86,7 +86,8 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
  // R779: keep the visible instrument and browser URL in lockstep. History holds
  // only a public registered route name; Canon addresses/private source state stay local.
  useEffect(()=>{
-  const restore=()=>{
+  const restore=(event?:PopStateEvent)=>{
+   if(event)clearRecoveredExecution();
    const selection=nativeHistorySelectionR779(window.location.search,OMEGA7_NATIVE_ROUTES);
    if(!selection.managed)return;
    const requested=readNativeWorkspaceRouteR778(window.location.search,OMEGA7_NATIVE_ROUTES);
@@ -97,9 +98,8 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
    dispatch({type:'SELECT_ROUTE',route:cap.legacyRoute});
   };
   restore();
-  const restoreFromHistory=()=>{clearRecoveredExecution();restore()};
-  window.addEventListener('popstate',restoreFromHistory);
-  return()=>window.removeEventListener('popstate',restoreFromHistory);
+  window.addEventListener('popstate',restore);
+  return()=>window.removeEventListener('popstate',restore);
  },[dispatch]);
 
  const switchDomain=(domain:Omega7Domain)=>{
