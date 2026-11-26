@@ -67,7 +67,12 @@ try{
  await hub.waitFor({state:'visible',timeout:30000});
  const state=await hub.locator('[data-r884-loopback-state]').getAttribute('data-r884-loopback-state');
  if(state!=='UNCONNECTED')throw Error('Local hub claimed connection without physical/loopback evidence');
- if(await hub.locator('input[type=password]').count()!==1)throw Error('Hub private token input missing');
+ if(await hub.locator('#r884-token[type=password]').count()!==1)throw Error('R881 hub private token input missing');
+ const bridge=hub.getByRole('region',{name:'Recoverable operational workspace'});
+ if(await bridge.locator('input[type=password]').count()!==1)throw Error('Operational bridge private token input missing');
+ if(await hub.locator('input[type=password]').count()!==2)throw Error('Unexpected credential field census');
+ if(!await bridge.getByRole('button',{name:'Audit workspace'}).isDisabled())throw Error('Bridge audit enabled without a session token');
+ if(await bridge.getByRole('button',{name:'Run certified forward / inverse batch'}).count()!==0)throw Error('Bridge execution exposed without verified status');
  console.log('R884 Hybrid Link local hub available, token memory-only, default unconnected and no PC acceptance PASS');
 }finally{
  await context.close();
