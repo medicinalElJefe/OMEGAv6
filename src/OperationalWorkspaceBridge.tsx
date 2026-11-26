@@ -53,9 +53,10 @@ function modes(data:Json):Mode[]{
 export default function OperationalWorkspaceBridge(){
  const [token,setToken]=useState(''),[status,setStatus]=useState<Status|null>(null),[busy,setBusy]=useState(false),[addresses,setAddresses]=useState('188, 564/0/0'),[message,setMessage]=useState('Local workspace not connected.');
  const [catalogue,setCatalogue]=useState<Mode[]>([]),[mode,setMode]=useState(15),[search,setSearch]=useState(''),[input,setInput]=useState(''),[cell,setCell]=useState('188'),[receipt,setReceipt]=useState(''),[preview,setPreview]=useState<Preview|null>(null),[output,setOutput]=useState<unknown>(null);
+ const [objective,setObjective]=useState<'audit'|'evolve'>('audit'),[missionPaths,setMissionPaths]=useState(''),[caps,setCaps]=useState({signal:'500',scar_sample:'1000',prune_sample:'1000'}),[mission,setMission]=useState<{kind:'audit'|'evolve';args:Json;plan:Json}|null>(null);
  const lock=useRef(false);
  const selected=catalogue.find(r=>r.id===mode);
- const clear=()=>{setStatus(null);setCatalogue([]);setPreview(null);setOutput(null);setInput('')};
+ const clear=()=>{setStatus(null);setCatalogue([]);setPreview(null);setMission(null);setOutput(null);setInput('')};
  const act=async(fn:()=>Promise<void>,message:string)=>{
   if(lock.current||!token)return;lock.current=true;setBusy(true);setMessage(message);
   try{await fn()}catch(e){clear();setMessage((e instanceof Error?e.message:'Local request failed')+' — audit again; never blindly retry a write.')}
@@ -73,6 +74,29 @@ export default function OperationalWorkspaceBridge(){
  const evaluate=()=>void act(async()=>{if(!status||!selected?.form||input.length>4096)throw Error('Select an available bounded form.');const inp:unknown=JSON.parse(input);if(!object(inp))throw Error('Scenario inputs must be a JSON object.');const path=one();const r=await work('preview',{i:mode,inp,path,pointer:status.pointer},status.pointer);if(r.mode!==mode||!validPath(r.path)||r.path.join('/')!==path.join('/')||!object(r.inputs)||!object(r.result)||!['COMPUTED','HOLD'].includes(String(r.result.status)))throw Error('Unexpected preview.');setPreview(r as unknown as Preview);setOutput(r);setMessage('Preview returned. No event committed.')},'Evaluating scoped mode…');
  const commit=()=>void act(async()=>{if(!status||!writable||!preview||preview.result.status!=='COMPUTED'||!same(status.pointer,preview.pointer))throw Error('No current computed preview or execution held.');const r=await work('commit',{preview});if(r.status!=='DONE'||!pointer(r.pointer)||!hash((r.pointer as Pointer).workspace))throw Error('Commit not confirmed; audit before continuing.');clear();setOutput(r);setMessage('Scoped receipt committed. Audit to inspect the new checkpoint.')},'Committing explicitly approved preview…');
  const run=()=>void act(async()=>{if(!status||!writable||!status.operatorReady)throw Error('Execution or operator evidence held.');const result=await request(token,'/v1/roundtrip',{pointer:status.pointer,addresses:parseAddresses(addresses)});clear();setOutput(result);setMessage('Local batch '+String(result.status)+' · audit to inspect its checkpoint.')},'Executing explicitly approved local batch…');
+ const missionArgs=():Json=>{
+  if(objective==='audit')return {paths:missionPaths.trim()?parseAddresses(missionPaths):[]};
+  const budgets:Record<string,number>={};
+  for(const [k,v] of Object.entries(caps)){if(!/^(0|[1-9][0-9]{0,6})$/.test(v)||Number(v)>1000000)throw Error('Movement caps must be integer accounting units, 0–1,000,000.');budgets[k]=Number(v)}
+  if(!Object.values(budgets).some(v=>v>0))throw Error('At least one positive movement cap required.');
+  return {budgets};
+ };
+ const missionPlan=()=>void act(async()=>{
+  if(!status)throw Error('Audit workspace first.');
+  setMission(null);setPreview(null);
+  const args=missionArgs(),kind=objective,p=await work(kind==='audit'?'mission-preview':'evolve-preview',{...args,pointer:status.pointer},status.pointer);
+  if(typeof p.ready!=='boolean'||!hash(p.intent_sha256)||!pointer(p.pointer))throw Error('Invalid relational plan.');
+  if(kind==='audit'&&(!count(p.task_count)||!object(p.statuses)||!object(p.expected)||!count(p.expected.count)||!hash(p.expected.head)||p.expected.count!==status.pointer.checkpoint.count+1))throw Error('Invalid audit checkpoint plan.');
+  if(kind==='evolve'&&(!Array.isArray(p.expected_checkpoints)||p.expected_checkpoints.length!==2||!p.expected_checkpoints.every((x,i)=>object(x)&&count(x.count)&&x.count===status.pointer.checkpoint.count+i+1&&hash(x.head))||!object(p.selected)||!count(p.changed_cells)||!object(p.post_proof)))throw Error('Invalid evolution checkpoint plan.');
+  setMission({kind,args,plan:p});setOutput(p);setMessage('Relational plan evaluated; no event written. '+(p.ready?'Ready for explicit execution.':'Held by evidence.'));
+ },'Evaluating the existing relational operators…');
+ const missionRun=()=>void act(async()=>{
+  if(!status||!writable||!mission||mission.kind!==objective||mission.plan.ready!==true||!pointer(mission.plan.pointer)||!same(mission.plan.pointer,status.pointer)||JSON.stringify(mission.args)!==JSON.stringify(missionArgs()))throw Error('No current verified plan; evaluate again.');
+  const p=mission.plan;const r=await work(mission.kind==='audit'?'mission-commit':'evolve-commit',{...mission.args,pointer:p.pointer,intent_sha256:p.intent_sha256});
+  const expected=mission.kind==='audit'?p.expected:(p.expected_checkpoints as unknown[])[1];
+  if(r.status!=='DONE'||!pointer(r.pointer)||!object(expected)||r.pointer.checkpoint.count!==expected.count||r.pointer.checkpoint.head!==expected.head)throw Error('Commit differs from approved checkpoint; audit and recover locally.');
+  clear();setOutput(r);setMessage('Relational operation completed at event '+r.pointer.checkpoint.count+'. Audit to inspect the new state.');
+ },'Executing the approved relational plan; never repeat an interrupted write automatically…');
  const displayed=catalogue.filter(r=>(r.id+' '+r.name+' '+r.category+' '+r.binding).toLowerCase().includes(search.toLowerCase())).sort((a,b)=>Number(b.form)-Number(a.form)||Number(a.policy_hold)-Number(b.policy_hold)||a.id-b.id);
  return <section aria-label='Recoverable operational workspace' style={{border:'1px solid #527286',borderRadius:10,padding:14,margin:'14px 0',minWidth:0,overflowWrap:'anywhere'}}>
   <h3>Recoverable operational workspace</h3><p>One local executor for OMEGA6, OMEGA7 and native operation. Local receipts do not admit CanonState, R141 host proof or GPU execution.</p>
@@ -80,6 +104,12 @@ export default function OperationalWorkspaceBridge(){
   <button type='button' disabled={busy||!token} onClick={audit}>Audit workspace</button> <button type='button' disabled={busy} onClick={()=>{setToken('');clear();setMessage('Session cleared.')}}>Disconnect</button>
   {status&&<><p>Event {status.pointer.checkpoint.count} · {status.cells.toLocaleString()} materialized cells · {status.queue.jobs} persisted jobs · {status.evidence.live}/{status.evidence.nodes} live evidence records</p><p>Signal / scar sample / prune sample: {status.channels.join(' / ')}</p><details><summary>Checkpoint and workspace identity</summary><code>{status.pointer.checkpoint.head}</code><br/><code>{status.pointer.workspace}</code></details>
   <label>Cell addresses (comma separated; max 8)<input value={addresses} disabled={busy} onChange={e=>setAddresses(e.target.value)} /></label><button type='button' disabled={!writable||!status.operatorReady} onClick={run}>Run certified forward / inverse batch</button><small> {status.executionEnabled?'Local execution enabled by launcher.':'Read-only session. Enable execution locally to run.'}</small>
+  <hr/><h4>Relational operations</h4><p>Compose the established field, nonlinear, inverse, sensitivity, exact solver and adaptive portfolio operators in one recoverable mission. Requires the updated local service.</p>
+  <label>Relational objective<select value={objective} disabled={busy} onChange={e=>{setObjective(e.target.value as 'audit'|'evolve');setMission(null);setOutput(null)}}><option value='audit'>Audit and reconcile</option><option value='evolve'>Evolve and prove</option></select></label>
+  {objective==='audit'?<label>Optional audit addresses<input value={missionPaths} placeholder='Blank = automatic representative witnesses' disabled={busy} onChange={e=>{setMissionPaths(e.target.value);setMission(null);setOutput(null)}}/></label>:<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(140px,1fr))',gap:8}}>{(['signal','scar_sample','prune_sample'] as const).map(k=><label key={k}>{k.replaceAll('_',' ')} movement cap<input inputMode='numeric' style={{width:'100%',boxSizing:'border-box'}} value={caps[k]} disabled={busy} onChange={e=>{setCaps({...caps,[k]:e.target.value});setMission(null);setOutput(null)}}/></label>)}</div>}
+  <button type='button' disabled={busy} onClick={missionPlan}>Plan and evaluate</button> <button type='button' disabled={!writable||mission?.plan.ready!==true} onClick={missionRun}>Execute verified plan</button>
+  {mission&&<p>Plan ready: {String(mission.plan.ready)} · {mission.kind==='audit'?String(mission.plan.task_count)+' tasks':String(mission.plan.changed_cells)+' changed cells; transition and dependent proof'}.</p>}
+  <small>Audits persist one event. Evolution persists two dependent events with exact movement caps. No physical simulation or Canon admission.</small>
   <hr/><h4>Atlas and source modes</h4><p>Requires the updated local workbench service. No cloud file upload.</p>
   <label>Exact cell address<input value={cell} disabled={busy} onChange={e=>{setCell(e.target.value);setPreview(null)}}/></label><button type='button' disabled={busy} onClick={inspect}>Inspect cell</button>
   <label>Evidence receipt ID<input value={receipt} disabled={busy} maxLength={64} onChange={e=>setReceipt(e.target.value)}/></label><button type='button' disabled={busy} onClick={inspectReceipt}>Inspect evidence</button>
