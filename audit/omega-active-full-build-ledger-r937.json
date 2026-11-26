@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R989 unify actual 360 shell mesh edges across existing SVG/WebGL/Canvas renderer paths, exact cache optimization and geometry-tagged data exports; R988 9/9 CI passed",
+  "latestGovernedWork": "R990 implement bounded arbitrary-depth canonical path identity and direct existing SPHERE state binding, exact BigInt flatten/expand, parent/child/ancestors and bounded deeper procedural regions; expanded user directive now 67-part intelligence specification",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -568,6 +568,11 @@
     {
       "revision": "R989",
       "conservation": "R988 regular geometry unchanged: direct old/new Object.is parity for all 20,736 coordinate triples and IDs in controlled JS evaluation; immutable 1,728 unit face samples eliminate 11/12 repeated ray-boundary constructions. 360 actual polyhedral edges from shared OBJ vertex topology drawn in existing SVG, WebGL2 and Canvas, explicit shader varying precision, geometry source tagged in CSV/XLSX/JSON. Full CI and browser parity pending; no measured timing claim.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R990",
+      "conservation": "User expanded OMEGA sovereign AI specification section 07: exact omega://atlas/root/###### paths with 0–64 depth resource bound, BigInt flatten/expand, explicit shell context, parent/child/common ancestor, direct existing R887 depth-two stored/generated state resolution, versioned read-only deeper procedural scalar generation, 1–144 child region query and existing SPHERE inspector/execute navigation. No dense allocation, no duplicate writer or claim of deeper persisted execution. Direct 65 depth boundary roundtrips and 144-child query verified; regression tests added. R989 5 workflows passed, 4 pending when checked.",
       "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
     }
   ],

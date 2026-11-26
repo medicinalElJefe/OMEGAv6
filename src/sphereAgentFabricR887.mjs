@@ -116,3 +116,71 @@ export function phaseSampleR918(fabric,agent,inner,phase){
   createsIndependentPhaseState:false,canonicalWrites:0
  });
 }
+
+// R990: exact recursive identity over the existing SPHERE fabric. Shell is
+// a separate context; canonical path digits always use the original radix.
+// Depth bound controls resource consumption, not a mathematical dimension.
+export const RECURSIVE_PATH_MAX_DEPTH_R990=64;
+const ROOT_R990='omega://atlas/root';
+const RADIX_R990=BigInt(SIZE);
+function pathDigitsR990(parts){
+ if(!Array.isArray(parts)||parts.length>RECURSIVE_PATH_MAX_DEPTH_R990)throw new RangeError('Invalid recursive atlas path depth');
+ return Array.from(parts,n=>integer(n,SIZE,'recursive atlas component'));
+}
+export function encodePathR990(parts){
+ const digits=pathDigitsR990(parts);
+ return ROOT_R990+digits.map(n=>'/'+String(n).padStart(6,'0')).join('');
+}
+export function decodePathR990(path){
+ if(typeof path!=='string'||path.length>ROOT_R990.length+7*RECURSIVE_PATH_MAX_DEPTH_R990)throw new RangeError('Invalid recursive atlas path length');
+ if(path===ROOT_R990)return Object.freeze([]);
+ if(!path.startsWith(ROOT_R990+'/'))throw new Error('Invalid recursive atlas root');
+ const components=path.slice(ROOT_R990.length+1).split('/');
+ if(components.some(c=>!/^\d{6}$/.test(c)))throw new Error('Path components require six decimal digits');
+ return Object.freeze(pathDigitsR990(components.map(Number)));
+}
+export function flattenPathR990(parts){
+ const digits=pathDigitsR990(parts);
+ return Object.freeze({depth:digits.length,index:digits.reduce((sum,n)=>sum*RADIX_R990+BigInt(n),0n)});
+}
+export function expandIndexR990(index,depth){
+ if(!Number.isSafeInteger(depth)||depth<0||depth>RECURSIVE_PATH_MAX_DEPTH_R990||typeof index!=='bigint'||index<0n||index>=RADIX_R990**BigInt(depth))throw new RangeError('Recursive flattened address outside depth');
+ const digits=Array(depth).fill(0);let n=index;
+ for(let i=depth-1;i>=0;i--){digits[i]=Number(n%RADIX_R990);n/=RADIX_R990}
+ return Object.freeze(digits);
+}
+export function parentPathR990(path){const parts=decodePathR990(path);return parts.length?encodePathR990(parts.slice(0,-1)):null}
+export function childPathR990(path,child){return encodePathR990([...decodePathR990(path),child])}
+export function commonAncestorR990(a,b){
+ const left=decodePathR990(a),right=decodePathR990(b);let i=0;
+ while(i<Math.min(left.length,right.length)&&left[i]===right[i])i++;
+ return encodePathR990(left.slice(0,i));
+}
+export function ancestorsR990(path){
+ const digits=decodePathR990(path);
+ return Object.freeze(Array.from({length:digits.length},(_,i)=>encodePathR990(digits.slice(0,i))));
+}
+// Versioned generated scalar only; identity is the full path, never a hash.
+// The first two components resolve directly to R887 instead of a shadow store.
+export function resolveRecursiveStateR990(fabric,shell,path){
+ integer(shell,SHELLS,'shell');
+ if(!fabric||!(fabric.active instanceof Map))throw new Error('Existing SPHERE fabric required');
+ const digits=decodePathR990(path),flat=flattenPathR990(digits);
+ const base={schema:'OMEGA_RECURSIVE_PATH_R990',path,depth:digits.length,flatIndex:flat.index.toString(),shell,parent:parentPathR990(path),childCount:digits.length<RECURSIVE_PATH_MAX_DEPTH_R990?SIZE:0,canonicalMutation:false};
+ if(digits.length===0)return Object.freeze({...base,state:'LOGICAL_ATLAS_ROOT',value:null,materialized:false});
+ const id=agentId(shell,digits[0]),active=fabric.active.get(id);
+ if(digits.length===1)return Object.freeze({...base,agent:id,state:'LOGICAL_AGENT',value:null,materialized:Boolean(active),epoch:active?.epoch??0});
+ if(digits.length===2){
+  const inner=digits[1],materialized=Boolean(active?.values.has(inner));
+  return Object.freeze({...base,agent:id,inner,value:stateValue(fabric,id,inner),materialized,state:materialized?'STORED_R887_OVERRIDE':'GENERATED_R887_BASELINE',epoch:active?.epoch??0,globalAddress:nestedId(id,inner)});
+ }
+ let seed=0x52393930;
+ seed=hash(seed^shell);
+ for(let i=0;i<digits.length;i++)seed=hash(seed^Math.imul(digits[i]+1,16777619)^i);
+ return Object.freeze({...base,value:seed/4294967295,materialized:false,state:'GENERATED_RECURSIVE_SCALAR_R990',generator:'R990_PATH_HASH32_V1',execution:'READ_ONLY_DEEP_INSPECTION',learned:false,observed:false});
+}
+export function queryRecursiveRegionR990(fabric,shell,parent,start,count){
+ decodePathR990(parent);integer(start,SIZE,'region offset');
+ if(!Number.isSafeInteger(count)||count<1||count>144||start+count>SIZE)throw new RangeError('Recursive region page must contain 1–144 valid children');
+ return Object.freeze(Array.from({length:count},(_,i)=>resolveRecursiveStateR990(fabric,shell,childPathR990(parent,start+i))));
+}

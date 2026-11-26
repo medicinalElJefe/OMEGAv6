@@ -121,3 +121,36 @@ for(let i=0;i<32;i++){
 assert.equal(replayCount,2048);assert.equal(cursor,restoredCursor);assert.deepEqual(decoded.fabric,live);
 assert.equal(await encodeDurablePortableR987(decoded.fabric,{...session,stepCursor:cursor}),await encodeDurablePortableR987(live,{...session,stepCursor:cursor}));
 console.log('R987 PASS: actual portable state roundtrip and 2,048 identical resumed operations plus queued operator priority; malformed maps/census/digest rejected.');
+
+ // R990 exact recursive addressing, with direct binding to the existing state.
+const {encodePathR990,decodePathR990,flattenPathR990,expandIndexR990,parentPathR990,childPathR990,commonAncestorR990,ancestorsR990,resolveRecursiveStateR990,queryRecursiveRegionR990,RECURSIVE_PATH_MAX_DEPTH_R990}=await import('../src/sphereAgentFabricR887.mjs');
+const rootPath990=encodePathR990([]),deep990=encodePathR990([12348,6221,19385]);
+assert.equal(deep990,'omega://atlas/root/012348/006221/019385');
+assert.deepEqual(decodePathR990(deep990),[12348,6221,19385]);
+assert.equal(parentPathR990(rootPath990),null);
+assert.equal(childPathR990(parentPathR990(deep990),19385),deep990);
+assert.equal(commonAncestorR990(deep990,encodePathR990([12348,6221,0])),parentPathR990(deep990));
+assert.equal(ancestorsR990(deep990).length,3);
+for(let depth=0;depth<=RECURSIVE_PATH_MAX_DEPTH_R990;depth++){
+ const digits=Array(depth).fill(20735),flat=flattenPathR990(digits);
+ assert.equal(flat.index,20736n**BigInt(depth)-1n);
+ assert.deepEqual(expandIndexR990(flat.index,depth),digits);
+ assert.deepEqual(decodePathR990(encodePathR990(digits)),digits);
+}
+for(const bad of ['omega://atlas/root/0','omega://atlas/root/020736','omega://atlas/root/000000/','omega://atlas/root/00000a','other'])assert.throws(()=>decodePathR990(bad));
+assert.throws(()=>flattenPathR990(Array(65).fill(0)));
+assert.throws(()=>expandIndexR990(20736n,1));
+assert.throws(()=>expandIndexR990(1,1));
+const recursiveFabric=createFabric(),selectedPath990=encodePathR990([137,731]);
+assert.equal(resolveRecursiveStateR990(recursiveFabric,4,selectedPath990).value,baseline(root,731));
+getAgent(recursiveFabric,root).values.set(731,.123);
+assert.equal(resolveRecursiveStateR990(recursiveFabric,4,selectedPath990).value,.123);
+assert.equal(resolveRecursiveStateR990(recursiveFabric,4,selectedPath990).state,'STORED_R887_OVERRIDE');
+const before990=structuredClone(recursiveFabric),region990=queryRecursiveRegionR990(recursiveFabric,4,selectedPath990,20592,144);
+assert.equal(region990.length,144);assert.equal(region990.at(-1).path,childPathR990(selectedPath990,20735));
+assert.deepEqual(region990,queryRecursiveRegionR990(recursiveFabric,4,selectedPath990,20592,144));
+assert.ok(region990.every(row=>row.state==='GENERATED_RECURSIVE_SCALAR_R990'&&!row.materialized&&row.value>=0&&row.value<=1));
+assert.deepEqual(recursiveFabric,before990);
+assert.throws(()=>queryRecursiveRegionR990(recursiveFabric,4,selectedPath990,20735,2));
+assert.ok(ui.includes('data-r990-recursive=')&&ui.includes('Open existing state executor'));
+console.log('R990 PASS: 0–64 depth exact BigInt paths; existing depth-two state binding, bounded deterministic deeper region inspection without allocation.');
