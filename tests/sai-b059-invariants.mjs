@@ -51,3 +51,21 @@ assert.doesNotMatch(pkg,/@appdeploy\/client|appdeploy\.ai/i,'SAI restoration mus
 assert.match(manifest,/OMEGA_SAI_B059_PART_01_CORE_COMPILED\.zip/,'manifest must identify exact donor archive');
 await import('./r209-end-to-end-mission-lineage-invariants.mjs');
 console.log('SAI_B059_R209_INVARIANTS PASS · R195 differential + R195.1 live bridge + R196.1 held SAI→Hybrid handoff + R209 SHA-bound operator-review lineage · authority boundaries locked');
+
+// R992 real parameter training, not merely a prepared training batch.
+const {initializeR992,exampleR992,datasetR992,lossGradientR992,trainR992,predictR992,verifyTrainingR992}=await import('../src/saiRelationalLearningR992.mjs');
+const ds992=datasetR992(37);
+assert.equal(new Set([...ds992.train,...ds992.validation,...ds992.test].map(x=>x.address)).size,768);
+const w992=initializeR992(37),sample992=[exampleR992(0),exampleR992(20735)],g992=lossGradientR992(w992,sample992);
+for(let i=0;i<w992.length;i++){const plus=w992.slice(),minus=w992.slice(),eps=1e-6;plus[i]+=eps;minus[i]-=eps;const numeric=(lossGradientR992(plus,sample992).loss-lossGradientR992(minus,sample992).loss)/(2*eps);assert.ok(Math.abs(numeric-g992.gradient[i])<1e-7,'gradient '+i)}
+const trained992=trainR992({seed:37,epochs:80});
+assert.ok(trained992.final.test<trained992.initial.test);
+assert.ok(trained992.final.validation<trained992.initial.validation);
+assert.notDeepEqual(trained992.weights,w992);
+assert.deepEqual(trainR992({seed:37,epochs:80}),trained992);
+assert.deepEqual(verifyTrainingR992(JSON.parse(JSON.stringify(trained992))),trained992.final);
+const changed992=JSON.parse(JSON.stringify(trained992));changed992.weights[0]+=.1;assert.throws(()=>verifyTrainingR992(changed992),/evaluation mismatch/);
+assert.throws(()=>trainR992({epochs:201}),RangeError);
+assert.ok(Number.isFinite(predictR992(trained992.weights,20735)));
+assert.ok(fabric.includes('<SaiRelationalLearningR992 address={address}/>'));
+console.log('R992 actual CPU relational gradient training PASS: '+JSON.stringify({before:trained992.initial,after:trained992.final,parameters:trained992.parameterCount}));

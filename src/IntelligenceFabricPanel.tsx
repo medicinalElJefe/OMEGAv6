@@ -6,6 +6,7 @@ import IntelligenceBridgeR195 from './IntelligenceBridgeR195';
 import SaiHybridHandoffPanelR1961 from './SaiHybridHandoffPanelR1961';
 import GroundedIntelligenceR724 from '../src7/workspaces/GroundedIntelligenceR724';
 import MemoryContinuityR725 from '../src7/workspaces/MemoryContinuityR725';
+import SaiRelationalLearningR992 from './SaiRelationalLearningR992';
 import MemoryTrajectoryR726 from '../src7/workspaces/MemoryTrajectoryR726';
 
 export const INTELLIGENCE_FABRIC_IDENTITY='OMEGA Intelligence Fabric';
@@ -14,5 +15,5 @@ export const INTELLIGENCE_FABRIC_TRUTH='No donor is relabeled as a live neural m
 export default function IntelligenceFabricPanel({address,onAddress}:{address:number;onAddress:(address:number)=>void}){
  const record=useMemo(()=>corpusState(address),[address]);
  const modeSummary=useMemo(()=>sourceBackedModeSummary(record),[record]);
- return <div data-intelligence-fabric={INTELLIGENCE_FABRIC_IDENTITY} data-truth-boundary={INTELLIGENCE_FABRIC_TRUTH}><GroundedIntelligenceR724 onAddress={onAddress}/><MemoryContinuityR725 onAddress={onAddress}/><MemoryTrajectoryR726 onAddress={onAddress}/><IntelligenceBridgeR195/><SaiHybridHandoffPanelR1961 record={record} modeSummary={modeSummary}/><SAISovereignControl record={record} modeCount={modeSummary.appliedCount}/></div>;
+ return <div data-intelligence-fabric={INTELLIGENCE_FABRIC_IDENTITY} data-truth-boundary={INTELLIGENCE_FABRIC_TRUTH}><SaiRelationalLearningR992 address={address}/><GroundedIntelligenceR724 onAddress={onAddress}/><MemoryContinuityR725 onAddress={onAddress}/><MemoryTrajectoryR726 onAddress={onAddress}/><IntelligenceBridgeR195/><SaiHybridHandoffPanelR1961 record={record} modeSummary={modeSummary}/><SAISovereignControl record={record} modeCount={modeSummary.appliedCount}/></div>;
 }
