@@ -41,7 +41,8 @@ function validReceipt(r){return r&&typeof r==='object'&&!Array.isArray(r)&&Numbe
 export function serializeFabricR888(fabric){
  if(fabric.active.size>MAX_ACTIVE||fabric.queue.length>MAX_QUEUE||fabric.receipts.length>512)throw Error('Checkpoint budget violation');
  const agents=[...fabric.active.values()].sort((a,b)=>a.id-b.id).map(a=>({id:a.id,epoch:a.epoch,mode:a.mode,values:[...a.values.entries()].sort((a,b)=>a[0]-b[0]),memory:a.memory,inbox:a.inbox}));
- const state={tick:fabric.tick,sequence:fabric.sequence,agents,queue:fabric.queue,receipts:fabric.receipts};
+ validateRecursiveStoreR991(fabric);
+ const state={tick:fabric.tick,sequence:fabric.sequence,agents,queue:fabric.queue,receipts:fabric.receipts,...(fabric.recursive?{recursive:fabric.recursive}:{})};
  const canonical=JSON.stringify(state);
  if(canonical.length>CHECKPOINT_LIMIT_R888)throw Error('Checkpoint exceeds 4 MiB browser budget; no data discarded');
  return JSON.stringify({schema:CHECKPOINT_SCHEMA_R888,checksum:checksumR888(canonical),state});
@@ -69,6 +70,8 @@ export function restoreFabricR888(serialized){
  }
  if(!state.receipts.every(validReceipt))throw new Error('Invalid checkpoint receipt');
  restored.receipts=state.receipts;
+ if(Object.hasOwn(state,'recursive'))restored.recursive=state.recursive;
+ validateRecursiveStoreR991(restored);
  return restored;
 }
 
@@ -166,7 +169,7 @@ export function resolveRecursiveStateR990(fabric,shell,path){
  integer(shell,SHELLS,'shell');
  if(!fabric||!(fabric.active instanceof Map))throw new Error('Existing SPHERE fabric required');
  const digits=decodePathR990(path),flat=flattenPathR990(digits);
- const base={schema:'OMEGA_RECURSIVE_PATH_R990',path,depth:digits.length,flatIndex:flat.index.toString(),shell,parent:parentPathR990(path),childCount:digits.length<RECURSIVE_PATH_MAX_DEPTH_R990?SIZE:0,canonicalMutation:false};
+ const base={schema:'OMEGA_RECURSIVE_PATH_R990',path,depth:digits.length,flatIndex:flat.index.toString(),shell,parent:parentPathR990(path),childCount:digits.length<RECURSIVE_PATH_MAX_DEPTH_R990?SIZE:0,revision:0,canonicalMutation:false};
  if(digits.length===0)return Object.freeze({...base,state:'LOGICAL_ATLAS_ROOT',value:null,materialized:false});
  const id=agentId(shell,digits[0]),active=fabric.active.get(id);
  if(digits.length===1)return Object.freeze({...base,agent:id,state:'LOGICAL_AGENT',value:null,materialized:Boolean(active),epoch:active?.epoch??0});
@@ -174,13 +177,99 @@ export function resolveRecursiveStateR990(fabric,shell,path){
   const inner=digits[1],materialized=Boolean(active?.values.has(inner));
   return Object.freeze({...base,agent:id,inner,value:stateValue(fabric,id,inner),materialized,state:materialized?'STORED_R887_OVERRIDE':'GENERATED_R887_BASELINE',epoch:active?.epoch??0,globalAddress:nestedId(id,inner)});
  }
+ const saved=fabric.recursive?.entries[recursiveKeyR991(shell,path)];
+ if(saved)return Object.freeze({...base,value:saved.value,revision:saved.revision,materialized:true,state:'STORED_RECURSIVE_OVERRIDE_R991',execution:'BOUNDED_LOCAL_OPERATOR',learned:false,observed:false});
  let seed=0x52393930;
  seed=hash(seed^shell);
  for(let i=0;i<digits.length;i++)seed=hash(seed^Math.imul(digits[i]+1,16777619)^i);
- return Object.freeze({...base,value:seed/4294967295,materialized:false,state:'GENERATED_RECURSIVE_SCALAR_R990',generator:'R990_PATH_HASH32_V1',execution:'READ_ONLY_DEEP_INSPECTION',learned:false,observed:false});
+ return Object.freeze({...base,value:seed/4294967295,materialized:false,state:'GENERATED_RECURSIVE_SCALAR_R990',generator:'R990_PATH_HASH32_V1',execution:'BOUNDED_LOCAL_OPERATOR_AVAILABLE',learned:false,observed:false});
 }
 export function queryRecursiveRegionR990(fabric,shell,parent,start,count){
  decodePathR990(parent);integer(start,SIZE,'region offset');
  if(!Number.isSafeInteger(count)||count<1||count>144||start+count>SIZE)throw new RangeError('Recursive region page must contain 1–144 valid children');
  return Object.freeze(Array.from({length:count},(_,i)=>resolveRecursiveStateR990(fabric,shell,childPathR990(parent,start+i))));
 }
+
+// R991: deeper states are sparse extensions of the same SPHERE fabric.
+// Legacy depth-two values remain owned exclusively by R887. Separate
+// recursive revision clock is not a second CanonState authority.
+export const R991_MAX_OVERRIDES=4096;
+const R991_MAX_RECEIPTS=512;
+const recursiveKeyR991=(shell,path)=>shell+':'+path;
+const validUnitR991=x=>typeof x==='number'&&Number.isFinite(x)&&x>=0&&x<=1;
+const validRevisionR991=x=>Number.isSafeInteger(x)&&x>=0;
+function deepPathR991(path){const digits=decodePathR990(path);if(digits.length<3)throw new Error('Depth three or greater required for recursive operator');return digits}
+function siblingR991(path,phase){
+ const digits=deepPathR991(path);
+ integer(phase,12,'phase');if(Math.floor(phase/4)===1)throw new Error('Nonzero sibling phase required');
+ return encodePathR990([...digits.slice(0,-1),phaseNeighborR919(digits.at(-1),phase)]);
+}
+export function validateRecursiveStoreR991(fabric){
+ if(!Object.hasOwn(fabric,'recursive'))return 0;
+ const store=fabric.recursive;
+ if(!store||!validRevisionR991(store.revision)||!store.entries||Object.getPrototypeOf(store.entries)!==Object.prototype||!Array.isArray(store.receipts)||store.receipts.length!==Math.min(store.revision,R991_MAX_RECEIPTS))throw new Error('Invalid recursive store');
+ const keys=Object.keys(store.entries);
+ if(keys.length>R991_MAX_OVERRIDES)throw new Error('Recursive override budget exceeded');
+ for(const key of keys){
+  const split=key.indexOf(':'),shell=Number(key.slice(0,split)),path=key.slice(split+1),entry=store.entries[key];
+  integer(shell,SHELLS,'shell');deepPathR991(path);
+  if(key!==recursiveKeyR991(shell,path)||!entry||!validUnitR991(entry.value)||!validRevisionR991(entry.revision)||entry.revision<1||entry.revision>store.revision)throw new Error('Invalid recursive override');
+ }
+ const latest=new Map();let expected=store.revision-store.receipts.length;
+ for(const receipt of store.receipts){
+  if(!receipt||receipt.revision!==++expected||!['RELAX_PARENT','EXCHANGE_SIBLING'].includes(receipt.kind)||!validUnitR991(receipt.weight)||!Array.isArray(receipt.changes)||receipt.changes.length!==(receipt.kind==='RELAX_PARENT'?1:2))throw new Error('Invalid recursive receipt');
+  integer(receipt.shell,SHELLS,'shell');deepPathR991(receipt.path);
+  const a=receipt.changes[0],b=receipt.changes[1];
+  if(a?.path!==receipt.path)throw new Error('Invalid recursive receipt source');
+  if(receipt.kind==='EXCHANGE_SIBLING'){
+   if(b?.path!==siblingR991(receipt.path,receipt.phase))throw new Error('Invalid recursive sibling identity');
+   const delta=receipt.weight*(b.before-a.before)/2;
+   if(a.after!==a.before+delta||b.after!==b.before-delta||receipt.residual!==(a.after+b.after)-(a.before+b.before)||Math.abs(receipt.residual)>1e-12)throw new Error('Invalid recursive exchange arithmetic');
+  }else{
+   if(receipt.parent!==parentPathR990(receipt.path)||!validUnitR991(receipt.parentValue)||a.after!==a.before+receipt.weight*(receipt.parentValue-a.before)||receipt.residual!==null)throw new Error('Invalid recursive parent arithmetic');
+  }
+  for(const change of receipt.changes){
+   deepPathR991(change.path);
+   if(!validUnitR991(change.before)||!validUnitR991(change.after)||!validRevisionR991(change.beforeRevision)||change.beforeRevision>=receipt.revision)throw new Error('Invalid recursive receipt values');
+   const key=recursiveKeyR991(receipt.shell,change.path),prior=latest.get(key);
+   if(prior&&(prior.value!==change.before||prior.revision!==change.beforeRevision))throw new Error('Recursive receipt continuity mismatch');
+   latest.set(key,{value:change.after,revision:receipt.revision});
+  }
+ }
+ for(const [key,entry] of latest){
+  const stored=store.entries[key];
+  if(!stored||stored.value!==entry.value||stored.revision!==entry.revision)throw new Error('Recursive receipt return mismatch');
+ }
+ const earliest=store.revision-store.receipts.length+1;
+ for(const key of keys)if(store.entries[key].revision>=earliest&&!latest.has(key))throw new Error('Recursive override missing receipt');
+ return keys.length;
+}
+export function executeRecursiveR991(fabric,{shell,path,kind,weight,expectedRevision,phase,expectedPeerRevision}){
+ integer(shell,SHELLS,'shell');deepPathR991(path);unit(weight);
+ if(!['RELAX_PARENT','EXCHANGE_SIBLING'].includes(kind))throw new Error('Unknown recursive operator');
+ const current=resolveRecursiveStateR990(fabric,shell,path);
+ if(!validRevisionR991(expectedRevision)||current.revision!==expectedRevision)throw new Error('Stale recursive source revision');
+ const existing=fabric.recursive??{revision:0,entries:{},receipts:[]};
+ if(!validRevisionR991(existing.revision)||existing.revision>=Number.MAX_SAFE_INTEGER)throw new Error('Recursive revision exhausted');
+ const revision=existing.revision+1,changes=[];let parent=null,parentValue=null,residual=null;
+ if(kind==='RELAX_PARENT'){
+  parent=parentPathR990(path);parentValue=resolveRecursiveStateR990(fabric,shell,parent).value;unit(parentValue);
+  changes.push({path,before:current.value,beforeRevision:current.revision,after:current.value+weight*(parentValue-current.value)});
+ }else{
+  const peerPath=siblingR991(path,phase),peer=resolveRecursiveStateR990(fabric,shell,peerPath);
+  if(!validRevisionR991(expectedPeerRevision)||peer.revision!==expectedPeerRevision)throw new Error('Stale recursive peer revision');
+  const delta=weight*(peer.value-current.value)/2;
+  changes.push({path,before:current.value,beforeRevision:current.revision,after:current.value+delta},{path:peerPath,before:peer.value,beforeRevision:peer.revision,after:peer.value-delta});
+  residual=(changes[0].after+changes[1].after)-(current.value+peer.value);
+  if(Math.abs(residual)>1e-12)throw new Error('Recursive exchange residual exceeds tolerance');
+ }
+ const additional=changes.filter(change=>!Object.hasOwn(existing.entries,recursiveKeyR991(shell,change.path))).length;
+ if(Object.keys(existing.entries).length+additional>R991_MAX_OVERRIDES)throw new Error('Recursive override budget exceeded; no mutation');
+ for(const change of changes)unit(change.after);
+ const receipt=Object.freeze({revision,kind,shell,path,weight,...(kind==='RELAX_PARENT'?{parent,parentValue}:{phase}),changes:Object.freeze(changes.map(change=>Object.freeze(change))),residual,authority:'SYNTHETIC_LOCAL_COMPUTATION',canonicalMutation:false});
+ const entries={...existing.entries};
+ for(const change of changes)entries[recursiveKeyR991(shell,change.path)]=Object.freeze({value:change.after,revision});
+ fabric.recursive={revision,entries,receipts:[...existing.receipts,receipt].slice(-R991_MAX_RECEIPTS)};
+ return receipt;
+}
+export function recursiveSiblingR991(path,phase){return siblingR991(path,phase)}

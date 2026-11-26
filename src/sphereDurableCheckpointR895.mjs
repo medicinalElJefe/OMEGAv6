@@ -1,6 +1,6 @@
 // R895: atomic IndexedDB exact-float64 state persistence for a bounded complete 12-agent × 20,736 inner-state sweep.
 // No silent truncation, no automatic cloud work, and no second CanonState writer.
-import {AGENTS,SIZE,neighbors,phaseNeighborR919,MAX_PERSISTABLE_VALUES_R974} from './sphereAgentFabricR887.mjs';
+import {AGENTS,SIZE,neighbors,phaseNeighborR919,MAX_PERSISTABLE_VALUES_R974,validateRecursiveStoreR991} from './sphereAgentFabricR887.mjs';
 export const R895_SCHEMA='OMEGA_SPHERE_DURABLE_CHECKPOINT_R895';
 export const R895_MAX_VALUES=MAX_PERSISTABLE_VALUES_R974;
 const DB='omega-sphere-durable-r895',STORE='checkpoints',KEY='latest';
@@ -25,6 +25,7 @@ function receiptWindowR973(rows,sequence,tick,owner=null){
 export function validateDurableR895(fabric,session){
  if(!fabric||!(fabric.active instanceof Map)||!Array.isArray(fabric.queue)||!Array.isArray(fabric.receipts)||fabric.active.size>512||fabric.queue.length>1024||fabric.receipts.length>512||!Number.isSafeInteger(fabric.tick)||fabric.tick<0||!Number.isSafeInteger(fabric.sequence)||fabric.sequence<fabric.tick)throw new Error('Invalid or over-budget fabric');
  if(!session||!idx(session.agent,AGENTS)||!Number.isSafeInteger(session.memberCount)||session.memberCount<1||session.memberCount>12||!Number.isSafeInteger(session.stepCursor)||session.stepCursor<0||!Number.isSafeInteger(session.batch)||session.batch<1||session.batch>64||!['SELECTED_INNER','ALL_20736'].includes(session.mode)||!idx(session.selectedInner,SIZE))throw new Error('Invalid autonomous checkpoint session');
+ validateRecursiveStoreR991(fabric);
  const ids=new Set();let values=0;
  for(const [id,a] of fabric.active){
   if(!idx(id,AGENTS)||ids.has(id)||!a||a.id!==id||a.mode!=='IDLE'||!Number.isSafeInteger(a.epoch)||a.epoch<0||!(a.values instanceof Map)||a.values.size>SIZE||!Array.isArray(a.memory)||a.memory.length>32||!Array.isArray(a.inbox)||a.inbox.length>32)throw new Error('Invalid durable agent');
