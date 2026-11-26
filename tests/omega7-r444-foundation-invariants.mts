@@ -12,7 +12,7 @@ for(const route of added)assert.equal(isOmega7NativeRoute(route),true,route+' mu
 assert.ok(OMEGA7_NATIVE_ROUTES.length>=29,'R444 native set may grow in successors but cannot shrink below 29');
 assert.ok(native.includes("lazy(()=>import('./workspaces/DevelopmentComputeWorkspaceR444'))"));
 
-for(const token of ['HybridMissionControlR8','UniversalQualityControl','WovenBuildOutPanel','SAISovereignControl','IntelligenceFabricPanel','OmegaIntentWorkbenchR85','sourceBackedModeSummary','omega.v6.address'])assert.ok(workspace.includes(token),'R444 missing '+token);
+for(const token of ['HybridLinkR32','HybridRuntimeSnapshotProviderR238','UniversalQualityControl','WovenBuildOutPanel','SAISovereignControl','IntelligenceFabricPanel','OmegaIntentWorkbenchR85','sourceBackedModeSummary','omega.v6.address'])assert.ok(workspace.includes(token),'R444 missing '+token);
 assert.ok(workspace.includes("depth!=='STANDARD'")&&workspace.includes('Open full {route} workspace'),'Standard development view must explain execution boundary first');
 assert.ok(workspace.includes("status?.hybridLink?.state||'DEVICE_PROOF_REQUIRED'"),'Hybrid must fail closed without returned device proof');
 assert.ok(workspace.includes('pairing alone is not PC execution'),'Hybrid human presentation must distinguish browser pairing from PC execution');
@@ -22,6 +22,7 @@ assert.ok(workspace.includes("<UniversalQualityControl")&&workspace.includes('mo
 assert.ok(workspace.includes("<WovenBuildOutPanel")&&workspace.includes("<OmegaIntentWorkbenchR85"),'Development must preserve governed build plus outcome workflow');
 assert.ok(workspace.includes("<IntelligenceFabricPanel")&&workspace.includes("<SAISovereignControl"),'SAI Lab must preserve intelligence fabric plus sovereign SAI controls');
 
+assert.ok(workspace.includes('<HybridRuntimeSnapshotProviderR238><HybridLinkR32')&&workspace.includes('showOperationalWorkspace={false}'),'native Hybrid must reuse full command/proof chain without duplicating local bridge');
 assert.equal(OMEGA7_INHERITANCE_LEDGER.length,44);
 for(const route of OMEGA7_NATIVE_ROUTES)assert.equal(OMEGA7_INHERITANCE_LEDGER.find(x=>x.legacyRoute===route)?.migration,'ADAPTED',route+' must remain adapted rather than retired');
 assert.equal(OMEGA7_INHERITANCE_LEDGER.some(canRetireOmega6Surface),false);

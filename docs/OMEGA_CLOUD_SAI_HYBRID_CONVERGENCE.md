@@ -1,0 +1,7 @@
+# OMEGA6/7 cloud, SAI and Hybrid convergence
+The existing R116 Worker, R146 durable history, R147 executor fabric and R141 proof return remain authoritative. No new Worker or cloud storage is introduced.
+- OMEGA7 Hybrid Link now opens the full retained R32/R117/R237/R239/R141 surface (including R209 import), inside one existing R238 snapshot provider. R884 remains the local hub; its nested operational bridge is not duplicated.
+- SAI Query can explicitly authorize and dispatch a source-packet-bound cloud model synthesis through the existing authenticated R146/R147 endpoints, then read back the persisted result and replay. Source-role plans are not claimed to be retrieved donor text. Model output cannot become native execution.
+- R147 now preserves explicit executor selection against automatic performance reordering. An in-flight lock and durable host dispatch reservation prevent double queueing for the same run. A failed or interrupted ambiguous queue response stays held for reconciliation instead of retrying automatically; no new queue ownership.
+- Exact host ID must be among current advertised hosts. Existing R141 return proof, R146 history, R125 admission and CI-only deployment are retained.
+The new regression cases cover duplicate, concurrent, wrong-target and ambiguous-return host dispatch, and the native menu browser test checks full Hybrid surfaces. Candidate source only until exact-head CI and real paired host/cloud return are observed. No claim of full historical parity, production deployment or GPU acceptance.

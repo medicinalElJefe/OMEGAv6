@@ -14,6 +14,21 @@ let out=await dispatchRunR147(aiRuntime,aiRun.id,{prompt:'synthesize current sta
 
 const host={id:'device-r147',name:'OMEGA PC',online:true,revoked:false,lastSeen:Date.now(),capabilityRevision:'R132',capabilities:['INDEX','HASH_TREE','BUILD','TEST']},hyRuntime=new Runtime({},[host]),hyRun=await authorized(hyRuntime,'HYBRID','Hybrid Link');
 out=await dispatchRunR147(hyRuntime,hyRun.id,{confirmed:true,targetDeviceId:host.id,steps:[{id:'S01',op:'INDEX',label:'index',path:'.'}]}, {queueHybrid:async()=>({ok:true,status:200,job:{id:'job-r147',status:'QUEUED',inputFingerprint:'1'.repeat(64)}})});assert.equal(out.ok,true);assert.equal(out.run.state,'AVAILABLE');assert.equal(out.truthBoundary.includes('QUEUED is not INVOKED'),true);
+let duplicateCalls=0;
+const duplicate=await dispatchRunR147(hyRuntime,hyRun.id,{confirmed:true,targetDeviceId:host.id},{queueHybrid:async()=>{duplicateCalls++;return{ok:true,job:{id:'duplicate'}}}});
+assert.equal(duplicate.code,'R147_DISPATCH_ALREADY_BOUND_OR_RESERVED');assert.equal(duplicateCalls,0);
+const concurrentRuntime=new Runtime({},[host]),concurrentRun=await authorized(concurrentRuntime,'HYBRID','Hybrid Link');
+let release,entered;const gate=new Promise(r=>{release=r}),startedQueue=new Promise(r=>{entered=r});
+const first=dispatchRunR147(concurrentRuntime,concurrentRun.id,{confirmed:true,targetDeviceId:host.id,steps:[{id:'S01',op:'INDEX',path:'.'}]},{queueHybrid:async()=>{entered();await gate;return{ok:true,job:{id:'job-concurrent-r147'}}}});
+await startedQueue;const racing=await dispatchRunR147(concurrentRuntime,concurrentRun.id,{confirmed:true,targetDeviceId:host.id},{queueHybrid:async()=>{duplicateCalls++;return{ok:true,job:{id:'racing'}}}});
+assert.equal(racing.code,'R147_DISPATCH_IN_FLIGHT');release();assert.equal((await first).ok,true);assert.equal(duplicateCalls,0);
+const heldRuntime=new Runtime({},[host]),heldRun=await authorized(heldRuntime,'HYBRID','Hybrid Link');
+const invalidTarget=await dispatchRunR147(heldRuntime,heldRun.id,{confirmed:true,targetDeviceId:'other-host'},{queueHybrid:async()=>{duplicateCalls++;return{ok:true,job:{id:'wrong'}}}});
+assert.equal(invalidTarget.code,'R147_EXPLICIT_HOST_NOT_CURRENT');assert.equal(duplicateCalls,0);
+const uncertain=await dispatchRunR147(heldRuntime,heldRun.id,{confirmed:true,targetDeviceId:host.id},{queueHybrid:async()=>({ok:false,status:502,code:'AMBIGUOUS_QUEUE'})});
+assert.equal(uncertain.dispatchReservation,'HELD_FOR_RECONCILIATION_NO_AUTOMATIC_RETRY');
+const retry=await dispatchRunR147(heldRuntime,heldRun.id,{confirmed:true,targetDeviceId:host.id},{queueHybrid:async()=>{duplicateCalls++;return{ok:true,job:{id:'unsafe'}}}});
+assert.equal(retry.code,'R147_DISPATCH_ALREADY_BOUND_OR_RESERVED');assert.equal(duplicateCalls,0);
 let linked=await syncHybridClaimR147(hyRuntime,{id:'job-r147',inputFingerprint:'1'.repeat(64)});assert.equal(linked.state,'INVOKED');
 linked=await syncHybridReturnR147(hyRuntime,{id:'job-r147',status:'COMPLETE',returnPacket:{resultFingerprint:'2'.repeat(64),stepProofs:[]}},null);assert.equal(linked.state,'RETURNED');
 linked=await syncHybridReturnR147(hyRuntime,{id:'job-r147',status:'COMPLETE',returnPacket:{resultFingerprint:'2'.repeat(64),stepProofs:[]}},{state:'VERIFIED_EXECUTION_RETURN',fingerprint:{verified:true,digestMatch:true,semanticMatch:true},finalHeadSha256:'3'.repeat(64)});assert.equal(linked.state,'VERIFIED');

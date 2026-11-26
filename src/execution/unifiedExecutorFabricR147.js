@@ -50,6 +50,8 @@ const MODEL='@cf/google/gemma-4-26b-a4b-it';
 const BIND_PREFIX='execution:r147:binding:';
 const RESULT_PREFIX='execution:r147:result:';
 const ARTIFACT_PREFIX='execution:r147:artifact:';
+const HOST_RESERVATION_PREFIX='execution:r147:host-dispatch:';
+const dispatchLocks=new WeakMap();
 const txt=(v,n=4000)=>String(v??'').trim().slice(0,n);
 const sid=v=>{const s=txt(v,180);return /^[A-Za-z0-9._:-]+$/.test(s)?s:''};
 const stable=v=>{if(Array.isArray(v))return v.map(stable);if(v&&typeof v==='object'){const out={};for(const k of Object.keys(v).sort())out[k]=stable(v[k]);return out}return v};
@@ -112,8 +114,8 @@ export async function selectExecutorR147(runtime,run,input={}){
   else executorId=eligible[0]||null;
  }
  const temporalPerformance=await planTemporalPerformanceR185(runtime,{run,directory,eligible,defaultExecutorId:executorId,input}),recommended=temporalPerformance?.selection?.recommendedExecutorId;
- if(recommended&&eligible.includes(recommended)&&directory.executors[recommended]?.state==='AVAILABLE')executorId=recommended;
  const explicitSelection=Boolean(requested||(strategy&&strategy!=='AUTO'));
+ if(!explicitSelection&&recommended&&eligible.includes(recommended)&&directory.executors[recommended]?.state==='AVAILABLE')executorId=recommended;
  const reuse=explicitSelection?{hit:false,reason:'EXPLICIT_EXECUTOR_OR_STRATEGY_BYPASSES_CACHE'}:await lookupVerifiedReuseR194(runtime,{run,multiAxis:temporalPerformance?.multiAxis});
  if(reuse?.hit===true)executorId='CONTENT_CACHE';
  const planEligible=reuse?.hit===true?[...eligible,'CONTENT_CACHE']:eligible,state=executorId?directory.executors[executorId]?.state||'UNAVAILABLE':'UNAVAILABLE';
@@ -171,12 +173,29 @@ async function runSwarm(runtime,run,input,env){
 
 async function queueHybrid(runtime,run,input,callbacks){
  const directory=await executorDirectoryR147(runtime),hosts=directory.executors.HYBRID_HOST.devices||[];if(!hosts.length)return{ok:false,status:503,code:'R147_HYBRID_DEVICE_PROOF_REQUIRED'};run=await ensureAvailable(runtime,run,'HYBRID_HOST','At least one paired host has a current authenticated heartbeat');if(run.state!=='AVAILABLE')return{ok:false,status:409,code:'R147_RUN_NOT_AVAILABLE',run};if(input.confirmed!==true)return{ok:false,status:409,code:'R147_EXPLICIT_EXECUTION_CONFIRMATION_REQUIRED',run};if(typeof callbacks?.queueHybrid!=='function')return{ok:false,status:500,code:'R147_HYBRID_QUEUE_ADAPTER_MISSING'};
- const targetId=sid(input.targetDeviceId)||hosts[0].id,domain=executionDomain(run),defaultSteps=domain==='BUILD'?[{id:'S01',op:'INDEX',label:'Discover the approved project',path:txt(input.projectPath||'.',240)},{id:'S02',op:'HASH_TREE',label:'Fingerprint source before build',path:txt(input.projectPath||'.',240),maxResults:5000},{id:'S03',op:'BUILD',label:'Run declared project build',path:txt(input.projectPath||'.',240),profile:'AUTO_BUILD'},{id:'S04',op:'TEST',label:'Run declared project verification',path:txt(input.projectPath||'.',240),profile:'AUTO_BUILD'}]:[];
- const jobInput={schema:'OMEGA_R147_HYBRID_EXECUTION_JOB',action:domain==='BUILD'?'BUILD':'PLAN',profile:domain==='BUILD'?'AUTO_BUILD':txt(input.profile||'AUTO_BUILD',40),projectPath:txt(input.projectPath||'.',240),instructions:txt(input.instructions||run.intent,4000),allowedDomains:Array.isArray(input.allowedDomains)?input.allowedDomains:[],steps:Array.isArray(input.steps)&&input.steps.length?input.steps:defaultSteps,targetDeviceId:targetId,confirmed:true},queued=await callbacks.queueHybrid(jobInput);if(!queued?.ok||!queued?.job?.id)return{ok:false,status:queued?.status||502,code:queued?.code||'R147_HYBRID_QUEUE_REJECTED',body:queued};const bind=await bindArtifact(runtime,run.id,'HYBRID_HOST','HYBRID_JOB',queued.job.id,{targetDeviceId:targetId,inputFingerprint:queued.job.inputFingerprint||null});return{ok:true,status:202,run:await readRunR146(runtime,run.id),binding:bind,job:queued.job,truthBoundary:'QUEUED is not INVOKED. The durable run remains AVAILABLE until the authenticated PC agent actually claims the linked job.'};
+ const requestedTarget=input.targetDeviceId==null?'':sid(input.targetDeviceId);
+ if(input.targetDeviceId!=null&&(!requestedTarget||!hosts.some(h=>h.id===requestedTarget)))return{ok:false,status:409,code:'R147_EXPLICIT_HOST_NOT_CURRENT',run};
+ const targetId=requestedTarget||hosts[0].id,domain=executionDomain(run),defaultSteps=domain==='BUILD'?[{id:'S01',op:'INDEX',label:'Discover the approved project',path:txt(input.projectPath||'.',240)},{id:'S02',op:'HASH_TREE',label:'Fingerprint source before build',path:txt(input.projectPath||'.',240),maxResults:5000},{id:'S03',op:'BUILD',label:'Run declared project build',path:txt(input.projectPath||'.',240),profile:'AUTO_BUILD'},{id:'S04',op:'TEST',label:'Run declared project verification',path:txt(input.projectPath||'.',240),profile:'AUTO_BUILD'}]:[];
+ const jobInput={schema:'OMEGA_R147_HYBRID_EXECUTION_JOB',action:domain==='BUILD'?'BUILD':'PLAN',profile:domain==='BUILD'?'AUTO_BUILD':txt(input.profile||'AUTO_BUILD',40),projectPath:txt(input.projectPath||'.',240),instructions:txt(input.instructions||run.intent,4000),allowedDomains:Array.isArray(input.allowedDomains)?input.allowedDomains:[],steps:Array.isArray(input.steps)&&input.steps.length?input.steps:defaultSteps,targetDeviceId:targetId,confirmed:true};
+ // Persist a dispatch reservation before crossing the queue boundary. An interrupted
+ // or ambiguous return is held, never silently sent twice to a native host.
+ const reservationKey=HOST_RESERVATION_PREFIX+run.id;
+ if(await binding(runtime,run.id)||await storage(runtime).get(reservationKey))return{ok:false,status:409,code:'R147_HOST_DISPATCH_ALREADY_RESERVED',run};
+ await storagePut(runtime,reservationKey,{runId:run.id,targetDeviceId:targetId,requestSha256:await sha(jobInput),state:'PENDING_OR_UNCERTAIN',canonicalMutation:false});
+ const queued=await callbacks.queueHybrid(jobInput);
+ if(!queued?.ok||!queued?.job?.id)return{ok:false,status:queued?.status||502,code:queued?.code||'R147_HYBRID_QUEUE_REJECTED',body:queued,dispatchReservation:'HELD_FOR_RECONCILIATION_NO_AUTOMATIC_RETRY'};
+ const bind=await bindArtifact(runtime,run.id,'HYBRID_HOST','HYBRID_JOB',queued.job.id,{targetDeviceId:targetId,inputFingerprint:queued.job.inputFingerprint||null});return{ok:true,status:202,run:await readRunR146(runtime,run.id),binding:bind,job:queued.job,truthBoundary:'QUEUED is not INVOKED. The durable run remains AVAILABLE until the authenticated PC agent actually claims the linked job.'};
 }
 
 export async function dispatchRunR147(runtime,id,input={},callbacks={}){
- let run=await readRunR146(runtime,id);if(!run)return{ok:false,status:404,code:'R147_RUN_NOT_FOUND'};if(!['AUTHORIZED','AVAILABLE'].includes(run.state))return{ok:false,status:409,code:'R147_DISPATCH_REQUIRES_AUTHORIZED_OR_AVAILABLE',run};const plan=await selectExecutorR147(runtime,run,input);if(!plan.executorId)return{ok:false,status:409,code:'R147_NO_ELIGIBLE_EXECUTOR',plan};if(plan.state==='UNAVAILABLE'||plan.state==='DEVICE_PROOF_REQUIRED')return{ok:false,status:503,code:'R147_EXECUTOR_UNAVAILABLE',plan,run};
+ // Durable Objects serialize storage events, not arbitrary awaited provider calls.
+ // One in-flight dispatch per run closes the same-instance concurrent request seam.
+ let locks=dispatchLocks.get(runtime);if(!locks){locks=new Set();dispatchLocks.set(runtime,locks)}
+ if(locks.has(id))return{ok:false,status:409,code:'R147_DISPATCH_IN_FLIGHT'};
+ locks.add(id);try{return await dispatchOnceR147(runtime,id,input,callbacks)}finally{locks.delete(id)}
+}
+async function dispatchOnceR147(runtime,id,input={},callbacks={}){
+ let run=await readRunR146(runtime,id);if(!run)return{ok:false,status:404,code:'R147_RUN_NOT_FOUND'};if(!['AUTHORIZED','AVAILABLE'].includes(run.state))return{ok:false,status:409,code:'R147_DISPATCH_REQUIRES_AUTHORIZED_OR_AVAILABLE',run};if(await binding(runtime,run.id)||await storage(runtime).get(HOST_RESERVATION_PREFIX+run.id))return{ok:false,status:409,code:'R147_DISPATCH_ALREADY_BOUND_OR_RESERVED',run};const plan=await selectExecutorR147(runtime,run,input);if(!plan.executorId)return{ok:false,status:409,code:'R147_NO_ELIGIBLE_EXECUTOR',plan};if(plan.state==='UNAVAILABLE'||plan.state==='DEVICE_PROOF_REQUIRED')return{ok:false,status:503,code:'R147_EXECUTOR_UNAVAILABLE',plan,run};
  const started=Date.now();let out;
  if(plan.executorId==='WORKERS_AI')out=await runWorkersAI(runtime,run,input,runtime.env||{},plan.temporalPerformance?.multiAxis);
  else if(plan.executorId==='LOCAL_PROOF')out=await runLocalProof(runtime,run,input);

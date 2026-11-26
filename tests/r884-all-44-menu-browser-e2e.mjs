@@ -65,6 +65,10 @@ try{
  await page.waitForFunction(()=>document.querySelector('.o7-main')?.getAttribute('data-native-route')==='Hybrid Link',null,{timeout:15000});
  const hub=page.locator('[data-r884-local-hub="LOOPBACK_INTEGRATION_ONLY"]');
  await hub.waitFor({state:'visible',timeout:30000});
+ const fullHybrid=page.getByRole('button',{name:'Open full Hybrid Link workspace'});
+ if(await fullHybrid.count())await fullHybrid.click();
+ await page.locator('[data-r264-operational-surfaces="FULL"]').waitFor({state:'visible',timeout:30000});
+ await page.locator('[data-r209-lineage-review]').waitFor({state:'visible',timeout:30000});
  const state=await hub.locator('[data-r884-loopback-state]').getAttribute('data-r884-loopback-state');
  if(state!=='UNCONNECTED')throw Error('Local hub claimed connection without physical/loopback evidence');
  if(await hub.locator('#r884-token[type=password]').count()!==1)throw Error('R881 hub private token input missing');
