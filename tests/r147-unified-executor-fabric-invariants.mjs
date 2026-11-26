@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {createRunR146,transitionRunR146,readRunR146} from '../src/execution/durableOperationExecutionR146.js';
+import {createRunR146,transitionRunR146,readRunR146,authorizeOperatorRunR146} from '../src/execution/durableOperationExecutionR146.js';
 import {dispatchRunR147,executorDirectoryR147,manifestR147,pollRunR147,readResultR147,syncHybridClaimR147,syncHybridReturnR147,R147_LAWS} from '../src/execution/unifiedExecutorFabricR147.js';
+import {buildSaiInspectionDraft,verifySaiInspectionDraft,saiInspectionSteps} from '../src/execution/saiHostInspectionR209.js';
 const must=(v,m)=>assert.ok(v,'R147 '+m);
 class Storage{constructor(){this.m=new Map()}async get(k){return this.m.get(k)}async put(k,v){this.m.set(k,structuredClone(v))}}
 class Runtime{constructor(env={},devices=[]){this.state={storage:new Storage()};this.env=env;this.deviceRows=devices}async devices(){return this.deviceRows}}
@@ -40,6 +41,20 @@ const proposal={schema:'OMEGA_PACKET_v1',source_node:'omega-genesis',packet_id:'
 
 const proofRuntime=new Runtime(),target=await authorized(proofRuntime,'LOCAL','Traversal');await transitionRunR146(proofRuntime,target.id,{state:'AVAILABLE'});await transitionRunR146(proofRuntime,target.id,{state:'INVOKED'});await transitionRunR146(proofRuntime,target.id,{state:'RETURNED',evidence:{proofRef:'test',resultFingerprint:'6'.repeat(64)}});await transitionRunR146(proofRuntime,target.id,{state:'VERIFIED',evidence:{proofRef:'test',resultFingerprint:'6'.repeat(64)}});const proofRun=await authorized(proofRuntime,'PROOF','Validation');out=await dispatchRunR147(proofRuntime,proofRun.id,{strategy:'LOCAL',targetRunId:target.id});assert.equal(out.ok,true);assert.equal(out.run.state,'VERIFIED');assert.equal(out.result.payload.replay.ok,true);
 
+const typedDraft=await buildSaiInspectionDraft('Do not execute a shell, patch, repair, train or click; inspect the source project.','.');
+assert.deepEqual(typedDraft.operations.map(x=>x.op),['INDEX','HASH_TREE']);assert.equal(await verifySaiInspectionDraft(typedDraft),true);
+assert.equal(await verifySaiInspectionDraft({...typedDraft,operations:[{step:1,op:'APPLY_PATCH',path:'.'}]}),false);
+await assert.rejects(()=>buildSaiInspectionDraft('inspect','../unsafe'));
+await assert.rejects(()=>saiInspectionSteps(typedDraft,751));
+const typedSteps=await saiInspectionSteps(typedDraft,750),typedRuntime=new Runtime({},[host]),ancestry='a'.repeat(64);
+const typedCreated=await createRunR146(typedRuntime,{intent:'SAI typed inspection',contract:contract('HYBRID','Hybrid Link'),metadata:{saiHostInspection:{lineageId:'r209_'+ancestry.slice(0,32),ancestrySha256:ancestry,draft:typedDraft,targetDeviceId:host.id,maxResults:750,steps:typedSteps}}});
+const forgedTransition=await authorizeOperatorRunR146(typedRuntime,typedCreated.run.id,{state:'VERIFIED',evidence:{proofRef:'forged',resultFingerprint:'f'.repeat(64)}});assert.equal(forgedTransition.code,'R146_EXECUTOR_OWNED_TRANSITION_HELD');
+assert.equal((await authorizeOperatorRunR146(typedRuntime,typedCreated.run.id,{state:'AUTHORIZED'})).ok,true);
+const typedInput={executorId:'HYBRID_HOST',targetDeviceId:host.id,projectPath:'.',confirmed:true,steps:typedSteps};
+const altered=await dispatchRunR147(typedRuntime,typedCreated.run.id,{...typedInput,steps:[{id:'S01',op:'APPLY_PATCH',path:'.'}]},{queueHybrid:async()=>{throw Error('must never queue altered draft')}});
+assert.equal(altered.code,'R209_SAI_INSPECTION_EXACT_DISPATCH_HELD');
+const typedReturn=await dispatchRunR147(typedRuntime,typedCreated.run.id,typedInput,{queueHybrid:async job=>{assert.deepEqual(job.steps,typedSteps);assert.equal(job.targetDeviceId,host.id);return{ok:true,job:{id:'sai-r209-typed-host',inputFingerprint:'8'.repeat(64)}}}});
+assert.equal(typedReturn.ok,true);assert.equal(typedReturn.run.state,'AVAILABLE');assert.equal((await readResultR147(typedRuntime,typedCreated.run.id)).hostDispatchReservation.state,'BOUND');
 const pluginRuntime=new Runtime(),pluginRun=await authorized(pluginRuntime,'PLUGIN','Plugins');out=await dispatchRunR147(pluginRuntime,pluginRun.id,{});assert.equal(out.ok,false);assert.equal(out.code,'R147_PLUGIN_CONCRETE_ADAPTER_REQUIRED');assert.equal((await readRunR146(pluginRuntime,pluginRun.id)).state,'AUTHORIZED');
 
 for(const law of ['ONE_DURABLE_RUN_ONE_EXECUTOR_BINDING_AT_A_TIME','QUEUEING_IS_NOT_INVOCATION','HYBRID_AGENT_CLAIM_ADVANCES_AVAILABLE_TO_INVOKED','HYBRID_RETURN_REQUIRES_R141_CLOSURE_BEFORE_VERIFIED','SWARM_EXECUTION_QUORUM_IS_NOT_TRUTH_CONSENSUS','PLUGIN_REGISTRY_PRESENCE_IS_NOT_PROVIDER_EXECUTION','R125_REMAINS_THE_ONLY_CANONSTATE_ADMISSION_AUTHORITY'])must(R147_LAWS.includes(law),'law missing '+law);

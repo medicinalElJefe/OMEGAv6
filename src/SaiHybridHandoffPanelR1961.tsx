@@ -1,6 +1,7 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {ArrowRight,CheckCircle2,GitBranch,Route,ShieldCheck,TriangleAlert} from 'lucide-react';
 import {api} from './platformAdapter';
+import {SAI_INSPECTION_KIND,verifySaiInspectionDraft} from './execution/saiHostInspectionR209.js';
 import {appendSaiLedger,compileSaiImprovementProposal} from './saiB059Runtime';
 import {compileSaiHybridHandoffR1961,verifyHybridDraftForSaiR1961} from './saiHybridHandoffR1961';
 import {compileSaiHybridLineageR209,publishPendingLineageR209} from './missionLineageR209';
@@ -17,10 +18,11 @@ export default function SaiHybridHandoffPanelR1961({record,modeSummary}:{record:
  const prepare=async()=>{
   if(busy)return;const request=++generation.current,proposalId=handoff.proposalId;setDraft(null);setBusy('prepare');setError('');setValidation(null);setLineage(null);
   try{
-   const r=await api.post<any>('/api/hybrid/plan',{prompt:handoff.prompt,root:handoff.root});
+   const r=await api.post<any>('/api/hybrid/plan',{prompt:handoff.prompt,root:handoff.root,intentKind:SAI_INSPECTION_KIND});
    if(request!==generation.current||proposalId!==activeProposal.current)return;
    const next=r.data?.draft||null;
    const held=verifyHybridDraftForSaiR1961(handoff,next);
+   if(!await verifySaiInspectionDraft(next))throw new Error('Cloud did not return the exact typed SAI inspection draft.');
    if(!held.passed)throw new Error(`Hybrid draft violated R196.1 hold boundary: ${held.errors.join(', ')}`);
    setDraft(next);
    await appendSaiLedger('R196_1_HYBRID_DRAFT_PREPARED',{proposalId:handoff.proposalId,draftFingerprint:next?.fingerprint??null,state:next?.state,confirmed:next?.confirmed,deviceId:next?.deviceId,operationCount:next?.operations?.length||0,queueMutation:false,executionClaimed:false});
@@ -42,7 +44,7 @@ export default function SaiHybridHandoffPanelR1961({record,modeSummary}:{record:
   }catch(e){if(request===generation.current)setError(e instanceof Error?e.message:String(e))}finally{if(request===generation.current)setBusy('')}
  };
  return <section className='sai-r1961' data-sai-hybrid-handoff='R196.1' data-r209-lineage={lineage?.lineageId||'NONE'} data-queue-mutation='false'>
-  <header><div><span>R196.1 → R209 · SAI → HYBRID GOVERNED HANDOFF</span><h3>Proposal becomes a typed draft—not a hidden action.</h3><p>B059 diagnoses and proposes. R196.1 translates that exact proposal into the existing V90 Hybrid planning contract. R209 binds the validated held draft to a SHA-256 ancestry envelope for explicit operator import. Neither layer confirms, binds a device, queues, dispatches or executes native work.</p></div><ShieldCheck/></header>
+  <header><div><span>R196.1 → R209 · SAI → HYBRID GOVERNED HANDOFF</span><h3>Proposal becomes a typed source inspection—not a hidden action.</h3><p>B059 diagnoses and proposes. R196.1 translates that exact proposal into the existing V90 Hybrid planning contract. R209 binds the validated held draft to a SHA-256 ancestry envelope for explicit operator import. Neither layer confirms, binds a device, queues, dispatches or executes native work.</p></div><ShieldCheck/></header>
   <div className='sai-r1961-chain'>{handoff.authorityChain.map((x,i)=><span key={x} className={i<4?'prepared':i===4?'operator':''}><code>{String(i+1).padStart(2,'0')}</code><b>{x.replaceAll('_',' ')}</b></span>)}</div>
   <div className='sai-r1961-body'><article><span>CURRENT SAI PROPOSAL</span><b>{proposal.proposalId}</b><strong>{proposal.priority} · {proposal.decision}</strong><p>{proposal.observations[0]}</p><small>{proposal.targets.length} bounded target{proposal.targets.length===1?'':'s'} · state {proposal.stateId} · address {proposal.address}</small></article><article><span>HANDOFF LAW</span><b>{handoff.expectedDraftState.replaceAll('_',' ')}</b><strong>CONFIRMATION REQUIRED</strong><p>Device binding, queue mutation, native execution, deployment and Canon admission are forbidden at this stage.</p><small>Canon admission authority · {handoff.canonicalAdmissionAuthority}</small></article></div>
   <div className='sai-r1961-actions'><button className='primary' onClick={()=>void prepare()} disabled={!!busy}><Route/>{busy==='prepare'?'Preparing held draft…':draft?'Rebuild held draft':'Prepare governed Hybrid draft'}</button><ArrowRight/><button onClick={()=>void validate()} disabled={!draft||!!busy}><GitBranch/>{busy==='validate'?'Validating…':'Validate + bind R209 lineage'}</button>{proof&&<div className={proof.passed?'pass':'hold'}>{proof.passed?<CheckCircle2/>:<TriangleAlert/>}<span><b>{proof.passed?'BOUNDARY PASS':'BOUNDARY HOLD'}</b><small>{proof.draftState||'NO DRAFT'} · {proof.operationCount} ops · validation {proof.validationPassed?'PASS':'pending'}</small></span></div>}</div>

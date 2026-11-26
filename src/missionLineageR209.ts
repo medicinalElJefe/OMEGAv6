@@ -1,6 +1,7 @@
 export const R209_REVISION='R209';
 export const R209_SCHEMA='OMEGA_END_TO_END_MISSION_LINEAGE_R209';
 export const R209_EVENT='omega-r209-lineage-ready';
+export const R209_ACCEPTED_EVENT='omega-r209-lineage-imported';
 export const R209_STORAGE_KEY='omega.r209.pendingLineage';
 export const R209_ACCEPTED_STORAGE_KEY='omega.r209.acceptedLineage';
 export const R209_BOUNDARY='R209 correlates existing evidence, proposal, held-plan, authorization, executor, return-proof, durable-history and residual identities. It creates no queue, dispatch, device, persistence-owner, scientific-truth or CanonState authority.';
@@ -34,6 +35,7 @@ export type R209LineageEnvelope={
  boundary:typeof R209_BOUNDARY;
  nodes:R209Node[];
  ancestrySha256:string;
+ heldDraftSha256:string;
  heldDraft:any;
 };
 export type R209AcceptedImport={schema:'OMEGA_R209_OPERATOR_IMPORT_RECEIPT';revision:'R209';lineageId:string;proposalId:string;draftFingerprint:string;state:'OPERATOR_IMPORTED_HELD_DRAFT';operatorConfirmationStillRequired:true;deviceBindingRequired:true;queueMutation:false;dispatchMutation:false;executionClaimed:false;canonicalMutation:false;canonicalAdmissionAuthority:'R125';acceptedAt:string};
@@ -66,9 +68,10 @@ export async function compileSaiHybridLineageR209(input:{proposalId:string;state
   {kind:'HELD_PLAN',id:draftNodeId,authority:'R196_1_TO_R8_HYBRID_DRAFT',parentIds:[proposalNodeId],independence:'DERIVED',canonicalMutation:false},
   {kind:'PLAN_VALIDATION',id:validationNodeId,authority:'R8_HYBRID_VALIDATION',parentIds:[draftNodeId],independence:'PROOF',canonicalMutation:false}
  ];
- const ancestryBody={proposalId,stateId:Number(input.stateId),address:Number(input.address),draftFingerprint,draftState:'DRAFT_ONLY_NOT_QUEUED',validationState:'VALIDATED_HELD',nodes};
+ const heldDraftSha256=await sha256(input.draft);
+ const ancestryBody={proposalId,stateId:Number(input.stateId),address:Number(input.address),draftFingerprint,heldDraftSha256,draftState:'DRAFT_ONLY_NOT_QUEUED',validationState:'VALIDATED_HELD',nodes};
  const ancestrySha256=await sha256(ancestryBody),lineageId=`r209_${ancestrySha256.slice(0,32)}`;
- return{schema:R209_SCHEMA,revision:R209_REVISION,lineageId,proposalId,stateId:Number(input.stateId),address:Number(input.address),draftFingerprint,draftState:'DRAFT_ONLY_NOT_QUEUED',validationState:'VALIDATED_HELD',operatorImportRequired:true,operatorAccepted:false,deviceId:null,queueMutation:false,dispatchMutation:false,executionClaimed:false,canonicalMutation:false,canonicalAdmissionAuthority:'R125',executionHistoryAuthority:'R146',executorAuthority:'R147',hybridReturnProofAuthority:'R141',storageAuthority:'BROWSER_CORRELATION_ONLY',independenceLaw:R209_INDEPENDENCE_LAW,boundary:R209_BOUNDARY,nodes,ancestrySha256,heldDraft:stable(input.draft)};
+ return{schema:R209_SCHEMA,revision:R209_REVISION,lineageId,proposalId,stateId:Number(input.stateId),address:Number(input.address),draftFingerprint,draftState:'DRAFT_ONLY_NOT_QUEUED',validationState:'VALIDATED_HELD',operatorImportRequired:true,operatorAccepted:false,deviceId:null,queueMutation:false,dispatchMutation:false,executionClaimed:false,canonicalMutation:false,canonicalAdmissionAuthority:'R125',executionHistoryAuthority:'R146',executorAuthority:'R147',hybridReturnProofAuthority:'R141',storageAuthority:'BROWSER_CORRELATION_ONLY',independenceLaw:R209_INDEPENDENCE_LAW,boundary:R209_BOUNDARY,nodes,ancestrySha256,heldDraftSha256,heldDraft:stable(input.draft)};
 }
 
 export function readPendingLineageR209():R209LineageEnvelope|null{try{const raw=localStorage.getItem(R209_STORAGE_KEY);if(!raw)return null;const value=JSON.parse(raw);return value?.schema===R209_SCHEMA&&value?.revision===R209_REVISION?value:null}catch{return null}}
@@ -80,11 +83,20 @@ export function publishPendingLineageR209(lineage:R209LineageEnvelope){
 }
 export function clearPendingLineageR209(){try{localStorage.removeItem(R209_STORAGE_KEY)}catch{}}
 
-export function acceptPendingLineageR209(lineage:R209LineageEnvelope|null){
+export async function verifyPendingLineageR209(lineage:R209LineageEnvelope|null){
+ try{
+  if(!lineage||lineage.schema!==R209_SCHEMA||lineage.revision!==R209_REVISION||!Array.isArray(lineage.nodes))return false;
+  const expected=await compileSaiHybridLineageR209({proposalId:lineage.proposalId,stateId:lineage.stateId,address:lineage.address,draft:lineage.heldDraft,validation:{valid:true,errors:[]},evidenceRefs:lineage.nodes.filter(x=>x.kind==='SOURCE_EVIDENCE').map(x=>x.id)});
+  return canonical(expected)===canonical(lineage);
+ }catch{return false}
+}
+export async function acceptPendingLineageR209(lineage:R209LineageEnvelope|null){
  if(!lineage||lineage.schema!==R209_SCHEMA||lineage.revision!==R209_REVISION)return{ok:false as const,code:'R209_LINEAGE_MISSING'};
  const held=verifyHeldDraftR209(lineage.heldDraft,{valid:lineage.validationState==='VALIDATED_HELD'});if(!held.ok)return{ok:false as const,code:'R209_LINEAGE_DRAFT_INVALID',errors:held.errors};
  if(lineage.operatorAccepted!==false||lineage.deviceId!==null||lineage.queueMutation!==false||lineage.dispatchMutation!==false||lineage.executionClaimed!==false)return{ok:false as const,code:'R209_LINEAGE_AUTHORITY_VIOLATION'};
+ if(!await verifyPendingLineageR209(lineage))return{ok:false as const,code:'R209_EXACT_LINEAGE_HASH_REQUIRED'};
+ const current=readPendingLineageR209();if(!current||canonical(current)!==canonical(lineage))return{ok:false as const,code:'R209_LINEAGE_CHANGED'};
  const acceptance:R209AcceptedImport={schema:'OMEGA_R209_OPERATOR_IMPORT_RECEIPT',revision:R209_REVISION,lineageId:lineage.lineageId,proposalId:lineage.proposalId,draftFingerprint:lineage.draftFingerprint,state:'OPERATOR_IMPORTED_HELD_DRAFT',operatorConfirmationStillRequired:true,deviceBindingRequired:true,queueMutation:false,dispatchMutation:false,executionClaimed:false,canonicalMutation:false,canonicalAdmissionAuthority:'R125',acceptedAt:new Date().toISOString()};
- try{localStorage.setItem(R209_ACCEPTED_STORAGE_KEY,JSON.stringify(acceptance))}catch{}
+ try{localStorage.setItem(R209_ACCEPTED_STORAGE_KEY,JSON.stringify(acceptance));window.dispatchEvent(new CustomEvent(R209_ACCEPTED_EVENT,{detail:{lineageId:acceptance.lineageId}}))}catch{return{ok:false as const,code:'R209_IMPORT_PERSISTENCE_HELD'}}
  return{ok:true as const,lineageId:lineage.lineageId,proposalId:lineage.proposalId,draftFingerprint:lineage.draftFingerprint,draft:stable(lineage.heldDraft),acceptance};
 }

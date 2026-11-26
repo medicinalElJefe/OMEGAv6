@@ -7,7 +7,7 @@ export default function MissionLineageReviewR209(){
  const[accepted,setAccepted]=useState<R209AcceptedImport|null>(()=>readAcceptedLineageR209());
  const[message,setMessage]=useState('');
  useEffect(()=>{const sync=()=>setPending(readPendingLineageR209());sync();window.addEventListener(R209_EVENT,sync);return()=>window.removeEventListener(R209_EVENT,sync)},[]);
- const importHeld=()=>{const result=acceptPendingLineageR209(pending);if(!result.ok){setMessage(`R209 import held · ${result.code}`);return}setAccepted(result.acceptance);setMessage(`Imported ${result.lineageId} for review only. Confirmation, device binding, queueing and execution remain separate existing Hybrid authorities.`)};
+ const importHeld=async()=>{const result=await acceptPendingLineageR209(pending);if(!result.ok){setMessage(`R209 import held · ${result.code}`);return}setAccepted(result.acceptance);setMessage(`Imported ${result.lineageId} for review only. Confirmation, device binding, queueing and execution remain separate existing Hybrid authorities.`)};
  if(!pending)return <section className='hybrid-r32-pair' data-r209-lineage-review='empty'><header><div><GitBranch/><span><b>R209 · END-TO-END MISSION LINEAGE</b><small>No validated SAI→Hybrid lineage is pending. Prepare and validate a governed draft in Intelligence Fabric first.</small></span></div></header></section>;
  const imported=accepted?.lineageId===pending.lineageId;
  return <section className='hybrid-r32-pair' data-r209-lineage-review={imported?'imported-held':'pending-held'} data-queue-mutation='false' data-dispatch-mutation='false'>

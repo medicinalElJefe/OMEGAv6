@@ -4,6 +4,7 @@ import {operationContractForRouteR143} from './authoritativeOperationChainR143';
 import {createAuthorizedOperationRunR146,replayDurableOperationRunR146} from './durableExecutionClientR146';
 import {dispatchExecutionRunR147,executionResultR147,executorDirectoryR147} from './executorFabricClientR147';
 import {compileSaiRetrievalPlan,compileSaiImprovementProposal} from './saiB059Runtime';
+import {inspectionSHA} from './execution/saiHostInspectionR209.js';
 
 const HEX=/^[a-f0-9]{64}$/;
 const RUN=/^run_[a-f0-9]{32}$/;
@@ -41,6 +42,7 @@ export default function SaiCloudExecution({record,query,onNavigate}:{record:any;
    if(v?.runId!==id||v?.state!=='VERIFIED'||stored?.runId!==id||stored?.executorId!=='WORKERS_AI'||!HEX.test(stored?.resultFingerprint||'')||stored?.canonicalMutation!==false)throw Error('Persisted model return did not match SAI run.');
    const terminal=run.events?.at(-1);
    if(terminal?.evidence?.resultFingerprint!==stored.resultFingerprint)throw Error('Model result fingerprint differs from durable verification event.');
+   const {resultFingerprint,...body}=stored;if(await inspectionSHA(body)!==resultFingerprint)throw Error('Persisted model result content hash mismatch.');
    setResult(stored);setMessage('Persisted model return and R146 replay agree. This is not factual or Canon proof.');
   }else setMessage('Observed durable state: '+run.state+'. No new dispatch performed.');
  });
