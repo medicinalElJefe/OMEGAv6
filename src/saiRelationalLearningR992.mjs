@@ -279,3 +279,57 @@ function orderedCheckpointJSONR997(value){
  const normalize=v=>Array.isArray(v)?v.map(normalize):v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().map(k=>[k,normalize(v[k])])):v;
  return JSON.stringify(normalize(value));
 }
+
+ // R998: locally trained specialists over all 144 projected corpus regions.
+ // This is a bank of shared-architecture regional regressors, not 20,736
+ // independently trained foundation models or a learned inter-agent graph.
+export const R998_BANK='OMEGA_SAI_PROJECTED_REGIONAL_BANK_R998';
+export const R998_FEATURES=Object.freeze(['continuity','plasticity','contradiction','burden','evidence','geometry','rsc','motion']);
+export const R998_EPOCHS=24;
+export function projectedRegionR998(read,region){
+ if(typeof read!=='function'||!Number.isSafeInteger(region)||region<0||region>=144)throw RangeError('Invalid projected region');
+ const rows=Array.from({length:144},(_,lane)=>{
+  const address=region*144+lane,record=read(address);
+  if(!record||record.address!==address||record.stateId!==address+1||!record.metrics||!record.math)throw Error('Projected source address mismatch');
+  return {address,features:R998_FEATURES.map(k=>k==='motion'?record.math.normalizedMotionRelativity:record.metrics[k]),target:record.metrics.scar};
+ });
+ return validateDatasetR995({schema:'OMEGA_SAI_USER_DATASET_R995',source:'LOCAL_EMBEDDED_PROJECTED_SCAR_REGION_'+region,rows});
+}
+export function trainProjectedRegionR998(dataset,region){
+ if(!Number.isSafeInteger(region)||region<0||region>=144)throw RangeError('Invalid region');
+ const data=validateDatasetR995(dataset);
+ if(data.source!=='LOCAL_EMBEDDED_PROJECTED_SCAR_REGION_'+region||data.rows.length!==144||data.rows.some((x,i)=>x.address!==region*144+i))throw Error('Regional dataset identity mismatch');
+ const start=startUserTrainingR995(data,{authorized:true,seed:37,targetEpochs:R998_EPOCHS,learningRate:.08});
+ const session=advanceUserTrainingR995(start,R998_EPOCHS),evaluation=evaluateUserTrainingR995(session);
+ return Object.freeze({region,weights:Object.freeze(session.bestWeights.slice()),bestEpoch:session.bestEpoch,partitions:Object.freeze(Object.fromEntries(Object.entries(evaluation.partitions).map(([kind,row])=>[kind,Object.freeze({...row})]))),predictions:Object.freeze(evaluation.predictions.map(row=>Object.freeze({...row})))});
+}
+export function predictRegionalR998(dataset,model,address){
+ if(!validAddress(address)||Math.floor(address/144)!==model?.region)throw Error('Model region does not cover address');
+ validateWeights(model.weights);
+ const row=dataset?.rows?.[address%144];
+ if(row?.address!==address||dataset.source!=='LOCAL_EMBEDDED_PROJECTED_SCAR_REGION_'+model.region)throw Error('Regional inference source mismatch');
+ if(!Array.isArray(row.features)||row.features.length!==WIDTH||!Array.from(row.features).every(x=>typeof x==='number'&&Number.isFinite(x)&&x>=-1&&x<=1))throw Error('Invalid projected inference features');
+ const prediction=forward(model.weights,row.features).output,reference=referencePredictionR994(model.weights,row.features);
+ if(!Number.isFinite(prediction)||Math.abs(prediction-reference)>1e-12)throw Error('Regional reference mismatch');
+ return {address,region:model.region,prediction,target:row.target,residual:prediction-row.target,source:dataset.source,canonicalMutation:false};
+}
+export function summarizeBankR998(models){
+ if(!Array.isArray(models)||models.length>144)throw Error('Invalid bank census');
+ const seen=new Set(),acc=Object.fromEntries(['train','validation','test'].map(k=>[k,{count:0,squared:0,initialSquared:0}]));
+ for(const model of models){
+  if(!model||!Number.isSafeInteger(model.region)||model.region<0||model.region>=144||seen.has(model.region))throw Error('Duplicate or invalid regional model');
+  seen.add(model.region);validateWeights(model.weights);
+  for(const [kind,count] of [['train',86],['validation',28],['test',30]]){
+   const row=model.partitions?.[kind];
+   if(row?.count!==count||!Number.isFinite(row.mse)||row.mse<0||!Number.isFinite(row.initialMse)||row.initialMse<0)throw Error('Regional evaluation census mismatch');
+   acc[kind].count+=count;acc[kind].squared+=row.mse*count;acc[kind].initialSquared+=row.initialMse*count;
+  }
+ }
+ return {schema:R998_BANK,regions:seen.size,addresses:seen.size*144,parameterCount:seen.size*PARAMS,complete:seen.size===144,partitions:Object.fromEntries(Object.entries(acc).map(([k,a])=>[k,{count:a.count,mse:a.count?a.squared/a.count:null,initialMse:a.count?a.initialSquared/a.count:null}])),source:'LOCAL_EMBEDDED_PROJECTED_SOURCE',empirical:false,canonicalMutation:false};
+}
+export function verifyRegionalModelR998(dataset,model){
+ const expected=trainProjectedRegionR998(dataset,model?.region);
+ const compact=x=>({region:x.region,weights:x.weights,bestEpoch:x.bestEpoch,partitions:x.partitions});
+ if(orderedCheckpointJSONR997(compact(expected))!==orderedCheckpointJSONR997(compact(model)))throw Error('Regional model replay mismatch');
+ return expected;
+}

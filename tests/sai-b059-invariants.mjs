@@ -126,3 +126,17 @@ const corrupt995=JSON.parse(JSON.stringify(partial995));corrupt995.currentWeight
 assert.throws(()=>parseDatasetR995(csv995+'\n'+csv995.split('\n')[1],'fixture'),/duplicate/);
 assert.ok(learningUi993.includes('<SaiUserTrainingR995/>'));
 console.log('R995 PASS: local supervision, address-disjoint partitions, exact replay and refusals.');
+
+ // R998 complete 144-region training bank; synthetic fixture exercises the
+ // identical projected-source feature adapter without claiming raw donors.
+const {projectedRegionR998,trainProjectedRegionR998,summarizeBankR998,predictRegionalR998,verifyRegionalModelR998}=await import('../src/saiRelationalLearningR992.mjs');
+const read998=address=>{const x=exampleR992(address),f=x.features;return {address,stateId:address+1,metrics:{continuity:f[0],plasticity:f[1],contradiction:f[2],burden:f[3],evidence:f[4],geometry:f[5],rsc:f[6],scar:x.target},math:{normalizedMotionRelativity:f[7]}}};
+const models998=[];
+for(let region=0;region<144;region++){const dataset=projectedRegionR998(read998,region),model=trainProjectedRegionR998(dataset,region);models998.push(model);for(const row of model.predictions){const inference=predictRegionalR998(dataset,model,row.address);assert.equal(inference.prediction,row.prediction);assert.equal(inference.residual,row.residual)}}
+const summary998=summarizeBankR998(models998);assert.equal(summary998.addresses,20736);assert.equal(summary998.parameterCount,17424);assert.equal(summary998.complete,true);
+assert.deepEqual(Object.values(summary998.partitions).map(x=>x.count),[12384,4032,4320]);
+assert.deepEqual(verifyRegionalModelR998(projectedRegionR998(read998,143),JSON.parse(JSON.stringify(models998[143]))),models998[143]);
+assert.throws(()=>summarizeBankR998([models998[0],models998[0]]),/Duplicate/);
+assert.throws(()=>predictRegionalR998(projectedRegionR998(read998,0),models998[0],144),/region/);
+assert.ok(fabric.includes('<SaiRegionalBankR998 address={address}/>'));
+console.log('R998 PASS: 144 models, exhaustive 20736 addressed fixture inference and 17424 parameters.');

@@ -14,3 +14,6 @@ The Vite build emits 144 integrity-bound projected source regions from the exist
 
 ### R997 cloud-to-offline model continuity
 Verified regional learning returns now export their full source packet, R147 result, and R146 replay-bound run identity. The existing local SAI training workspace accepts this portable transfer, independently replays the optimizer and evaluation, and preserves the original evidence envelope on save/export. Offline import verifies consistency, not authenticated origin. The server prompt is reconstructed and compared semantically against its SHA-bound source packet; old JSON property ordering is supported.
+
+### R998 whole-field local learning
+SAI Lab can train one source-derived scar regressor for each of the 144 regions using the embedded corpus, without a cloud request. The original R995 optimizer and evaluation are retained. Explicitly authorized training yields between regions; compact checkpoint entries retain source digests and the selected weights. Restore verifies each region by retraining against the current embedded source. This is a regional model bank, not a learned multi-agent communication graph or raw donor model.
