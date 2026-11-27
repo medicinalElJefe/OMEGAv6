@@ -183,3 +183,21 @@ const identity1001=auditCorrelationR1001(fieldReceiptR1000(field999,binds1000,{w
 assert.deepEqual(identity1001.full.before,identity1001.full.after);
 assert.throws(()=>auditCorrelationR1001(tamper1000,read998),/replay mismatch/);
 console.log('R1001 PASS: full and partitioned correlation evaluation, identity and tamper refusal.');
+
+const {selectCorrelationR1002,verifySelectionR1002}=await import('../src/saiRelationalLearningR992.mjs');
+const selected1002=selectCorrelationR1002(field999,binds1000,read998);
+assert.equal(selected1002.candidates.length,13);
+assert.equal(selected1002.selectionCount,4032);
+assert.equal(selected1002.selected.mse,Math.min(...selected1002.candidates.map(c=>c.mse)));
+assert.ok(selected1002.selected.mse<=selected1002.candidates[0].mse);
+assert.equal(selected1002.audit.partitions.test.before.count,4320);
+assert.ok(Math.abs(selected1002.selected.mse-selected1002.audit.partitions.validation.after.mse)<1e-12);
+const testAddresses1002=new Set(Array.from({length:144},(_,r)=>splitDatasetR995(projectedRegionR998(read998,r),37).test.map(x=>x.address)).flat());
+const alteredRead1002=a=>{const row=read998(a);return testAddresses1002.has(a)?{...row,metrics:{...row.metrics,scar:1-row.metrics.scar}}:row};
+const altered1002=selectCorrelationR1002(field999,binds1000,alteredRead1002);
+assert.deepEqual(altered1002.selected,selected1002.selected);
+assert.deepEqual(altered1002.candidates,selected1002.candidates);
+assert.deepEqual(verifySelectionR1002(JSON.parse(JSON.stringify(selected1002)),field999,binds1000,read998),selected1002);
+const forged1002=JSON.parse(JSON.stringify(selected1002));forged1002.selected.mse+=1;
+assert.throws(()=>verifySelectionR1002(forged1002,field999,binds1000,read998),/replay mismatch/);
+console.log('R1002 PASS: validation-only bounded selection, held-out isolation and replay.');

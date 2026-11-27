@@ -2,7 +2,7 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {corpusState} from './corpusRuntime';
 import {inspectionSHA} from './execution/saiHostInspectionR209.js';
-import {projectedRegionR998,trainProjectedRegionR998,summarizeBankR998,predictRegionalR998,verifyRegionalModelR998,R998_BANK,R998_FEATURES,correlateFieldR999,fieldReceiptR1000,verifyFieldReceiptR1000,auditCorrelationR1001} from './saiRelationalLearningR992.mjs';
+import {projectedRegionR998,trainProjectedRegionR998,summarizeBankR998,predictRegionalR998,verifyRegionalModelR998,R998_BANK,R998_FEATURES,correlateFieldR999,fieldReceiptR1000,verifyFieldReceiptR1000,auditCorrelationR1001,selectCorrelationR1002,verifySelectionR1002} from './saiRelationalLearningR992.mjs';
 type Model=ReturnType<typeof trainProjectedRegionR998>;
 type Row={region:number;weights:readonly number[];bestEpoch:number;partitions:Model['partitions'];sourceSha256:string};
 const KEY='omega.sai.r998.regional-bank',LIMIT=2097152;
@@ -15,6 +15,8 @@ export default function SaiRegionalBankR998({address}:{address:number}){
  useEffect(()=>setReceipt(null),[models]);
  const [audit,setAudit]=useState<ReturnType<typeof auditCorrelationR1001>|null>(null);
  useEffect(()=>setAudit(null),[receipt]);
+ const [selection,setSelection]=useState<ReturnType<typeof selectCorrelationR1002>|null>(null);
+ useEffect(()=>setSelection(null),[models]);
  const lock=useRef(false),alive=useRef(true),pause=useRef(false);
  useEffect(()=>{alive.current=true;return()=>{alive.current=false;pause.current=true}},[]);
  useEffect(()=>setPrediction(null),[address,models]);
@@ -65,13 +67,30 @@ export default function SaiRegionalBankR998({address}:{address:number}){
  const correlate=()=>void work(async()=>{
   const inputs=await fieldInputs();if(!inputs)return;
   const next=fieldReceiptR1000(inputs.values,inputs.bindings,{steps:4});
-  setReceipt(next);setCorrelation(next.result);setMessage('Source/model-bound prediction exchange completed; CanonState unchanged.');
+  setSelection(null);setReceipt(next);setCorrelation(next.result);setMessage('Source/model-bound prediction exchange completed; CanonState unchanged.');
  });
  const auditField=()=>void work(async()=>{
   if(!receipt)throw Error('No field receipt');
   const inputs=await fieldInputs();if(!inputs)return;
   const verified=verifyFieldReceiptR1000(receipt,inputs.values,inputs.bindings);
   setAudit(auditCorrelationR1001(verified,corpusState));setMessage('Compared original and exchanged predictions against disjoint projected source partitions.');
+ });
+ const optimizeField=()=>void work(async()=>{
+  const inputs=await fieldInputs();if(!inputs)return;
+  const next=selectCorrelationR1002(inputs.values,inputs.bindings,corpusState);
+  setSelection(next);setReceipt(next.field);setCorrelation(next.field.result);
+  setMessage('Validation-only exchange selection complete; held-out metrics are reported separately.');
+ });
+ const exportSelection=()=>void work(async()=>{
+  if(!selection)throw Error('No selection receipt');
+  const text=JSON.stringify(selection);if(new TextEncoder().encode(text).length>LIMIT)throw Error('Selection receipt exceeds byte budget');
+  const url=URL.createObjectURL(new Blob([text],{type:'application/json'}));try{const a=document.createElement('a');a.href=url;a.download='omega-sai-r1002-selection.json';a.click()}finally{window.setTimeout(()=>URL.revokeObjectURL(url),1000)}
+ });
+ const importSelection=(file:File)=>void work(async()=>{
+  if(file.size>LIMIT)throw Error('Selection receipt exceeds byte budget');
+  const packet=JSON.parse(await file.text()),inputs=await fieldInputs();if(!inputs)return;
+  const next=verifySelectionR1002(packet,inputs.values,inputs.bindings,corpusState);
+  setSelection(next);setReceipt(next.field);setCorrelation(next.field.result);setMessage('Validation selection replay verified.');
  });
  const exportField=()=>void work(async()=>{
   if(!receipt)throw Error('No field receipt');
@@ -82,7 +101,7 @@ export default function SaiRegionalBankR998({address}:{address:number}){
   if(file.size>LIMIT)throw Error('Field receipt exceeds byte budget');
   const packet=JSON.parse(await file.text()),inputs=await fieldInputs();if(!inputs)return;
   const next=verifyFieldReceiptR1000(packet,inputs.values,inputs.bindings);
-  setReceipt(next);setCorrelation(next.result);setMessage('Field receipt replay verified against active source and model bank.');
+  setSelection(null);setReceipt(next);setCorrelation(next.result);setMessage('Field receipt replay verified against active source and model bank.');
  });
  const exportBank=()=>void work(async()=>{const text=await pack(),url=URL.createObjectURL(new Blob([text],{type:'application/json'}));try{const a=document.createElement('a');a.href=url;a.download='omega-sai-r998-regional-bank.json';a.click()}finally{window.setTimeout(()=>URL.revokeObjectURL(url),1000)}});
  return <section data-r998-regional-bank='LOCAL_PROJECTED_CORPUS_TRAINING' aria-label='Full projected atlas model bank' style={{border:'1px solid #60758c',borderRadius:10,padding:12,marginBottom:12,maxWidth:'100%',minWidth:0,overflowWrap:'anywhere'}}>
@@ -95,6 +114,10 @@ export default function SaiRegionalBankR998({address}:{address:number}){
  <button disabled={busy||!receipt} onClick={exportField}>Export replayable field receipt</button>
  <button disabled={busy||!receipt} onClick={auditField}>Evaluate correlation against source</button>
  {audit&&<div><p>Full-field MSE: {audit.full.before.mse?.toPrecision(6)} → {audit.full.after.mse?.toPrecision(6)}</p>{Object.entries(audit.partitions).map(([kind,p])=><p key={kind}>{kind}: {p.before.count} addresses · MSE {p.before.mse?.toPrecision(6)} → {p.after.mse?.toPrecision(6)}</p>)}<p>Selected region MSE: {audit.regions[Math.floor(address/144)]?.before.mse?.toPrecision(6)} → {audit.regions[Math.floor(address/144)]?.after.mse?.toPrecision(6)}. Exchange is not assumed to improve accuracy.</p></div>}
+ <button disabled={busy||!summary.complete} onClick={optimizeField}>Select exchange by validation</button>
+ <button disabled={busy||!selection} onClick={exportSelection}>Export selection receipt</button>
+ <label>Verify selection receipt <input type='file' accept='.json,application/json' disabled={busy||!summary.complete} onChange={e=>{const file=e.target.files?.[0];e.target.value='';if(file)importSelection(file)}}/></label>
+ {selection&&<div><p>Selected weight {selection.selected.weight} · steps {selection.selected.steps} · {selection.candidates.length} bounded candidates including identity.</p><p>Validation MSE: {selection.audit.partitions.validation.before.mse?.toPrecision(6)} → {selection.audit.partitions.validation.after.mse?.toPrecision(6)}. Held-out MSE: {selection.audit.partitions.test.before.mse?.toPrecision(6)} → {selection.audit.partitions.test.after.mse?.toPrecision(6)}.</p><p>Held-out labels do not select the exchange. Repeated review is not fresh external validation.</p></div>}
  <label>Verify field receipt <input type='file' accept='.json,application/json' disabled={busy||!summary.complete} onChange={e=>{const file=e.target.files?.[0];e.target.value='';if(file)importField(file)}}/></label>
  <label>Import model bank <input type='file' accept='.json,application/json' disabled={busy} onChange={e=>{const file=e.target.files?.[0];e.target.value='';if(file)void work(async()=>{if(file.size>LIMIT)throw Error('Bank too large');await restore(await file.text())})}}/></label>
  <progress value={summary.regions} max={144}/><p>{summary.regions} / 144 models · {summary.addresses.toLocaleString()} addresses · {summary.parameterCount.toLocaleString()} trainable parameters across trained regions</p>
