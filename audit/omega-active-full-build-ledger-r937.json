@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R1002 bounded validation-only exchange selection, identity baseline, separate held-out evaluation and portable replay; R1001 11/11 exact-head CI passed. Candidate CI pending.",
+  "latestGovernedWork": "R1003 source-bound SAI to SPHERE read-only projection with full regional optimizer replay, exact raster addressing and unchanged execution ownership. R1002 CI unavailable at observation; R1003 CI pending.",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -633,6 +633,11 @@
     {
       "revision": "R1002",
       "conservation": "13 deterministic exchange candidates including identity; 4032 validation addresses select parameters, 4320 held-out addresses evaluated only after selection. Existing SAI field receipt and UI extended with portable replay and held-out label isolation tests.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R1003",
+      "conservation": "Existing SAI field transfers to existing SPHERE outer raster. Receiver rechecks 144 source digests and optimizer checkpoints, reconstructs 20736 predictions and replays exchange. No state mutation or authority promotion.",
       "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
     }
   ],

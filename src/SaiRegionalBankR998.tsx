@@ -1,5 +1,6 @@
 
 import {useEffect,useMemo,useRef,useState} from 'react';
+import {SAI_SPHERE_KEY_R1003,SAI_SPHERE_LIMIT_R1003} from './saiSphereBridgeR1003.mjs';
 import {corpusState} from './corpusRuntime';
 import {inspectionSHA} from './execution/saiHostInspectionR209.js';
 import {projectedRegionR998,trainProjectedRegionR998,summarizeBankR998,predictRegionalR998,verifyRegionalModelR998,R998_BANK,R998_FEATURES,correlateFieldR999,fieldReceiptR1000,verifyFieldReceiptR1000,auditCorrelationR1001,selectCorrelationR1002,verifySelectionR1002} from './saiRelationalLearningR992.mjs';
@@ -92,6 +93,14 @@ export default function SaiRegionalBankR998({address}:{address:number}){
   const next=verifySelectionR1002(packet,inputs.values,inputs.bindings,corpusState);
   setSelection(next);setReceipt(next.field);setCorrelation(next.field.result);setMessage('Validation selection replay verified.');
  });
+ const publishSphere=()=>void work(async()=>{
+  if(!receipt||!summary.complete)throw Error('Complete verified field required');
+  const inputs=await fieldInputs();if(!inputs)return;
+  const field=verifyFieldReceiptR1000(receipt,inputs.values,inputs.bindings);
+  const text=JSON.stringify({schema:'OMEGA_SAI_SPHERE_READONLY_R1003',models,field,canonicalMutation:false});
+  if(new TextEncoder().encode(text).length>SAI_SPHERE_LIMIT_R1003)throw Error('SPHERE transfer exceeds byte budget');
+  localStorage.setItem(SAI_SPHERE_KEY_R1003,text);setMessage('Published read-only field; open SPHERE and replay to verify.');
+ });
  const exportField=()=>void work(async()=>{
   if(!receipt)throw Error('No field receipt');
   const text=JSON.stringify(receipt);if(new TextEncoder().encode(text).length>LIMIT)throw Error('Field receipt exceeds byte budget');
@@ -111,6 +120,7 @@ export default function SaiRegionalBankR998({address}:{address:number}){
  <button disabled={busy||!summary.complete} onClick={correlate}>Correlate all 20,736 predictions</button>
  <p>R999 · Four simultaneous periodic lattice exchanges of model predictions only; not learned communication or empirical evidence.</p>
  {correlation&&<output>Selected address correlated prediction {correlation.values[address]?.toFixed(6)} · conservation residual {correlation.residual.toExponential(3)} · {correlation.edges.toLocaleString()} undirected edges</output>}
+ <button disabled={busy||!receipt||!summary.complete} onClick={publishSphere}>Publish verified field to SPHERE</button>
  <button disabled={busy||!receipt} onClick={exportField}>Export replayable field receipt</button>
  <button disabled={busy||!receipt} onClick={auditField}>Evaluate correlation against source</button>
  {audit&&<div><p>Full-field MSE: {audit.full.before.mse?.toPrecision(6)} → {audit.full.after.mse?.toPrecision(6)}</p>{Object.entries(audit.partitions).map(([kind,p])=><p key={kind}>{kind}: {p.before.count} addresses · MSE {p.before.mse?.toPrecision(6)} → {p.after.mse?.toPrecision(6)}</p>)}<p>Selected region MSE: {audit.regions[Math.floor(address/144)]?.before.mse?.toPrecision(6)} → {audit.regions[Math.floor(address/144)]?.after.mse?.toPrecision(6)}. Exchange is not assumed to improve accuracy.</p></div>}

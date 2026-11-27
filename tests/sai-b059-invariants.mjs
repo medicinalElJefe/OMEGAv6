@@ -201,3 +201,19 @@ assert.deepEqual(verifySelectionR1002(JSON.parse(JSON.stringify(selected1002)),f
 const forged1002=JSON.parse(JSON.stringify(selected1002));forged1002.selected.mse+=1;
 assert.throws(()=>verifySelectionR1002(forged1002,field999,binds1000,read998),/replay mismatch/);
 console.log('R1002 PASS: validation-only bounded selection, held-out isolation and replay.');
+
+const {verifySaiSphereR1003,saiSpherePixelR1003}=await import('../src/saiSphereBridgeR1003.mjs');
+const digest1003=async value=>{const {createHash}=await import('node:crypto');return createHash('sha256').update(JSON.stringify(value)).digest('hex')};
+const rows1003=[],bindings1003=[];
+for(const model of models998){
+ const sourceSha256=await digest1003(projectedRegionR998(read998,model.region));
+ const compact={region:model.region,weights:model.weights,bestEpoch:model.bestEpoch,partitions:model.partitions,sourceSha256};
+ rows1003.push(compact);bindings1003.push({region:model.region,sourceSha256,modelSha256:await digest1003(compact)});
+}
+const transfer1003={schema:'OMEGA_SAI_SPHERE_READONLY_R1003',models:rows1003,field:fieldReceiptR1000(field999,bindings1003,{steps:4}),canonicalMutation:false};
+assert.deepEqual(await verifySaiSphereR1003(JSON.parse(JSON.stringify(transfer1003)),read998,{digest:digest1003}),transfer1003.field);
+assert.equal(saiSpherePixelR1003(transfer1003.field,20735).value,transfer1003.field.result.values[20735]);
+assert.throws(()=>saiSpherePixelR1003(transfer1003.field,20736),/address/);
+await assert.rejects(()=>verifySaiSphereR1003({...transfer1003,canonicalMutation:true},read998,{digest:digest1003}),/read-only/);
+await assert.rejects(()=>verifySaiSphereR1003({...transfer1003,models:rows1003.map((m,i)=>i===0?{...m,sourceSha256:'f'.repeat(64)}:m)},read998,{digest:digest1003}),/digest mismatch/);
+console.log('R1003 PASS: independently replayed SAI to SPHERE read-only field projection.');
