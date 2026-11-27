@@ -226,3 +226,25 @@ const altered1004=JSON.parse(portable1004);altered1004.body.field.result.values[
 await assert.rejects(()=>unpackSaiSphereR1004(JSON.stringify(altered1004),{digest:digest1003}),/digest mismatch/);
 await assert.rejects(()=>unpackSaiSphereR1004('x'.repeat(2097153),{digest:digest1003}),/size/);
 console.log('R1004 PASS: bounded portable SAI–SPHERE transfer, digest refusal and independent replay.');
+
+const {attachSaiCloudR1005}=await import('../src/saiSphereCloudR1005.mjs');
+const {createFabric:makeFabric1005,agentId:agent1005}=await import('../src/sphereAgentFabricR887.mjs');
+const {sphereSwarmRequestR889:solo1005}=await import('../src/sphereSwarmBridgeR889.mjs');
+const {collectiveRequestR890:flock1005}=await import('../src/sphereCollectiveR890.mjs');
+const fabric1005=makeFabric1005(),id1005=agent1005(2,20735);
+const base1005=solo1005(fabric1005,id1005,0,'Compare distinct computed channels',0);
+assert.equal(await attachSaiCloudR1005(base1005,null,false,digest1003),base1005);
+await assert.rejects(()=>attachSaiCloudR1005(base1005,null,true,digest1003),/required/);
+const soloContext1005=await attachSaiCloudR1005(base1005,transfer1003.field,true,digest1003);
+assert.equal(soloContext1005.request.providerBudget,0);
+assert.equal(soloContext1005.context.rows[0].prediction,transfer1003.field.result.values[20735]);
+assert.equal(soloContext1005.context.rows[0].outer,20735);
+const flockContext1005=await attachSaiCloudR1005(flock1005(fabric1005,id1005,0,'Compare distinct computed channels',12,1),transfer1003.field,true,digest1003);
+assert.equal(flockContext1005.context.rows.length,12);
+assert.equal(flockContext1005.request.requestedCells,12);
+assert.equal(flockContext1005.request.providerBudget,1);
+assert.equal(fabric1005.active.size,0);
+assert.equal(flockContext1005.context.canonicalMutation,false);
+const forgedField1005=JSON.parse(JSON.stringify(transfer1003.field));forgedField1005.result.values[0]+=.1;
+await assert.rejects(()=>attachSaiCloudR1005(base1005,forgedField1005,true,digest1003),/replay mismatch/);
+console.log('R1005 PASS: opt-in bounded SAI context for existing cloud dispatch, no local allocation or Canon mutation.');

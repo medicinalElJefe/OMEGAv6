@@ -9,15 +9,47 @@ const MAX_JOURNAL=8192,ID=/^[A-Za-z0-9_.:-]{1,128}$/;
 const STATUS=new Set(['RECEIVED','QUEUED','RUNNING','COMPLETE','PAUSED','CANCELLED','FAILED','TIMED_OUT','NOT_REPORTED']);
 function statusOf(x){if(typeof x!=='string'||!STATUS.has(x))throw new Error('Untrusted cloud mission status');return x}
 const index=(x,max)=>Number.isSafeInteger(x)&&x>=0&&x<max;
+// R1006: persist only a bounded client-supplied projection actually attached
+// to an accepted mission. A digest does not authenticate a server or donor.
+const SHA_R1006=/^[a-f0-9]{64}$/;
+const SAI_AUTHORITY_R1006='OPERATOR_SUPPLIED_PROJECTED_MODEL_OUTPUT_NOT_SERVER_VERIFIED';
+export function verifySaiMissionBindingR1006(receipt,context){
+ const ids=receipt?.schema===R889_SCHEMA?[receipt.originAgent]:receipt?.schema===R890_SCHEMA?receipt.members:null;
+ if(!Array.isArray(ids)||ids.length<1||ids.length>12||!ids.every(id=>index(id,AGENTS))||
+    !context||context.schema!=='OMEGA_SAI_CLOUD_CONTEXT_R1005'||context.authority!==SAI_AUTHORITY_R1006||
+    context.canonicalMutation!==false||!SHA_R1006.test(context.fieldSha256||'')||
+    !Number.isFinite(context.weight)||context.weight<0||context.weight>1||
+    !Number.isSafeInteger(context.steps)||context.steps<0||context.steps>32||
+    !Array.isArray(context.rows)||context.rows.length!==ids.length)throw new Error('Untrusted SAI mission binding');
+ const rows=context.rows.map((row,i)=>{
+  if(!row||row.agent!==ids[i]||row.outer!==ids[i]%SIZE||!Number.isFinite(row.prediction)||
+     !SHA_R1006.test(row.sourceSha256||'')||!SHA_R1006.test(row.modelSha256||''))
+    throw new Error('Untrusted SAI mission member binding');
+  return Object.freeze({agent:row.agent,outer:row.outer,prediction:row.prediction,sourceSha256:row.sourceSha256,modelSha256:row.modelSha256});
+ });
+ return Object.freeze({schema:'OMEGA_SAI_CLOUD_CONTEXT_R1005',fieldSha256:context.fieldSha256,
+  weight:context.weight,steps:context.steps,rows:Object.freeze(rows),authority:SAI_AUTHORITY_R1006,canonicalMutation:false});
+}
+export function bindSaiMissionR1006(receipt,context){
+ if(context===undefined)return receipt;
+ return Object.freeze({...receipt,saiContext:verifySaiMissionBindingR1006(receipt,context)});
+}
+export function exportSaiMissionCsvR1006(receipt){
+ if(!receipt?.saiContext||!ID.test(receipt.missionId||''))throw new Error('No bounded SAI submission evidence');
+ const context=verifySaiMissionBindingR1006(receipt,receipt.saiContext);
+ return ['mission_id,agent,outer,prediction,field_sha256,source_sha256,model_sha256,weight,steps,authority',
+  ...context.rows.map(row=>[receipt.missionId,row.agent,row.outer,row.prediction,context.fieldSha256,
+   row.sourceSha256,row.modelSha256,context.weight,context.steps,context.authority].join(','))].join('\n')+'\n';
+}
 function singleReceipt(x){
  if(x===null)return null;
  if(!x||x.schema!==R889_SCHEMA||!ID.test(x.missionId||'')||!index(x.originAgent,AGENTS)||!index(x.originShell,12)||!index(x.originOuter,SIZE)||!index(x.originInner,SIZE)||x.originAgent!==x.originShell*SIZE+x.originOuter||x.localStateMutated!==false||x.truthClass!=='CLOUD_RECEIPT_RETURNED_NOT_CANON_ADMITTED')throw new Error('Untrusted individual mission receipt');
- return{schema:R889_SCHEMA,originAgent:x.originAgent,originShell:x.originShell,originOuter:x.originOuter,originInner:x.originInner,missionId:x.missionId,status:statusOf(x.status),truthClass:'CLOUD_RECEIPT_RETURNED_NOT_CANON_ADMITTED',externalProof:'NOT_ESTABLISHED_BY_JOURNAL',localStateMutated:false};
+ return{schema:R889_SCHEMA,originAgent:x.originAgent,originShell:x.originShell,originOuter:x.originOuter,originInner:x.originInner,missionId:x.missionId,status:statusOf(x.status),truthClass:'CLOUD_RECEIPT_RETURNED_NOT_CANON_ADMITTED',externalProof:'NOT_ESTABLISHED_BY_JOURNAL',localStateMutated:false,...(Object.prototype.hasOwnProperty.call(x,'saiContext')?{saiContext:verifySaiMissionBindingR1006(x,x.saiContext)}:{})};
 }
 function collectiveReceipt(x){
  if(x===null)return null;
  if(!x||x.schema!==R890_SCHEMA||!ID.test(x.missionId||'')||!index(x.rootAgent,AGENTS)||!index(x.inner,SIZE)||!Array.isArray(x.members)||x.members.length<1||x.members.length>12||x.members[0]!==x.rootAgent||new Set(x.members).size!==x.members.length||!x.members.every(n=>index(n,AGENTS))||x.localMutation!==false||x.authority!=='SWARM_RESULT_NOT_CANON_ADMITTED')throw new Error('Untrusted collective mission receipt');
- return{schema:R890_SCHEMA,rootAgent:x.rootAgent,inner:x.inner,members:[...x.members],missionId:x.missionId,status:statusOf(x.status),authority:'SWARM_RESULT_NOT_CANON_ADMITTED',localMutation:false,returnedProof:'NOT_ESTABLISHED_BY_JOURNAL'};
+ return{schema:R890_SCHEMA,rootAgent:x.rootAgent,inner:x.inner,members:[...x.members],missionId:x.missionId,status:statusOf(x.status),authority:'SWARM_RESULT_NOT_CANON_ADMITTED',localMutation:false,returnedProof:'NOT_ESTABLISHED_BY_JOURNAL',...(Object.prototype.hasOwnProperty.call(x,'saiContext')?{saiContext:verifySaiMissionBindingR1006(x,x.saiContext)}:{})};
 }
 export function serializeMissionJournalR894(single,collective){
  const journal={schema:R894_SCHEMA,single:singleReceipt(single),collective:collectiveReceipt(collective)};

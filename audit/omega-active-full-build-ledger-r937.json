@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R1004 portable bounded SAI–SPHERE envelope and independent receiving replay; failed imports preserve previous verified projection. R1002/R1003 workflow records unavailable at observation; candidate CI pending.",
+  "latestGovernedWork": "R1006 client-submitted SAI context receipt: bounded replayed SAI predictions, source/model/field SHA, mission identity, inspectable CSV and R894 journal recovery for existing R121 SOLO/FLOCK. Candidate source and tests only; production, provider, device, and Canon acceptance unverified.",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -643,6 +643,11 @@
     {
       "revision": "R1004",
       "conservation": "Portable SAI/SPHERE transfer export/import, pre-replay byte and SHA checks, full optimizer and field replay, serialized receiver lock and non-destructive rejected imports. No Canon or SPHERE state mutation.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R1005",
+      "conservation": "Client-replayed field context for bounded selected cloud members with source/model and full-field digest, existing dispatch and provider budget unchanged. Cloud verification not claimed. Regression coverage added.",
       "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
     }
   ],

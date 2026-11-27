@@ -3,7 +3,7 @@ import {readFileSync} from 'node:fs';
 import {agentId} from '../src/sphereAgentFabricR887.mjs';
 import {R889_SCHEMA} from '../src/sphereSwarmBridgeR889.mjs';
 import {R890_SCHEMA} from '../src/sphereCollectiveR890.mjs';
-import {R894_SCHEMA,R894_STORAGE_KEY,serializeMissionJournalR894,restoreMissionJournalR894,shouldWatchMissionR894} from '../src/sphereMissionJournalR894.mjs';
+import {R894_SCHEMA,R894_STORAGE_KEY,serializeMissionJournalR894,restoreMissionJournalR894,shouldWatchMissionR894,bindSaiMissionR1006,exportSaiMissionCsvR1006} from '../src/sphereMissionJournalR894.mjs';
 const id=agentId(3,17),single={schema:R889_SCHEMA,originAgent:id,originShell:3,originOuter:17,originInner:139,missionId:'mission_R889-7',status:'QUEUED',truthClass:'CLOUD_RECEIPT_RETURNED_NOT_CANON_ADMITTED',localStateMutated:false};
 const collective={schema:R890_SCHEMA,rootAgent:id,inner:139,members:[id,id+1,id+2],missionId:'mission_R890-8',status:'RECEIVED',authority:'SWARM_RESULT_NOT_CANON_ADMITTED',localMutation:false};
 const saved=serializeMissionJournalR894(single,collective);
@@ -56,3 +56,35 @@ for(const token of ['R894_STORAGE_KEY','serializeMissionJournalR894','restoreMis
 const watchers=ui.split(" useEffect(()=>{if(!watchCloud")[1]?.split(" const choose=")[0]||'';
 assert.ok(!watchers.includes('api.post<'),'R894 status watch must never dispatch a cloud mission');
 console.log('R894 PASS: bounded persistent cloud mission identity, read-only watch, schema and authority preservation, malicious journal rejection, no ambient POST.');
+
+// R1006 accepted R121 SOLO/FLOCK missions preserve a bounded, inspectable,
+// client-supplied SAI context with explicit non-authentication semantics.
+const digest1006='a'.repeat(64),source1006='b'.repeat(64),model1006='c'.repeat(64);
+const row1006=agent=>({agent,outer:agent%20736,prediction:agent/248832,sourceSha256:source1006,modelSha256:model1006});
+const sai1006=ids=>({schema:'OMEGA_SAI_CLOUD_CONTEXT_R1005',fieldSha256:digest1006,weight:0.125,
+ steps:4,rows:ids.map(row1006),authority:'OPERATOR_SUPPLIED_PROJECTED_MODEL_OUTPUT_NOT_SERVER_VERIFIED',canonicalMutation:false});
+const boundSingle1006=bindSaiMissionR1006(single,sai1006([id]));
+const boundCollective1006=bindSaiMissionR1006(collective,sai1006(collective.members));
+const journal1006=serializeMissionJournalR894(boundSingle1006,boundCollective1006);
+const recovered1006=restoreMissionJournalR894(journal1006);
+assert.deepEqual(recovered1006.single.saiContext,boundSingle1006.saiContext);
+assert.deepEqual(recovered1006.collective.saiContext,boundCollective1006.saiContext);
+assert.equal(serializeMissionJournalR894(recovered1006.single,recovered1006.collective),journal1006);
+assert.equal(exportSaiMissionCsvR1006(recovered1006.collective).trim().split('\n').length,4);
+assert.match(exportSaiMissionCsvR1006(recovered1006.single),/OPERATOR_SUPPLIED_PROJECTED_MODEL_OUTPUT_NOT_SERVER_VERIFIED/);
+assert.equal(bindSaiMissionR1006(single,undefined),single);
+assert.throws(()=>exportSaiMissionCsvR1006(single),/No bounded/);
+for(const altered of [
+ {...sai1006([id]),fieldSha256:'not-a-digest'},
+ {...sai1006([id]),canonicalMutation:true},
+ {...sai1006([id]),authority:'SERVER_VERIFIED'},
+ {...sai1006([id]),rows:[row1006(id+1)]},
+ {...sai1006([id]),rows:[{...row1006(id),prediction:Infinity}]},
+ {...sai1006([id]),rows:[{...row1006(id),sourceSha256:'invalid'}]},
+])assert.throws(()=>bindSaiMissionR1006(single,altered),/Untrusted/);
+assert.throws(()=>restoreMissionJournalR894(JSON.stringify({schema:R894_SCHEMA,single:{...single,saiContext:sai1006([id+1])},collective:null})),/Untrusted/);
+assert.match(ui,/data-r1006-sai-context/);
+assert.match(ui,/Download submitted SAI context CSV/);
+assert.match(ui,/bindSaiMissionR1006\(validateSwarmReturnR889/);
+assert.match(ui,/bindSaiMissionR1006\(collectiveReceiptR890/);
+console.log('R1006 PASS: accepted SOLO/FLOCK context visible, downloadable, durable and fail-closed; no claim of independent cloud verification.');
