@@ -22,6 +22,11 @@ export function captureCellReturnsR1008(mission,original,maxCells){
  if(mission.schema!=='OMEGA_SWARM_MISSION_R121'||mission.canonicalMutation!==false||!Number.isSafeInteger(mission.total)||mission.total<1||mission.total>maxCells||!Number.isSafeInteger(mission.completed)||!Number.isSafeInteger(mission.failed)||mission.completed<0||mission.failed<0||mission.completed+mission.failed>mission.total)throw Error('Untrusted coordinator mission');
  const cellReturns=validateCellReturnsR1008({schema:'OMEGA_R121_CELL_RETURNS_R1008',missionId:mission.id,authority:AUTHORITY,canonicalMutation:false,rows:mission.recent},mission.id,maxCells);
  if(cellReturns.rows.length!==mission.completed+mission.failed||cellReturns.rows.filter(row=>row.ok).length!==mission.completed)throw Error('Untrusted coordinator cell counts');
+ if(original.acceptedPlan){
+  const plan=validateAcceptedPlanR1009(original.acceptedPlan,mission.id,maxCells);
+  const ids=new Set(plan.cells.map(row=>row.cellId));
+  if(mission.total!==plan.cells.length||cellReturns.rows.some(row=>!ids.has(row.cellId)))throw Error('Untrusted return outside accepted cell plan');
+ }
  return {cellReturns};
 }
 // Only apply a response to its original current mission; do not regress progress on overlapping GETs.
@@ -32,4 +37,36 @@ export function reconcileMissionReturnR1008(current,next){
  if((next.completed??0)<(current.completed??0)||(next.failed??0)<(current.failed??0))return current;
  if(current.cellReturns&&(!next.cellReturns||next.cellReturns.rows.length<current.cellReturns.rows.length))return current;
  return next;
+}
+
+const PLAN_AUTHORITY_R1009='COORDINATOR_REPORTED_ACCEPTED_PLAN_NOT_INDEPENDENTLY_VERIFIED';
+export function validateAcceptedPlanR1009(plan,missionId,maxCells){
+ if(!plan||plan.schema!=='OMEGA_ACCEPTED_CELL_PLAN_R1009'||plan.missionId!==missionId||plan.authority!==PLAN_AUTHORITY_R1009||plan.canonicalMutation!==false||!Number.isSafeInteger(maxCells)||maxCells<1||maxCells>12||!Array.isArray(plan.cells)||plan.cells.length<1||plan.cells.length>maxCells)throw Error('Untrusted accepted cell plan');
+ const seen=new Set();
+ const cells=plan.cells.map(row=>{
+  const addr=typeof row?.cellId==='string'?parseCellId(row.cellId):null;
+  if(!addr||addr.id!==row.cellId||row.index!==addr.index||seen.has(row.cellId)||!Number.isSafeInteger(row.lane)||Math.floor(row.lane/12)!==row.index||typeof row.providerEligible!=='boolean')throw Error('Untrusted planned cell identity');
+  seen.add(row.cellId);
+  return Object.freeze({cellId:row.cellId,index:row.index,lane:row.lane,providerEligible:row.providerEligible});
+ });
+ return Object.freeze({schema:'OMEGA_ACCEPTED_CELL_PLAN_R1009',missionId,authority:PLAN_AUTHORITY_R1009,canonicalMutation:false,cells:Object.freeze(cells)});
+}
+export function captureAcceptedPlanR1009(data,maxCells){
+ if(data.plan===undefined)return {};
+ const m=data.mission,p=data.plan;
+ if(m.schema!=='OMEGA_SWARM_MISSION_R121'||m.canonicalMutation!==false||!p||p.schema!=='OMEGA_SWARM_PLAN_R121'||!Number.isSafeInteger(m.total)||m.total<1||m.total>maxCells||!Array.isArray(p.sampleCells)||p.sampleCells.length!==m.total)throw Error('Untrusted accepted coordinator plan');
+ return {acceptedPlan:validateAcceptedPlanR1009({schema:'OMEGA_ACCEPTED_CELL_PLAN_R1009',missionId:m.id,authority:PLAN_AUTHORITY_R1009,canonicalMutation:false,cells:p.sampleCells.map(row=>({cellId:row.id,index:row.index,lane:row.lane,providerEligible:row.providerEligible}))},m.id,maxCells)};
+}
+export function validatePlannedReturnsR1009(receipt,maxCells){
+ const out={};
+ if(receipt.acceptedPlan!==undefined)out.acceptedPlan=validateAcceptedPlanR1009(receipt.acceptedPlan,receipt.missionId,maxCells);
+ if(receipt.cellReturns!==undefined){
+  out.cellReturns=validateCellReturnsR1008(receipt.cellReturns,receipt.missionId,maxCells);
+  if(out.acceptedPlan){
+   const ids=new Set(out.acceptedPlan.cells.map(row=>row.cellId));
+   if(out.cellReturns.rows.some(row=>!ids.has(row.cellId)))throw Error('Untrusted return outside accepted cell plan');
+  }
+  if(out.cellReturns.rows.length!==receipt.completed+receipt.failed||out.cellReturns.rows.filter(row=>row.ok).length!==receipt.completed)throw Error('Untrusted restored cell counts');
+ }
+ return out;
 }

@@ -126,3 +126,18 @@ assert.equal(reconcileMissionReturnR1008(solo1008,{...solo1008,missionId:'other'
 assert.equal(reconcileMissionReturnR1008(single,solo1008),solo1008);
 assert.match(ui,/data-r1008-cell-returns/);
 console.log('R1008 PASS: coordinator cell previews persist and export with distinct identities and monotonic response guard.');
+
+const {captureAcceptedPlanR1009}=await import('../src/sphereCellReturnsR1008.mjs');
+const {planMissionR121,compactPlanR121}=await import('../src/swarm/swarmCoreR121.js');
+const p1009=compactPlanR121(planMissionR121({intent:'Bounded plan provenance regression',mode:'FLOCK',requestedCells:3,providerBudget:0}));
+const m1009={schema:'OMEGA_SWARM_MISSION_R121',id:boundCollective1006.missionId,total:p1009.sampleCells.length,canonicalMutation:false};
+const receipt1009={...boundCollective1006,...captureAcceptedPlanR1009({mission:m1009,plan:p1009},3)};
+const rows1009=p1009.sampleCells.map(x=>row1008(x.index));
+const result1009=collectiveStatusR890(response1008(receipt1009,rows1009,rows1009.length),receipt1009);
+assert.deepEqual(restoreMissionJournalR894(serializeMissionJournalR894(null,result1009)).collective.acceptedPlan,receipt1009.acceptedPlan);
+const outsider1009=Array.from({length:1728},(_,i)=>i).find(i=>!p1009.sampleCells.some(x=>x.index===i));
+assert.throws(()=>collectiveStatusR890(response1008(receipt1009,[row1008(outsider1009)],rows1009.length),receipt1009),/outside accepted/);
+assert.throws(()=>serializeMissionJournalR894(null,{...result1009,completed:0}),/Untrusted restored cell counts/);
+assert.throws(()=>captureAcceptedPlanR1009({mission:m1009,plan:{...p1009,sampleCells:[...p1009.sampleCells.slice(1),{...p1009.sampleCells[0],lane:-1}]}},3),/Untrusted planned/);
+assert.match(ui,/data-r1009-accepted-plan/);
+console.log('R1009 PASS: accepted coordinator plan identities, lanes, restored counts and returned membership enforced.');
