@@ -1,6 +1,7 @@
 // R890: bounded selected-agent collective to existing R121 FLOCK scheduler.
 // Address membership is explicit; cloud receipts do not mutate local values or canonical authority.
 import {agentAddress,agentSnapshot,axes4,neighbors,SIZE} from './sphereAgentFabricR887.mjs';
+import {captureCellReturnsR1008} from './sphereCellReturnsR1008.mjs';
 export const R890_SCHEMA='OMEGA_SPHERE_COLLECTIVE_R890';
 export const MAX_R890_PEERS=12;
 function validateMember(id){return agentAddress(id),id}
@@ -36,5 +37,5 @@ export function collectiveReceiptR890(data,packet){
 export function collectiveStatusR890(data,receipt){
  if(!receipt||receipt.schema!==R890_SCHEMA||!data||data.mission?.id!==receipt.missionId)throw new Error('Collective mission identity mismatch');
  const mission=data.mission,allowed=new Set(['QUEUED','RUNNING','COMPLETE','PAUSED','CANCELLED','FAILED','TIMED_OUT']);
- return Object.freeze({...receipt,status:allowed.has(mission.status)?mission.status:'NOT_REPORTED',completed:Number.isSafeInteger(mission.completed)&&mission.completed>=0?mission.completed:0,failed:Number.isSafeInteger(mission.failed)&&mission.failed>=0?mission.failed:0,summary:typeof mission.finalSynthesis?.text==='string'?mission.finalSynthesis.text.slice(0,1200):'',authority:'SWARM_RESULT_NOT_CANON_ADMITTED',localMutation:false});
+ return Object.freeze({...receipt,...captureCellReturnsR1008(mission,receipt,receipt.members.length),status:allowed.has(mission.status)?mission.status:'NOT_REPORTED',completed:Number.isSafeInteger(mission.completed)&&mission.completed>=0?mission.completed:0,failed:Number.isSafeInteger(mission.failed)&&mission.failed>=0?mission.failed:0,summary:typeof mission.finalSynthesis?.text==='string'?mission.finalSynthesis.text.slice(0,1200):'',authority:'SWARM_RESULT_NOT_CANON_ADMITTED',localMutation:false});
 }

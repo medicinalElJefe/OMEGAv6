@@ -20,7 +20,7 @@ assert.equal(shouldWatchMissionR894(result.single),true);
 assert.equal(shouldWatchMissionR894(result.collective),true);
 for(const s of ['COMPLETE','FAILED','CANCELLED','TIMED_OUT','PAUSED'])assert.equal(shouldWatchMissionR894({...result.single,status:s}),false);
 assert.throws(()=>restoreMissionJournalR894('not-json'),/Malformed/);
-assert.throws(()=>restoreMissionJournalR894('x'.repeat(32769)),/oversized/);
+assert.throws(()=>restoreMissionJournalR894('x'.repeat(131073)),/oversized/);
 assert.throws(()=>serializeMissionJournalR894({...single,originAgent:-1},null),/Untrusted/);
 assert.throws(()=>serializeMissionJournalR894({...single,originOuter:18},null),/Untrusted/);
 assert.throws(()=>serializeMissionJournalR894({...single,missionId:'../bad'},null),/Untrusted/);
@@ -103,3 +103,26 @@ assert.throws(()=>exportMissionReturnR1007(single),/No returned/);
 for(const bad of [{completed:-1},{failed:1.5},{reportedSynthesis:'x'.repeat(1201)}])assert.throws(()=>serializeMissionJournalR894({...single,...bad},null),/Untrusted/);
 assert.match(ui,/Download returned mission JSON/);
 console.log('R1007 PASS: bounded cloud returns persist and export without authority promotion.');
+
+const {validateSwarmStatusR889}=await import('../src/sphereSwarmBridgeR889.mjs');
+const {collectiveStatusR890}=await import('../src/sphereCollectiveR890.mjs');
+const {reconcileMissionReturnR1008}=await import('../src/sphereCellReturnsR1008.mjs');
+const {capabilityProfile}=await import('../src/swarm/swarmCoreR121.js');
+const row1008=(index,ok=true)=>{const p=capabilityProfile(index);return{cellId:p.cellId,index,organ:p.domainRole,phase:p.phaseRole,executor:'DETERMINISTIC',ok,status:ok?200:500,summary:'actual coordinator preview '+index,receiptSha:ok?'a'.repeat(64):null}};
+const response1008=(receipt,rows,total)=>({mission:{schema:'OMEGA_SWARM_MISSION_R121',id:receipt.missionId,status:'COMPLETE',total,completed:rows.filter(x=>x.ok).length,failed:rows.filter(x=>!x.ok).length,recent:rows,canonicalMutation:false}});
+const solo1008=validateSwarmStatusR889(response1008(boundSingle1006,[row1008(17)],1),boundSingle1006);
+const flock1008=collectiveStatusR890(response1008(boundCollective1006,[row1008(33),row1008(17),row1008(0,false)],3),boundCollective1006);
+const recovered1008=restoreMissionJournalR894(serializeMissionJournalR894(solo1008,flock1008));
+assert.deepEqual(recovered1008.single.cellReturns,solo1008.cellReturns);
+assert.deepEqual(recovered1008.collective.cellReturns,flock1008.cellReturns);
+assert.deepEqual(JSON.parse(exportMissionReturnR1007(recovered1008.collective)).receipt.cellReturns,flock1008.cellReturns);
+assert.equal(recovered1008.collective.cellReturns.canonicalMutation,false);
+for(const rows of [[row1008(17),row1008(17)],[{...row1008(17),index:18}],[{...row1008(17),organ:'PHYSICS'}],[{...row1008(17),receiptSha:'fake'}],[{...row1008(17),summary:'x'.repeat(1201)}],[{...row1008(17),status:500}]]){
+ assert.throws(()=>collectiveStatusR890(response1008(boundCollective1006,rows,3),boundCollective1006),/Untrusted/);
+}
+assert.throws(()=>serializeMissionJournalR894({...solo1008,cellReturns:{...solo1008.cellReturns,missionId:'other'}},null),/Untrusted/);
+assert.equal(reconcileMissionReturnR1008(solo1008,{...solo1008,status:'RUNNING',completed:0}),solo1008);
+assert.equal(reconcileMissionReturnR1008(solo1008,{...solo1008,missionId:'other'}),solo1008);
+assert.equal(reconcileMissionReturnR1008(single,solo1008),solo1008);
+assert.match(ui,/data-r1008-cell-returns/);
+console.log('R1008 PASS: coordinator cell previews persist and export with distinct identities and monotonic response guard.');
