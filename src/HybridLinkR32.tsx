@@ -17,9 +17,9 @@ import MissionLineageReviewR209 from './MissionLineageReviewR209';
 import './hybridLinkR32.css';
 import './hybridLinkR112.css';
 
-type Props={status:any;record:any};
+type Props={status:any;record:any;showOperationalWorkspace?:boolean};
 
-export default function HybridLinkR32({status,record}:Props){
+export default function HybridLinkR32({status,record,showOperationalWorkspace=true}:Props){
  const[deepOpen,setDeepOpen]=useState(false);
  return <section className='hybrid-r32 special-app r112-hybrid-link' data-r264-operational-surfaces='FULL' data-r264-responsive='DESKTOP_MOBILE' data-r264-hybrid-bytes='EAGER' data-r270-snapshot-owner='WORKSTATION_SHARED_R238'>
   <header className='r112-hybrid-hero'>
@@ -37,7 +37,7 @@ export default function HybridLinkR32({status,record}:Props){
   <HybridExperienceLedgerR255/>
   <HybridParallelDevelopmentR262/>
   <HybridHostEffectsR212/>
-  <HybridCommandDeckR237/>
+  {showOperationalWorkspace?<HybridCommandDeckR237/>:<HybridCommandDeckR237 showOperationalWorkspace={false}/>}
   <HybridProofClosureR141/>
   <MissionLineageReviewR209/>
 

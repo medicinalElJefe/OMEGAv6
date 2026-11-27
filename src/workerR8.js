@@ -1,4 +1,5 @@
 import baseWorker from './worker.js';
+import {SAI_INSPECTION_KIND,buildSaiInspectionDraft,verifySaiInspectionDraft} from './execution/saiHostInspectionR209.js';
 import {sarCatalogR285} from './sarLiveCatalogR285.js';
 import {sarAssetProbeR325} from './sarAssetProbeR325.js';
 import {sarNativeRasterR326} from './sarNativeRasterR326.js';
@@ -85,8 +86,8 @@ async function omegaR8(request,env){const url=new URL(request.url);
  if(url.pathname==='/api/earth/sar/annotations'&&request.method==='GET'){const result=await sarAnnotationR343(url);const status=result.state==='INVALID_REQUEST'?400:result.state==='ANNOTATION_FETCH_FAILED'?502:200;return json(result,status)}
  if(url.pathname==='/api/earth/noaa/image'&&request.method==='GET'){const id=text(url.searchParams.get('coverage')),c=NOAA_COVERAGES[id];if(!c)return json({ok:false,code:'UNKNOWN_COVERAGE'},404);try{const r=await fetch(c.url,{cf:{cacheTtl:60,cacheEverything:false}});const ct=r.headers.get('content-type')||'';if(!r.ok||!ct.startsWith('image/'))return json({ok:false,code:'NOAA_IMAGE_UNAVAILABLE',coverage:id,status:r.status},502);return new Response(r.body,{status:200,headers:{'content-type':ct,'cache-control':'public, max-age=60','x-omega-source':'NOAA-STAR-LATEST-ALIAS','x-omega-last-modified':r.headers.get('last-modified')||''}})}catch(e){return json({ok:false,code:'NOAA_IMAGE_FETCH_FAILED',error:e instanceof Error?e.message:String(e)},502)}}
  if(url.pathname==='/api/hybrid/capabilities'&&request.method==='GET')return json({ok:true,schema:'OMEGA_HYBRID_V90_MIGRATION_CONTRACT_V1',state:'CLOUD_DRAFT_AND_VALIDATION_LIVE_NATIVE_EXECUTION_DEVICE_PROOF_REQUIRED',operations:HYBRID_OPERATIONS,profiles:HYBRID_PROFILES,missionCycles:{min:2,max:8},workspaceGovernor:{sourceFiles:25000,sourceBytes:2147483648,generatedBytes:536870912,changedFiles:80},trainLocal:{operation:'TRAIN_LOCAL',foundationWeightsChanged:false,requiredProof:'OMEGA_SAI_LOCAL_TRAINING_RECEIPT_V1 + active model fingerprint'},boundaries:['NO_ARBITRARY_SHELL','ROOT_CONFINED','EXPLICIT_CONFIRMATION_REQUIRED','NO_PASSWORD_CAPTURE','NO_UAC_OR_SECURE_DESKTOP','HOSTSTATE_NOT_MUTATED_BY_DRAFT']});
- if(url.pathname==='/api/hybrid/plan'&&request.method==='POST'){const body=await request.json().catch(()=>({}));return json({ok:true,draft:await hybridDraft(body)})}
- if(url.pathname==='/api/hybrid/validate'&&request.method==='POST'){const body=await request.json().catch(()=>({}));const result=validateHybridPlan(body);return json({ok:result.valid,...result},result.valid?200:400)}
+ if(url.pathname==='/api/hybrid/plan'&&request.method==='POST'){const body=await request.json().catch(()=>({}));if(body.intentKind===SAI_INSPECTION_KIND){try{return json({ok:true,draft:await buildSaiInspectionDraft(body.prompt,body.root??'.')})}catch{return json({ok:false,code:'SAI_INSPECTION_INPUT_HELD'},400)}}return json({ok:true,draft:await hybridDraft(body)})}
+ if(url.pathname==='/api/hybrid/validate'&&request.method==='POST'){const body=await request.json().catch(()=>({}));const result=validateHybridPlan(body);const plan=body?.plan||body;if(plan?.intentKind===SAI_INSPECTION_KIND&&!await verifySaiInspectionDraft(plan)){result.valid=false;result.errors.push('SAI_INSPECTION_EXACT_DRAFT_SHA256_REQUIRED')}return json({ok:result.valid,...result},result.valid?200:400)}
  return baseWorker.fetch(request,env)
 }
 export default{fetch:omegaR8};

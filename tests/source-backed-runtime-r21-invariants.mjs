@@ -61,3 +61,11 @@ assert.match(corpus,/function scoreForText/); // legacy affinity catalog still e
 assert.doesNotMatch(runtime,/@appdeploy\/client/);
 assert.doesNotMatch(panel,/@appdeploy\/client/);
 console.log('R311/R308/R27/R109/R140 SOURCE-BACKED RUNTIME PASS · exact Drive Mode188 Sratio/decision law bound to source-derived packet inputs · Full Canon Mother/Father/coherence retained · remaining unsupported operators gated · canonical traversal retained');
+
+ // R984: preserve native details semantics; the existing R313 exhaustive
+ // browser disclosure proof must exercise actual visible/hidden content.
+const donorCss=read('src/sourceBackedModesR21.css');
+assert.ok(panel.includes("data-r982-donor-formula='true'><summary>Recovered formula calculator · 11 source hooks</summary><div className='sbm21-donor-body'>"));
+assert.ok(donorCss.includes('.sbm21-catalog[data-r982-donor-formula]:not([open]) > :not(summary){display:none!important}'));
+assert.ok(donorCss.includes('.sbm21-catalog[data-r982-donor-formula][open] > .sbm21-donor-body{display:grid'));
+assert.ok(donorCss.includes('repeat(auto-fit,minmax(min(100%,180px),1fr))'));

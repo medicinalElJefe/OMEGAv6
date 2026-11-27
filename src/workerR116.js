@@ -1,4 +1,5 @@
 import {cloudArchive} from './archive/cloudArchive.js';
+import {compileSaiCloudSource} from './execution/saiCloudCorpus.js';
 import {creationStudioApiR881} from './system/creationStudioApiR881.mjs';
 import r115,{OmegaRuntime as OmegaRuntimeR115} from './workerR115.js';
 import {planIntentR103} from './federation/federationIntentRouterR103.js';
@@ -9,7 +10,7 @@ import {OmegaSwarmBranch,OmegaSwarmOrgan,OmegaSwarmOrganismCoordinator} from './
 import {OmegaSwarmAutonomicCoordinator} from './swarm/swarmAutonomicR125.js';
 import {manifestR130,operationalR130,R130_REVISION} from './system/operationalControlPlaneR130.js';
 import {closeHybridReturnR141,readHybridClosureR141,replayHybridClosureR141,manifestR141,R141_REVISION} from './hybridProofClosureR141.js';
-import {createRunR146,listRunsR146,manifestR146,readRunR146,replayRunR146,transitionRunR146,R146_REVISION} from './execution/durableOperationExecutionR146.js';
+import {createRunR146,listRunsR146,manifestR146,readRunR146,replayRunR146,transitionRunR146,authorizeOperatorRunR146,R146_REVISION} from './execution/durableOperationExecutionR146.js';
 import {dispatchRunR147,executorDirectoryR147,manifestR147,pollRunR147,readResultR147,syncHybridClaimR147,syncHybridReturnR147,R147_REVISION} from './execution/unifiedExecutorFabricR147.js';
 import {advanceSovereignMissionR152,hydrateSovereignMissionsR152,manifestR152,resumeSovereignMissionR152,tagSovereignMissionR152,R152_MISSION_SCHEMA,R152_REVISION,R152_SOURCE_SCHEMA} from './execution/adaptiveSovereignMissionR152.js';
 import {publicLearningR331,runtimeLearningR331} from './system/coherentLearningWorkerR331.js';
@@ -252,9 +253,22 @@ export class OmegaRuntime extends OmegaRuntimeR115 {
   if(closureRoute){if(!await this.authorized(request))return json({ok:false,code:'PAIR_AUTH_FAILED'},401);const id=closureRoute[1];if(closureRoute[2]==='closure'&&request.method==='GET'){const closure=await readHybridClosureR141(this,id);return closure?json({ok:true,closure}):json({ok:false,code:'R141_CLOSURE_NOT_FOUND'},404)}if(closureRoute[2]==='replay'&&request.method==='POST'){const receipt=await replayHybridClosureR141(this,id);return receipt?json({ok:receipt.ok,receipt},receipt.ok?200:409):json({ok:false,code:'R141_CLOSURE_NOT_FOUND'},404)}}
   if(path.startsWith('/execution/')){if(!await this.authorized(request))return json({ok:false,code:'PAIR_AUTH_FAILED',reply:'Durable execution history requires the authenticated OMEGA runtime bridge.'},401);
    if(path==='/execution/executors'&&request.method==='GET')return json({ok:true,...await executorDirectoryR147(this)});
-   if(path==='/execution/runs'&&request.method==='POST'){const body=await request.json().catch(()=>({})),result=await createRunR146(this,body);return json(result,result.status||200)}
+   if(path==='/execution/runs'&&request.method==='POST'){
+    const body=await request.json().catch(()=>({}));
+    if(body?.metadata?.saiCloudExecution===true||body?.metadata?.saiCloudTraining===true){
+     if(body.contract?.route!=='SAI Lab'||body.contract?.executionDomain!=='SAI')return json({ok:false,code:'SAI_R143_CONTRACT_REQUIRED'},400);
+     try{
+      const packet=await compileSaiCloudSource(this.env?.ASSETS,body.metadata.saiRequest);
+      const training=packet.kind==='TRAIN_REGIONAL';
+      if(training!==(body.metadata.saiCloudTraining===true))return json({ok:false,code:'SAI_SOURCE_KIND_MISMATCH'},400);
+      body.metadata={saiCloudExecution:!training,saiCloudTraining:training,address:packet.address,stateId:packet.stateId,sourcePacket:packet};
+      body.intent=training?'Train scoped projected scar regression':packet.query;
+     }catch(e){return json({ok:false,code:'SAI_SERVER_SOURCE_HELD',reply:String(e?.message||e).slice(0,240)},409)}
+    }
+    const result=await createRunR146(this,body);return json(result,result.status||200)
+   }
    if(path==='/execution/runs'&&request.method==='GET'){const runs=await listRunsR146(this);return json({ok:true,schema:'OMEGA_EXECUTION_RUN_LIST_R146',runs,canonicalMutation:false,canonicalAdmissionAuthority:'R125'})}
-   const executionRoute=path.match(/^\/execution\/runs\/([A-Za-z0-9._:-]+)(?:\/(transition|replay|dispatch|poll|result))?$/);if(executionRoute){const id=executionRoute[1],action=executionRoute[2]||'';if(!action&&request.method==='GET'){const run=await readRunR146(this,id);return run?json({ok:true,run}):json({ok:false,code:'R146_RUN_NOT_FOUND'},404)}if(action==='transition'&&request.method==='POST'){const body=await request.json().catch(()=>({})),result=await transitionRunR146(this,id,body);return json(result,result.status||200)}if(action==='replay'&&request.method==='POST'){const receipt=await replayRunR146(this,id);return receipt?json({ok:receipt.ok,receipt},receipt.ok?200:409):json({ok:false,code:'R146_RUN_NOT_FOUND'},404)}if(action==='dispatch'&&request.method==='POST'){const body=await request.json().catch(()=>({})),defaults={temperature:Number.isFinite(Number(body.temperature))?Number(body.temperature):.2,providerBudget:Number.isFinite(Number(body.providerBudget))?Number(body.providerBudget):4,...body},queueHybrid=async jobInput=>{const headers=new Headers(request.headers);headers.set('content-type','application/json');const response=await super.fetch(new Request('https://omega-runtime.internal/jobs',{method:'POST',headers,body:JSON.stringify(jobInput)})),data=await response.clone().json().catch(()=>({}));return{...data,ok:response.ok,status:response.status}};const result=await dispatchRunR147(this,id,defaults,{queueHybrid});return json(result,result.status||200)}if(action==='poll'&&request.method==='POST'){const result=await pollRunR147(this,id);return json(result,result.status||200)}if(action==='result'&&request.method==='GET'){const result=await readResultR147(this,id);return result?json({ok:true,...result}):json({ok:false,code:'R147_RUN_NOT_FOUND'},404)}}
+   const executionRoute=path.match(/^\/execution\/runs\/([A-Za-z0-9._:-]+)(?:\/(transition|replay|dispatch|poll|result))?$/);if(executionRoute){const id=executionRoute[1],action=executionRoute[2]||'';if(!action&&request.method==='GET'){const run=await readRunR146(this,id);return run?json({ok:true,run}):json({ok:false,code:'R146_RUN_NOT_FOUND'},404)}if(action==='transition'&&request.method==='POST'){const body=await request.json().catch(()=>({})),result=await authorizeOperatorRunR146(this,id,body);return json(result,result.status||200)}if(action==='replay'&&request.method==='POST'){const receipt=await replayRunR146(this,id);return receipt?json({ok:receipt.ok,receipt},receipt.ok?200:409):json({ok:false,code:'R146_RUN_NOT_FOUND'},404)}if(action==='dispatch'&&request.method==='POST'){const body=await request.json().catch(()=>({})),defaults={temperature:Number.isFinite(Number(body.temperature))?Number(body.temperature):.2,providerBudget:Number.isFinite(Number(body.providerBudget))?Number(body.providerBudget):4,...body},queueHybrid=async jobInput=>{const headers=new Headers(request.headers);headers.set('content-type','application/json');const response=await super.fetch(new Request('https://omega-runtime.internal/jobs',{method:'POST',headers,body:JSON.stringify(jobInput)})),data=await response.clone().json().catch(()=>({}));return{...data,ok:response.ok,status:response.status}};const result=await dispatchRunR147(this,id,defaults,{queueHybrid});return json(result,result.status||200)}if(action==='poll'&&request.method==='POST'){const result=await pollRunR147(this,id);return json(result,result.status||200)}if(action==='result'&&request.method==='GET'){const result=await readResultR147(this,id);return result?json({ok:true,...result}):json({ok:false,code:'R147_RUN_NOT_FOUND'},404)}}
   }
   return super.fetch(request);
  }

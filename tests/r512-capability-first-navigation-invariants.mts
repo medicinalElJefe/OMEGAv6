@@ -117,6 +117,8 @@ for(const token of [
  "autoOpen={Boolean(softwareLaunch&&softwareLaunch.route===route)}"
 ])assert.ok(native.includes(token),'R512 native executor actuation missing '+token);
 
+assert.ok(native.includes('const boundLaunch=softwareLaunch?.route===route?softwareLaunch:null'),'R970 route-scoped focus must be resolved inside the native host');
+assert.ok(native.includes("data-r512-binding={boundLaunch?.recoveredId||''}"),'R970 unrelated routes must not expose a stale historical binding');
 const css=fs.readFileSync('src7/omega7.css','utf8');
 for(const token of [
  "R512 · CAPABILITY-FIRST NAVIGATION + RESOLVED HISTORICAL EXECUTION",
@@ -131,3 +133,17 @@ const ci=fs.readFileSync('.github/workflows/ci.yml','utf8');
 assert.ok(ci.includes('r512-capability-menu-execution-browser-e2e.mjs'),'R512 browser execution proof must be deployment-gating');
 
 console.log('R512 CAPABILITY-FIRST NAVIGATION PASS · six organized human areas · 72 capability lineages + 100 reviewed systems · every KEEP/MERGE system resolves working/gated successor · donors archive-only · R142/R125 proof chain retained');
+
+ // R985: stale lazy launch resolution must never override a newer operator
+ // selection; ordinary route/domain/history navigation clears focus.
+for(const token of [
+ 'const requestedEpoch=recoveredFocusEpoch.current',
+ 'if(requestedEpoch!==recoveredFocusEpoch.current)return',
+ 'if(!preserveRecoveredFocus)clearRecoveredExecution()',
+ 'open(capsule.route,true)',
+ 'const restore=(event?:PopStateEvent)=>{\n   if(event)clearRecoveredExecution();',
+ 'return()=>{live=false;recoveredFocusEpoch.current++}',
+ 'const switchDomain=(domain:Omega7Domain)=>{\n  clearRecoveredExecution()',
+ 'const backToDomain=()=>{\n  clearRecoveredExecution()'
+])assert.ok(root.includes(token),'R985 operator navigation precedence missing '+token);
+assert.equal(root.split('const clearRecoveredExecution=()=>').length,2,'one historical focus clear authority');

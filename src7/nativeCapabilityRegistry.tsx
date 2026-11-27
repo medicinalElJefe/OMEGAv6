@@ -2,6 +2,7 @@ import {lazy,Suspense,useEffect,useRef,type ReactNode} from 'react';
 import type {OmegaRouteName} from '../src/navigationRegistry';
 import type {Omega7Depth} from './capabilityRegistry';
 import type {RecoveredExecutionCapsuleR512} from './capabilityMenuR512';
+import type {R512RecoveredSystemResolution} from '../src/recoveredSoftwareExecutionR512';
 import {Omega7Boundary} from './Omega7Boundary';
 import {HybridRuntimeSnapshotProviderR238} from '../src/HybridRuntimeSnapshotR238';
 
@@ -21,8 +22,9 @@ export function isOmega7NativeRoute(route:string):route is Omega7NativeRoute{
  return (OMEGA7_NATIVE_ROUTES as readonly string[]).includes(route);
 }
 
-export function Omega7NativeSurface({route,onNavigate,depth,softwareLaunch}:{route:Omega7NativeRoute;onNavigate:(route:string)=>void;depth:Omega7Depth;softwareLaunch?:RecoveredExecutionCapsuleR512|null}):ReactNode{
+export function Omega7NativeSurface({route,onNavigate,onLaunchRecoveredSystem,depth,softwareLaunch}:{route:Omega7NativeRoute;onNavigate:(route:string)=>void;onLaunchRecoveredSystem?:(row:R512RecoveredSystemResolution)=>void;depth:Omega7Depth;softwareLaunch?:RecoveredExecutionCapsuleR512|null}):ReactNode{
  const hostRef=useRef<HTMLDivElement|null>(null);
+ const boundLaunch=softwareLaunch?.route===route?softwareLaunch:null;
  useEffect(()=>{
   if(!softwareLaunch||softwareLaunch.route!==route)return;
   let complete=false,clicked=false;
@@ -51,9 +53,9 @@ export function Omega7NativeSurface({route,onNavigate,depth,softwareLaunch}:{rou
   case'Forecast':case'Visual Instrument':case'Field':case'Data Motion':case'Convergence':surface=<ForecastVisualWorkspaceR442 key={route} route={route} onNavigate={onNavigate} depth={depth}/>;break;
   case'Workspace':case'Projects':case'Memory':case'Create':case'Render Queue':case'Assets':surface=<WorkCreateWorkspaceR443 key={route} route={route} onNavigate={onNavigate} depth={depth} autoOpen={Boolean(softwareLaunch&&softwareLaunch.route===route)}/>;break;
   case'Hybrid Link':case'Quality Compiler':case'Build Out':case'Development':case'Kernel Intelligence':case'SAI Lab':surface=<DevelopmentComputeWorkspaceR444 key={route} route={route} onNavigate={onNavigate} depth={depth}/>;break;
-  case'Cockpit':case'Modes':case'Evidence & Proof':case'Archive Census':case'Archive Operators':case'Canon Evolution':case'Governance':case'Consolidation':case'Instructions':case'Plugins':case'Settings':case'System':case'Validation':case'System Atlas':case'Control Matrix':surface=<SystemEvidenceWorkspaceR445 key={route} route={route} onNavigate={onNavigate} depth={depth}/>;break;
+  case'Cockpit':case'Modes':case'Evidence & Proof':case'Archive Census':case'Archive Operators':case'Canon Evolution':case'Governance':case'Consolidation':case'Instructions':case'Plugins':case'Settings':case'System':case'Validation':case'System Atlas':case'Control Matrix':surface=<SystemEvidenceWorkspaceR445 key={route} route={route} onNavigate={onNavigate} onLaunchRecoveredSystem={onLaunchRecoveredSystem} depth={depth}/>;break;
  }
- return <div ref={hostRef} className='o7-executor-host' data-r512-executor-route={route} data-r512-binding={softwareLaunch?.recoveredId||''}>
+ return <div ref={hostRef} className='o7-executor-host' data-r512-executor-route={route} data-r512-binding={boundLaunch?.recoveredId||''}>
   <HybridRuntimeSnapshotProviderR238><Omega7Boundary label={`OMEGA7 ${route}`}><Suspense fallback={<section className='o7-native-loading' role='status' aria-live='polite'>Opening {route}…</section>}>{surface}</Suspense></Omega7Boundary></HybridRuntimeSnapshotProviderR238>
  </div>;
 }

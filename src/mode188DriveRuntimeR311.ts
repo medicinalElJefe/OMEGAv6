@@ -21,12 +21,28 @@ export const MODE188_DRIVE_AUTHORITY_R311=Object.freeze({
   boundary:'The Sratio and decision law are exact transcriptions of the declared Drive workbook. Runtime values are recomputed from the hosted source-derived packet channels; this does not claim that browser channels are fresh external measurements or literal physical telemetry.'
 } as const);
 
+// R980: validate the workbook's actual channel dependencies before evaluating.
+// Do not confuse missing evidence with an explicit numerical zero.
+export function missingMode188InputsR980(record:any):string[]{
+ const missing:string[]=[];
+ for(const [key,name] of [['continuity','CΩ'],['burden','Λ'],['contradiction','q']] as const){
+  const v=record?.metrics?.[key];
+  if(typeof v!=='number'||!Number.isFinite(v)||v<0)missing.push(name);
+ }
+ const d=record?.coordinates?.d;
+ if(!Number.isInteger(d)||d<0||d>11)missing.push('D');
+ return missing;
+}
 export function evaluateMode188DriveRuntimeR311(record:any){
+ const missing=missingMode188InputsR980(record);
+ if(missing.length)throw new RangeError('Mode 188 required packet inputs invalid: '+missing.join(', '));
   const C=num(record?.metrics?.continuity),ledger=Math.max(0,num(record?.metrics?.burden)),q=Math.max(0,num(record?.metrics?.contradiction));
   const domain=Math.max(1,Math.min(12,Math.floor(num(record?.coordinates?.d))+1));
   const controls=DRIVE_CANON_SOURCE.controls,gamma=controls.Gamma_LambdaQ,epsilon=controls.Epsilon;
   const denominator=ledger+q+gamma*(ledger*q)+epsilon;
-  const sratio=denominator>0?C/denominator:0;
+  if(!Number.isFinite(denominator)||denominator<=0)throw new RangeError('Mode 188 denominator invalid');
+  const sratio=C/denominator;
+  if(!Number.isFinite(sratio))throw new RangeError('Mode 188 ratio invalid');
   const turnCorridor=domain===10||domain===11;
   const escalationCorridor=domain===11&&q>.5;
   const decision:Mode188DecisionR311=sratio>=controls.Stay_Threshold&&!turnCorridor?'STAY':sratio<controls.Escalate_Threshold||escalationCorridor?'ESCALATE':'TURN';

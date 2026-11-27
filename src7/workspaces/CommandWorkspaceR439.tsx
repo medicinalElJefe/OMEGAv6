@@ -5,6 +5,7 @@ import {sourceBackedModeSummary} from '../../src/sourceBackedModeRuntimeR21';
 import {compileFullOverallModePlanR79,compactModePlanR79} from '../../src/fullOverallModeOrchestratorR79';
 import {unifiedFromRecord} from '../../src/unifiedCalculus';
 import {OmegaCommandDeck} from '../../src/OmegaCommandDeck';
+import OmegaIntentWorkbenchR85 from '../../src/OmegaIntentWorkbenchR85';
 import OmegaRichText from '../../src/OmegaRichText';
 import type {Omega7Depth} from '../capabilityRegistry';
 
@@ -26,6 +27,7 @@ export default function CommandWorkspaceR439({onNavigate,depth}:Props){
  const[prompt,setPrompt]=useState(()=>String(localState.read('omega.b015.chatDraft.v1','')));
  const[response,setResponse]=useState<any>(null);
  const[busy,setBusy]=useState('');
+ const[workflowOpen,setWorkflowOpen]=useState(false);
 
  const boot=async()=>{
   setBootError('');
@@ -59,6 +61,13 @@ export default function CommandWorkspaceR439({onNavigate,depth}:Props){
   instrumentView:'LIVE',
   workspace:'COMMAND'
  }),[address,coords]);
+
+ const commitAddress=(next:number)=>{
+  const bounded=clamp(next);
+  localState.write('omega.v6.address',bounded);
+  window.dispatchEvent(new CustomEvent('omega7-address-changed',{detail:{address:bounded}}));
+  setAddress(bounded);
+ };
 
  const run=async()=>{
   if(!record||!modes||!modePlan||!prompt.trim()||busy)return;
@@ -142,10 +151,14 @@ export default function CommandWorkspaceR439({onNavigate,depth}:Props){
      {response.nextAction&&<div className='o7-command-next'><b>Next useful action</b><span>{response.nextAction}</span></div>}
      <details><summary>Why this result?</summary><dl><div><dt>Route</dt><dd>{response.responsePath||'ROUTED'}</dd></div><div><dt>Evidence state</dt><dd>{response.evidenceStatus||'UNKNOWN'}</dd></div><div><dt>Current state</dt><dd>{record.stateId.toLocaleString()}</dd></div><div><dt>Applied modes</dt><dd>{modes.appliedCount}</dd></div><div><dt>Gated modes</dt><dd>{modes.gatedCount}</dd></div></dl><p>{response.uncertainty}</p></details>
     </section>}
-    <footer className='o7-command-capability-links'><button onClick={()=>onNavigate('Projects')}>Projects</button><button onClick={()=>onNavigate('Earth Now')}>Earth & Weather</button><button onClick={()=>onNavigate('Development')}>Build Software</button><button onClick={()=>onNavigate('Evidence & Proof')}>Evidence</button></footer>
+    <footer className='o7-command-capability-links'><button onClick={()=>setWorkflowOpen(open=>!open)} aria-expanded={workflowOpen}>{workflowOpen?'Close operational workflow':'Build / execute with full OMEGA workflow'}</button><button onClick={()=>onNavigate('Projects')}>Projects</button><button onClick={()=>onNavigate('Earth Now')}>Earth & Weather</button><button onClick={()=>onNavigate('Development')}>Build Software</button><button onClick={()=>onNavigate('Evidence & Proof')}>Evidence</button></footer>
    </div>:
    <div className='o7-native-surface o7-command-native-surface'>
     <OmegaCommandDeck record={record} state={state} prompt={prompt} onPrompt={setPrompt} onRun={run} response={response} busy={busy} onNavigate={onNavigate}/>
+    <button type='button' aria-expanded={workflowOpen} onClick={()=>setWorkflowOpen(open=>!open)}>{workflowOpen?'Close OMEGA project workflow':'Execute this goal through OMEGA workflow engine'}</button>
    </div>}
+  {workflowOpen&&<div className='o7-native-surface' data-r917-command-workflow='R85_R86_R87_R108' style={{marginTop:16}}>
+   <OmegaIntentWorkbenchR85 record={record} address={address} currentPanel='Command Center' onAddress={commitAddress} onNavigate={onNavigate} initialGoal={prompt.trim()}/>
+  </div>}
  </section>;
 }

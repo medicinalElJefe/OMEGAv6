@@ -1,7 +1,10 @@
 import { defineConfig } from 'vite';
+import {saiCorpusAssets} from './scripts/saiCorpusAssets';
 import react from '@vitejs/plugin-react';
 import { createHash } from 'node:crypto';
 import { writeFile } from 'node:fs/promises';
+import { readdirSync,statSync } from 'node:fs';
+import { dirname,basename,extname,relative,resolve } from 'node:path';
 
 function governedBuildReceipt(){
   return {
@@ -56,8 +59,34 @@ function vendorChunkR109(id:string){
   return undefined;
 }
 
+// R896: on Windows, case-insensitive NTFS can resolve './UpperComponent' to a
+// different lower-camel .ts helper before the intended UpperComponent.tsx.
+// Resolve extensionless source imports using exact directory-entry spelling,
+// preserving normal Vite extension precedence and preserving all historical files.
+function exactCaseSourceResolutionR896(){
+ const candidates=['.mjs','.js','.mts','.ts','.jsx','.tsx','.json'];
+ return {
+  name:'omega-r896-exact-case-source-resolution',
+  enforce:'pre' as const,
+  resolveId(specifier:string,importer?:string){
+   if(!importer||!specifier.startsWith('.')||extname(specifier))return null;
+   const from=importer.split('?')[0];
+   const relativeImporter=relative(process.cwd(),from).replace(/\\/g,'/');
+   if(!relativeImporter.startsWith('src/')&&!relativeImporter.startsWith('src7/'))return null;
+   const target=resolve(dirname(from),specifier);
+   for(const extension of candidates){
+    const candidate=target+extension;
+    try {
+     if(readdirSync(dirname(candidate)).includes(basename(candidate))&&statSync(candidate).isFile())return candidate;
+    }catch{}
+   }
+   return null;
+  }
+ };
+}
+
 export default defineConfig({
-  plugins: [react(),governedBuildReceipt(),initialEntryBudgetR1991()],
+  plugins: [react(),governedBuildReceipt(),initialEntryBudgetR1991(),exactCaseSourceResolutionR896(),saiCorpusAssets()],
   build: {
     outDir: 'dist',
     sourcemap: true,

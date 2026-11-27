@@ -1,0 +1,30 @@
+{
+  "schema": "OMEGA_V35_ORIGINAL_ATLAS_DB_R954",
+  "originalSource": "OMEGA_V35_PART_18.zip/OMEGA_SETUP/expansion/PSC_20736D_OMEGA_MASTER_ATLAS_UNDER_150MB.zip/psc_finished_atlas.sqlite",
+  "sourceManifest": "source_manifest/OMEGA_MASTER_MANIFEST.json",
+  "sourceSqliteSha256": "24a03b232ebd35d755fe2f7152e04067c9e5755d0593dcc525a727480601fb38",
+  "sourceSqliteBytes": 383766528,
+  "sqliteQuickCheck": "PASS",
+  "originalRows": 149679,
+  "originalFtsRows": 149679,
+  "originalSourceFiles": 13,
+  "originalSheets": 35,
+  "originalNonemptyDomains": 240,
+  "originalNonemptyRoots": 12,
+  "originalNonemptyFunctions": 16,
+  "originalGateCensus": {
+    "STAY": 110152,
+    "TURN": 35045,
+    "ESCALATE": 26,
+    "ADMIT": 11,
+    "UNASSIGNED": 4445
+  },
+  "originalEvidenceLedgerEntries": 7,
+  "exampleWaterFtsMatches": 2024,
+  "sourceRowsIndependentlyCounted": true,
+  "originalSourceWorkbookRowsNotIndependentObservations": true,
+  "originalEmpiricalPhysicsProof": false,
+  "nativeGpuProof": false,
+  "canonicalWrites": 0,
+  "productionCertified": false
+}

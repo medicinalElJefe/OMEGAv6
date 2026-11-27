@@ -1,6 +1,7 @@
 import {useEffect,useMemo,useState,lazy,Suspense} from 'react';
 import SelfBuildTruthR539 from '../SelfBuildTruthR539';
-import HybridMissionControlR8 from '../../src/HybridMissionControlR8';
+import HybridLinkR32 from '../../src/HybridLinkR32';
+import {HybridRuntimeSnapshotProviderR238} from '../../src/HybridRuntimeSnapshotR238';
 import UniversalQualityControl from '../../src/UniversalQualityControl';
 import WovenBuildOutPanel from '../../src/WovenBuildOutPanel';
 import SAISovereignControl from '../../src/SAISovereignControl';
@@ -68,10 +69,10 @@ export default function DevelopmentComputeWorkspaceR444({route,onNavigate,depth}
    <button className='o7-open-instrument' onClick={()=>setInstrumentOpen(true)}>Open full {route} workspace</button>
   </section>}
 
-  {route==='Hybrid Link'&&<Suspense fallback={<section role='status'>Loading local automation hub controls…</section>}><OmegaLocalHubPanelR884/></Suspense>}
+  {(route==='Hybrid Link'||route==='Development'||route==='Build Out')&&<Suspense fallback={<section role='status'>Loading authenticated local execution controls…</section>}><OmegaLocalHubPanelR884 initialOperation={route==='Hybrid Link'?'HASH_TREE':'SPHERE_TENSOR_STEP'}/></Suspense>}
 
   {instrumentOpen&&<div className='o7-native-surface'>
-   {route==='Hybrid Link'?<HybridMissionControlR8 status={status} record={record}/>:
+   {route==='Hybrid Link'?<HybridRuntimeSnapshotProviderR238><HybridLinkR32 status={status} record={record} showOperationalWorkspace={false}/></HybridRuntimeSnapshotProviderR238>:
     route==='Quality Compiler'?<UniversalQualityControl record={record} status={status} restore={restore} modeCount={modeSummary.appliedCount} catalogCount={modeSummary.catalogCount}/>:
     route==='Build Out'?<WovenBuildOutPanel address={address} onNavigate={onNavigate}/>:
     route==='Development'?<section className='o7-development-combined'><SelfBuildTruthR539/><WovenBuildOutPanel address={address} onNavigate={onNavigate}/><OmegaIntentWorkbenchR85 record={record} address={address} currentPanel='Development' onAddress={commit} onNavigate={onNavigate}/></section>:

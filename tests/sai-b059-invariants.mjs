@@ -51,3 +51,135 @@ assert.doesNotMatch(pkg,/@appdeploy\/client|appdeploy\.ai/i,'SAI restoration mus
 assert.match(manifest,/OMEGA_SAI_B059_PART_01_CORE_COMPILED\.zip/,'manifest must identify exact donor archive');
 await import('./r209-end-to-end-mission-lineage-invariants.mjs');
 console.log('SAI_B059_R209_INVARIANTS PASS · R195 differential + R195.1 live bridge + R196.1 held SAI→Hybrid handoff + R209 SHA-bound operator-review lineage · authority boundaries locked');
+
+// R992 real parameter training, not merely a prepared training batch.
+const {initializeR992,exampleR992,datasetR992,lossGradientR992,trainR992,predictR992,verifyTrainingR992}=await import('../src/saiRelationalLearningR992.mjs');
+const ds992=datasetR992(37);
+assert.equal(new Set([...ds992.train,...ds992.validation,...ds992.test].map(x=>x.address)).size,768);
+const w992=initializeR992(37),sample992=[exampleR992(0),exampleR992(20735)],g992=lossGradientR992(w992,sample992);
+for(let i=0;i<w992.length;i++){const plus=w992.slice(),minus=w992.slice(),eps=1e-6;plus[i]+=eps;minus[i]-=eps;const numeric=(lossGradientR992(plus,sample992).loss-lossGradientR992(minus,sample992).loss)/(2*eps);assert.ok(Math.abs(numeric-g992.gradient[i])<1e-7,'gradient '+i)}
+const trained992=trainR992({seed:37,epochs:80});
+assert.ok(trained992.final.test<trained992.initial.test);
+assert.ok(trained992.final.validation<trained992.initial.validation);
+assert.notDeepEqual(trained992.weights,w992);
+assert.deepEqual(trainR992({seed:37,epochs:80}),trained992);
+assert.deepEqual(verifyTrainingR992(JSON.parse(JSON.stringify(trained992))),trained992.final);
+const changed992=JSON.parse(JSON.stringify(trained992));changed992.weights[0]+=.1;assert.throws(()=>verifyTrainingR992(changed992),/evaluation mismatch/);
+assert.throws(()=>trainR992({epochs:201}),RangeError);
+assert.ok(Number.isFinite(predictR992(trained992.weights,20735)));
+assert.ok(fabric.includes('<SaiRelationalLearningR992 address={address}/>'));
+console.log('R992 actual CPU relational gradient training PASS: '+JSON.stringify({before:trained992.initial,after:trained992.final,parameters:trained992.parameterCount}));
+
+ // R993 continuation is equivalent to the original uninterrupted optimizer.
+const {startTrainingR993,advanceTrainingR993,verifySessionR993,completeTrainingR993,chartPredictionsR993}=await import('../src/saiRelationalLearningR992.mjs');
+const initial993=startTrainingR993({targetEpochs:80}),partial993=advanceTrainingR993(initial993,31);
+assert.equal(initial993.epoch,0);assert.equal(partial993.epoch,31);assert.ok(Object.isFrozen(partial993.currentWeights));
+assert.equal(partial993.status,'PAUSED');assert.throws(()=>completeTrainingR993(partial993),/requires completed/);
+const restored993=verifySessionR993(JSON.parse(JSON.stringify(partial993)));
+assert.deepEqual(restored993,partial993);
+const finished993=advanceTrainingR993(restored993,49);
+assert.equal(finished993.status,'COMPLETE');
+assert.deepEqual(completeTrainingR993(finished993),trained992);
+assert.deepEqual(advanceTrainingR993(initial993,80),finished993);
+const corrupted993=JSON.parse(JSON.stringify(partial993));corrupted993.currentWeights[0]+=.01;
+assert.throws(()=>verifySessionR993(corrupted993),/replay mismatch/);
+assert.throws(()=>advanceTrainingR993(finished993,1),RangeError);
+let count993=0;
+for(let start=0;start<20736;start+=144){const rows=chartPredictionsR993(trained992.weights,start,144);for(const row of rows){assert.equal(row.address,count993++);assert.equal(row.prediction,predictR992(trained992.weights,row.address));assert.equal(row.residual,row.prediction-row.target)}}
+assert.equal(count993,20736);
+assert.throws(()=>chartPredictionsR993(trained992.weights,20735,2),RangeError);
+const learningUi993=read('src/SaiRelationalLearningR992.tsx');
+for(const token of ['Pause training','Resume training','verifySessionR993(packet.payload)','advanceTrainingR993(current,4)','Export 20,736 prediction field'])assert.ok(learningUi993.includes(token),'missing R993 UI '+token);
+console.log('R993 PASS: exact 31+49 epoch continuation equals uninterrupted R992; tamper rejection and exhaustive addressed prediction export parity.');
+
+// R994 real complete-field evaluation and independent forward implementation.
+const {evaluateFieldR994,verifyFieldAuditR994}=await import('../src/saiRelationalLearningR992.mjs');
+const audit994=evaluateFieldR994(finished993);
+assert.equal(audit994.coverage,20736);
+assert.equal(audit994.maximumReferenceDifference,0);
+assert.deepEqual(Object.values(audit994.split).map(row=>row.count),[512,128,128,19968]);
+assert.equal(audit994.domains.length,12);assert.ok(audit994.domains.every(row=>row.count===1728));
+assert.equal(audit994.nodeRegions.length,144);assert.ok(audit994.nodeRegions.every(row=>row.count===144));
+assert.ok(Math.abs(audit994.split.TEST.mse-trained992.final.test)<1e-12);
+assert.ok(Math.abs(audit994.full.mse-Object.values(audit994.split).reduce((sum,row)=>sum+row.mse*row.count,0)/20736)<1e-12);
+assert.deepEqual(verifyFieldAuditR994(JSON.parse(JSON.stringify(finished993)),JSON.parse(JSON.stringify(audit994))),audit994);
+const changed994=JSON.parse(JSON.stringify(audit994));changed994.split.UNUSED.count--;
+assert.throws(()=>verifyFieldAuditR994(finished993,changed994),/return mismatch/);
+assert.throws(()=>evaluateFieldR994(partial993),/requires completed/);
+assert.ok(learningUi993.includes('Verify full prediction field')&&learningUi993.includes('Export verified field audit'));
+console.log('R994 PASS: '+JSON.stringify({coverage:audit994.coverage,split:audit994.split,reference:audit994.maximumReferenceDifference}));
+
+// R995 explicit synthetic fixture exercising the real local-data path.
+const {R995_HEADER,parseDatasetR995,splitDatasetR995,startUserTrainingR995,advanceUserTrainingR995,verifyUserTrainingR995,evaluateUserTrainingR995}=await import('../src/saiRelationalLearningR992.mjs');
+const csv995=[R995_HEADER,...Array.from({length:120},(_,i)=>{const x=exampleR992(i*137);return [x.address,...x.features,x.target].join(',')})].join('\n');
+const data995=parseDatasetR995(csv995,'SYNTHETIC_TEST_FIXTURE_R995');
+const split995=splitDatasetR995(data995,37);
+assert.deepEqual(Object.values(split995).map(rows=>rows.length),[72,24,24]);
+assert.equal(new Set(Object.values(split995).flat().map(row=>row.address)).size,120);
+assert.throws(()=>startUserTrainingR995(data995),/authorization/);
+const begin995=startUserTrainingR995(data995,{authorized:true}),partial995=advanceUserTrainingR995(begin995,31);
+assert.throws(()=>evaluateUserTrainingR995(partial995),/Complete/);
+const end995=advanceUserTrainingR995(verifyUserTrainingR995(JSON.parse(JSON.stringify(partial995))),49);
+assert.deepEqual(end995,advanceUserTrainingR995(begin995,80));
+const eval995=evaluateUserTrainingR995(end995);assert.equal(eval995.predictions.length,120);assert.ok(eval995.partitions.test.mse<eval995.partitions.test.initialMse);
+const corrupt995=JSON.parse(JSON.stringify(partial995));corrupt995.currentWeights[0]+=.01;assert.throws(()=>verifyUserTrainingR995(corrupt995),/replay mismatch/);
+assert.throws(()=>parseDatasetR995(csv995+'\n'+csv995.split('\n')[1],'fixture'),/duplicate/);
+assert.ok(learningUi993.includes('<SaiUserTrainingR995/>'));
+console.log('R995 PASS: local supervision, address-disjoint partitions, exact replay and refusals.');
+
+ // R998 complete 144-region training bank; synthetic fixture exercises the
+ // identical projected-source feature adapter without claiming raw donors.
+const {projectedRegionR998,trainProjectedRegionR998,summarizeBankR998,predictRegionalR998,verifyRegionalModelR998}=await import('../src/saiRelationalLearningR992.mjs');
+const read998=address=>{const x=exampleR992(address),f=x.features;return {address,stateId:address+1,metrics:{continuity:f[0],plasticity:f[1],contradiction:f[2],burden:f[3],evidence:f[4],geometry:f[5],rsc:f[6],scar:x.target},math:{normalizedMotionRelativity:f[7]}}};
+const models998=[];
+for(let region=0;region<144;region++){const dataset=projectedRegionR998(read998,region),model=trainProjectedRegionR998(dataset,region);models998.push(model);for(const row of model.predictions){const inference=predictRegionalR998(dataset,model,row.address);assert.equal(inference.prediction,row.prediction);assert.equal(inference.residual,row.residual)}}
+const summary998=summarizeBankR998(models998);assert.equal(summary998.addresses,20736);assert.equal(summary998.parameterCount,17424);assert.equal(summary998.complete,true);
+assert.deepEqual(Object.values(summary998.partitions).map(x=>x.count),[12384,4032,4320]);
+assert.deepEqual(verifyRegionalModelR998(projectedRegionR998(read998,143),JSON.parse(JSON.stringify(models998[143]))),models998[143]);
+assert.throws(()=>summarizeBankR998([models998[0],models998[0]]),/Duplicate/);
+assert.throws(()=>predictRegionalR998(projectedRegionR998(read998,0),models998[0],144),/region/);
+assert.ok(fabric.includes('<SaiRegionalBankR998 address={address}/>'));
+console.log('R998 PASS: 144 models, exhaustive 20736 addressed fixture inference and 17424 parameters.');
+
+const {correlateFieldR999}=await import('../src/saiRelationalLearningR992.mjs');
+const field999=models998.flatMap(m=>m.predictions.map(p=>p.prediction));
+const result999=correlateFieldR999(field999,{steps:4});
+assert.equal(result999.values.length,20736);
+assert.equal(result999.edges,82944);
+assert.ok(Math.abs(result999.residual)<1e-8);
+assert.deepEqual(correlateFieldR999(field999,{steps:4}),result999);
+const impulse999=Array(20736).fill(0);impulse999[0]=1;
+const spread999=correlateFieldR999(impulse999).values;
+assert.equal(spread999[0],0);
+for(const i of [1,11,12,132,144,1584,1728,19008])assert.equal(spread999[i],.125);
+assert.equal(spread999.reduce((a,b)=>a+b,0),1);
+assert.deepEqual(correlateFieldR999(Array(20736).fill(2)).values,Array(20736).fill(2));
+assert.throws(()=>correlateFieldR999(field999,{weight:.126}),/Invalid/);
+assert.throws(()=>correlateFieldR999(field999,{steps:33}),/Invalid/);
+assert.throws(()=>correlateFieldR999([NaN]),/Invalid/);
+console.log('R999 PASS: periodic four-axis conservative prediction exchange and deterministic replay.');
+
+const {fieldReceiptR1000,verifyFieldReceiptR1000}=await import('../src/saiRelationalLearningR992.mjs');
+const binds1000=Array.from({length:144},(_,region)=>({region,sourceSha256:'a'.repeat(64),modelSha256:region.toString(16).padStart(64,'0')}));
+const receipt1000=fieldReceiptR1000(field999,binds1000,{steps:4});
+assert.deepEqual(receipt1000.result,result999);
+assert.deepEqual(verifyFieldReceiptR1000(JSON.parse(JSON.stringify(receipt1000)),field999,binds1000),receipt1000);
+const tamper1000=JSON.parse(JSON.stringify(receipt1000));tamper1000.result.values[0]+=.01;
+assert.throws(()=>verifyFieldReceiptR1000(tamper1000,field999,binds1000),/replay mismatch/);
+const changed1000=binds1000.map((b,i)=>i===0?{...b,modelSha256:'f'.repeat(64)}:b);
+assert.throws(()=>verifyFieldReceiptR1000(receipt1000,field999,changed1000),/replay mismatch/);
+assert.throws(()=>fieldReceiptR1000(field999,binds1000.slice(1)),/bindings/);
+assert.throws(()=>fieldReceiptR1000(Array(20736),binds1000),/dense/);
+console.log('R1000 PASS: full field receipt roundtrip, source/model binding and tamper rejection.');
+
+const {auditCorrelationR1001}=await import('../src/saiRelationalLearningR992.mjs');
+const audit1001=auditCorrelationR1001(receipt1000,read998);
+assert.equal(audit1001.full.before.count,20736);
+assert.deepEqual(Object.values(audit1001.partitions).map(p=>p.before.count),[12384,4032,4320]);
+assert.equal(audit1001.regions.length,144);
+assert.ok(audit1001.regions.every(r=>r.before.count===144&&r.after.count===144));
+for(const kind of ['train','validation','test'])assert.ok(Math.abs(audit1001.partitions[kind].before.mse-summary998.partitions[kind].mse)<1e-12);
+const identity1001=auditCorrelationR1001(fieldReceiptR1000(field999,binds1000,{weight:0}),read998);
+assert.deepEqual(identity1001.full.before,identity1001.full.after);
+assert.throws(()=>auditCorrelationR1001(tamper1000,read998),/replay mismatch/);
+console.log('R1001 PASS: full and partitioned correlation evaluation, identity and tamper refusal.');

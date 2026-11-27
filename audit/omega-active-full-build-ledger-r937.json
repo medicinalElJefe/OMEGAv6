@@ -1,0 +1,642 @@
+{
+  "schema": "OMEGA_ACTIVE_FULL_BUILD_LEDGER_R937",
+  "sourceBaselineSha": "d40009e255d30ca407cff80526c80f385531cf85",
+  "scope": "ALL_KNOWN_SOURCE_AND_HISTORICAL_WORKSTREAMS_NOT_AN_EXHAUSTIVE_TWO_YEAR_ARCHIVE_AUDIT",
+  "releaseState": "UNMERGED_CANDIDATE_NOT_RELEASE_CLEAN",
+  "canonicalAdvancementIssue": "https://github.com/medicinalElJefe/OMEGAv6/issues/435",
+  "sourceLedgers": {
+    "software": "audit/omega-full-historical-software-ledger-r926.json",
+    "archive": "audit/omega-drive-historical-archive-source-index-r936.json",
+    "donor": "audit/omega-historical-donor-conservation-r922.json"
+  },
+  "invariants": {
+    "systems": 100,
+    "menus": 12,
+    "controls": 36,
+    "capabilities": 18,
+    "stages": 144,
+    "gates": 12,
+    "nativeRoutes": 44,
+    "bins": 24,
+    "outverse": 12,
+    "inverse": 12,
+    "outerAddresses": 20736,
+    "innerAddressesPerCell": 20736,
+    "addressPairs": 429981696,
+    "archivedSplitFamilies": 6,
+    "archivedNamedParts": 156,
+    "archivedCompanionZips": 18,
+    "otherChatArchiveMetadata": 1233
+  },
+  "archiveReleaseIds": [
+    "B043",
+    "B045",
+    "B053",
+    "B053-R7",
+    "V32",
+    "V35"
+  ],
+  "sourceTruth": "ROUTE_MAPPING_IS_NOT_INDEPENDENT_EXECUTOR_PROOF; METADATA_IS_NOT_ZIP_BYTES; HISTORICAL_REPORT_IS_NOT_NEW_CI; CI_IS_NOT_NATIVE_DEVICE_PROOF; NO_CANON_PROMOTION_BEYOND_EVIDENCE",
+  "workstreams": [
+    {
+      "id": "W01",
+      "name": "Runtime, CanonState and HostState",
+      "route": "System",
+      "primarySource": "src7/Omega7Root.tsx",
+      "evidenceState": "PARTIAL",
+      "acceptance": "REQUIRES_EXACT_SOURCE_RUNTIME_AND_NEGATIVE_TEST_PROOF",
+      "complete": false
+    },
+    {
+      "id": "W02",
+      "name": "100 software successors, 12 menus, 36 controls, 18 capabilities and 144 stages",
+      "route": "System Atlas",
+      "primarySource": "src/recoveredSoftwareExecutionR512.ts",
+      "evidenceState": "PARTIAL",
+      "acceptance": "REQUIRES_EXACT_SOURCE_RUNTIME_AND_NEGATIVE_TEST_PROOF",
+      "complete": false
+    },
+    {
+      "id": "W03",
+      "name": "44 routes, actions, ergonomic desktop/mobile",
+      "route": "Control Matrix",
+      "primarySource": "src7/nativeCapabilityRegistry.tsx",
+      "evidenceState": "PARTIAL",
+      "acceptance": "REQUIRES_EXACT_SOURCE_RUNTIME_AND_NEGATIVE_TEST_PROOF",
+      "complete": false
+    },
+    {
+      "id": "W04",
+      "name": "20,736 source states, nested 20,736-lane sparse transitions",
+      "route": "Atlas",
+      "primarySource": "tools/omega_sparse_tensor_r902.py",
+      "evidenceState": "PARTIAL",
+      "acceptance": "REQUIRES_EXACT_SOURCE_RUNTIME_AND_NEGATIVE_TEST_PROOF",
+      "complete": false
+    },
+    {
+      "id": "W05",
+      "name": "24 inverses/outverses and B010/B053/V61 release parity",
+      "route": "Archive Operators",
+      "primarySource": "src/v77BinLedgerR83.ts",
+      "evidenceState": "HELD",
+      "acceptance": "REQUIRES_EXACT_SOURCE_RUNTIME_AND_NEGATIVE_TEST_PROOF",
+      "complete": false
+    },
+    {
+      "id": "W06",
+      "name": "188 historical modes and complete mode catalogue with executed/gated distinctions",
+      "route": "Modes",
+      "primarySource": "src/sourceBackedModeRuntimeR21.ts",
+      "evidenceState": "PARTIAL",
+      "acceptance": "REQUIRES_EXACT_SOURCE_RUNTIME_AND_NEGATIVE_TEST_PROOF",
+      "complete": false
+    },
+    {
+      "id": "W07",
+      "name": "R125, R141, R146, R147, R170, R237 evidence and return governance",
+      "route": "Governance",
+      "primarySource": "docs/OMEGA_ADVANCEMENT_LEDGER.md",
+      "evidenceState": "PARTIAL",
+      "acceptance": "REQUIRES_EXACT_SOURCE_RUNTIME_AND_NEGATIVE_TEST_PROOF",
+      "complete": false
+    },
+    {
+      "id": "W08",
+      "name": "B043/B045/B053/B053-R7/V32/V35 and other historical ZIPs",
+      "route": "Archive Census",
+      "primarySource": "audit/omega-drive-historical-archive-source-index-r936.json",
+      "evidenceState": "HELD",
+      "acceptance": "REQUIRES_EXACT_SOURCE_RUNTIME_AND_NEGATIVE_TEST_PROOF",
+      "complete": false
+    },
+    {
+      "id": "W09",
+      "name": "Creation studio, render, geometry, images, traversal and authored output",
+      "route": "Visual Instrument",
+      "primarySource": "src7/workspaces/CreationDesignStudioR881.tsx",
+      "evidenceState": "PARTIAL",
+      "acceptance": "REQUIRES_EXACT_SOURCE_RUNTIME_AND_NEGATIVE_TEST_PROOF",
+      "complete": false
+    },
+    {
+      "id": "W10",
+      "name": "AI agents, workers, local inference and unified automation",
+      "route": "SAI Lab",
+      "primarySource": "src/FullSystemCompletionR153.tsx",
+      "evidenceState": "DEVICE_HELD",
+      "acceptance": "REQUIRES_EXACT_SOURCE_RUNTIME_AND_NEGATIVE_TEST_PROOF",
+      "complete": false
+    },
+    {
+      "id": "W11",
+      "name": "Windows EXE/installer, GPU and local host execution",
+      "route": "Build Out",
+      "primarySource": "tools/omega_local_hub_r881.py",
+      "evidenceState": "DEVICE_HELD",
+      "acceptance": "REQUIRES_EXACT_SOURCE_RUNTIME_AND_NEGATIVE_TEST_PROOF",
+      "complete": false
+    },
+    {
+      "id": "W12",
+      "name": "Performance, tests, deterministic packaging, exact deployed SHA and rollback",
+      "route": "Validation",
+      "primarySource": ".github/workflows/ci.yml",
+      "evidenceState": "RELEASE_HELD",
+      "acceptance": "REQUIRES_EXACT_SOURCE_RUNTIME_AND_NEGATIVE_TEST_PROOF",
+      "complete": false
+    }
+  ],
+  "blockers": [
+    {
+      "id": "HISTORY",
+      "state": "OPEN",
+      "description": "Unexamined historical archive contents and variant-specific behavior",
+      "route": "Archive Census"
+    },
+    {
+      "id": "ZIP_BYTES",
+      "state": "OPEN",
+      "description": "156 named Drive parts are not independently hashed or reconstructed",
+      "route": "Archive Operators"
+    },
+    {
+      "id": "V61",
+      "state": "OPEN",
+      "description": "V61.3 first part not found in targeted Library index, not proven globally absent",
+      "route": "Archive Operators"
+    },
+    {
+      "id": "BIN_PARITY",
+      "state": "OPEN",
+      "description": "24 bin source and execution parity across versions not established",
+      "route": "Archive Operators"
+    },
+    {
+      "id": "FAMILY_PARITY",
+      "state": "OPEN",
+      "description": "100 historical binaries not independently executable/proven equivalent",
+      "route": "System Atlas"
+    },
+    {
+      "id": "MODE_PARITY",
+      "state": "OPEN",
+      "description": "All historical modes not individually execution-proven",
+      "route": "Modes"
+    },
+    {
+      "id": "NATIVE_PC",
+      "state": "OPEN",
+      "description": "Current authenticated Windows/installer/GPU/model execution not accepted",
+      "route": "Hybrid Link"
+    },
+    {
+      "id": "UI_PARITY",
+      "state": "OPEN",
+      "description": "All route, control and complete user workflows not end-to-end accepted",
+      "route": "Validation"
+    },
+    {
+      "id": "RELEASE",
+      "state": "OPEN",
+      "description": "PR remains candidate; production exact-SHA proof and rollback required",
+      "route": "Governance"
+    }
+  ],
+  "releaseGates": [
+    "EXACT_HEAD_ALL_WORKFLOWS",
+    "HISTORICAL_EXECUTOR_PARITY",
+    "SOURCE_BYTE_AND_HASH_PROOF",
+    "24_BIN_INVERSE_OUTVERSE",
+    "20_736_BY_20_736_SPARSE_CONSERVATION",
+    "ALL_MODES_EXECUTION_OR_GATED_DISCLOSURE",
+    "R125_R141_R146_R147_AUTHORITY",
+    "WINDOWS_GPU_INSTALLER_RETURN",
+    "FULL_DESKTOP_MOBILE_UX",
+    "PERFORMANCE_AND_FAILURE_RECOVERY",
+    "GOVERNED_MERGE_AND_EXACT_DEPLOY",
+    "LIVE_POST_DEPLOY_ROLLBACK"
+  ],
+  "laws": [
+    "NO_STAGE_PROMOTED_BEYOND_EVIDENCE",
+    "NO_SECOND_SHADOW_RUNTIME",
+    "NEVER_DELETE_OR_OVERWRITE_HISTORICAL_DONORS",
+    "NO_UI_ROUTE_IMPLIED_EXECUTOR_COMPLETION",
+    "NO_PRODUCTION_PROMOTION_FROM_CANDIDATE_TEST",
+    "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
+    "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
+  ],
+  "latestGovernedWork": "R1001 evaluates R1000 source/model-bound field exchange against disjoint projected-source partitions; R1000 and R999 each 11/11 exact-head CI passed. R1001 candidate CI pending.",
+  "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
+  "independentArchiveByteWitnesses": 79,
+  "gateReceipts": [
+    {
+      "id": "EXACT_HEAD_ALL_WORKFLOWS",
+      "state": "HELD",
+      "proof": null
+    },
+    {
+      "id": "HISTORICAL_EXECUTOR_PARITY",
+      "state": "HELD",
+      "proof": null
+    },
+    {
+      "id": "SOURCE_BYTE_AND_HASH_PROOF",
+      "state": "HELD",
+      "proof": null
+    },
+    {
+      "id": "24_BIN_INVERSE_OUTVERSE",
+      "state": "HELD",
+      "proof": null
+    },
+    {
+      "id": "20_736_BY_20_736_SPARSE_CONSERVATION",
+      "state": "HELD",
+      "proof": null
+    },
+    {
+      "id": "ALL_MODES_EXECUTION_OR_GATED_DISCLOSURE",
+      "state": "HELD",
+      "proof": null
+    },
+    {
+      "id": "R125_R141_R146_R147_AUTHORITY",
+      "state": "HELD",
+      "proof": null
+    },
+    {
+      "id": "WINDOWS_GPU_INSTALLER_RETURN",
+      "state": "HELD",
+      "proof": null
+    },
+    {
+      "id": "FULL_DESKTOP_MOBILE_UX",
+      "state": "HELD",
+      "proof": null
+    },
+    {
+      "id": "PERFORMANCE_AND_FAILURE_RECOVERY",
+      "state": "HELD",
+      "proof": null
+    },
+    {
+      "id": "GOVERNED_MERGE_AND_EXACT_DEPLOY",
+      "state": "HELD",
+      "proof": null
+    },
+    {
+      "id": "LIVE_POST_DEPLOY_ROLLBACK",
+      "state": "HELD",
+      "proof": null
+    }
+  ],
+  "completionRule": "EACH_GATE_REQUIRES_INDEPENDENT_EXACT_SOURCE_PROOF; EACH_RESOLVED_BLOCKER_RETAINS_ITS_ID_AND_IMMUTABLE_RECEIPT; WORKSTREAM_COMPLETION_CANNOT_EXCEED_EVIDENCE; RELEASE_CLEAN_REQUIRES_ZERO_OPEN_BLOCKERS_ALL_WORKSTREAMS_PROVEN_AND_POST_DEPLOY_PROOFS",
+  "transitionRules": {
+    "workstreams": "PARTIAL_HELD_DEVICE_HELD_RELEASE_HELD_TO_VERIFIED_ONLY_WITH_ACCEPTANCE_PROOF",
+    "blockers": "OPEN_TO_RESOLVED_ONLY_WITH_RESOLUTION_RECEIPT",
+    "gates": "HELD_TO_PROVEN_ONLY_WITH_INDEPENDENT_GATE_PROOF",
+    "release": "UNMERGED_CANDIDATE_NOT_RELEASE_CLEAN_TO_RELEASE_CLEAN_PRODUCTION_PROVEN_ONLY_AFTER_ALL_GATES_AND_EXACT_DEPLOY"
+  },
+  "acceptanceDocumentation": "docs/OMEGA_ADVANCEMENT_LEDGER.md",
+  "buildHistory": [
+    {
+      "revision": "R936",
+      "conservation": "Six Drive split releases and companion archives source-listed",
+      "accepted": "SOURCE_METADATA_ONLY"
+    },
+    {
+      "revision": "R937",
+      "conservation": "Twelve-workstream active ledger and CI drift test established",
+      "accepted": "CANDIDATE_SOURCE_ONLY"
+    },
+    {
+      "revision": "R938",
+      "conservation": "Bounded authenticated release set audit job",
+      "accepted": "CANDIDATE_LOCAL_AND_CI_SCOPE"
+    },
+    {
+      "revision": "R939",
+      "conservation": "Corrected safe directory predicate for local archive audit",
+      "accepted": "CANDIDATE_FIX"
+    },
+    {
+      "revision": "R940",
+      "conservation": "ZIP-valid negative-fixture digest mismatch",
+      "accepted": "CANDIDATE_TEST_FIX"
+    },
+    {
+      "revision": "R941",
+      "conservation": "Archive catalogue to local-audit form connection",
+      "accepted": "CANDIDATE_UI"
+    },
+    {
+      "revision": "R942",
+      "conservation": "Updated catalogue callback regression",
+      "accepted": "CANDIDATE_TEST_FIX"
+    },
+    {
+      "revision": "R943",
+      "conservation": "49 manifest SHA expectations preserved",
+      "accepted": "HISTORICAL_SOURCE_ONLY"
+    },
+    {
+      "revision": "R944",
+      "conservation": "Two independent archive part and inner member byte witnesses",
+      "accepted": "BOUNDED_LOCAL_BYTE_PROOF"
+    },
+    {
+      "revision": "R945",
+      "conservation": "Windows POSIX relative-path safety fix",
+      "accepted": "WINDOWS_CI_PENDING"
+    },
+    {
+      "revision": "R946",
+      "conservation": "Active ledger accepts only evidence-qualified closeout and governed release promotion",
+      "accepted": "CANDIDATE_SOURCE_ONLY"
+    },
+    {
+      "revision": "R947",
+      "conservation": "Source-pinned B043 29-part streaming reconstruction with non-overwrite durable receipt",
+      "accepted": "CANDIDATE_EXECUTOR_NOT_29_PART_FULL_RUN"
+    },
+    {
+      "revision": "R948",
+      "conservation": "Full original B043 source SHA/CRC recovery, selected test proof and Windows-safe audit/reconstruction paths",
+      "accepted": "ORIGINAL_B043_SOURCE_BYTES_ONLY_OTHER_ARCHIVES_AND_RUNTIME_HELD"
+    },
+    {
+      "revision": "R949",
+      "conservation": "34 recovered B043 modules tested separately; 62 cases pass; combined suite timeout persists",
+      "accepted": "ISOLATED_DONOR_TEST_PARITY_ONLY_COMBINED_SUITE_HELD"
+    },
+    {
+      "revision": "R950",
+      "conservation": "Original B053 R7 30-part split reconstructed, ZIP CRC 1857 and independently hashed 1856 B053 file manifest entries",
+      "accepted": "R7_SOURCE_BYTES_VERIFIED_NOT_OMEGA7_RUNTIME_PARITY_OR_ORIGINAL_MASTER_SHA_PIN"
+    },
+    {
+      "revision": "R951",
+      "conservation": "All 28 archived B053 R7 source test modules reproduced as 70 passing tests, including nested skin module",
+      "accepted": "ISOLATED_ORIGINAL_DONOR_TESTS_ONLY_NOT_OMEGA7_OR_WINDOWS_PROOF"
+    },
+    {
+      "revision": "R952",
+      "conservation": "Correct source-acceptance regression assertion to immutable recorded replay scope; do not confuse R950 with R951",
+      "accepted": "CANDIDATE_TEST_FIX"
+    },
+    {
+      "revision": "R953",
+      "conservation": "Full original V35 20-part SHA/CRC and its 17 main runtime payload plus 3 expansion SHA verified",
+      "accepted": "ORIGINAL_V35_SOURCE_BYTES_ONLY_RUNTIME_AND_INSTALLER_HELD"
+    },
+    {
+      "revision": "R954",
+      "conservation": "Full original V35 383MB atlas SQLite, FTS5 149679 rows and source-address metadata read-only query adapter",
+      "accepted": "ORIGINAL_SOURCE_INDEXED_QUERY_ONLY_NO_EMPIRICAL_OR_NATIVE_PARITY"
+    },
+    {
+      "revision": "R955",
+      "conservation": "Refuse ambiguous FTS5 boolean operator input with original-source SQL parser intact",
+      "accepted": "CANDIDATE_OPERATOR_TEST_FIX"
+    },
+    {
+      "revision": "R956",
+      "conservation": "Authenticated original V35 source-pinned nested ZIP/SQLite staging plus one-action transition into indexed FTS5 search",
+      "accepted": "CANDIDATE_LOCAL_EXECUTOR_UNTIL_EXACT_SHA_CI_AND_HOST_RETURN"
+    },
+    {
+      "revision": "R957",
+      "conservation": "Original V35 FTS5 rowid-pushdown query avoids dependent gate-index scans and temp sort, with source-result parity and bounded local performance evidence",
+      "accepted": "LOCAL_QUERY_PLAN_PERFORMANCE_MEASUREMENT_NOT_DEVICE_OR_RUNTIME_ACCEPTANCE"
+    },
+    {
+      "revision": "R958",
+      "conservation": "Explicit SQLite fixture connection closure and Windows cleanup regression; exact R958 Windows portable-studio job passed (138458932652); inherited verify and native repair passed; browser parity and R241 full workflow pending at observation",
+      "accepted": "BOUNDED_WINDOWS_CI_JOB_PROOF_NOT_NATIVE_DEVICE_OR_RELEASE_ACCEPTANCE"
+    },
+    {
+      "revision": "R959",
+      "conservation": "V35 atlas validates request before source filesystem access and rejects overlong unsplit FTS tokens; regression covers refusal before source I/O",
+      "accepted": "CANDIDATE_SOURCE_ONLY_TEST_EXECUTION_PENDING"
+    },
+    {
+      "revision": "R960",
+      "conservation": "Sparse tensor bounded before insertion on seed aggregation and transitions; strict integer shift delta; tests cover zero-step overflow, transition overflow and duplicate aggregation; R959 exact head 55ef12f passed nine workflows",
+      "accepted": "CANDIDATE_SOURCE_ONLY_R960_TEST_EXECUTION_PENDING"
+    },
+    {
+      "revision": "R961",
+      "conservation": "Projection verifies canonical row digest before rendering and computes shared intensity once; regressions reject changed cell, lane, or mass under a valid-format source digest",
+      "accepted": "CANDIDATE_SOURCE_ONLY_TEST_EXECUTION_PENDING"
+    },
+    {
+      "revision": "R962",
+      "conservation": "All historical execution capsules resolve from canonical registry by system ID; caller cannot override route or execution state; exact ID search ranking and conjunctive term matching; regression covers all 100 families",
+      "accepted": "CANDIDATE_SOURCE_ONLY_NOT_INDEPENDENT_HISTORICAL_EXECUTOR_PARITY"
+    },
+    {
+      "revision": "R963",
+      "conservation": "Batch archive audit prevalidates every declared part including absent sources, rejects duplicate Drive identity and boolean index, binds index receipt to exact parsed bytes; regression included",
+      "accepted": "CANDIDATE_SOURCE_ONLY_NOT_ARCHIVE_BYTE_RECOVERY"
+    },
+    {
+      "revision": "R964",
+      "conservation": "Existing 100-family software workspace now selects first visible result when selected family is filtered out, synchronizes pressed state, resets stale menu filters, adds clear-filter recovery and responsive minimum tracks",
+      "accepted": "CANDIDATE_UI_SOURCE_ONLY_BROWSER_ACCEPTANCE_PENDING"
+    },
+    {
+      "revision": "R965",
+      "conservation": "Existing creation studio now uses common normalized projection across SVG/Canvas/WebGL, renders tessellation edges and mode positions on fallback, records actual raster backend, releases transient contexts and constrains address input to integer; source regression added",
+      "accepted": "CANDIDATE_SOURCE_ONLY_BROWSER_GPU_ACCEPTANCE_PENDING"
+    },
+    {
+      "revision": "R966",
+      "conservation": "Existing scheduler compares inner phase gradient against collective peer contrast and executes strongest eligible phase or peer exchange; durable receipt validates computed peer conservation; regression exercises live inner-phase sweep and forged receipt refusal",
+      "accepted": "CANDIDATE_SOURCE_ONLY_NOT_COMPLETE_MODE_OR_DEVICE_PARITY"
+    },
+    {
+      "revision": "R967",
+      "conservation": "R966 failed six workflows; Cloud Bridge log identified R891 selected-coordinate isolation regression. Restore legacy default, authorize phase coupling explicitly from R893 full sweep; retain existing tests and R966 conservation tests.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R968",
+      "conservation": "Existing SPHERE instrument pauses autonomy on durable save and guards scheduled/manual state mutations and legacy checkpoint paths during durable transactions; selected-inner isolation versus full sweep phase coupling disclosed; original tests retained and regression source checks added",
+      "accepted": "CANDIDATE_SOURCE_ONLY_BROWSER_ACCEPTANCE_PENDING"
+    },
+    {
+      "revision": "R969",
+      "conservation": "Canonical capability-lineage launch lookup; persisted focus re-resolved against original system/capability registries before use, asynchronous restore cannot overwrite newer launch/clear, unrelated routes do not receive stale launch binding; 100-system forged-storage regression checks",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R970",
+      "conservation": "R969 Cloud Bridge failed R512 source integration assertion. Restore existing root softwareLaunch interface and enforce route-scoped binding at native host boundary; retain inherited assertion and add regression for stale binding.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R971",
+      "conservation": "Pairwise full-state analysis reads 248832 distinct values once instead of 2737152 state lookups at 12 agents; same bivariate Welford order and output; temporary buffers bounded to 1990656 bytes; counted-read and exact output equality tests, invalid singleton refusal.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R972",
+      "conservation": "Actual R893 scheduler full 12×20736 operation cycle regression, every visit and receipt identity, tick order, independent exchange conservation, bounded active state and receipt ring; selected scheduler safe integer overflow refusal before mutation.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R973",
+      "conservation": "R895 exact durable validation rejects misattributed agent memory, duplicate/reordered receipts, and queued task IDs overlapping completed receipt history; actual executor fixtures plus independent negative controls; no persistence format or authority replacement.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R974",
+      "conservation": "Shared R887/R895 persistable-state budget; preflight exact new coordinates before task dequeue or autonomous submission; preserve existing coordinate writes at limit; reject sequence/tick/epoch overflow; regression verifies no mutation on refusal.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R975",
+      "conservation": "R241 R895 browser failed waiting for stale analysis after capacity-refused update. Manual task preflight refuses before enqueue; actual completed tick invalidates analytics even on partial batch error; browser proves refused new allocation preserves analysis and existing allocated coordinate mutation invalidates it; inherited route proof retained.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R976",
+      "conservation": "Scene-invariant spiral chromatic/monochrome material phase control on existing 20736-node geometry; shared linear-light luminance-preserving mix before 8-bit quantization; same per-node/edge material function in WebGL2, Canvas and SVG; project restore and JSON/manifest representation parameters; numerical and source integration checks. No new renderer authority.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R977",
+      "conservation": "R881 creation studio now validates full project metadata, canonical address, material, mode, geometry source and asset references before apply. Local save and portable import/export share integrity-checked scene packet, legacy valid project migration, bounded size, no embedded asset bytes or new state authority; real encode/decode round-trip and tamper rejection tests.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R978",
+      "conservation": "Existing R21 donor formula evaluation retained, explicit per-mode source input gates for 17 implemented/read-through modes, missing coordinates and invalid route addresses held, nonfinite formula outputs refused, valid zeros retained. Actual runtime negative and positive regression fixtures. R311 separately scoped runtime unchanged; 179 catalog not represented as 179 executable modes.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R979",
+      "conservation": "Bounded 144-address batch chart over existing R21 evaluator; explicit 20736-address CSV operator in current Modes panel, 414720 contract evaluations, held input lists preserved, status counts, null no longer treated as numeric trace; full corpus coverage acceptance test. Registry-only catalog and Canon lenses remain separate; no new formulas invented.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R980",
+      "conservation": "R311 rejects absent, coercible, negative or invalid domain inputs before computing ratio, rejects nonfinite denominator/ratio; R979 chart includes separate R311 state, ratio, decision, source gate comparison and held channels, UI reports independent counts; tests independently compare workbook law on full canonical field. No ORION threshold substitution or M002 conflation.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R981",
+      "conservation": "Use original normalized psc.Scar_Score channel directly for previous-state dependency, avoiding one complete predecessor packet reconstruction per evaluation (20736 per full chart). Preserve arithmetic order, address wrap, and missing-input gate; exact full field scalar parity and original M009 formula comparison, no new cache or authority. Timing not measured.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R982",
+      "conservation": "Phase2 Mode Ledger recovered from dewey_canon_phase2_objective_workbook.xlsx; actual explicit RAFT, Gamma, renderer weighted sum, proof ledger, scar product, evolution, shortcut, balance, memetic, phase2 Mother and Father formulas integrated in existing R21 runtime and UI. Scenario provenance, bounded vectors, finite inputs, denominator and proof-count checks, 11 positive fixtures and per-input negative tests; no admission or canonical mutation; canonical held modes and R308/R311 variants remain separate.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R983",
+      "conservation": "R982 formula engine reused for EVOLVE, BALANCE, MEMETIC, MOTHER_PHASE2 and FATHER_PHASE2 source-channel bindings. No evidence weight as proof, no guessed RAFT terms, no overrides of bound fields. Current address execution and bounded complete 20736-address portable field export with input provenance. All-field independent evolution checks, missing/override/range rejection, sparse vector hole validation. Canonical writes and admission remain false.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R984",
+      "conservation": "R983 R241 prove-r241 job 139578911215 failed R313 disclosure shard 9: mobile/Modes closed details #1 leaks 1/6 direct content regions. Recovered calculator now owns one scoped body hidden by explicit closed-details selector, open grid responsive layout, 44px controls and bounded fields. Existing interaction/disclosure tests unchanged; source invariant added. Cloud Bridge verify and Windows smoke jobs passed, user parity was still running when checked.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R985",
+      "conservation": "Existing OMEGA7 root epoch now guards delayed historical launcher before actuation, invalidates stale restoration on unmount, and clears historic focus on explicit ordinary route/domain/back/popstate navigation. Only deliberate capsule route preserves focus. Existing native host route binding and authority kept; source regression checks added. R984 exact-head R241 interaction, Cloud Bridge verify and Windows smoke passed, disclosure/user parity pending when checked.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R986",
+      "conservation": "All six failed R985 jobs share exact R779 assertion missing window.addEventListener('popstate',restore). Restore same registered and unregistered callback; optional event distinguishes initial hydration from browser navigation and clears stale focus only for popstate. Preserve original R779 assertions; update R985 source marker to equivalent callback behavior; add executable registered callback test for initial Atlas restore, popstate Memory/domain route, listener cleanup. Full CI pending.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R987",
+      "conservation": "Shared R895 portable encode/decode separates verification from IndexedDB, rejects duplicate/malformed outer and inner map entries before constructing state, checks claimed census and integrity, preserves atomic import. Actual executor save/reopen at nonzero cursor, pending operator priority and 2048 identical continued operations with full state equality, corruption negative fixtures. No state truncation or second writer.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R988",
+      "conservation": "Derived exact regular dodecahedron half-space topology (12 pentagonal faces, 20 vertices, 30 equal edges), twelve concentric shells, D/P/R/L face/shell/sample binding, all 20736 unique addresses rendered via existing SVG/WebGL/Canvas and source exports, closed OBJ mesh, project mode persistence. Full geometric parity tests, direct numeric plane and uniqueness check. No claim of physical topology or recovered historical face assignment.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R989",
+      "conservation": "R988 regular geometry unchanged: direct old/new Object.is parity for all 20,736 coordinate triples and IDs in controlled JS evaluation; immutable 1,728 unit face samples eliminate 11/12 repeated ray-boundary constructions. 360 actual polyhedral edges from shared OBJ vertex topology drawn in existing SVG, WebGL2 and Canvas, explicit shader varying precision, geometry source tagged in CSV/XLSX/JSON. Full CI and browser parity pending; no measured timing claim.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R990",
+      "conservation": "User expanded OMEGA sovereign AI specification section 07: exact omega://atlas/root/###### paths with 0–64 depth resource bound, BigInt flatten/expand, explicit shell context, parent/child/common ancestor, direct existing R887 depth-two stored/generated state resolution, versioned read-only deeper procedural scalar generation, 1–144 child region query and existing SPHERE inspector/execute navigation. No dense allocation, no duplicate writer or claim of deeper persisted execution. Direct 65 depth boundary roundtrips and 144-child query verified; regression tests added. R989 5 workflows passed, 4 pending when checked.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R991",
+      "conservation": "Recursive depth >=3 parent relaxation and conservative sibling phase exchange operate within the existing SPHERE fabric, preserve R887 depth-two ownership, bounded 4096 overrides and 512 receipts, compare expected source/peer revisions, atomic preflight, arithmetic/identity/continuity/return validation, legacy and portable checkpoint integration, UI execution and regression tests. Direct controlled execution confirmed 2 overrides, exchange conservation and stale refusal. No claim of trained AI or external physical evidence; full CI pending.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R992",
+      "conservation": "Expanded 67-section directive §§17–19: existing SAI B059/R331 services preserved. Actual shared 121-parameter tanh relational predictor, eight typed features including neighborhood mean, deterministic 512/128/128 address split, analytic gradients and clipped full-batch descent, validation-selected weights, held-out evaluation and SHA local checkpoint/export. Direct exact-code run with all parameter finite-difference checks and held-out improvement. Synthetic only; no general intelligence or historical weight claim. CI pending.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R993",
+      "conservation": "R992 optimizer shared unchanged with immutable R993 training session (current vs best weights, completed epochs, metric history). Four-epoch browser yielding, explicit pause/resume, SHA local and portable checkpoint and actual deterministic replay verification; held-out test only after completion; legacy inference checkpoint preserved without false resume claim. Direct 31+49 replay exactly equals original 80 epochs, tamper refused and 20736 field predictions matched. Existing SAI route and tests conserved; CI pending.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R994",
+      "conservation": "Existing R992/R993 training preserved, all 20736 addresses independently evaluated with matching CPU reference, partitioned train/validation/test/19968 unused and 12 domain/144 region statistics; exact replay-bound model and audit export with SHA receipts. Direct full numerical evaluation and altered result refusal passed. Synthetic only; no Canon promotion, empirical or general intelligence claim. CI pending.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R995",
+      "conservation": "Actual local CSV supervised learning with 30–768 unique addresses, eight normalized features and supplied labels, source declaration, explicit training permission, deterministic 60/20/20 split, paused/resumed CPU backprop, independent reference evaluation and SHA checkpoint import/export/deletion. Synthetic 120-row direct fixture passed exact 31+49 replay and three refusals. No private memory ingestion, external inference or empirical claim. CI pending.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R996",
+      "conservation": "Existing cloud R116/R146/R147/R141 and full OMEGA7 Hybrid retained. 06097c82ba927bd0704e8fe1a5ca395099aaccf0: all 11 exact-head GitHub workflows completed successfully. Successor builds the original embedded source-derived field into 144 SHA-bound regions, uses real source-backed mode outputs, verifies server-side evidence before invoking existing cloud model or R995 optimizer, binds immutable run metadata to R146 genesis, guards terminal host receipts. Fixture and actual build checks required; no native or production proof claimed.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R997",
+      "conservation": "R996 cloud and R995 local learning connected without new execution or Canon authority. Fix object-key-order dependence in optimizer replay; enforce source-derived prompt semantics and training region schema; bind exported regional checkpoint to R146 verified run/replay and R147 exact return; offline import replays model and evaluations and preserves source transfer bytes in local storage. Offline digest does not authenticate origin. Tests cover sorted return, altered prompt, altered weights/evaluation, missing intent proof. Exact-head predecessor 306be8d7 11/11 CI passed.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R998",
+      "conservation": "One existing SAI learning architecture extended to 144 local regional specialists over embedded source-derived corpus, 24 epochs per region, 121 parameters per model, 86/28/30 train/validation/test partitions, explicit authorization, region boundary pause/resume, source-bound SHA checkpoint, full optimizer replay on restore and selected-address inference. Direct complete 144-region synthetic fixture trained and all 20736 predictions compared against evaluation, 17424 parameters, final regional replay. Real browser corpus path and exact CI pending; no empirical or independent foundation agent claim.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R999",
+      "conservation": "Four-axis periodic prediction exchange, 82944 undirected edges, conservative bounded execution, existing SAI UI. Exact head d5ef628d883206d09e0b5e8b97d7f22ecedab4ed: 11/11 workflows passed.",
+      "accepted": "EXACT_HEAD_CI_ONLY"
+    },
+    {
+      "revision": "R1000",
+      "conservation": "Portable source/model-bound field receipt, replay and tamper refusal. Exact head e8d4b4bf1ce70429dbf1c421a83641ddfe0367ff: 11/11 workflows passed.",
+      "accepted": "EXACT_HEAD_CI_ONLY"
+    },
+    {
+      "revision": "R1001",
+      "conservation": "Full-field and partitioned before/after projected-source residual evaluation; no claim of improvement, empirical validity, or Canon mutation.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    }
+  ],
+  "independentArchiveUnverifiedOtherListedParts": 77,
+  "reconstructedOriginalReleaseEvidence": "audit/omega-b043-full-source-byte-acceptance-r948.json",
+  "isolatedB043ModuleProof": "audit/omega-b043-module-test-evidence-r949.json",
+  "reconstructedB053R7SourceEvidence": "audit/omega-b053-r7-full-source-acceptance-r950.json",
+  "originalB053R7ModuleEvidence": "audit/omega-b053-r7-isolated-module-parity-r951.json",
+  "recoveredV35SourceEvidence": "audit/omega-v35-full-source-acceptance-r953.json",
+  "v35OriginalAtlasSqliteEvidence": "audit/omega-v35-original-atlas-db-r954.json",
+  "originalV35IndexedQueryPerformanceEvidence": "audit/omega-v35-fts-performance-r957.json"
+}

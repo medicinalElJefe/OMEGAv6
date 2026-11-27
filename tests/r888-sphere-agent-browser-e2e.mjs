@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
+import {readFileSync} from 'node:fs';
 const base=(process.env.OMEGA_E2E_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 async function openAtlas(page){
  await page.goto(base+'/?omega7=1&r888='+Date.now(),{waitUntil:'domcontentloaded',timeout:45000});
@@ -134,6 +135,292 @@ async function prove(browser,label,viewport){
   await lab.getByLabel('Exact inner state address').fill('1');
   assert.match(await lab.locator('[data-r892-selected-address]').innerText(),/Selected inner state: 1 of 20736/);
   console.log('R892 BROWSER '+label.toUpperCase()+' PASS: exact last/first inner address, unique outer agent address and projection switching.');
+  // R893: verify real autonomous scheduling sweeps distinct nested inner coordinates.
+  const schedule=lab.getByLabel('Autonomous inner-state schedule');
+  await schedule.selectOption('ALL_20736');
+  await lab.getByLabel('Autonomous steps per cycle').selectOption('12');
+  const sweepBefore=(await lab.locator('[data-r893-sweep-progress]').innerText()).match(/Autonomous inner sweep: (\d+)/);
+  assert.ok(sweepBefore,label+' sweep progress exists');
+  await lab.getByRole('button',{name:'Run local agent autonomy'}).click();
+  await page.waitForFunction(()=>{
+    const text=document.querySelector('[data-r893-sweep-progress]')?.textContent||'';
+    const match=text.match(/Autonomous inner sweep: (\d+)/);
+    return Boolean(match&&Number(match[1])>1);
+  },null,{timeout:8000});
+  await lab.getByRole('button',{name:'Pause local agent autonomy'}).click();
+  const sweepAfter=await lab.locator('[data-r893-sweep-progress]').innerText();
+  const advanced=sweepAfter.match(/Autonomous inner sweep: (\d+) \/ 20736/);
+  assert.ok(advanced&&Number(advanced[1])>1,label+' actual sweep progressed beyond first state');
+  assert.match(sweepAfter,/local only/);
+  // R893 continuation: resume exact sweep address, not just mutable fabric values.
+  const savedPosition=(await lab.locator('[data-r893-sweep-progress]').innerText()).match(/Autonomous inner sweep: (\d+)/);
+  assert.ok(savedPosition&&Number(savedPosition[1])>1,label+' pre-save sweep coordinate');
+  await lab.getByRole('button',{name:'Save checkpoint'}).click();
+  const savedMeta=await page.evaluate(()=>localStorage.getItem('omega.r893.sphere.agent.sweep-continuation.v1'));
+  assert.ok(savedMeta&&JSON.parse(savedMeta).schema==='OMEGA_SPHERE_SWEEP_CONTINUATION_R893',label+' sweep continuation saved');
+  const persistedStep=JSON.parse(savedMeta).stepCursor;
+  assert.ok(persistedStep>0);
+  await lab.getByRole('button',{name:'Run local agent autonomy'}).click();
+  await page.waitForFunction(previous=>{
+    const n=document.querySelector('[data-r893-sweep-progress]')?.textContent||'';
+    const m=n.match(/Autonomous inner sweep: (\d+)/);
+    return Boolean(m&&Number(m[1])>previous);
+  },Number(savedPosition[1]),{timeout:8000});
+  await lab.getByRole('button',{name:'Pause local agent autonomy'}).click();
+  await lab.getByRole('button',{name:'Restore checkpoint'}).click();
+  assert.match(await lab.locator('p.r887-key[role="status"]').innerText(),/sweep cursor/);
+  const resumedText=await lab.locator('[data-r893-sweep-progress]').innerText();
+  assert.match(resumedText,new RegExp('Autonomous inner sweep: '+(Math.floor(persistedStep/JSON.parse(savedMeta).memberCount)%20736+1)+' \\/ 20736'));
+  console.log('R893 CONTINUITY '+label.toUpperCase()+' PASS: save, advance, restore exact bounded inner-state sweep cursor.');
+  if(process.env.OMEGA_R888_USE_FIXTURES==='1'){
+   // Cloud missions are resumed by identity only; reloading must not create new work.
+   const currentJournal=await page.evaluate(()=>localStorage.getItem('omega.r894.sphere.missions.v1'));
+   const j=JSON.parse(currentJournal||'null');
+   assert.equal(j.schema,'OMEGA_SPHERE_MISSION_JOURNAL_R894',label+' journal schema');
+   assert.equal(j.single.missionId,'r889-fixture-001');
+   assert.equal(j.collective.missionId,'r889-fixture-001');
+   assert.equal(j.single.localStateMutated,false);
+   assert.equal(j.collective.localMutation,false);
+   const cloud=lab.locator('[data-r889-cloud-bridge="EXPLICIT_OPERATOR_DISPATCH_ONLY"]');
+   // Renew an explicitly authorized pending mission, then check GET polling does not dispatch POST.
+   let watchPosts=0,watchReads=0;
+   await page.route('**/api/swarm/missions',async route=>{
+    watchPosts++;
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({mission:{id:'r889-fixture-001',status:'QUEUED'}})});
+   });
+   await page.route('**/api/swarm/missions/r889-fixture-001',async route=>{
+    watchReads++;
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({mission:{id:'r889-fixture-001',status:'COMPLETE',completed:1,failed:0,proofState:'RETURNED_NOT_ADMITTED',finalSynthesis:{text:'Read-only watch fixture'}}})});
+   });
+   await cloud.getByRole('button',{name:'Dispatch selected agent to governed swarm'}).click();
+   await page.waitForFunction(()=>document.querySelector('[data-r889-receipt]')?.textContent?.includes('QUEUED'),null,{timeout:8000});
+   assert.equal(watchPosts,1,label+' only deliberate dispatch may POST');
+   assert.equal(watchReads,0,label+' no ambient GET before opt-in');
+   await cloud.getByLabel('Watch individual cloud mission read-only').check();
+   await page.waitForFunction(()=>document.querySelector('[data-r889-receipt]')?.textContent?.includes('COMPLETE'),null,{timeout:9500});
+   assert.ok(watchReads>=1,label+' opt-in watcher must GET the mission');
+   assert.equal(watchPosts,1,label+' read-only watcher must never POST');
+   await cloud.getByLabel('Watch individual cloud mission read-only').uncheck();
+   const beforeReloadJournal=await page.evaluate(()=>localStorage.getItem('omega.r894.sphere.missions.v1'));
+   assert.ok(beforeReloadJournal);
+   const reattached=await openAtlas(page);
+   await reattached.locator('[data-r889-receipt="RETURNED_NOT_ADMITTED"]').waitFor({state:'visible',timeout:5000});
+   await reattached.locator('[data-r890-receipt="RETURNED_NOT_ADMITTED"]').waitFor({state:'visible',timeout:5000});
+   assert.match(await reattached.innerText(),/r889-fixture-001/);
+   assert.equal(await reattached.getByLabel('Watch individual cloud mission read-only').isChecked(),false,label+' reattachment does not automatically enable network polling');
+   console.log('R894 BROWSER '+label.toUpperCase()+' PASS: bounded mission journal survives navigation, opt-in GET-only status watch and no automatic re-dispatch.');
+  }
+
+  console.log('R893 BROWSER '+label.toUpperCase()+' PASS: all-inner autonomy executes distinct logical addresses and stops on user pause.');
+  // R895: exact float64 state survives a real atomic IndexedDB checkpoint and page navigation.
+  await lab.getByLabel('Exact inner state address').fill('1');
+  const firstCell=lab.getByRole('gridcell',{name:/Select and observe inner state 1 value/});
+  await lab.getByRole('button',{name:'Local update'}).click();
+  const storedValue=(await lab.locator('[data-r895-exact-inner-value]').innerText()).split('Exact selected state: ')[1];
+  assert.ok(Number.isFinite(Number(storedValue)),label+' exact saved float64 representation');
+  await lab.getByRole('button',{name:'Save full-state durable checkpoint'}).click();
+  await page.waitForFunction(()=>document.querySelector('.r887-side p[role="status"]')?.textContent?.includes('Durable checkpoint saved'),null,{timeout:8000});
+  await lab.getByRole('button',{name:'Local update'}).click();
+  const changedValue=(await lab.locator('[data-r895-exact-inner-value]').innerText()).split('Exact selected state: ')[1];
+  assert.notEqual(changedValue,storedValue,label+' second local computation changes inner value');
+  const durableLab=await openAtlas(page);
+  await durableLab.getByRole('button',{name:'Restore full-state durable checkpoint'}).click();
+  await page.waitForFunction(()=>document.querySelector('.r887-side p[role="status"]')?.textContent?.includes('Durable checkpoint restored'),null,{timeout:8000});
+  assert.equal((await durableLab.locator('[data-r895-exact-inner-value]').innerText()).split('Exact selected state: ')[1],storedValue,label+' exact float64 inner value recovered after true page reload');
+  // R895 PORTABLE: export a real download, then re-import and restore without cloud calls.
+  const [portableDownload]=await Promise.all([
+    page.waitForEvent('download',{timeout:10000}),
+    durableLab.getByRole('button',{name:'Export portable checkpoint JSON'}).click()
+  ]);
+  assert.equal(portableDownload.suggestedFilename(),'omega-r895-portable-checkpoint.json');
+  const portableBytes=readFileSync(await portableDownload.path());
+  const portableText=portableBytes.toString('utf8');
+  const portableRecord=JSON.parse(portableText);
+  assert.equal(portableRecord.schema,'OMEGA_SPHERE_DURABLE_CHECKPOINT_R895');
+  assert.match(portableRecord.integrity,/^[a-f0-9]{64}$/);
+  await durableLab.getByRole('button',{name:'Local update'}).click();
+  await durableLab.getByLabel('Import portable checkpoint JSON').setInputFiles({name:'omega-r895-portable-checkpoint.json',mimeType:'application/json',buffer:portableBytes});
+  await page.waitForFunction(()=>document.querySelector('.r887-side p[role="status"]')?.textContent?.includes('Portable checkpoint imported'),null,{timeout:10000});
+  await durableLab.getByRole('button',{name:'Restore full-state durable checkpoint'}).click();
+  await page.waitForFunction(()=>document.querySelector('.r887-side p[role="status"]')?.textContent?.includes('Durable checkpoint restored'),null,{timeout:8000});
+  assert.equal((await durableLab.locator('[data-r895-exact-inner-value]').innerText()).split('Exact selected state: ')[1],storedValue,label+' portable imported float64 matches exported snapshot');
+  console.log('R895 PORTABLE '+label.toUpperCase()+' PASS: downloaded SHA-256-bound checkpoint, imported and restored exact float64.');
+  // R895 PORTABLE TAMPER: reject a syntactically valid altered export before storage.
+  const tamperedPortable=JSON.parse(portableText);
+  tamperedPortable.session.stepCursor+=1;
+  await durableLab.getByLabel('Import portable checkpoint JSON').setInputFiles({
+    name:'omega-r895-tampered.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(tamperedPortable))
+  });
+  await durableLab.getByRole('alert').getByText(/Portable checkpoint import refused:.*integrity mismatch/).waitFor({state:'visible',timeout:8000});
+  await durableLab.getByRole('button',{name:'Restore full-state durable checkpoint'}).click();
+  await page.waitForFunction(()=>document.querySelector('.r887-side p[role="status"]')?.textContent?.includes('Durable checkpoint restored'),null,{timeout:8000});
+  assert.equal((await durableLab.locator('[data-r895-exact-inner-value]').innerText()).split('Exact selected state: ')[1],storedValue,label+' rejected portable tamper kept last valid stored state');
+  console.log('R895 PORTABLE TAMPER '+label.toUpperCase()+' PASS: metadata modification rejected without replacing durable checkpoint.');
+
+  // R895 VALID-VALUE TAMPER: structurally valid numeric alteration must fail SHA-256 verification.
+  const beforeNumericTamper=(await durableLab.locator('[data-r895-exact-inner-value]').innerText()).split('Exact selected state: ')[1];
+  await page.evaluate(async()=>{
+    const db=await new Promise((resolve,reject)=>{
+      const request=indexedDB.open('omega-sphere-durable-r895',1);
+      request.onsuccess=()=>resolve(request.result);
+      request.onerror=()=>reject(request.error);
+    });
+    try{
+      await new Promise((resolve,reject)=>{
+        const tx=db.transaction('checkpoints','readwrite'),store=tx.objectStore('checkpoints');
+        const get=store.get('latest');
+        get.onsuccess=()=>{
+          const snapshot=get.result;
+          const agent=snapshot.fabric.active.get(snapshot.session.agent);
+          const original=agent.values.get(snapshot.session.selectedInner);
+          agent.values.set(snapshot.session.selectedInner,original===0.5?0.625:0.5);
+          store.put(snapshot,'latest'); // deliberately retain original integrity digest
+        };
+        tx.oncomplete=resolve;
+        tx.onabort=()=>reject(tx.error);
+      });
+    }finally{db.close()}
+  });
+  await durableLab.getByRole('button',{name:'Restore full-state durable checkpoint'}).click();
+  await durableLab.getByRole('alert').getByText(/integrity mismatch/).waitFor({state:'visible',timeout:8000});
+  assert.equal((await durableLab.locator('[data-r895-exact-inner-value]').innerText()).split('Exact selected state: ')[1],beforeNumericTamper,label+' modified in-range snapshot refused without live-state mutation');
+  console.log('R895 VALID-VALUE TAMPER '+label.toUpperCase()+' PASS: SHA-256 rejects modified in-range float64 state.');
+  // R895 CORRUPTION: a damaged on-device checkpoint must be refused without mutating live state.
+  const liveBeforeCorrupt=await durableLab.getByRole('gridcell',{name:/Select and observe inner state 1 value/}).getAttribute('aria-label');
+  await page.evaluate(async()=>{
+    const db=await new Promise((resolve,reject)=>{
+      const request=indexedDB.open('omega-sphere-durable-r895',1);
+      request.onsuccess=()=>resolve(request.result);
+      request.onerror=()=>reject(request.error);
+    });
+    try{
+      await new Promise((resolve,reject)=>{
+        const tx=db.transaction('checkpoints','readwrite');
+        tx.objectStore('checkpoints').put({schema:'OMEGA_SPHERE_DURABLE_CHECKPOINT_R895',fabric:{active:'corrupt'},session:{}},'latest');
+        tx.oncomplete=resolve;
+        tx.onabort=()=>reject(tx.error);
+      });
+    }finally{db.close()}
+  });
+  await durableLab.getByRole('button',{name:'Restore full-state durable checkpoint'}).click();
+  await durableLab.getByRole('alert').getByText(/Atomic full-state restore refused/).waitFor({state:'visible',timeout:8000});
+  assert.equal(await durableLab.getByRole('gridcell',{name:/Select and observe inner state 1 value/}).getAttribute('aria-label'),liveBeforeCorrupt,label+' refused corrupt checkpoint without mutating current state');
+  console.log('R895 CORRUPTION '+label.toUpperCase()+' PASS: malformed atomic checkpoint refused without live-state mutation.');
+
+  // R895 FULL-CAPACITY: a real IndexedDB transaction and operator restore must
+  // roundtrip 12 independently addressed agents x every one of 20,736 inner states.
+  // Build the fixture from the previously exported valid checkpoint, preserving
+  // real fabric and receipt shapes and recomputing a corruption-detection digest.
+  await page.evaluate(async portableJSON=>{
+    const revive=(_key,value)=>value&&typeof value==='object'&&!Array.isArray(value)
+      &&Object.keys(value).length===1&&Array.isArray(value.__omega_r895_map__)
+        ?new Map(value.__omega_r895_map__):value;
+    const original=JSON.parse(portableJSON,revive);
+    const root=original.session.agent;
+    const template=original.fabric.active.get(root);
+    if(!template)throw new Error('Full-capacity fixture needs selected agent snapshot');
+    const active=new Map();
+    for(let agentIndex=0;agentIndex<12;agentIndex++){
+      const agentId=root+agentIndex;
+      const member=structuredClone(template);
+      member.id=agentId;
+      member.epoch=0;
+      member.memory=[];
+      member.inbox=[];
+      member.values=new Map();
+      for(let inner=0;inner<20736;inner++)member.values.set(inner,((inner+agentIndex)%1024)/1024);
+      active.set(agentId,member);
+    }
+    const record={...original,fabric:{...original.fabric,active},session:{...original.session,memberCount:12},activeAgents:12,modifiedValues:248832};
+    delete record.integrity;
+    const serialized=JSON.stringify(record,(_key,value)=>value instanceof Map
+      ? {__r895Map:[...value.entries()].sort((a,b)=>a[0]-b[0])}:value);
+    const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(serialized));
+    record.integrity=Array.from(new Uint8Array(digest),n=>n.toString(16).padStart(2,'0')).join('');
+    const db=await new Promise((resolve,reject)=>{
+      const request=indexedDB.open('omega-sphere-durable-r895',1);
+      request.onsuccess=()=>resolve(request.result);
+      request.onerror=()=>reject(request.error);
+    });
+    try{
+      await new Promise((resolve,reject)=>{
+        const tx=db.transaction('checkpoints','readwrite');
+        tx.objectStore('checkpoints').put(record,'latest');
+        tx.oncomplete=resolve;
+        tx.onabort=()=>reject(tx.error);
+      });
+    }finally{db.close()}
+  },portableText);
+  await durableLab.getByRole('button',{name:'Restore full-state durable checkpoint'}).click();
+  await page.waitForFunction(()=>document.querySelector('.r887-side p[role="status"]')?.textContent?.includes('248832 exact values'),null,{timeout:20000});
+  assert.match(await durableLab.locator('.r887-side p[role="status"]').innerText(),/12 agents.*248832 exact values/);
+  assert.equal((await durableLab.locator('[data-r895-exact-inner-value]').innerText()).split('Exact selected state: ')[1],'0');
+  console.log('R895 FULL-CAPACITY '+label.toUpperCase()+' PASS: real IndexedDB restores all 248,832 float64 values across 12 logical agents.');
+
+  const savedAddressText=await durableLab.locator('[data-r895-global-address]').innerText();
+  const savedAddress=savedAddressText.match(/Global nested address: ([\d,]+) \//)?.[1].replaceAll(',','');
+  assert.ok(savedAddress,'full-capacity fixture must expose its existing selected address');
+  // R895 GLOBAL ADDRESS: navigate the entire 5,159,780,352-coordinate
+  // address universe without allocating 248,832 agents or their states.
+  const jump=durableLab.getByLabel('Global nested address');
+  await jump.fill('5159780351');
+  await durableLab.getByRole('button',{name:'Go to exact nested address'}).click();
+  await page.waitForFunction(()=>document.querySelector('[data-r895-global-address]')?.textContent?.trim().startsWith('Global nested address: 5,159,780,351 /'),null,{timeout:10000});
+  assert.match(await durableLab.locator('.r887-side h3').innerText(),/Agent 248,831/);
+  assert.match(await durableLab.getByText('Shell 12 · outer 20736 · 20,736 independent inner values').innerText(),/Shell 12/);
+  assert.equal(await durableLab.getByLabel('Exact inner state address').inputValue(),'20736');
+  await jump.fill('0');
+  await durableLab.getByRole('button',{name:'Go to exact nested address'}).click();
+  assert.match(await durableLab.locator('[data-r895-global-address]').innerText(),/Global nested address: 0 \/ 5,159,780,351/);
+  assert.equal(await durableLab.getByLabel('Exact inner state address').inputValue(),'1');
+  await jump.fill('5159780352');
+  await durableLab.getByRole('button',{name:'Go to exact nested address'}).click();
+  await durableLab.getByRole('alert').getByText(/Global address navigation refused/).waitFor({state:'visible',timeout:8000});
+  assert.match(await durableLab.locator('[data-r895-global-address]').innerText(),/Global nested address: 0 \/ 5,159,780,351/);
+  console.log('R895 GLOBAL ADDRESS '+label.toUpperCase()+' PASS: first/last exact nested addresses, shell/inner projection, invalid address refusal.');
+  // R975: maximum global address is outside the 12 consecutive fixture
+  // agents. A capacity refusal must preserve the current analytical result.
+  await jump.fill('5159780351');
+  await durableLab.getByRole('button',{name:'Go to exact nested address'}).click();
+  await durableLab.getByRole('button',{name:'Analyze full collective field'}).click();
+  const heldAnalysis=await durableLab.locator('[data-r895-field-result]').innerText();
+  const heldState=await durableLab.locator('[data-r895-exact-inner-value]').innerText();
+  await durableLab.getByRole('button',{name:'Local update'}).click();
+  await durableLab.getByRole('alert').getByText(/Durable state budget exceeded/).waitFor({state:'visible',timeout:8000});
+  assert.equal(await durableLab.locator('[data-r895-field-result]').innerText(),heldAnalysis);
+  assert.equal(await durableLab.locator('[data-r895-exact-inner-value]').innerText(),heldState);
+  // Return to a materialized coordinate: mutation is legal at capacity.
+  await jump.fill(savedAddress);
+  await durableLab.getByRole('button',{name:'Go to exact nested address'}).click();
+  // R895 FIELD BROWSER: entire 12 × 20,736 lazy state field is read through
+  // the actual operator control, with an explicitly invalidated stale result.
+  await durableLab.getByLabel('Collective member count').selectOption('12');
+  await durableLab.getByRole('button',{name:'Analyze full collective field'}).click();
+  await durableLab.locator('[data-r895-field-result]').waitFor({state:'visible',timeout:12000});
+  assert.match(await durableLab.locator('[data-r895-field-result]').innerText(),/Analyzed 248,832 logical values across 12 agents/);
+  const fieldBeforeChange=await durableLab.locator('[data-r895-field-result]').innerText();
+  assert.match(fieldBeforeChange,/variance [0-9.]+/);
+  // R895 RELATIONAL BROWSER: real operator matrix and exported 66 pairs
+  // remain read-only; changing a state invalidates both result surfaces.
+  const matrix=durableLab.getByRole('table',{name:'Complete agent relationship matrix'});
+  assert.equal(await matrix.locator('tbody tr').count(),12);
+  assert.equal(await matrix.locator('tbody tr').first().locator('td').count(),12);
+  const [relationsDownload]=await Promise.all([
+    page.waitForEvent('download',{timeout:15000}),
+    durableLab.getByRole('button',{name:'Export complete pairwise relations CSV'}).click()
+  ]);
+  assert.equal(relationsDownload.suggestedFilename(),'omega-r895-agent-relations.csv');
+  const relationCSV=readFileSync(await relationsDownload.path(),'utf8');
+  const records=relationCSV.trim().split(/\r?\n/);
+  assert.equal(records.length,67,'CSV must include one header and exactly 66 pairs');
+  assert.match(records[0],/^agent_a,agent_b,shared_inner_coordinates,covariance,pearson_correlation/);
+  assert.ok(records.slice(1).every(line=>line.split(',')[2]==='20736'),'each pair must compare all 20,736 coordinates');
+  console.log('R895 RELATIONAL BROWSER '+label.toUpperCase()+' PASS: accessible 12×12 relation matrix and all 66 complete-coordinate CSV pairs.');
+  await durableLab.getByRole('button',{name:'Local update'}).click();
+  await durableLab.locator('[data-r895-field-status]').waitFor({state:'visible',timeout:8000});
+  assert.equal(await durableLab.locator('[data-r895-field-result]').count(),0,'read-only field result must not masquerade as fresh after state mutation');
+  console.log('R895 FIELD BROWSER '+label.toUpperCase()+' PASS: complete 248,832-value scan, no stale analytics after local state update.');
+  console.log('R895 BROWSER '+label.toUpperCase()+' PASS: atomic IndexedDB state survived reload, rejected unrecorded update, recovered exact inner value.');
   assert.equal(errors.length,0,label+' unexpected uncaught errors '+errors.join('; '));
   console.log('R888 BROWSER '+label.toUpperCase()+' PASS: exact inner-state action, symmetric exchange, explicit checkpoint, exact restore and malformed checkpoint refusal');
  }finally{await ctx.close()}

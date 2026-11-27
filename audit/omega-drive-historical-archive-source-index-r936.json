@@ -1,0 +1,1180 @@
+{
+  "schema": "OMEGA_DRIVE_HISTORICAL_ARCHIVE_SOURCE_INDEX_R936",
+  "collectionBoundary": "EXPLICIT_GOOGLE_DRIVE_FOLDER_LISTINGS_NOT_EXHAUSTIVE_DRIVE_SEARCH",
+  "evidenceBoundary": "FILE_NAMES_AND_SIZES_FROM_DRIVE; REPORTED_HISTORICAL_RESULTS_ARE_NOT_INDEPENDENT_BYTES_OR_RUNTIME_PROOF",
+  "groups": [
+    {
+      "id": "B043",
+      "label": "B043 FIELD-TO-FORM FULL SYSTEM",
+      "folderUrl": "https://drive.google.com/drive/folders/1Dck4a6ptj5ygLKGNPnbZEe796M0AgWUX",
+      "expectedParts": 29,
+      "sourceState": "DRIVE_FILENAME_SIZE_DISCOVERED_NOT_BYTE_VERIFIED",
+      "parts": [
+        {
+          "index": 1,
+          "filename": "OMEGA_B043_FULL_SYSTEM_PART_01_OF_29.zip",
+          "driveId": "1k7vHss_OaTZljEstcNKyvJMzHHD3EI-X",
+          "bytes": 96000184,
+          "sha256": "a21616ccf48bfd2b6bc7cd50a6da87fd2b1d3e6d55adb297d40e008855a6796b"
+        },
+        {
+          "index": 2,
+          "filename": "OMEGA_B043_FULL_SYSTEM_PART_02_OF_29.zip",
+          "driveId": "1uwgVXOH-p_EweSFpf97weK9dBq-gBV9y",
+          "bytes": 96000184,
+          "sha256": "5a7ded415b0f0cdfe3329c4ec199ab7777aa60965972173fc8fd7e8726601dd4"
+        },
+        {
+          "index": 3,
+          "filename": "OMEGA_B043_FULL_SYSTEM_PART_03_OF_29.zip",
+          "driveId": "1VltWMH82DgTuNsiIRidVsbgMH4NWnAxS",
+          "bytes": 96000184,
+          "sha256": "9dc50f1ae8720c6fbcd68b4c25403efd525bb3b09b2b44eb029f02cc1493eaa9"
+        },
+        {
+          "index": 4,
+          "filename": "OMEGA_B043_FULL_SYSTEM_PART_04_OF_29.zip",
+          "driveId": "1B4ZHlzNC0YlITAX8YS9zlbJFqKruPdyw",
+          "bytes": 96000184,
+          "sha256": "924b6dda98121cc87590ab86b67361ba87b119a08ade685022c256a3e93195ff"
+        },
+        {
+          "index": 5,
+          "filename": "OMEGA_B043_FULL_SYSTEM_PART_05_OF_29.zip",
+          "driveId": "1z4y0ogwJqYpslWipv5fxx7osGRjb4e3K",
+          "bytes": 96000184,
+          "sha256": "5f8e42e33419371b6791a3aa44d5385193ad6c20e10676435410f8da9a1b90b2"
+        },
+        {
+          "index": 6,
+          "filename": "OMEGA_B043_FULL_SYSTEM_PART_06_OF_29.zip",
+          "driveId": "1D-amCZ0s6tj_0cOe3lu39hI18XYirFHi",
+          "bytes": 96000184,
+          "sha256": "9a0789f6b0766654bb325c224dc7cb66582ca86ece684f58728e936139bbb436"
+        },
+        {
+          "index": 7,
+          "filename": "OMEGA_B043_FULL_SYSTEM_PART_07_OF_29.zip",
+          "driveId": "1dVs1TtD6AHUkFae1nhDHzPLTf8cjEHuI",
+          "bytes": 96000184,
+          "sha256": "39a4cb97acc12c1f56d743b0966af026814bfff6e572c6de1e01734a6a3cd5f8"
+        },
+        {
+          "index": 8,
+          "filename": "OMEGA_B043_FULL_SYSTEM_PART_08_OF_29.zip",
+          "driveId": "1PFATFXXoFTZItwFspJ47y3RtUQuBA7Gs",
+          "bytes": 96000184,
+          "sha256": "3d23eb916807cbbf54cece136dd6cb1c2c0ca3fde27faa38b3c4548feceea213"
+        },
+        {
+          "index": 9,
+          "filename": "OMEGA_B043_FULL_SYSTEM_PART_09_OF_29.zip",
+          "driveId": "1ybKujOmNX6ZmumgOpCrEU6ykbIxbXBHi",
+          "bytes": 96000184,
+          "sha256": "f93f3c01d17e0ec4d2c268924b024a0f8893e0f44fe7ae504ebf17bf2b4e704c"
+        },
+        {
+          "index": 10,
+          "filename": "OMEGA_B043_FULL_SYSTEM_PART_10_OF_29.zip",
+          "driveId": "1Pt3d15otEbDasbXi5lO5W__h8rVl4-qQ",
+          "bytes": 96000184,
+          "sha256": "1a6651bdade180ac8f387bffef7ebba145a08c428c233a0eb7f874ad91f97342"
+        },
+        {
+          "index": 11,
+          "filename": "OMEGA_B043_FULL_SYSTEM_PART_11_OF_29.zip",
+          "driveId": "1zsweO7oydxBsbdaA9ynSvlyq_8zjUTUs",
+          "bytes": 96000184,
+          "sha256": "467a9bac57b4d768a56286d0f9fd054d5948257e3a3c0383b812458a82fb5768"
+        },
+        {
+          "index": 12,
+          "filename": "OMEGA_B043_FULL_SYSTEM_PART_12_OF_29.zip",
+          "driveId": "1SVFPv-7h2Q0WWLwThfS37AQZeQCz4TB4",
+          "bytes": 96000184,
+          "sha256": "d45d936f349ac70432a2975e9a2731aedec228a4b604f140349e61a5d219fbed"
+        },
+        {
+          "index": 13,
+          "filename": "OMEGA_B043_FULL_SYSTEM_PART_13_OF_29.zip",
+          "driveId": "16H1GS2YSczkj8p7kmWqOF8YvZnvka7eG",
+          "bytes": 96000184,
+          "sha256": "5e1a82bc0b73cd1e27833eee2ef0a9265aa54fe9c49b13561a6171ff0ddca29a"
+        },
+        {
+          "index": 14,
+          "filename": "OMEGA_B043_FULL_SYSTEM_PART_14_OF_29.zip",
+          "driveId": "1GXlMMeh_04j8EzwNfJoi21i7XJCrOHfD",
+          "bytes": 96000184,
+          "sha256": "a6d8d5c3be5ec127ada3a647e6528a8a4bce1908bde798f8706c1438a97340d6"
+        },
+        {
+          "index": 15,
+          "filename": "OMEGA_B043_FULL_SYSTEM_PART_15_OF_29.zip",
+          "driveId": "1czXUgT3WWAAzILxUMscfjjSQBK-YUHuI",
+          "bytes": 96000184,
+          "sha256": "39dfbcbfed3a1a0fc691f0b0326e781d9282af9b18f661d7c27062c595928281"
+        },
+        {
+          "index": 16,
+          "filename": "OMEGA_B043_FULL_SYSTEM_PART_16_OF_29.zip",
+          "driveId": "1O-yWMaPFK7Pk4SYeIF8lYgp0eGAOluSx",
+          "bytes": 96000184,
+          "sha256": "f4a9cf0b43b1d5c70a6fc6d299c599c31934efa3f44397cb3b4876982d659982"
+        },
+        {
+          "index": 17,
+          "filename": "OMEGA_B043_FULL_SYSTEM_PART_17_OF_29.zip",
+          "driveId": "1LSrgwlb2M0g0I8LoALr0MQH-X5qJqosb",
+          "bytes": 96000184,
+          "sha256": "6e5f272474e240468965af8e7359779bc116fa5f3534a1e323659daa3b6d050d"
+        },
+        {
+          "index": 18,
+          "filename": "OMEGA_B043_FULL_SYSTEM_PART_18_OF_29.zip",
+          "driveId": "1ZL0wiuhYKHuFI_SavhyHtcg_TfzYDire",
+          "bytes": 96000184,
+          "sha256": "31d0c1cb4a2a5ac2ba94ddb722e43cb8fee800d4a63a45bfd41477892c46113e"
+        },
+        {
+          "index": 19,
+          "filename": "OMEGA_B043_FULL_SYSTEM_PART_19_OF_29.zip",
+          "driveId": "1CawAMB1fid13wbLD9V_LNuzeWLY1O1vv",
+          "bytes": 96000184,
+          "sha256": "b8f9b6b203877b1512f2c8d7484ef7d9bac05a7443510463460c648555f2187e"
+        },
+        {
+          "index": 20,
+          "filename": "OMEGA_B043_FULL_SYSTEM_PART_20_OF_29.zip",
+          "driveId": "1-lmdNU4-VGZgRJ0FvBquvyL1ypjnAOld",
+          "bytes": 96000184,
+          "sha256": "ee57492bf9893d9fc35eea0fa05b68db83de1e41a7aefa8c43cbbd2134f6984b"
+        },
+        {
+          "index": 21,
+          "filename": "OMEGA_B043_FULL_SYSTEM_PART_21_OF_29.zip",
+          "driveId": "1FWPL1hlkC6lzuF9CZpVSw5agL45nXfe5",
+          "bytes": 96000184,
+          "sha256": "2183221791d7d835adabc9af6e0112eb011160c368bf9522bc6b8517405efb42"
+        },
+        {
+          "index": 22,
+          "filename": "OMEGA_B043_FULL_SYSTEM_PART_22_OF_29.zip",
+          "driveId": "15ls6iPFfCHtBZYBpvt_hTJ1YK_c1zPTg",
+          "bytes": 96000184,
+          "sha256": "d2093ec44ecb52b364528f090b2419a879ed1d21d481cce4e950efdfd383d98e"
+        },
+        {
+          "index": 23,
+          "filename": "OMEGA_B043_FULL_SYSTEM_PART_23_OF_29.zip",
+          "driveId": "13zbU4yDsVxvaiXw3n2j3vCUr5XvX6v--",
+          "bytes": 96000184,
+          "sha256": "e48f3cec5eb9e5f0cc49ec34362e0499a97a60c0924ef8a8a2dfdb614d7c064b"
+        },
+        {
+          "index": 24,
+          "filename": "OMEGA_B043_FULL_SYSTEM_PART_24_OF_29.zip",
+          "driveId": "1Zd0PBtbvGFjqxecqRJfw3FxM9cOjCLOW",
+          "bytes": 96000184,
+          "sha256": "ab6e7a9850ae00b546ba5b95b8fac2c9e82955b3856cde100433acb0eaceecd7"
+        },
+        {
+          "index": 25,
+          "filename": "OMEGA_B043_FULL_SYSTEM_PART_25_OF_29.zip",
+          "driveId": "1ic9yRXDySWR4wuDV1hXhXCgfx3Zvyu20",
+          "bytes": 96000184,
+          "sha256": "13a02ed2c989fb312220d25e1d061bf0454888865930be6ce772bdd08dd44262"
+        },
+        {
+          "index": 26,
+          "filename": "OMEGA_B043_FULL_SYSTEM_PART_26_OF_29.zip",
+          "driveId": "1M8S73Rp09dn30iRCH7_KwHKf4ZyS06sO",
+          "bytes": 96000184,
+          "sha256": "a9bc06788a03e6be9df36e458ff0b4cf6992ae0630efaf8cdbaa03fe7a7dca14"
+        },
+        {
+          "index": 27,
+          "filename": "OMEGA_B043_FULL_SYSTEM_PART_27_OF_29.zip",
+          "driveId": "1Oh-nM4wE3jLf8tQwN1eNFpPKMy0xmDf5",
+          "bytes": 96000184,
+          "sha256": "3bdeaecb0f0249842d177fc78107d8059513bc8a8b9c3d21f0ee1c51e226eae2"
+        },
+        {
+          "index": 28,
+          "filename": "OMEGA_B043_FULL_SYSTEM_PART_28_OF_29.zip",
+          "driveId": "1xdAZuLbupCPODdXiWOgwZ_-guqfe0Ebw",
+          "bytes": 96000184,
+          "sha256": "b463075c5e41b9d64093ec916779013b0c51f15ee04bedb2b782805a062b76b2"
+        },
+        {
+          "index": 29,
+          "filename": "OMEGA_B043_FULL_SYSTEM_PART_29_OF_29.zip",
+          "driveId": "1iPVKhzqV9lSu5Sl3OL6No7uQMo6EJUYo",
+          "bytes": 90646473,
+          "sha256": "86599fc420e065730046daf925374e13e58bcdce24535dcb59642bd8bc6ad714"
+        }
+      ],
+      "reportedEvidence": {
+        "manifest": "OMEGA_B043_RECONSTRUCTION_KIT.zip",
+        "masterSha256": "76092ac1396ab5224dde6f77401ce7c76819c10a749c102950045de9bad6e4e7",
+        "evidenceState": "RECONSTRUCTION_KIT_HISTORICAL_REPORT_NOT_CURRENT_BYTE_ACCEPTANCE",
+        "partDigestManifest": "OMEGA_B043_RECONSTRUCTION_KIT.zip/OMEGA_B043_PARTITION_MANIFEST.json",
+        "partDigestState": "HISTORICAL_RECORDED_EXPECTATION_NOT_CURRENT_DRIVE_BYTE_VERIFICATION"
+      }
+    },
+    {
+      "id": "B045",
+      "label": "B045 FULL SYSTEM",
+      "folderUrl": "https://drive.google.com/drive/folders/1J1svqq-wCy9xDbTr03kEM6ynsxKv5WPh",
+      "expectedParts": 30,
+      "sourceState": "DRIVE_FILENAME_SIZE_DISCOVERED_NOT_BYTE_VERIFIED",
+      "parts": [
+        {
+          "index": 1,
+          "filename": "OMEGA_B045_FULL_SYSTEM_PART_01_OF_30.zip",
+          "driveId": "1Qrm-_mCsP_Ztm3mqbfxPq0fCBcQ1LE4p",
+          "bytes": 96000184
+        },
+        {
+          "index": 2,
+          "filename": "OMEGA_B045_FULL_SYSTEM_PART_02_OF_30.zip",
+          "driveId": "1RbZs_p1XReuZRkhhoxZxCNj8S6YmIfin",
+          "bytes": 96000184
+        },
+        {
+          "index": 3,
+          "filename": "OMEGA_B045_FULL_SYSTEM_PART_03_OF_30.zip",
+          "driveId": "1QBnEe7PeFm7Q1hSlvPwdrwo1qWQW8nCZ",
+          "bytes": 96000184
+        },
+        {
+          "index": 4,
+          "filename": "OMEGA_B045_FULL_SYSTEM_PART_04_OF_30.zip",
+          "driveId": "1TZoWDN2-1oyh263B5DLokpwZ-cfeqd7K",
+          "bytes": 96000184
+        },
+        {
+          "index": 5,
+          "filename": "OMEGA_B045_FULL_SYSTEM_PART_05_OF_30.zip",
+          "driveId": "1N_YZtlkMlsNF9yo1svfovRZrFSphMXKv",
+          "bytes": 96000184
+        },
+        {
+          "index": 6,
+          "filename": "OMEGA_B045_FULL_SYSTEM_PART_06_OF_30.zip",
+          "driveId": "1FQTaPfiQ_vr-lAQtldHTzW5cRDaGVjDY",
+          "bytes": 96000184
+        },
+        {
+          "index": 7,
+          "filename": "OMEGA_B045_FULL_SYSTEM_PART_07_OF_30.zip",
+          "driveId": "1QTRdLjbXktdn-6icFzoWK8E-4lBt5R2Z",
+          "bytes": 96000184
+        },
+        {
+          "index": 8,
+          "filename": "OMEGA_B045_FULL_SYSTEM_PART_08_OF_30.zip",
+          "driveId": "169sa4J_JvfhWC_UIGW1nHKU64OoXeYd5",
+          "bytes": 96000184
+        },
+        {
+          "index": 9,
+          "filename": "OMEGA_B045_FULL_SYSTEM_PART_09_OF_30.zip",
+          "driveId": "1kEGcytamXIxB7IV2eeedFUpL02osTqJm",
+          "bytes": 96000184
+        },
+        {
+          "index": 10,
+          "filename": "OMEGA_B045_FULL_SYSTEM_PART_10_OF_30.zip",
+          "driveId": "1VJUpb6eI1fuP52QlozE178axkycZUVCL",
+          "bytes": 96000184
+        },
+        {
+          "index": 11,
+          "filename": "OMEGA_B045_FULL_SYSTEM_PART_11_OF_30.zip",
+          "driveId": "1zTQCkXF6waFDYoI_ijMfG6SqwECCLwsn",
+          "bytes": 96000184
+        },
+        {
+          "index": 12,
+          "filename": "OMEGA_B045_FULL_SYSTEM_PART_12_OF_30.zip",
+          "driveId": "1QLYFeN2U2bzcWLOr9S9ZEFp7-dALjN9m",
+          "bytes": 96000184
+        },
+        {
+          "index": 13,
+          "filename": "OMEGA_B045_FULL_SYSTEM_PART_13_OF_30.zip",
+          "driveId": "1gZMIEKg-Xq98XKBWm8UXnUWXnevnYq1F",
+          "bytes": 96000184
+        },
+        {
+          "index": 14,
+          "filename": "OMEGA_B045_FULL_SYSTEM_PART_14_OF_30.zip",
+          "driveId": "1PpcNCZ5VbkFVyhPtfr-s1H2WI1j1sVcC",
+          "bytes": 96000184
+        },
+        {
+          "index": 15,
+          "filename": "OMEGA_B045_FULL_SYSTEM_PART_15_OF_30.zip",
+          "driveId": "1WHgDiooXoewkJn67g9aMomDhDuUPTmd9",
+          "bytes": 96000184
+        },
+        {
+          "index": 16,
+          "filename": "OMEGA_B045_FULL_SYSTEM_PART_16_OF_30.zip",
+          "driveId": "1PoOfKBQ5wCirhej-l6TaIVOHwNaY0hg6",
+          "bytes": 96000184
+        },
+        {
+          "index": 17,
+          "filename": "OMEGA_B045_FULL_SYSTEM_PART_17_OF_30.zip",
+          "driveId": "1cQKgXmsJxrvVZ4ediE1as41oCmffNDK3",
+          "bytes": 96000184
+        },
+        {
+          "index": 18,
+          "filename": "OMEGA_B045_FULL_SYSTEM_PART_18_OF_30.zip",
+          "driveId": "1wImawLdf3DSlBKEvLkMWpUQ3pQVrOAwn",
+          "bytes": 96000184
+        },
+        {
+          "index": 19,
+          "filename": "OMEGA_B045_FULL_SYSTEM_PART_19_OF_30.zip",
+          "driveId": "1twWEMr12Kw0aRqDlGx0yCrYymbEkCC58",
+          "bytes": 96000184
+        },
+        {
+          "index": 20,
+          "filename": "OMEGA_B045_FULL_SYSTEM_PART_20_OF_30.zip",
+          "driveId": "1T-EOb8M0DhbVMuiYt37Zl-xndEcYiiPA",
+          "bytes": 96000184
+        },
+        {
+          "index": 21,
+          "filename": "OMEGA_B045_FULL_SYSTEM_PART_21_OF_30.zip",
+          "driveId": "16Yrsb3x5_oC-ILJqGoqrsJ4EVTrtlYgU",
+          "bytes": 96000184
+        },
+        {
+          "index": 22,
+          "filename": "OMEGA_B045_FULL_SYSTEM_PART_22_OF_30.zip",
+          "driveId": "1fmUXEXKPEvkP4-kTlTrLp7CD5tmpqFgo",
+          "bytes": 96000184
+        },
+        {
+          "index": 23,
+          "filename": "OMEGA_B045_FULL_SYSTEM_PART_23_OF_30.zip",
+          "driveId": "13tcDxHLmKczwMEIImZRrNFTeJXdm9Jhy",
+          "bytes": 96000184
+        },
+        {
+          "index": 24,
+          "filename": "OMEGA_B045_FULL_SYSTEM_PART_24_OF_30.zip",
+          "driveId": "1abw8EQ3Y9Xd_SMaLX0_IB-NZODpgWnoE",
+          "bytes": 96000184
+        },
+        {
+          "index": 25,
+          "filename": "OMEGA_B045_FULL_SYSTEM_PART_25_OF_30.zip",
+          "driveId": "1vQr3Chu6DD2cxJKsEzPgl_90HctLCL24",
+          "bytes": 96000184
+        },
+        {
+          "index": 26,
+          "filename": "OMEGA_B045_FULL_SYSTEM_PART_26_OF_30.zip",
+          "driveId": "1u1Vix8fLyPfwRhDvSA35eE_XpB8TmA1N",
+          "bytes": 96000184
+        },
+        {
+          "index": 27,
+          "filename": "OMEGA_B045_FULL_SYSTEM_PART_27_OF_30.zip",
+          "driveId": "1PBYZ3k4Jc8aZO-Z6skg7hsJj7L-DeU5F",
+          "bytes": 96000184
+        },
+        {
+          "index": 28,
+          "filename": "OMEGA_B045_FULL_SYSTEM_PART_28_OF_30.zip",
+          "driveId": "1DMYnEfGrLxzivdzu_qnEGt4JXai2LVKU",
+          "bytes": 96000184
+        },
+        {
+          "index": 29,
+          "filename": "OMEGA_B045_FULL_SYSTEM_PART_29_OF_30.zip",
+          "driveId": "1Ut8t18ObJU9T-iz1F1KPLLacxIIC-Zv2",
+          "bytes": 96000184
+        },
+        {
+          "index": 30,
+          "filename": "OMEGA_B045_FULL_SYSTEM_PART_30_OF_30.zip",
+          "driveId": "1WKp3_r1bRmm1LgRef1h4eWdf4oNDOABo",
+          "bytes": 3808619
+        }
+      ],
+      "reportedEvidence": null
+    },
+    {
+      "id": "B053",
+      "label": "B053 FULL SYSTEM",
+      "folderUrl": "https://drive.google.com/drive/folders/1OJzPFCGylfEEHNyurvPnwq--C-nO88M2",
+      "expectedParts": 30,
+      "sourceState": "DRIVE_FILENAME_SIZE_DISCOVERED_NOT_BYTE_VERIFIED",
+      "parts": [
+        {
+          "index": 1,
+          "filename": "OMEGA_B053_FULL_SYSTEM_PART_01_OF_30.zip",
+          "driveId": "1YnADmXObFlbwoaN9dUOxlsHtolJm0Zaa",
+          "bytes": 96000184
+        },
+        {
+          "index": 2,
+          "filename": "OMEGA_B053_FULL_SYSTEM_PART_02_OF_30.zip",
+          "driveId": "1KtTqEt8lJjKuPn10AFURx8l0Trdk2d85",
+          "bytes": 96000184
+        },
+        {
+          "index": 3,
+          "filename": "OMEGA_B053_FULL_SYSTEM_PART_03_OF_30.zip",
+          "driveId": "1ac0iFk3bBCVTaLzKLijIBcJPNzheRIL0",
+          "bytes": 96000184
+        },
+        {
+          "index": 4,
+          "filename": "OMEGA_B053_FULL_SYSTEM_PART_04_OF_30.zip",
+          "driveId": "1n7ImthKR6eWi82Gk2Te0piWjJa0Lr0T7",
+          "bytes": 96000184
+        },
+        {
+          "index": 5,
+          "filename": "OMEGA_B053_FULL_SYSTEM_PART_05_OF_30.zip",
+          "driveId": "1-Dc7zprKJ56xfOuVLoRqgt9sjjVUMPYn",
+          "bytes": 96000184
+        },
+        {
+          "index": 6,
+          "filename": "OMEGA_B053_FULL_SYSTEM_PART_06_OF_30.zip",
+          "driveId": "1B0JxbvCcb3aNpyXY6FUgv4htbjJYLGRs",
+          "bytes": 96000184
+        },
+        {
+          "index": 7,
+          "filename": "OMEGA_B053_FULL_SYSTEM_PART_07_OF_30.zip",
+          "driveId": "1FnqG5ak9G7JAvEIk9xCmuhIKrgi0UefW",
+          "bytes": 96000184
+        },
+        {
+          "index": 8,
+          "filename": "OMEGA_B053_FULL_SYSTEM_PART_08_OF_30.zip",
+          "driveId": "1Qc_Dm_4aPCcGOSU8yMHBtWfPT16lxUn6",
+          "bytes": 96000184
+        },
+        {
+          "index": 9,
+          "filename": "OMEGA_B053_FULL_SYSTEM_PART_09_OF_30.zip",
+          "driveId": "1OGVe_VDDRRFPr6EMvo8XO6xhcxVKAnVC",
+          "bytes": 96000184
+        },
+        {
+          "index": 10,
+          "filename": "OMEGA_B053_FULL_SYSTEM_PART_10_OF_30.zip",
+          "driveId": "1Cfc4IIB5dLSYpZz2ZET5C2rJzZTfwxSc",
+          "bytes": 96000184
+        },
+        {
+          "index": 11,
+          "filename": "OMEGA_B053_FULL_SYSTEM_PART_11_OF_30.zip",
+          "driveId": "1h_ggZqlHh1G1mUvY_LT0RrwBjq7Lx-jn",
+          "bytes": 96000184
+        },
+        {
+          "index": 12,
+          "filename": "OMEGA_B053_FULL_SYSTEM_PART_12_OF_30.zip",
+          "driveId": "1XjtTIT9s07mVpGUlJ1MZkIrw6wbZiYgp",
+          "bytes": 96000184
+        },
+        {
+          "index": 13,
+          "filename": "OMEGA_B053_FULL_SYSTEM_PART_13_OF_30.zip",
+          "driveId": "1pe2SpxcMKaMQybkn-3ncJmpLZSmTOQEL",
+          "bytes": 96000184
+        },
+        {
+          "index": 14,
+          "filename": "OMEGA_B053_FULL_SYSTEM_PART_14_OF_30.zip",
+          "driveId": "1iq0Coqi7s9I5QG-BOiiqmTqk70v98LIA",
+          "bytes": 96000184
+        },
+        {
+          "index": 15,
+          "filename": "OMEGA_B053_FULL_SYSTEM_PART_15_OF_30.zip",
+          "driveId": "1-wj-k6bWHhl9m4lT4JQMt9t_SmQCaLmR",
+          "bytes": 96000184
+        },
+        {
+          "index": 16,
+          "filename": "OMEGA_B053_FULL_SYSTEM_PART_16_OF_30.zip",
+          "driveId": "1yOXvyLccBXaAkeUm0H6NfAhcvPVX0SQ4",
+          "bytes": 96000184
+        },
+        {
+          "index": 17,
+          "filename": "OMEGA_B053_FULL_SYSTEM_PART_17_OF_30.zip",
+          "driveId": "1x9e0rSiKLlRBwX_eith0hjTk8Z7S4_67",
+          "bytes": 96000184
+        },
+        {
+          "index": 18,
+          "filename": "OMEGA_B053_FULL_SYSTEM_PART_18_OF_30.zip",
+          "driveId": "1sPm_qDiTxmGNGn3EngEc_UM0fkYV9GbX",
+          "bytes": 96000184
+        },
+        {
+          "index": 19,
+          "filename": "OMEGA_B053_FULL_SYSTEM_PART_19_OF_30.zip",
+          "driveId": "1UBwmr285Pn_rYtS9wqwigHGxOFgVxpGJ",
+          "bytes": 96000184
+        },
+        {
+          "index": 20,
+          "filename": "OMEGA_B053_FULL_SYSTEM_PART_20_OF_30.zip",
+          "driveId": "1mS8OFmeUumBF6iTI8C_19QSSzB1FK3b_",
+          "bytes": 96000184
+        },
+        {
+          "index": 21,
+          "filename": "OMEGA_B053_FULL_SYSTEM_PART_21_OF_30.zip",
+          "driveId": "1sZFEAHDbq0CCGWWsoQ10jyFVEj7Mv5Qw",
+          "bytes": 96000184
+        },
+        {
+          "index": 22,
+          "filename": "OMEGA_B053_FULL_SYSTEM_PART_22_OF_30.zip",
+          "driveId": "12PyXBLv1qLJotF9ANO1kX2MgTS9almHj",
+          "bytes": 96000184
+        },
+        {
+          "index": 23,
+          "filename": "OMEGA_B053_FULL_SYSTEM_PART_23_OF_30.zip",
+          "driveId": "1S6lwGPCrH0FllyiPO1-1ahJM3mOKnwbq",
+          "bytes": 96000184
+        },
+        {
+          "index": 24,
+          "filename": "OMEGA_B053_FULL_SYSTEM_PART_24_OF_30.zip",
+          "driveId": "1rUvEAn-v-luxOAhsobUEVhNvluPmdMji",
+          "bytes": 96000184
+        },
+        {
+          "index": 25,
+          "filename": "OMEGA_B053_FULL_SYSTEM_PART_25_OF_30.zip",
+          "driveId": "1V-SzOJWv1S4Ql8fe_zllKqPc5vMb-jNG",
+          "bytes": 96000184
+        },
+        {
+          "index": 26,
+          "filename": "OMEGA_B053_FULL_SYSTEM_PART_26_OF_30.zip",
+          "driveId": "1D6X_oi3_xQu9t4F53uoDOuBQGrH6JaOH",
+          "bytes": 96000184
+        },
+        {
+          "index": 27,
+          "filename": "OMEGA_B053_FULL_SYSTEM_PART_27_OF_30.zip",
+          "driveId": "1l7sf6SzzSdcdbZZZL6nkVCpCA1CE0rKI",
+          "bytes": 96000184
+        },
+        {
+          "index": 28,
+          "filename": "OMEGA_B053_FULL_SYSTEM_PART_28_OF_30.zip",
+          "driveId": "1dlvwgfbecuuAKypISw0YWA3hfyJ7sDij",
+          "bytes": 96000184
+        },
+        {
+          "index": 29,
+          "filename": "OMEGA_B053_FULL_SYSTEM_PART_29_OF_30.zip",
+          "driveId": "1-EbWScJ1jlGBmn8vYv6U-Qkq8NL-Xb6T",
+          "bytes": 96000184
+        },
+        {
+          "index": 30,
+          "filename": "OMEGA_B053_FULL_SYSTEM_PART_30_OF_30.zip",
+          "driveId": "1Z6ATNFB_IZ3e7G4aa62IaOHfsqhfjdpD",
+          "bytes": 56872865
+        }
+      ],
+      "reportedEvidence": null
+    },
+    {
+      "id": "B053-R7",
+      "label": "B053 R7 PROFESSIONAL FULL SYSTEM",
+      "folderUrl": "https://drive.google.com/drive/folders/1xsootC7J4wWsZiOtzNfeBGErd15iz8qF",
+      "expectedParts": 30,
+      "sourceState": "DRIVE_FILENAME_SIZE_DISCOVERED_NOT_BYTE_VERIFIED",
+      "parts": [
+        {
+          "index": 1,
+          "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM_PART_01_OF_30.zip",
+          "driveId": "1eFCmALN5csqXfs1CP46dXHX22qoENc6a",
+          "bytes": 96000216
+        },
+        {
+          "index": 2,
+          "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM_PART_02_OF_30.zip",
+          "driveId": "1mvnTKNb10EiS6pCMiC8q6zFC2_GaQZIA",
+          "bytes": 96000216
+        },
+        {
+          "index": 3,
+          "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM_PART_03_OF_30.zip",
+          "driveId": "1vGMIIafG2OPY8PyeW-G6WI9P9jVIpXxV",
+          "bytes": 96000216
+        },
+        {
+          "index": 4,
+          "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM_PART_04_OF_30.zip",
+          "driveId": "1A2f_fUMvnsCBPl3WTsdFt0FP4dN3-Ri3",
+          "bytes": 96000216
+        },
+        {
+          "index": 5,
+          "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM_PART_05_OF_30.zip",
+          "driveId": "1i0ViOzQt-ahTdo6Y5QCv_kesBs4VUSsY",
+          "bytes": 96000216
+        },
+        {
+          "index": 6,
+          "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM_PART_06_OF_30.zip",
+          "driveId": "1c12mDYKI4oRWd4Wu3JcgFBWWIR6SCWtk",
+          "bytes": 96000216
+        },
+        {
+          "index": 7,
+          "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM_PART_07_OF_30.zip",
+          "driveId": "1W0BTR6sxj-Ut4bhYa1JQwsOyRUyE92qS",
+          "bytes": 96000216
+        },
+        {
+          "index": 8,
+          "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM_PART_08_OF_30.zip",
+          "driveId": "1ukbtcHBy4YK_cmjQa8GnfC-jJrPPGzzn",
+          "bytes": 96000216
+        },
+        {
+          "index": 9,
+          "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM_PART_09_OF_30.zip",
+          "driveId": "1_34OZvb8WSQL73yp36VpYuYRFScdchzE",
+          "bytes": 96000216
+        },
+        {
+          "index": 10,
+          "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM_PART_10_OF_30.zip",
+          "driveId": "1hLhF038Ha7EZzef6c719jbuxVvrjuAr-",
+          "bytes": 96000216
+        },
+        {
+          "index": 11,
+          "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM_PART_11_OF_30.zip",
+          "driveId": "1MarSaLsS-z2QE29h_C4sbI7nFJnXJ9Bq",
+          "bytes": 96000216
+        },
+        {
+          "index": 12,
+          "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM_PART_12_OF_30.zip",
+          "driveId": "10QPq5O3C0I2r1VYP2B4s2oWZXlPNIBs3",
+          "bytes": 96000216
+        },
+        {
+          "index": 13,
+          "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM_PART_13_OF_30.zip",
+          "driveId": "1gzO7p52IME1fp7xrHSyZCV9KoRwDWHrZ",
+          "bytes": 96000216
+        },
+        {
+          "index": 14,
+          "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM_PART_14_OF_30.zip",
+          "driveId": "1vWHyqAY2Kj-KadNmcD_6pKCTaQI5ZyX4",
+          "bytes": 96000216
+        },
+        {
+          "index": 15,
+          "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM_PART_15_OF_30.zip",
+          "driveId": "11LLi3rVSZlO5FZBKlkcll-K4Y83BS6k7",
+          "bytes": 96000216
+        },
+        {
+          "index": 16,
+          "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM_PART_16_OF_30.zip",
+          "driveId": "1yjHET4PDyGArNDqQSJeh8aaE8Lys-Gvy",
+          "bytes": 96000216
+        },
+        {
+          "index": 17,
+          "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM_PART_17_OF_30.zip",
+          "driveId": "1F6h57mk_hS8UlY4X3yWcqPAXTttpi2yR",
+          "bytes": 96000216
+        },
+        {
+          "index": 18,
+          "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM_PART_18_OF_30.zip",
+          "driveId": "1zPH_MySMR5AEnzAZH_LddX3rzHks4BDH",
+          "bytes": 96000216
+        },
+        {
+          "index": 19,
+          "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM_PART_19_OF_30.zip",
+          "driveId": "191Lo5eqlXUmH_tymR4InrkS0FNmYiCwa",
+          "bytes": 96000216
+        },
+        {
+          "index": 20,
+          "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM_PART_20_OF_30.zip",
+          "driveId": "1GdH11ci2JVDhj3ZcLrtEx0f2uGrfSpuM",
+          "bytes": 96000216
+        },
+        {
+          "index": 21,
+          "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM_PART_21_OF_30.zip",
+          "driveId": "1u6Exz5lfaotiYVqASCwF9-l78Y1XLVHF",
+          "bytes": 96000216
+        },
+        {
+          "index": 22,
+          "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM_PART_22_OF_30.zip",
+          "driveId": "1bgT0a4J-M4F0mRr2M9w4mGrCn5qitiUg",
+          "bytes": 96000216
+        },
+        {
+          "index": 23,
+          "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM_PART_23_OF_30.zip",
+          "driveId": "1VpVc84p2AoEsCR40VbieeFf1Fv4aTwDj",
+          "bytes": 96000216
+        },
+        {
+          "index": 24,
+          "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM_PART_24_OF_30.zip",
+          "driveId": "1IZV_iO8P38wubQ-rZL2v8aT6pxrIIRLU",
+          "bytes": 96000216
+        },
+        {
+          "index": 25,
+          "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM_PART_25_OF_30.zip",
+          "driveId": "1XjksY2p9V_AdWzVYlYL63_jOWpBJ0gpC",
+          "bytes": 96000216
+        },
+        {
+          "index": 26,
+          "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM_PART_26_OF_30.zip",
+          "driveId": "1OjlQ7l7TuYdjjLQ-Bj9cQ3BADrsu8vAE",
+          "bytes": 96000216
+        },
+        {
+          "index": 27,
+          "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM_PART_27_OF_30.zip",
+          "driveId": "1vRg6LEF3cCtGDxKvT8YzQsucsWr7XjkC",
+          "bytes": 96000216
+        },
+        {
+          "index": 28,
+          "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM_PART_28_OF_30.zip",
+          "driveId": "1JmtVsrbyquw-B3qCdMp_KQNocrr9yTes",
+          "bytes": 96000216
+        },
+        {
+          "index": 29,
+          "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM_PART_29_OF_30.zip",
+          "driveId": "1rbXdFCaVkINcu5A62sUVQUzFWaxEWZa1",
+          "bytes": 96000216
+        },
+        {
+          "index": 30,
+          "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM_PART_30_OF_30.zip",
+          "driveId": "1ZDrYA29sbRtZ9TJH88uPlDCqJtCjUV49",
+          "bytes": 65704015
+        }
+      ],
+      "reportedEvidence": null
+    },
+    {
+      "id": "V32",
+      "label": "V32 WORKSTATION",
+      "folderUrl": "https://drive.google.com/drive/folders/1aIpmDNoDTzasoCRxHbUDmVdtjdEbENKD",
+      "expectedParts": 17,
+      "sourceState": "DRIVE_FILENAME_SIZE_DISCOVERED_NOT_BYTE_VERIFIED",
+      "parts": [
+        {
+          "index": 1,
+          "filename": "OMEGA_V32_PART_01.zip",
+          "driveId": "1fC0AJO4Fs9FC97EqRof0Ogu8gkqh6zi3",
+          "bytes": 111706283
+        },
+        {
+          "index": 2,
+          "filename": "OMEGA_V32_PART_02.zip",
+          "driveId": "1Fre6QPVuPLdP-x5SEBbczR7OH5Js3zNv",
+          "bytes": 129032585
+        },
+        {
+          "index": 3,
+          "filename": "OMEGA_V32_PART_03.zip",
+          "driveId": "1JhI0TVrwFPVV6zd0c8S3uLiFNKRNyR2i",
+          "bytes": 124982033
+        },
+        {
+          "index": 4,
+          "filename": "OMEGA_V32_PART_04.zip",
+          "driveId": "123imcrTSbQVnyna6M8EVmXhuMlm-fN5C",
+          "bytes": 124947543
+        },
+        {
+          "index": 5,
+          "filename": "OMEGA_V32_PART_05.zip",
+          "driveId": "1CQkeOsAgJLdVpIfETsHU9lLp5PKRwD6p",
+          "bytes": 118887218
+        },
+        {
+          "index": 6,
+          "filename": "OMEGA_V32_PART_06.zip",
+          "driveId": "1Cy4eK-5G_n5QK8-Vr8gp9h4GGHvwP1GT",
+          "bytes": 114443151
+        },
+        {
+          "index": 7,
+          "filename": "OMEGA_V32_PART_07.zip",
+          "driveId": "1RgQ3G4VIYWpHa_WPuQ1TeTVbjzH18JKk",
+          "bytes": 111456139
+        },
+        {
+          "index": 8,
+          "filename": "OMEGA_V32_PART_08.zip",
+          "driveId": "1pz9l_ghJ61AdpK9xVZeqtB6qhov7vTwi",
+          "bytes": 111454704
+        },
+        {
+          "index": 9,
+          "filename": "OMEGA_V32_PART_09.zip",
+          "driveId": "1H-8NvnN9Fex1QffM-voXF_Qz0CVGicpx",
+          "bytes": 111458173
+        },
+        {
+          "index": 10,
+          "filename": "OMEGA_V32_PART_10.zip",
+          "driveId": "12Yw0L5wP9-ShNE7EypSz6ff1_r0WI_lk",
+          "bytes": 111456534
+        },
+        {
+          "index": 11,
+          "filename": "OMEGA_V32_PART_11.zip",
+          "driveId": "1vJvBT2_pJQHIdXD7PTGKpAMXGjqEywWw",
+          "bytes": 111456918
+        },
+        {
+          "index": 12,
+          "filename": "OMEGA_V32_PART_12.zip",
+          "driveId": "1wvLhRo8DgJLwxleNesxY5_FJo9b-p3HM",
+          "bytes": 111458060
+        },
+        {
+          "index": 13,
+          "filename": "OMEGA_V32_PART_13.zip",
+          "driveId": "13YeVT7GXnSXcmOtJNxzyoThDaaVS12Df",
+          "bytes": 111454685
+        },
+        {
+          "index": 14,
+          "filename": "OMEGA_V32_PART_14.zip",
+          "driveId": "1X2D_YKw9jJ60WyODAyQ_pU0tMLhYx6KQ",
+          "bytes": 111455922
+        },
+        {
+          "index": 15,
+          "filename": "OMEGA_V32_PART_15.zip",
+          "driveId": "1Y91q22rylkzbkrhbjU3GoIMBJ4nH84bU",
+          "bytes": 132500970
+        },
+        {
+          "index": 16,
+          "filename": "OMEGA_V32_PART_16.zip",
+          "driveId": "1fT6lsndGfib5xpMc3vZ5bYyvj7cEXfz8",
+          "bytes": 131900190
+        },
+        {
+          "index": 17,
+          "filename": "OMEGA_V32_PART_17.zip",
+          "driveId": "1zV17PVIUWfMJKCceIhnTyDdiV62FCpT6",
+          "bytes": 113516146
+        }
+      ],
+      "reportedEvidence": null
+    },
+    {
+      "id": "V35",
+      "label": "V35 MASTER ATLAS STUDIO",
+      "folderUrl": "https://drive.google.com/drive/folders/1YB5yjzPM52pcX2Y1C-Whyd4uiKRdIPZU",
+      "expectedParts": 20,
+      "sourceState": "DRIVE_FILENAME_SIZE_DISCOVERED_NOT_BYTE_VERIFIED",
+      "parts": [
+        {
+          "index": 1,
+          "filename": "OMEGA_V35_PART_01.zip",
+          "driveId": "1P1VVza36gEI3L44HReVDoP-39Q0l1d2M",
+          "bytes": 111794944,
+          "sha256": "101923d9378489d796657493433513f7c4094ccaee161a032a261bc9a2741315"
+        },
+        {
+          "index": 2,
+          "filename": "OMEGA_V35_PART_02.zip",
+          "driveId": "1NhiBORyaTAn8dBIUKS91BH1N0nkVyQOl",
+          "bytes": 129032585,
+          "sha256": "3d2c956b0d026581ce5ac2bb2b2bd685c2d1ef210a88988098c023b291c66a64"
+        },
+        {
+          "index": 3,
+          "filename": "OMEGA_V35_PART_03.zip",
+          "driveId": "1flyPsk8g7PCM1O2hhtrGtsWek3SQKR8D",
+          "bytes": 124982033,
+          "sha256": "3ad04a6b35a06df98f3291c20552a0cbb4c47b94af01724c3e20846b3657d18e"
+        },
+        {
+          "index": 4,
+          "filename": "OMEGA_V35_PART_04.zip",
+          "driveId": "1Lg-OczrcicF9kcWfzQ21uBQSzlPcMjoG",
+          "bytes": 124947543,
+          "sha256": "04a1b35905d28fe09554c66c1a64dc721163d93257f84d8b446aef16680f9030"
+        },
+        {
+          "index": 5,
+          "filename": "OMEGA_V35_PART_05.zip",
+          "driveId": "1nKDPCQZ7nObRfo_m-8GrFVlguIlpOfQP",
+          "bytes": 118887218,
+          "sha256": "80cd0f98f2889383286d37c38b4a9ffbf3790a129fef2d1b26136f437f5e9667"
+        },
+        {
+          "index": 6,
+          "filename": "OMEGA_V35_PART_06.zip",
+          "driveId": "1kA2v2v0tMWfAdksMUPahBKiJBB5EtDBP",
+          "bytes": 114443151,
+          "sha256": "f524415b6ad125f872e6e21a697e94e42c33d8b47fc9830ea4a3dee14721ddd1"
+        },
+        {
+          "index": 7,
+          "filename": "OMEGA_V35_PART_07.zip",
+          "driveId": "1u--cyMfuvTtYleSeScCsKvUP2aOcXyw4",
+          "bytes": 111456139,
+          "sha256": "50432a8e64fd8aba34b74018e801bd9851eee9a700766688d63b163b3aa93948"
+        },
+        {
+          "index": 8,
+          "filename": "OMEGA_V35_PART_08.zip",
+          "driveId": "1tEJjqQh3DygssMfhZTFzp1u_i1rSe1iG",
+          "bytes": 111454704,
+          "sha256": "f8375b102e7d595d6b3c5b86e0752d277e4565be1dc882775a3834a9f89a4535"
+        },
+        {
+          "index": 9,
+          "filename": "OMEGA_V35_PART_09.zip",
+          "driveId": "1H6zkjxMQfqI3BE2slxL-I8DVqvZ4KNYX",
+          "bytes": 111458173,
+          "sha256": "23aea2d678d2be6dba9f3d6a127e17515a63ecd1a493bf98f279a8c48b043de3"
+        },
+        {
+          "index": 10,
+          "filename": "OMEGA_V35_PART_10.zip",
+          "driveId": "1IiiOpq0U7cVggJSkEg5ocdcKTi5P32jZ",
+          "bytes": 111456534,
+          "sha256": "bba63fd3574e06a35ba9d59d812bc4e8bbf92edec51a0528f1571490b3d9ce0a"
+        },
+        {
+          "index": 11,
+          "filename": "OMEGA_V35_PART_11.zip",
+          "driveId": "1N8q0NRrLTlQzDWLcl6ILLr53Ei982KKO",
+          "bytes": 111456918,
+          "sha256": "0100cbd3f4bb1ca255ebb66cfb4d8e1dc2a1b37ae14c14cc9744866bd9cc8f0e"
+        },
+        {
+          "index": 12,
+          "filename": "OMEGA_V35_PART_12.zip",
+          "driveId": "1ChsAEjv70x9Yu5HzU6G8hWdcVixWS4nB",
+          "bytes": 111458060,
+          "sha256": "2e1355774204dc23210da6f41b961bf742fdd11eee7c1ce2aadb13da8b2c7ab8"
+        },
+        {
+          "index": 13,
+          "filename": "OMEGA_V35_PART_13.zip",
+          "driveId": "1_yPNhIXZx1_G4h1lvtu7Kk3cIx5YDJ_z",
+          "bytes": 111454685,
+          "sha256": "e9c3f52267c3a44902c5837376bc98b579d67226a16c537104f3c905fea4dafe"
+        },
+        {
+          "index": 14,
+          "filename": "OMEGA_V35_PART_14.zip",
+          "driveId": "1n1aEUOLEjbiAB0aPwf0Aljk7Ffp0zcbW",
+          "bytes": 111455922,
+          "sha256": "de5024ac2bfd37c7c4c6623c3cbd201b4d6de1c139f06babda6d27d90ba476ae"
+        },
+        {
+          "index": 15,
+          "filename": "OMEGA_V35_PART_15.zip",
+          "driveId": "1zIb2--3VKkZFKQhcsBa-USfh2weJQGIu",
+          "bytes": 132500970,
+          "sha256": "3d96db2dceddfb4bdbded777058762aa646732191763b9e92b63710eafd88ecb"
+        },
+        {
+          "index": 16,
+          "filename": "OMEGA_V35_PART_16.zip",
+          "driveId": "1ndN8muZzUEWqm6TowqLuEuUnYnp3UVTz",
+          "bytes": 131900190,
+          "sha256": "feff29980f9d40f16f6c2eec556ec10a5c3bf56c2eb0eb698b1d973a6ff1ef31"
+        },
+        {
+          "index": 17,
+          "filename": "OMEGA_V35_PART_17.zip",
+          "driveId": "1JsLyijOh8xNVbRj0RF-AC_8B6lW5jhYt",
+          "bytes": 113516146,
+          "sha256": "6d1ee86d2ecbfa89ae3cda01a865aa81641df8e1f3c836dde7d7e69ebd5b47bf"
+        },
+        {
+          "index": 18,
+          "filename": "OMEGA_V35_PART_18.zip",
+          "driveId": "12-x0UcySIAAFXatj4OAyQ8OudrPJFIvY",
+          "bytes": 125605005,
+          "sha256": "a94cc36563893ccdd4c35225dbfdd08e2381393a8a7f296ba8f837c513860dab"
+        },
+        {
+          "index": 19,
+          "filename": "OMEGA_V35_PART_19.zip",
+          "driveId": "1jiZLMARKO6SESangtC6fnvDX5l7gCE-H",
+          "bytes": 117477736,
+          "sha256": "1ae2954db274784144a8be5bac5ae885493a1841400bfdd45c277757dab46d3a"
+        },
+        {
+          "index": 20,
+          "filename": "OMEGA_V35_PART_20.zip",
+          "driveId": "1sYT5MgnsUWiXoArISffG2T8nO25EuzUi",
+          "bytes": 63392462,
+          "sha256": "7d2927e6c27236ec9517a23491434c574ed829751a323073e3a48b4b1dc1e557"
+        }
+      ],
+      "reportedEvidence": {
+        "manifest": "OMEGA_V35_DELIVERY_MANIFEST.json",
+        "testReport": "OMEGA_V35_TEST_REPORT.json",
+        "evidenceState": "HISTORICAL_MANIFEST_AND_REPORTED_TEST_PASS_NOT_CURRENT_BYTE_ACCEPTANCE",
+        "partDigestManifest": "OMEGA_V35_DELIVERY_MANIFEST.json",
+        "partDigestState": "HISTORICAL_RECORDED_EXPECTATION_NOT_CURRENT_DRIVE_BYTE_VERIFICATION"
+      }
+    }
+  ],
+  "companionZipArchives": [
+    {
+      "filename": "OMEGA_B043_RECONSTRUCTION_KIT.zip",
+      "driveId": "1OJgi9kL88bjm_jQJDC51A05U1wSbxQul",
+      "bytes": 94289,
+      "sourceState": "DRIVE_FILENAME_SIZE_DISCOVERED_NOT_BYTE_VERIFIED"
+    },
+    {
+      "filename": "OMEGA_B053_R7_PROFESSIONAL_FULL_SYSTEM.zip",
+      "driveId": "1YYiMJjTlpA137wR1zJBUDjTIY80YM9ck",
+      "bytes": 2849703799,
+      "sourceState": "DRIVE_FILENAME_SIZE_DISCOVERED_NOT_BYTE_VERIFIED"
+    },
+    {
+      "filename": "OMEGA_EMBODIMENT_TRAVERSAL_WORKSTATION_v13_1_FIXED.zip",
+      "driveId": "1G-o2z2lTxFC0EOsI9ZqY8ncy_NtczXSn",
+      "bytes": 32437246,
+      "sourceState": "DRIVE_FILENAME_SIZE_DISCOVERED_NOT_BYTE_VERIFIED"
+    },
+    {
+      "filename": "OMEGA_ENRICHED_LIVE_CANON_STUDIO_v23_2_COMPLETE.zip",
+      "driveId": "1NDamn7vD67haI7yq1T5JXUyl3VlHE1f1",
+      "bytes": 162724762,
+      "sourceState": "DRIVE_FILENAME_SIZE_DISCOVERED_NOT_BYTE_VERIFIED"
+    },
+    {
+      "filename": "OMEGA_ENRICHED_LIVE_CANON_STUDIO_v23_3_VIEWPORT_FIXED_COMPLETE.zip",
+      "driveId": "1T4SXNhVKUs9yJKfpKIXC-SO3v91c4nGB",
+      "bytes": 162730522,
+      "sourceState": "DRIVE_FILENAME_SIZE_DISCOVERED_NOT_BYTE_VERIFIED"
+    },
+    {
+      "filename": "OMEGA_GENERATIVE_PATH_TRACED_4K_WORKSTATION_v16.zip",
+      "driveId": "1us6lpO6m2AQg7PfslYq0U9ADAcqFUU4e",
+      "bytes": 32043297,
+      "sourceState": "DRIVE_FILENAME_SIZE_DISCOVERED_NOT_BYTE_VERIFIED"
+    },
+    {
+      "filename": "OMEGA_HIERARCHICAL_SUPERSAMPLING_WORKSTATION_v15.zip",
+      "driveId": "13-SOAZnkWhRlCEG2B75C8CvhEs8rXwUv",
+      "bytes": 32106351,
+      "sourceState": "DRIVE_FILENAME_SIZE_DISCOVERED_NOT_BYTE_VERIFIED"
+    },
+    {
+      "filename": "OMEGA_LIVE_GPU_CANON_RUNTIME_v22.zip",
+      "driveId": "1V_KWhKEM24e1A1jNf3m4VUHna1PcVRBj",
+      "bytes": 162701776,
+      "sourceState": "DRIVE_FILENAME_SIZE_DISCOVERED_NOT_BYTE_VERIFIED"
+    },
+    {
+      "filename": "OMEGA_NATIVE_RENDER_WORKSTATION_v11.zip",
+      "driveId": "1XAYBi7T2d5Je5lRjXIvbrd_DSoDZSd26",
+      "bytes": 32002399,
+      "sourceState": "DRIVE_FILENAME_SIZE_DISCOVERED_NOT_BYTE_VERIFIED"
+    },
+    {
+      "filename": "OMEGA_PRO_FIELD_WORKSTATION_v18.zip",
+      "driveId": "1AeVT5OjAmRl-1h-cAaffo2uTK2W20mbJ",
+      "bytes": 32130909,
+      "sourceState": "DRIVE_FILENAME_SIZE_DISCOVERED_NOT_BYTE_VERIFIED"
+    },
+    {
+      "filename": "OMEGA_STATE_SPACE_IMAGE_SYNTHESIZER_v14.zip",
+      "driveId": "13AwRJyBvwfZpMcWKt3t3olxErEI1knPR",
+      "bytes": 32054765,
+      "sourceState": "DRIVE_FILENAME_SIZE_DISCOVERED_NOT_BYTE_VERIFIED"
+    },
+    {
+      "filename": "OMEGA_UNIFIED_CREATION_STUDIO_v25_1_STARTUP_FIXED_COMPLETE.zip",
+      "driveId": "1OR-vuI0VqeFlt1Ll1vobaj5GmTVK9gOK",
+      "bytes": 162751819,
+      "sourceState": "DRIVE_FILENAME_SIZE_DISCOVERED_NOT_BYTE_VERIFIED"
+    },
+    {
+      "filename": "OMEGA_UNIFIED_CREATION_STUDIO_v25_COMPLETE.zip",
+      "driveId": "1i_D2Q6cAVVZDGjTx475gF6HLRO3g8QJ6",
+      "bytes": 162752467,
+      "sourceState": "DRIVE_FILENAME_SIZE_DISCOVERED_NOT_BYTE_VERIFIED"
+    },
+    {
+      "filename": "OMEGA_UNIFIED_CREATION_WORKSTATION_v17_1_FIXED.zip",
+      "driveId": "1du4FCqCrOFQzQdBNzZlk4mFSwBytP2cg",
+      "bytes": 32103689,
+      "sourceState": "DRIVE_FILENAME_SIZE_DISCOVERED_NOT_BYTE_VERIFIED"
+    },
+    {
+      "filename": "OMEGA_UNIFIED_CREATION_WORKSTATION_v17_2_CREATIVE_DATA.zip",
+      "driveId": "1gKVc4ZqHisSg2Ui9afxzTLgspQe51U6w",
+      "bytes": 32141639,
+      "sourceState": "DRIVE_FILENAME_SIZE_DISCOVERED_NOT_BYTE_VERIFIED"
+    },
+    {
+      "filename": "OMEGA_UNIFIED_CREATION_WORKSTATION_v17.zip",
+      "driveId": "1jX1ZSHJ0I3FDX6d8ORBhNeml0GGnwhlp",
+      "bytes": 32102157,
+      "sourceState": "DRIVE_FILENAME_SIZE_DISCOVERED_NOT_BYTE_VERIFIED"
+    },
+    {
+      "filename": "OMEGA_UNIFIED_TRANSITION_TRAVERSAL_RUNTIME_v10.zip",
+      "driveId": "1F4p_N81Idp4YvOOzj8IfEkL3BltkUeNg",
+      "bytes": 28931881,
+      "sourceState": "DRIVE_FILENAME_SIZE_DISCOVERED_NOT_BYTE_VERIFIED"
+    },
+    {
+      "filename": "v23 lines incomplete.zip",
+      "driveId": "1F2mKb1nGtvlRsFEhZh7x6LosMCJPWH5f",
+      "bytes": 162714012,
+      "sourceState": "DRIVE_FILENAME_SIZE_DISCOVERED_NOT_BYTE_VERIFIED"
+    }
+  ],
+  "counts": {
+    "splitFamilies": 6,
+    "expectedParts": 156,
+    "discoveredParts": 156,
+    "companionZipArchives": 18
+  }
+}

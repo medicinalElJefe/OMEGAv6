@@ -455,6 +455,218 @@ jobs:
           python tests/r680-native-archive-reconciliation.py
           python tests/r681-native-decision-truth-audit.py
 
+      - name: R895 Windows native host preflight smoke - CI runner is not target PC
+        shell: pwsh
+        run: |
+          $receiptPath = Join-Path $env:RUNNER_TEMP 'r895-windows-ci-preflight.json'
+          & pwsh -NoProfile -NonInteractive -File .\install\run-r895-windows-preflight.ps1 -ExpectedCommit $env:GITHUB_SHA -Output $receiptPath
+          $resultCode = $LASTEXITCODE
+          if ($resultCode -notin @(0,2)) { throw "Windows preflight returned invalid exit code $resultCode" }
+          if (-not (Test-Path -LiteralPath $receiptPath)) { throw 'Native host preflight produced no receipt' }
+          $receipt = Get-Content -LiteralPath $receiptPath -Raw | ConvertFrom-Json
+          if ($receipt.schema -ne 'OMEGA_R895_WINDOWS_HOST_PREFLIGHT') { throw 'Unexpected native receipt schema' }
+          if ($receipt.host.platform -ne 'win32') { throw 'Real Windows runner platform was not observed' }
+          if ($receipt.source.actual_commit -ne $env:GITHUB_SHA) { throw 'Exact Git source drift on native Windows runner' }
+          if ($receipt.source.files.base.git_blob_sha256 -ne '49a3be453b1e67e5eb7e8e29411e82f07d30d2fd45fa52fa0bf28ef57774a046') { throw 'Immutable Hybrid base SHA mismatch on Windows' }
+          if ($null -eq $receipt.source.files.base.checkout_matches_git_blob) { throw 'Missing transparent Windows checkout byte-identity observation' }
+          if ($receipt.verified_execution_return -ne $false -or $receipt.installer_lifecycle_proven -ne $false -or $receipt.native_gpu_workload_proven -ne $false) {
+            throw 'CI Windows runner was incorrectly promoted to device/workload execution proof'
+          }
+          if ($receipt.receipt_sha256 -notmatch '^[a-f0-9]{64}$') { throw 'Missing native SHA-256 evidence digest' }
+          Write-Host "R895 Windows-hosted CI smoke PASS: $($receipt.status); no target-PC, installer or GPU proof claimed."
+      - name: R895 zero-argument Windows check - user action smoke
+        shell: pwsh
+        run: |
+          $reportPath = Join-Path $env:RUNNER_TEMP 'r895-windows-no-arguments.json'
+          & pwsh -NoProfile -NonInteractive -File .\install\run-r895-windows-preflight.ps1 -Output $reportPath
+          if ($LASTEXITCODE -ne 0) { throw "OMEGA user-friendly Windows check failed with exit $LASTEXITCODE" }
+          $report = Get-Content -LiteralPath $reportPath -Raw | ConvertFrom-Json
+          if ($report.status -ne 'READY_FOR_PAIRED_HOST_PROOF') { throw 'Zero-argument check did not give READY result' }
+          if ($report.source.actual_commit -ne $env:GITHUB_SHA) { throw 'Auto-detected Git revision does not match exact candidate' }
+          if ($report.installer_lifecycle_proven -ne $false -or $report.native_gpu_workload_proven -ne $false -or $report.verified_execution_return -ne $false) { throw 'Non-executed machine proof was incorrectly promoted' }
+          Write-Host 'R895 zero-argument Windows check PASS - no copied SHA, no edits or installer execution.'
+
+
+
+  r896-windows-portable-studio:
+    if: github.event_name == 'pull_request'
+    needs: verify
+    runs-on: windows-latest
+    timeout-minutes: 35
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Build exact OMEGA7 Windows portable UI candidate
+        shell: pwsh
+        run: |
+          npm install --no-fund
+          if ($LASTEXITCODE -ne 0) { throw 'Locked application dependencies failed to install' }
+          npm run build
+          if ($LASTEXITCODE -ne 0) { throw 'OMEGA7 production UI build failed' }
+      - name: Prove bounded local Ollama inference and refusal without network dependencies
+        shell: pwsh
+        run: |
+          python -m unittest discover -s tests -p test_omega_local_inference_r899.py -v
+          if ($LASTEXITCODE -ne 0) { throw 'R899 local inference source and loopback refusal failed' }
+      - name: R903 fail-closed PowerShell syntax for packaged Windows operator paths
+        shell: pwsh
+        run: |
+          & pwsh -NoProfile -NonInteractive -File .\tests\r903-windows-powershell-syntax.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'R903 Windows packaged PowerShell syntax held' }
+      - name: Prove every dynamically loaded native Python module compiles
+        shell: pwsh
+        run: |
+          python -m py_compile tools/omega_local_hub_r881.py tools/omega_absolute_truth_verifier_r884.py tools/omega_local_inference_r899.py tools/omega_sparse_tensor_r902.py tools/omega_sparse_verify_r905.py tools/omega_sparse_projection_r907.py
+          if ($LASTEXITCODE -ne 0) { throw 'Native Windows dynamically loaded module syntax held' }
+      - name: R908 prove CPU reference and fail-closed GPU device absence
+        shell: pwsh
+        run: |
+          npx --yes tsx tests/r908-gpu-projection-cpu-parity.mts
+          if ($LASTEXITCODE -ne 0) { throw 'R908 GPU projection parity reference or absent-device refusal failed' }
+      - name: Prove exact 20,736 by 20,736 sparse tensor execution and refusal
+        shell: pwsh
+        run: |
+          python -m unittest discover -s tests -p test_omega_sparse_projection_r907.py -v
+          if ($LASTEXITCODE -ne 0) { throw 'R907 full base12 projection correctness failed' }
+          python -m unittest discover -s tests -p test_omega_sparse_tensor_r902.py -v
+          if ($LASTEXITCODE -ne 0) { throw 'R902 sparse state math unit tests failed' }
+          python -m unittest discover -s tests -p test_omega_local_hub_r881.py -v
+          if ($LASTEXITCODE -ne 0) { throw 'R902 sparse per-cell tensor algebra or conservation failed' }
+      - name: Compile real standalone Windows local worker executable
+        shell: pwsh
+        run: |
+          python -m pip install --disable-pip-version-check --no-input pyinstaller==6.16.0
+          if ($LASTEXITCODE -ne 0) { throw 'Pinned native Windows worker packager install failed' }
+          $folder = Join-Path $env:RUNNER_TEMP 'OMEGA-Windows-Portable'
+          New-Item -ItemType Directory -Path $folder -Force | Out-Null
+          $verifier = (Resolve-Path -LiteralPath '.\tools\omega_absolute_truth_verifier_r884.py').Path
+          $inference = (Resolve-Path -LiteralPath '.\tools\omega_local_inference_r899.py').Path
+          $tensor = (Resolve-Path -LiteralPath '.\tools\omega_sparse_tensor_r902.py').Path
+          $tensorVerify = (Resolve-Path -LiteralPath '.\tools\omega_sparse_verify_r905.py').Path
+          $projection = (Resolve-Path -LiteralPath '.\tools\omega_sparse_projection_r907.py').Path
+          $hubSource = (Resolve-Path -LiteralPath '.\tools\omega_local_hub_r881.py').Path
+          python -m PyInstaller --onedir --clean --noconfirm --log-level WARN --name OMEGA-Local-Hub --distpath $folder --workpath (Join-Path $env:RUNNER_TEMP 'omega-pyinstaller-work') --specpath (Join-Path $env:RUNNER_TEMP 'omega-pyinstaller-spec') --add-data "$verifier;." --add-data "$inference;." --add-data "$tensor;." --add-data "$tensorVerify;." --add-data "$projection;." --hidden-import xml.etree.ElementTree --hidden-import zipfile --hidden-import urllib.request --hidden-import urllib.error --hidden-import re --hidden-import math $hubSource
+          if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath (Join-Path $folder 'OMEGA-Local-Hub\OMEGA-Local-Hub.exe'))) { throw 'Native Windows local Hub compilation failed' }
+      - name: Assemble dependency-free operator launch package
+        shell: pwsh
+        run: |
+          $folder = Join-Path $env:RUNNER_TEMP 'OMEGA-Windows-Portable'
+          New-Item -ItemType Directory -Path $folder -Force | Out-Null
+          Copy-Item -LiteralPath '.\dist' -Destination (Join-Path $folder 'dist') -Recurse -Force
+          Copy-Item -LiteralPath '.\install\OPEN-OMEGA.cmd' -Destination (Join-Path $folder 'OPEN-OMEGA.cmd')
+          Copy-Item -LiteralPath '.\install\Start-OMEGA-Local.ps1' -Destination (Join-Path $folder 'Start-OMEGA-Local.ps1')
+          Copy-Item -LiteralPath '.\install\OPEN-OMEGA-HUB.cmd' -Destination (Join-Path $folder 'OPEN-OMEGA-HUB.cmd')
+          Copy-Item -LiteralPath '.\install\OPEN-OMEGA-INTEGRATED.cmd' -Destination (Join-Path $folder 'OPEN-OMEGA-INTEGRATED.cmd')
+          Copy-Item -LiteralPath '.\install\Start-OMEGA-Integrated.ps1' -Destination (Join-Path $folder 'Start-OMEGA-Integrated.ps1')
+          Copy-Item -LiteralPath '.\install\INSTALL-OMEGA.cmd' -Destination (Join-Path $folder 'INSTALL-OMEGA.cmd')
+          Copy-Item -LiteralPath '.\install\UNINSTALL-OMEGA.cmd' -Destination (Join-Path $folder 'UNINSTALL-OMEGA.cmd')
+          Copy-Item -LiteralPath '.\install\Install-OMEGA-Windows.ps1' -Destination (Join-Path $folder 'Install-OMEGA-Windows.ps1')
+          Copy-Item -LiteralPath '.\install\Uninstall-OMEGA-Windows.ps1' -Destination (Join-Path $folder 'Uninstall-OMEGA-Windows.ps1')
+          Copy-Item -LiteralPath '.\install\Check-OMEGA-Windows.ps1' -Destination (Join-Path $folder 'Check-OMEGA-Windows.ps1')
+          Copy-Item -LiteralPath '.\install\CHECK-OMEGA-PC.cmd' -Destination (Join-Path $folder 'CHECK-OMEGA-PC.cmd')
+          Copy-Item -LiteralPath '.\tools\omega_local_hub_r881.py' -Destination (Join-Path $folder 'omega_local_hub_r881.py')
+          Copy-Item -LiteralPath '.\tools\omega_absolute_truth_verifier_r884.py' -Destination (Join-Path $folder 'omega_absolute_truth_verifier_r884.py')
+          Copy-Item -LiteralPath '.\tools\omega_local_inference_r899.py' -Destination (Join-Path $folder 'omega_local_inference_r899.py')
+          Copy-Item -LiteralPath '.\tools\omega_sparse_tensor_r902.py' -Destination (Join-Path $folder 'omega_sparse_tensor_r902.py')
+          Copy-Item -LiteralPath '.\tools\omega_sparse_verify_r905.py' -Destination (Join-Path $folder 'omega_sparse_verify_r905.py')
+          Copy-Item -LiteralPath '.\tools\omega_sparse_projection_r907.py' -Destination (Join-Path $folder 'omega_sparse_projection_r907.py')
+          Copy-Item -LiteralPath '.\install\Verify-OMEGA-Package.ps1' -Destination (Join-Path $folder 'Verify-OMEGA-Package.ps1')
+          if (-not (Test-Path (Join-Path $folder 'dist\index.html'))) { throw 'Packaged OMEGA entry not found' }
+          [System.IO.File]::WriteAllText((Join-Path $folder 'READ-ME-FIRST.txt'),
+            "Double-click OPEN-OMEGA-INTEGRATED.cmd for the existing verified OMEGA7 interface plus authenticated local worker, or OPEN-OMEGA.cmd for the UI alone. For optional bounded local file automation, double-click OPEN-OMEGA-HUB.cmd (Python not required), select an existing approved non-system root, and authenticate in OMEGA Local / Edge Hub using its private token. Cloud Worker, Hybrid Link native agent, GPU execution, full installer lifecycle, and production promotion remain separate and NOT proven by this package.",[System.Text.Encoding]::UTF8)
+          # File hashes detect package drift. The manifest is not a cryptographic signature.
+          $files = @(Get-ChildItem -LiteralPath $folder -Recurse -File -Force | Sort-Object FullName | ForEach-Object {
+            @{
+              path = $_.FullName.Substring($folder.Length + 1).Replace('\','/')
+              sha256 = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+              bytes = [long]$_.Length
+            }
+          })
+          $evidence = @{
+            schema = 'OMEGA_WINDOWS_PORTABLE_UI_R896'
+            hash_schema = 'OMEGA_WINDOWS_PACKAGE_FILES_SHA256_R897'
+            files = $files
+            source_commit = $env:GITHUB_SHA
+            package_role = 'PR_CANDIDATE_NOT_PRODUCTION_PROMOTION'
+            local_ui = $true
+            cloud_worker_embedded = $false
+            optional_local_hub_source_embedded = $true
+            optional_local_hub_requires_python = $false
+            compiled_local_hub_executable_embedded = $true
+            compiled_local_hub_layout = 'PORTABLE_ONEDIR_NO_SYSTEM_TEMP_EXTRACTION'
+            local_hub_authentication_required = $true
+            native_gpu_executor_embedded = $false
+            installer_lifecycle_proven = $false
+            installer_lifecycle_ci_test_required = $true
+            managed_per_user_installer_embedded = $true
+            pairing_automatic = $false
+            hash_authentication_signature = $false
+          } | ConvertTo-Json -Depth 8
+          [System.IO.File]::WriteAllText((Join-Path $folder 'OMEGA-PACKAGE-EVIDENCE.json'),$evidence,[System.Text.Encoding]::UTF8)
+      - name: R911 prove original double-click launch with no-argument verifier in folder with spaces
+        shell: pwsh
+        run: |
+          & pwsh -NoProfile -NonInteractive -File .\tests\r911-windows-double-click-operator-smoke.ps1 -PackageRoot (Join-Path $env:RUNNER_TEMP 'OMEGA-Windows-Portable')
+          if ($LASTEXITCODE -ne 0) { throw 'R911 original Windows double-click startup or package path binding held' }
+      - name: Prove packaged local UI over real Windows loopback HTTP
+        shell: pwsh
+        run: |
+          & pwsh -NoProfile -NonInteractive -File .\tests\r896-windows-local-studio-smoke.ps1 -PackageRoot (Join-Path $env:RUNNER_TEMP 'OMEGA-Windows-Portable')
+          if ($LASTEXITCODE -ne 0) { throw 'R896 packaged OMEGA7 Windows loopback browser service smoke failed' }
+      - name: Prove packaged R881 local automation Hub on Windows with real token and queue
+        shell: pwsh
+        run: |
+          & pwsh -NoProfile -NonInteractive -File .\tests\r897-windows-packaged-hub-smoke.ps1 -PackageRoot (Join-Path $env:RUNNER_TEMP 'OMEGA-Windows-Portable')
+          if ($LASTEXITCODE -ne 0) { throw 'R897 packaged authenticated local worker smoke failed' }
+      - name: Prove compiled Windows EXE live local AI transport and durable receipt
+        shell: pwsh
+        run: |
+          & pwsh -NoProfile -NonInteractive -File .\tests\r899-windows-compiled-inference-smoke.ps1 -PackageRoot (Join-Path $env:RUNNER_TEMP 'OMEGA-Windows-Portable')
+          if ($LASTEXITCODE -ne 0) { throw 'R899 actual compiled Windows model inference and persisted receipt failed' }
+      - name: Prove complete integrated Windows Studio plus compiled Hub lifecycle
+        shell: pwsh
+        run: |
+          $root = Join-Path $env:RUNNER_TEMP ('omega-r898-approved-' + [guid]::NewGuid().ToString('N'))
+          New-Item -ItemType Directory -Path $root -Force | Out-Null
+          try {
+            & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File (Join-Path $env:RUNNER_TEMP 'OMEGA-Windows-Portable\Start-OMEGA-Integrated.ps1') -ApprovedRoot $root -SelfTest
+            if ($LASTEXITCODE -ne 0) { throw 'R898 integrated worker and studio lifecycle failed' }
+          } finally {
+            if (Test-Path -LiteralPath $root) { Remove-Item -LiteralPath $root -Recurse -Force -ErrorAction SilentlyContinue }
+          }
+      - name: Prove managed Windows install, upgrade, tamper refusal and uninstall
+        shell: pwsh
+        run: |
+          & pwsh -NoProfile -NonInteractive -File .\tests\r900-windows-install-lifecycle-smoke.ps1 -PackageRoot (Join-Path $env:RUNNER_TEMP 'OMEGA-Windows-Portable')
+          if ($LASTEXITCODE -ne 0) { throw 'R900 managed Windows installer lifecycle is not proven' }
+      - name: Prove Windows local observation receipt with actual running UI and no GPU/PC proof inflation
+        shell: pwsh
+        run: |
+          & pwsh -NoProfile -NonInteractive -File .\tests\r901-windows-host-observation-smoke.ps1 -PackageRoot (Join-Path $env:RUNNER_TEMP 'OMEGA-Windows-Portable')
+          if ($LASTEXITCODE -ne 0) { throw 'R901 actual Windows observation evidence check failed' }
+      - name: Zip actual tested portable UI, under 160 MiB
+        shell: pwsh
+        run: |
+          $folder = Join-Path $env:RUNNER_TEMP 'OMEGA-Windows-Portable'
+          $zip = Join-Path $env:RUNNER_TEMP 'OMEGA-Windows-Portable-R896.zip'
+          Compress-Archive -LiteralPath $folder -DestinationPath $zip -Force -CompressionLevel Optimal
+          $length = (Get-Item -LiteralPath $zip).Length
+          if ($length -gt 160MB) { throw "R896 portable package exceeds the 160 MiB download limit: $length bytes" }
+          Write-Host "R896 tested Windows ZIP built, $length bytes, exact source $env:GITHUB_SHA."
+      - uses: actions/upload-artifact@v4
+        with:
+          name: OMEGA-Windows-Portable-R896
+          path: ${{ runner.temp }}/OMEGA-Windows-Portable/
+          if-no-files-found: error
+          retention-days: 7
+
   cloudflare-auth-probe:
     if: github.event_name == 'pull_request'
     needs: verify

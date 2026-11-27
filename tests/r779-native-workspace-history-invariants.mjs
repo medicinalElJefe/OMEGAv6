@@ -28,3 +28,21 @@ for(const token of ["R779 '+label+' source-route URL","page.goBack(","page.goFor
 assert.equal(pkg.scripts['test:r779'],'node tests/r779-native-workspace-history-invariants.mjs');
 assert.ok(pkg.scripts['check:static'].includes('npm run test:r779'),'R779 release check must be blocking');
 console.log('R779 NATIVE WORKSPACE HISTORY PASS · 44 registered route links, browser history sync/invalid refusal, live desktop/mobile reload/back/forward proof wired, no private state in URL');
+
+ // R986: execute both initial restore and browser event semantics against
+ // the registered source effect. Keep the original R779 assertions intact.
+const effectStart=root.indexOf('  const restore=(event?:PopStateEvent)=>{');
+const effectEnd=root.indexOf(' },[dispatch]);',effectStart);
+assert.ok(effectStart>=0&&effectEnd>effectStart,'R986 history callback missing');
+const effectSource=root.slice(effectStart,effectEnd).replace('(event?:PopStateEvent)','(event)');
+const calls=[],listeners=new Map();
+const fakeWindow={location:{search:'?omega7=1&omega7route=Atlas'},addEventListener:(name,fn)=>listeners.set(name,fn),removeEventListener:(name,fn)=>{assert.equal(listeners.get(name),fn);listeners.delete(name)}};
+const capabilities=registered.map(legacyRoute=>({legacyRoute,domain:'TEST_DOMAIN'}));
+const cleanup=new Function('window','nativeHistorySelectionR779','readNativeWorkspaceRouteR778','OMEGA7_NATIVE_ROUTES','OMEGA7_CAPABILITIES','isOmega7NativeRoute','dispatch','clearRecoveredExecution',effectSource)(fakeWindow,nativeHistorySelectionR779,(query,routes)=>nativeHistorySelectionR779(query,routes).route,registered,capabilities,route=>registered.includes(route),event=>calls.push(event),()=>calls.push('CLEAR_FOCUS'));
+assert.deepEqual(calls,[{type:'DOMAIN',domain:'TEST_DOMAIN'},{type:'SELECT_ROUTE',route:'Atlas'}],'initial restore must not clear a valid saved focus');
+calls.length=0;fakeWindow.location.search='?omega7=1&omega7route=Memory';listeners.get('popstate')({type:'popstate'});
+assert.deepEqual(calls,['CLEAR_FOCUS',{type:'DOMAIN',domain:'TEST_DOMAIN'},{type:'SELECT_ROUTE',route:'Memory'}],'popstate must invalidate stale focus before selecting route');
+calls.length=0;fakeWindow.location.search='?omega7=1';listeners.get('popstate')({type:'popstate'});
+assert.deepEqual(calls,['CLEAR_FOCUS',{type:'SELECT_ROUTE',route:null}]);
+cleanup();assert.equal(listeners.size,0);
+console.log('R986 HISTORY CALLBACK PASS · initial restore retained · popstate clears stale focus before routing · same callback unregistered');

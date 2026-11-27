@@ -1,0 +1,240 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const server=readFileSync('install/Start-OMEGA-Local.ps1','utf8');
+const launch=readFileSync('install/OPEN-OMEGA.cmd','utf8');
+const smoke=readFileSync('tests/r896-windows-local-studio-smoke.ps1','utf8');
+for(const key of [
+ '[System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopback,0)',
+ 'Get-OmegaMime','Send-OmegaResponse','[switch] $NoBrowser','ReadyFile',
+ "CLOUD_SERVICE_NOT_AVAILABLE_LOCALLY","'index.html'","Method Not Allowed",
+ 'Forbidden path','Forbidden reparse path','ReparsePoint','Not found','GetFullPath','Content-Length','X-Content-Type-Options'
+])assert.ok(server.includes(key),'R896 local server contract missing: '+key);
+assert.ok(!server.includes('0.0.0.0'),'R896 must not accept public TCP binding');
+assert.ok(!server.includes('HttpListener'),'R896 should not require administrator URLACL');
+assert.ok(!server.includes("[string] $SiteRoot = (Join-Path $PSScriptRoot"),'R896 must not resolve PSScriptRoot before PowerShell parameter binding');
+assert.ok(server.includes("if (-not $SiteRoot) { $SiteRoot = Join-Path $PSScriptRoot 'dist' }"),'R896 must choose packaged dist after PowerShell parameter binding');
+
+assert.ok(server.includes("HTTP/1\\.[01]$')"),'R896 request parser regex must retain its literal closing dollar and quote');
+assert.ok(server.includes('$rawPath = ($requestMatch.Groups[2].Value'),'R896 request parser must preserve exact captured path');
+assert.equal(server.split('try { $decoded = [System.Uri]::UnescapeDataString').length,2,'R896 must contain exactly one intact URI decode block');
+assert.equal(server.split('$requestMatch = [System.Text.RegularExpressions.Regex]::Match').length,2,'R896 must contain exactly one intact HTTP request parser');
+
+assert.ok(launch.includes('Start-OMEGA-Local.ps1'),'R896 must be double-click launchable');
+assert.ok(launch.includes('Verify-OMEGA-Package.ps1')&&launch.includes('if errorlevel 1'),'R897 startup must fail closed when package integrity is not verified');
+const verify=readFileSync('install/Verify-OMEGA-Package.ps1','utf8');
+assert.ok(!verify.includes('Get-FileHash -LiteralPath'),'R911 verifier must work without optional PowerShell module discovery from CMD');
+const windowsSlash=String.fromCharCode(92);
+assert.ok(verify.includes(".Replace('"+windowsSlash+"','/')"),'R897 must normalize a single Windows path separator');
+assert.ok(!verify.includes(".Replace('"+windowsSlash+windowsSlash+"','/')"),'R897 must not require doubled Windows backslashes');
+for(const key of ['OMEGA_WINDOWS_PACKAGE_FILES_SHA256_R897','[System.Security.Cryptography.SHA256]::Create()','ComputeHash($stream)','SHA256','ReparsePoint','Package file count differs','Duplicate package manifest path'])
+ assert.ok(verify.includes(key),'R897 manifest integrity guard missing: '+key);
+const operatorSmoke=readFileSync('tests/r911-windows-double-click-operator-smoke.ps1','utf8');
+assert.ok(verify.includes('param([string]$PackageRoot)'),'R911 must not bind PSScriptRoot before PowerShell parameter binding');
+assert.ok(verify.includes('if ([string]::IsNullOrWhiteSpace($PackageRoot))'),'R911 must default script directory at runtime');
+assert.ok(launch.includes('-PackageRoot "%~dp0."'),'R911 double-click cmd must pass its extracted folder explicitly');
+for(const marker of ['OMEGA Operator Extracted With Spaces','OPEN-OMEGA.cmd','no-argument package verifier','OMEGA_OPERATOR_SMOKE','OM EGA'.replace(' ','')]){
+ assert.ok(operatorSmoke.includes(marker),'R911 real extracted operator test missing: '+marker);
+}
+const workflow=readFileSync('.github/workflows/ci.yml','utf8');
+const powershellSyntaxGate=readFileSync('tests/r903-windows-powershell-syntax.ps1','utf8');
+for(const filename of ['r911-windows-double-click-operator-smoke.ps1','Verify-OMEGA-Package.ps1','Start-OMEGA-Integrated.ps1','Install-OMEGA-Windows.ps1','Uninstall-OMEGA-Windows.ps1','r897-windows-packaged-hub-smoke.ps1'])
+ assert.ok(powershellSyntaxGate.includes(filename),'R903 missing Windows PowerShell AST syntax gate for: '+filename);
+assert.ok(workflow.includes('r911-windows-double-click-operator-smoke.ps1'),'R911 double-click extraction must be exercised before Windows packaging acceptance');
+assert.ok(workflow.includes('r903-windows-powershell-syntax.ps1'),
+ 'R903 parser gate must run before building the native Windows package');
+
+// PyInstaller cannot discover imports from the R884/R899 runtime-loaded
+// sibling source modules unless the compiled worker lists them explicitly.
+for(const dep of ['xml.etree.ElementTree','zipfile','urllib.request','urllib.error'])
+ assert.ok(workflow.includes('--hidden-import '+dep),
+  'R899 Windows EXE missing dynamically-loaded runtime dependency: '+dep);
+
+for(const key of ['hash_schema = \'OMEGA_WINDOWS_PACKAGE_FILES_SHA256_R897\'','Verify-OMEGA-Package.ps1','hash_authentication_signature = $false'])
+ assert.ok(workflow.includes(key),'R897 package assembly and evidence contract missing: '+key);
+
+for(const key of ['Invoke-WebRequest','Start-Process','127','api/health','StatusCode -eq 503','StatusCode -eq 404','ItemType Junction','StatusCode -eq 403','Stop-Process'])
+ assert.ok(smoke.includes(key),'R896 Windows smoke contract missing: '+key);
+const localProbeR901=readFileSync('install/Check-OMEGA-Windows.ps1','utf8');
+const localProbeSmokeR901=readFileSync('tests/r901-windows-host-observation-smoke.ps1','utf8');
+for(const marker of ['Verify-OMEGA-Package.ps1','Start-OMEGA-Local.ps1','Get-CimInstance','gpuAdapterInventoryState','nativeGpuWorkloadProven','physicalPcAccepted','UNSIGNED_OPERATOR_LOCAL_OBSERVATIONS_NOT_R141_R237']){
+ assert.ok(localProbeR901.includes(marker),'R901 physical Windows observations improperly omitted: '+marker);
+}
+for(const marker of ['EXACT_SHA256_PACKAGE_VERIFIED','localUi.responded','nativeGpuWorkloadProven','authenticatedHybridLinkPcAccepted','PRESERVE_PROJECT_DATA_R901']){
+ assert.ok(localProbeSmokeR901.includes(marker),'R901 local evidence regression missing: '+marker);
+}
+assert.ok(workflow.includes('r901-windows-host-observation-smoke.ps1'),
+ 'R901 must run actual Windows observation evidence in packaging CI');
+const installerR900=readFileSync('install/Install-OMEGA-Windows.ps1','utf8');
+const uninstallerR900=readFileSync('install/Uninstall-OMEGA-Windows.ps1','utf8');
+const installSmokeR900=readFileSync('tests/r900-windows-install-lifecycle-smoke.ps1','utf8');
+for(const key of ['Verify-OMEGA-Package.ps1','.omega-install.json','rollback-','Copy-Item','ReparsePoint','NoShortcut'])
+ assert.ok(installerR900.includes(key),'R900 verified managed install implementation missing: '+key);
+for(const key of ['ConfirmRemove','Verify-OMEGA-Package.ps1','.omega-install.json','ReparsePoint'])
+ assert.ok(uninstallerR900.includes(key),'R900 verified uninstall refusal missing: '+key);
+for(const key of ['R900_TAMPER_PROOF','R900_UNMANAGED_FILE','PROJECT_DATA_MUST_SURVIVE_R900','ConfirmRemove'])
+ assert.ok(installSmokeR900.includes(key),'R900 install lifecycle proof incomplete: '+key);
+assert.ok(workflow.includes('r900-windows-install-lifecycle-smoke.ps1'),
+ 'R900 Windows installer lifecycle must be verified by release CI');
+const roundtripR905=readFileSync('tools/omega_sparse_verify_r905.py','utf8');
+for(const marker of ['verify_sparse_export_r905','R905_NONCANONICAL_ROW_HELD','R905_FILE_SHA_DRIFT_HELD','R905_STATE_SHA_DRIFT_HELD','R905_MASS_CONSERVATION_HELD','EXACT_EXPORTED_STATE_MATCH'])
+ assert.ok(roundtripR905.includes(marker),'R905 exact CSV state roundtrip verifier missing: '+marker);
+assert.ok(workflow.includes('omega_sparse_verify_r905.py'),
+ 'R905 roundtrip verifier missing from compiled Windows worker');
+const projectionGpuR908=readFileSync('src7/workspaces/omegaR908GpuProjection.ts','utf8');
+for(const marker of ['executeR908GpuProjection','cpuProjectionReferenceR908','compareProjectionR908','dispatchWorkgroups(324)','readback.mapAsync','deviceExecutionProved','physicalPcAccepted:false','nativePcAccepted:false','canonicalStateMutated:false']){
+ assert.ok(projectionGpuR908.includes(marker),'R908 real browser GPU compute/readback boundary missing: '+marker);
+}
+assert.ok(workflow.includes('r908-gpu-projection-cpu-parity.mts'),
+ 'R908 exact GPU integer CPU reference and unavailable hardware gate missing from Windows CI');
+const projectionR907=readFileSync('tools/omega_sparse_projection_r907.py','utf8');
+for(const marker of ['address_xy_r907','project_verified_rows_r907','BIJECTIVE_BASE12_D0_D1_D2_D3_144X144','totalMass','sourceFullStateSha256','gpuComputeProven','projectionGrid','GRID_ALPHABET'])
+ assert.ok(projectionR907.includes(marker),'R907 verified 20736-cell true address projection missing: '+marker);
+assert.ok(workflow.includes('--hidden-import math'),'R907 dynamically loaded SVG logarithmic mass projection math must be bundled');
+assert.ok(workflow.includes('omega_sparse_projection_r907.py')&&workflow.includes('test_omega_sparse_projection_r907.py'),
+ 'R907 authentic projection must be shipped in Windows EXE and tested before building');
+const sparseTensor=readFileSync('tools/omega_sparse_tensor_r902.py','utf8');
+const sparseHub=readFileSync('tools/omega_local_hub_r881.py','utf8');
+for(const marker of ['verified_csv_artifact','R910_CSV_DOWNLOAD_BOUND_HELD','R910_CSV_DOWNLOAD_DRIFT_HELD','/api/hub/artifacts/csv/','text/csv; charset=utf-8']){
+ assert.ok(sparseHub.includes(marker),'R910 original complete SHA-verified checkpoint endpoint missing: '+marker);
+}
+for(const marker of ['verified_svg_artifact','R909_RENDER_RECEIPT_DRIFT_HELD','R909_SVG_ARTIFACT_INTEGRITY_HELD','/api/hub/artifacts/','image/svg+xml; charset=utf-8','X-Omega-Artifact-Sha256','Content-Disposition','nosniff']){
+ assert.ok(sparseHub.includes(marker),'R909 authenticated original-job verified SVG download missing: '+marker);
+}
+
+const sparseWindows=readFileSync('tests/r897-windows-packaged-hub-smoke.ps1','utf8');
+// The R902 Windows smoke uses PowerShell regexes ending in a literal '$'.
+// Keep that literal intact; a broken quote/parenthesis can otherwise make
+// a queued Windows release job fail before any worker exercise.
+assert.ok(sparseWindows.includes("'^[a-f0-9]{64}$'"),
+ 'R902 Windows SHA-256 anchored match must not lose its literal dollar anchor');
+assert.equal(sparseWindows.split('} finally {').length-1,1,
+ 'R902 Windows smoke must keep one complete process-cleanup finally block');
+assert.ok(sparseWindows.trimEnd().endsWith('}'),
+ 'R902 Windows smoke missing final cleanup closure');
+
+for(const needle of ['DIMENSIONS = AXIS**4','TOTAL_POSSIBLE = DIMENSIONS**2','MAX_NONZERO','conservationExact','fullStateSha256','denseTensorAllocated','gpuComputeProven'])
+ assert.ok(sparseTensor.includes(needle),'R902 implicit 20,736 per-cell operator missing: '+needle);
+for(const needle of ['SPHERE_TENSOR_EXPORT','sparse_tensor_rows_r904','COMPLETE_SPARSE_STATE_CSV_EXPORTED','R904_EXPORT_TARGET_EXISTS_HELD'])
+ assert.ok(sparseHub.includes(needle),'R904 complete sparse tensor CSV export missing: '+needle);
+for(const needle of ['SPHERE_TENSOR_RENDER','OMEGA_SPARSE_PROJECTION_ARTIFACT_R907','sourceFullStateSha256','R907_PROJECTION_TARGET_EXISTS_HELD'])
+ assert.ok(sparseHub.includes(needle),'R907 authenticated SVG projection missing: '+needle);
+for(const needle of ['/api/hub/artifacts/csv/','r910-','R910 compiled Windows protected CSV bytes differ from original export receipt','R910 served a modified complete CSV checkpoint after source SHA drift']){
+ assert.ok(sparseWindows.includes(needle),'R910 compiled Windows full-state checkpoint download refusal missing: '+needle);
+}
+for(const needle of ['/api/hub/artifacts/','r909-download.svg','X-Omega-Artifact-Sha256','R909 served SVG after its SHA-256 receipt diverged']){
+ assert.ok(sparseWindows.includes(needle),'R909 actual Windows SVG download/refusal proof missing: '+needle);
+}
+for(const needle of ['SPHERE_TENSOR_RENDER','verified-cell-projection.svg','sourceFullStateSha256','OMEGA_SPARSE_PROJECTION_ARTIFACT_R907'])
+ assert.ok(sparseWindows.includes(needle),'R907 actual compiled Windows SVG proof missing: '+needle);
+for(const needle of ['SPHERE_TENSOR_AUDIT_LINEAGE','audit_sparse_lineage_r912','R912_PARENT_RECEIPT_OR_STATE_DRIFT_HELD','R912_LINEAGE_CYCLE_HELD','R912_LINEAGE_DEPTH_BOUND_HELD','R912_RENDER_SOURCE_RECEIPT_DRIFT_HELD']){
+ assert.ok(sparseHub.includes(needle),'R912 entire checkpoint ancestry executor missing: '+needle);
+}
+for(const needle of ['SPHERE_TENSOR_AUDIT_LINEAGE','OMEGA_SPARSE_LINEAGE_AUDIT_R912','rootExportJobId','R912 compiled native exact checkpoint ancestry mismatch']){
+ assert.ok(sparseWindows.includes(needle),'R912 packaged Windows ancestry check missing: '+needle);
+}
+for(const needle of ['SPHERE_TENSOR_CONTINUE','OMEGA_SPARSE_TENSOR_CONTINUATION_R906','sourceExportReceiptSha256','VERIFIED_CHECKPOINT_CONTINUATION_EXPORTED'])
+ assert.ok(sparseHub.includes(needle),'R906 complete verified checkpoint continuation missing: '+needle);
+for(const needle of ['SPHERE_TENSOR_CONTINUE','tensor-next.csv','sourceExportReceiptSha256','OMEGA_SPARSE_TENSOR_CONTINUATION_R906'])
+ assert.ok(sparseWindows.includes(needle),'R906 native Windows continued-state proof missing: '+needle);
+assert.ok(workflow.includes('omega_sparse_verify_r905.py'),
+ 'R906 Python syntax and exact checkpoint verifier must run before packaged Windows build');
+for(const needle of ['SPHERE_TENSOR_VERIFY','OMEGA_SPARSE_EXPORT_ROUNDTRIP_R905','originalExportReceiptSha256','R905_'])
+ assert.ok(sparseWindows.includes(needle),'R905 native Windows roundtrip/tamper proof missing: '+needle);
+for(const needle of ['SPHERE_TENSOR_EXPORT','complete-tensor.csv','exportedRows','R904_EXPORT_TARGET_EXISTS_HELD'])
+ assert.ok(sparseWindows.includes(needle),'R904 compiled Windows full-state artifact verification missing: '+needle);
+for(const needle of ['SPHERE_TENSOR_STEP','omega_sparse_tensor_r902.py'])
+ assert.ok(sparseHub.includes(needle),'R902 local durable Hub state operator unwired: '+needle);
+for(const needle of ['SPHERE_TENSOR_STEP','429981696','conservationExact','fullStateSha256'])
+ assert.ok(sparseWindows.includes(needle),'R902 real packaged Windows compute proof missing: '+needle);
+for(const needle of ['omega_sparse_tensor_r902.py','test_omega_sparse_tensor_r902.py'])
+ assert.ok(workflow.includes(needle),'R902 packaging/test gate missing: '+needle);
+const modelSmoke=readFileSync('tests/r899-windows-compiled-inference-smoke.ps1','utf8');
+const modelFixture=readFileSync('tests/r899-windows-ollama-fixture.py','utf8');
+for(const line of ['OMEGA-Local-Hub.exe','/api/hub/models','LOCAL_INFER','result_sha256','R899_COMPILED_WORKER_RETURNED_ACTUAL_LOCAL_HTTP_RESPONSE','gpuProven']){
+ assert.ok(modelSmoke.includes(line),'R899 native Windows end-to-end local model receipt test missing: '+line);
+}
+for(const line of ['127.0.0.1','11434','/api/tags','/api/generate','R899_EXECUTION_PROOF_PROMPT']){
+ assert.ok(modelFixture.includes(line),'R899 localhost-only deterministic model fixture missing: '+line);
+}
+assert.ok(workflow.includes('r899-windows-compiled-inference-smoke.ps1'),
+ 'R899 native Windows end-to-end inference test must run in release CI');
+const localHubPanel=readFileSync('src7/workspaces/OmegaLocalHubPanelR884.tsx','utf8');
+for(const marker of ['SPHERE_TENSOR_STEP','SPHERE_TENSOR_EXPORT','SPHERE_TENSOR_VERIFY','SPHERE_TENSOR_CONTINUE','SPHERE_TENSOR_RENDER','SPHERE_TENSOR_AUDIT_LINEAGE','exportJobId','tensorExport','tensorResult','conservationExact','fullStateSha256','tensorPreview','projectionCanvasRef','putImageData','projectionGrid','executeR908GpuProjection','Run real WebGPU projection parity on this device','Download exact verified SVG','fetchVerifiedSvgR909','Download complete verified CSV checkpoint','fetchVerifiedCsvR910','crypto.subtle.digest'])
+ assert.ok(localHubPanel.includes(marker),'R902 interactive tensor operator or state receipt inspector missing: '+marker);
+
+for(const marker of ['importLocalToken','file.name!==\'hub-r881.token\'','file.size>512','file.text()','setToken(text)','Load local token file','Nothing is uploaded'])
+ assert.ok(localHubPanel.includes(marker),'R898 governed local token file intake missing: '+marker);
+assert.ok(!localHubPanel.includes('localStorage.setItem')&&!localHubPanel.includes('sessionStorage.setItem'),
+ 'R898 token may not persist to browser storage');
+const studio=readFileSync('src7/workspaces/CreationDesignStudioR881.tsx','utf8');
+for(const marker of ["BROWSER_CANVAS2D_RENDER","'image/png',renderer","renderAuthority:renderer","WEBGL_lose_context","project(visualPositionR884(p,mode),rotation)","ctx.lineTo(bx,by)","Math.floor(Number(e.target.value)||0)","return[500+x*scale*500,330-p.y*scale*330]"])
+ assert.ok(studio.includes(marker),'R965 studio render or receipt parity missing: '+marker);
+console.log('R896 LOCAL STUDIO PASS: read-only loopback-only, SPA fallback, unavailable APIs, no-runtime double-click and real Windows smoke contracts.');
+
+ // R976 numerical and source integration acceptance: same source sample, same
+ // material mapping across backends. No change to source geometry or address.
+const {spiralChromaR976}=await import('../src/system/creationCanonR881.mjs');
+assert.equal(spiralChromaR976('#ff0000',1,0,0),'#ff0000');
+assert.match(spiralChromaR976('#ff0000',1,0,180),/^#([0-9a-f]{2})\1\1$/);
+assert.equal(spiralChromaR976('#808080',.2,.4,137),'#808080');
+assert.equal(spiralChromaR976('#5fcecb',.3,.4,0),spiralChromaR976('#5fcecb',.3,.4,360));
+for(const invalid of [['red',0,0,0],['#ff0000',NaN,0,0],['#ff0000',0,0,361]])assert.throws(()=>spiralChromaR976(...invalid),RangeError);
+for(const marker of ['spiralChromaR976','materialColorR976(color,p,spiral,phase)','materialColorR976(color,points[edges[i]],spiral,phase)','representation:{mode,rotation,color,spiral,materialPhase}','geometryInvariant:true','gl.vertexAttribPointer(colorLoc','setSpiral(v.spiral===true)'])assert.ok(studio.includes(marker),'R976 studio material continuity missing: '+marker);
+
+const {validateStudioProjectR977,encodeStudioProjectR977,decodeStudioProjectR977}=await import('../src/system/creationCanonR881.mjs');
+const legacyStudio={project:'Continuity',title:'A scene',prompt:'',mode:'mandala',rotation:22,color:'#5fcecb',address:20735,assets:[]};
+const migratedStudio=validateStudioProjectR977(legacyStudio);
+assert.equal(migratedStudio.spiral,false);assert.equal(migratedStudio.materialPhase,0);assert.equal(migratedStudio.address,20735);
+const fullStudio=validateStudioProjectR977({...migratedStudio,spiral:true,materialPhase:137,assets:[{name:'source.png',sha256:'a'.repeat(64),byteSize:42,proofTier:'OBS',source:'USER_SELECTED_FILE'}]});
+const studioPacket=await encodeStudioProjectR977(fullStudio);
+assert.deepEqual(await decodeStudioProjectR977(studioPacket),fullStudio);
+const editedStudio=JSON.parse(studioPacket);editedStudio.scene.rotation=23;
+await assert.rejects(()=>decodeStudioProjectR977(JSON.stringify(editedStudio)),/integrity mismatch/);
+for(const change of [{address:20736},{mode:'unknown'},{rotation:Infinity},{materialPhase:-1},{spiral:'true'},{color:'invalid'},{geometrySource:'other'},{assets:[{name:'fake'}]}])assert.throws(()=>validateStudioProjectR977({...fullStudio,...change}));
+assert.ok(Object.isFrozen(fullStudio)&&Object.isFrozen(fullStudio.assets)&&Object.isFrozen(fullStudio.assets[0]));
+for(const marker of ['encodeStudioProjectR977(scene)','decodeStudioProjectR977(raw)','applyProject(scene)','Export project','Import project packet','asset references only','setReceipts([])'])assert.ok(studio.includes(marker),'R977 project continuity missing: '+marker);
+
+ // R988: actual half-space polyhedral geometry, not an icosahedral point proxy.
+const {DODECA_NORMALS_R988,DODECA_TOPOLOGY_R988,dodecaShellScaleR988,dodecaShellPointR988,dodecaShellObjR988}=await import('../src/system/creationCanonR881.mjs');
+const topo=DODECA_TOPOLOGY_R988, dot988=(a,b)=>a.reduce((sum,x,i)=>sum+x*b[i],0);
+assert.equal(topo.vertices.length,20);assert.equal(topo.edges.length,30);assert.equal(topo.faces.length,12);
+assert.equal(topo.vertices.length-topo.edges.length+topo.faces.length,2);
+const lengths988=topo.edges.map(([a,b])=>Math.hypot(...topo.vertices[a].map((x,i)=>x-topo.vertices[b][i])));
+assert.ok(Math.max(...lengths988)-Math.min(...lengths988)<1e-10);
+for(let i=0;i<12;i++){assert.equal(topo.faces[i].length,5);for(const j of topo.faces[i])assert.ok(Math.abs(dot988(DODECA_NORMALS_R988[i],topo.vertices[j])-1)<1e-10)}
+const seen988=new Set();
+for(let rowId=0;rowId<20736;rowId++){
+ const point=dodecaShellPointR988(rowId),xyz=[point.x,point.y,point.z],scale=dodecaShellScaleR988(point.p);
+ assert.equal(point.rowId,rowId);assert.ok(xyz.every(Number.isFinite));
+ assert.ok(Math.abs(dot988(DODECA_NORMALS_R988[point.d-1],xyz)-scale)<1e-12);
+ for(const n of DODECA_NORMALS_R988)assert.ok(dot988(n,xyz)<=scale+1e-12);
+ seen988.add(xyz.join(','));
+}
+assert.equal(seen988.size,20736);
+const obj988=dodecaShellObjR988().split('\n');
+assert.equal(obj988.filter(x=>x.startsWith('o ')).length,12);
+assert.equal(obj988.filter(x=>x.startsWith('v ')).length,240);
+assert.equal(obj988.filter(x=>x.startsWith('f ')).length,144);
+for(const face of obj988.filter(x=>x.startsWith('f '))){const ids=face.slice(2).split(' ').map(Number);assert.equal(ids.length,5);assert.ok(ids.every(x=>x>=1&&x<=240));assert.equal(new Set(ids.map(x=>Math.floor((x-1)/20))).size,1)}
+const shellProject=validateStudioProjectR977({...fullStudio,mode:'dodecahedron'});
+assert.deepEqual(await decodeStudioProjectR977(await encodeStudioProjectR977(shellProject)),shellProject);
+for(const marker of ["mode==='dodecahedron'?Array.from({length:20736}","dodecaShellPointR988(i)","dodecaShellObjR988()","OBJ shell mesh"])assert.ok(studio.includes(marker),'R988 studio binding missing '+marker);
+console.log('R988 dodecahedron PASS: regular topology, 20,736 distinct face samples, 12 closed OBJ meshes and project roundtrip.');
+
+ // R989: exact wire topology from the same OBJ mesh, and cached unit sample
+ // coordinates shared across radial scales without changing address identity.
+const {dodecaShellEdgesR989,dodecaSampleCacheCountR989}=await import('../src/system/creationCanonR881.mjs');
+assert.equal(dodecaSampleCacheCountR989(),1728);
+const wire989=dodecaShellEdgesR989();
+assert.equal(wire989.length,360);
+assert.equal(new Set(wire989.map(e=>e.shell+':'+e.edge)).size,360);
+for(const e of wire989){
+ const scale=dodecaShellScaleR988(e.shell);
+ assert.deepEqual([e.vertexA,e.vertexB],topo.edges[e.edge]);
+ assert.deepEqual([e.from.x,e.from.y,e.from.z],topo.vertices[e.vertexA].map(x=>x*scale));
+ assert.deepEqual([e.to.x,e.to.y,e.to.z],topo.vertices[e.vertexB].map(x=>x*scale));
+ assert.ok(Object.isFrozen(e)&&Object.isFrozen(e.from)&&Object.isFrozen(e.to));
+}
+assert.ok(Object.isFrozen(wire989));
+for(const marker of ['for(const edge of dodecaShellEdgesR989())','wirePositions','gl.drawArrays(gl.LINES,0,wirePositions.length/3)','data-shell=','meshEdgeCount:mode','R988_FORMAL_SHELL_PROJECTION','makeXlsx(points,geometrySource)'])assert.ok(studio.includes(marker),'R989 renderer or export topology binding missing '+marker);
+console.log('R989 PASS: 360 shell edges share exact OBJ coordinates, 1,728 immutable unit samples, renderer integration markers.');

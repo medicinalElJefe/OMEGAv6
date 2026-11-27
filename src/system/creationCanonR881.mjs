@@ -195,3 +195,150 @@ export async function byteReceiptR881(text,meta={}){
  const hash=await crypto.subtle.digest('SHA-256',bytes);
  return Object.freeze({schema:'OMEGA_BYTE_RECEIPT_R881',sha256:Array.from(new Uint8Array(hash)).map(n=>n.toString(16).padStart(2,'0')).join(''),byteSize:bytes.byteLength,proofTier:meta.proofTier||'DER',source:meta.source||'R881',physicalProof:false});
 }
+
+// R976: scene-invariant spiral chroma, in linear light. Input coordinates
+// belong to the source geometry, not the camera or the screen. No state writes.
+export function spiralChromaR976(color,x,y,phase=0){
+ if(typeof color!=='string'||!/^#[0-9a-f]{6}$/i.test(color)||![x,y,phase].every(Number.isFinite)||phase<0||phase>360)throw new RangeError('Invalid spiral material input');
+ const decode=v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4;
+ const encode=v=>v<=.0031308?12.92*v:1.055*v**(1/2.4)-.055;
+ const rgb=[1,3,5].map(i=>decode(parseInt(color.slice(i,i+2),16)/255));
+ const luminance=.2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2];
+ const angle=Math.atan2(y,x),radius=Math.hypot(x,y);
+ const chroma=.5+.5*Math.cos(angle-4*Math.PI*radius+phase*Math.PI/180);
+ return '#'+rgb.map(v=>Math.round(255*Math.max(0,Math.min(1,encode(luminance+(v-luminance)*chroma)))).toString(16).padStart(2,'0')).join('');
+}
+
+// R977: recoverable scene representation, not a second geometry/state writer.
+// The fixed source geometry is reconstructed by the existing studio kernel.
+export const STUDIO_PROJECT_SCHEMA_R977='OMEGA_CREATION_PROJECT_R977';
+export const STUDIO_PROJECT_MAX_BYTES_R977=2*1024*1024;
+export function validateStudioProjectR977(raw){
+ if(!raw||typeof raw!=='object'||Array.isArray(raw))throw new Error('Invalid studio project');
+ if(raw.schema!==undefined&&raw.schema!==STUDIO_PROJECT_SCHEMA_R977)throw new Error('Unsupported studio project schema');
+ const legacy=raw.schema===undefined;
+ const str=(value,max,label)=>{if(typeof value!=='string'||value.length>max)throw new Error('Invalid project '+label);return value};
+ const degree=(value,label)=>{if(!Number.isFinite(value)||value<0||value>360)throw new Error('Invalid project '+label);return value};
+ const project=str(raw.project,256,'name'),title=str(raw.title,1024,'title'),prompt=str(raw.prompt,65536,'prompt');
+ if(!project.trim())throw new Error('Project name required');
+ if(!['atlas3d','mandala','tessellation','pointillism','dodecahedron'].includes(raw.mode))throw new Error('Invalid project mode');
+ const rotation=degree(raw.rotation,'rotation'),color=str(raw.color,7,'color');
+ if(!/^#[0-9a-f]{6}$/i.test(color))throw new Error('Invalid project color');
+ const address=coordinatesR881(raw.address).rowId;
+ const spiral=legacy&&raw.spiral===undefined?false:raw.spiral;
+ if(typeof spiral!=='boolean')throw new Error('Invalid project spiral flag');
+ const materialPhase=degree(legacy&&raw.materialPhase===undefined?0:raw.materialPhase,'material phase');
+ if(!legacy&&(raw.geometrySource!=='CF-D0001/2/3'||raw.nodeCount!==20736))throw new Error('Project geometry authority mismatch');
+ const list=legacy&&raw.assets===undefined?[]:raw.assets;
+ if(!Array.isArray(list)||list.length>1024)throw new Error('Invalid project asset inventory');
+ const assets=list.map(a=>{
+  if(!a||typeof a!=='object'||!Number.isSafeInteger(a.byteSize)||a.byteSize<0||typeof a.sha256!=='string'||!/^[a-f0-9]{64}$/.test(a.sha256)||a.proofTier!=='OBS'||a.source!=='USER_SELECTED_FILE')throw new Error('Invalid project asset reference');
+  return Object.freeze({name:str(a.name,1024,'asset name'),sha256:a.sha256,byteSize:a.byteSize,proofTier:'OBS',source:'USER_SELECTED_FILE'});
+ });
+ return Object.freeze({schema:STUDIO_PROJECT_SCHEMA_R977,geometrySource:'CF-D0001/2/3',nodeCount:20736,project,title,prompt,mode:raw.mode,rotation,color,spiral,materialPhase,address,assets:Object.freeze(assets)});
+}
+export async function encodeStudioProjectR977(raw){
+ const scene=validateStudioProjectR977(raw);
+ const data=JSON.stringify(scene);
+ const proof=await byteReceiptR881(data,{source:'CF-D0001/2/3',proofTier:'DER'});
+ const text=JSON.stringify({schema:STUDIO_PROJECT_SCHEMA_R977,scene,sha256:proof.sha256});
+ if(new TextEncoder().encode(text).length>STUDIO_PROJECT_MAX_BYTES_R977)throw new Error('Project packet exceeds 2 MiB');
+ return text;
+}
+export async function decodeStudioProjectR977(text){
+ if(typeof text!=='string'||text.length>STUDIO_PROJECT_MAX_BYTES_R977||new TextEncoder().encode(text).length>STUDIO_PROJECT_MAX_BYTES_R977)throw new Error('Project packet absent or oversized');
+ const packet=JSON.parse(text);
+ if(!packet||packet.schema!==STUDIO_PROJECT_SCHEMA_R977||packet.scene?.schema!==STUDIO_PROJECT_SCHEMA_R977||typeof packet.sha256!=='string'||!/^[a-f0-9]{64}$/.test(packet.sha256))throw new Error('Invalid project packet envelope');
+ const scene=validateStudioProjectR977(packet.scene);
+ const proof=await byteReceiptR881(JSON.stringify(scene),{source:'CF-D0001/2/3',proofTier:'DER'});
+ if(proof.sha256!==packet.sha256)throw new Error('Project integrity mismatch');
+ return scene;
+}
+
+// R988: regular dodecahedron as the intersection of twelve unit-normal
+// half-spaces. D indexes the face, P the shell, R/L a face-interior sample.
+// This is a formal geometric projection, not historical physical topology.
+const dotR988=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const crossR988=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+const unitR988=a=>{const m=Math.hypot(...a);return a.map(x=>x/m)};
+const phiR988=(1+Math.sqrt(5))/2;
+export const DODECA_NORMALS_R988=Object.freeze([
+ [0,1,phiR988],[0,-1,phiR988],[0,1,-phiR988],[0,-1,-phiR988],
+ [1,phiR988,0],[-1,phiR988,0],[1,-phiR988,0],[-1,-phiR988,0],
+ [phiR988,0,1],[-phiR988,0,1],[phiR988,0,-1],[-phiR988,0,-1]
+].map(n=>Object.freeze(unitR988(n))));
+const dodecaBasesR988=DODECA_NORMALS_R988.map(n=>{
+ const u=unitR988(crossR988(n,Math.abs(n[2])<.85?[0,0,1]:[0,1,0]));
+ return {n,u,v:crossR988(n,u)};
+});
+function buildDodecaR988(){
+ const vertices=[],incidence=[];
+ for(let i=0;i<12;i++)for(let j=i+1;j<12;j++)for(let k=j+1;k<12;k++){
+  const a=DODECA_NORMALS_R988[i],b=DODECA_NORMALS_R988[j],c=DODECA_NORMALS_R988[k];
+  const bc=crossR988(b,c),ca=crossR988(c,a),ab=crossR988(a,b),det=dotR988(a,bc);
+  if(Math.abs(det)<1e-12)continue;
+  const xyz=bc.map((v,axis)=>(v+ca[axis]+ab[axis])/det);
+  if(DODECA_NORMALS_R988.every(n=>dotR988(n,xyz)<=1+1e-10)){
+   vertices.push(Object.freeze(xyz));incidence.push(Object.freeze([i,j,k]));
+  }
+ }
+ const faces=DODECA_NORMALS_R988.map((n,i)=>{
+  const {u,v}=dodecaBasesR988[i];
+  return Object.freeze(incidence.map((f,j)=>f.includes(i)?j:-1).filter(j=>j>=0).sort((a,b)=>Math.atan2(dotR988(vertices[a],v),dotR988(vertices[a],u))-Math.atan2(dotR988(vertices[b],v),dotR988(vertices[b],u))));
+ });
+ const edges=[];for(let i=0;i<vertices.length;i++)for(let j=i+1;j<vertices.length;j++)if(incidence[i].filter(f=>incidence[j].includes(f)).length===2)edges.push(Object.freeze([i,j]));
+ if(vertices.length!==20||edges.length!==30||faces.some(f=>f.length!==5))throw new Error('Regular dodecahedron topology invariant failed');
+ return Object.freeze({vertices:Object.freeze(vertices),faces:Object.freeze(faces),edges:Object.freeze(edges),circumradius:Math.hypot(...vertices[0])});
+}
+export const DODECA_TOPOLOGY_R988=buildDodecaR988();
+export function dodecaShellScaleR988(p){
+ numberIn(p,1,12,'DODECA_SHELL');return Math.cbrt((p-.5)/12)/DODECA_TOPOLOGY_R988.circumradius;
+}
+// R989: cache only immutable unit-shell samples; never cache mutable state.
+// Identical operation order before the final shell multiplication.
+const dodecaFaceSamplesR989=new Array(1728);
+function faceSampleR989(c){
+ const key=(c.d-1)*144+(c.r-1)*12+c.l-1;
+ if(dodecaFaceSamplesR989[key])return dodecaFaceSamplesR989[key];
+ const {n,u,v}=dodecaBasesR988[c.d-1];
+ const a=(c.r-6.5)/6,b=(c.l-6.5)/6,angle=Math.atan2(b,a),rho=Math.max(Math.abs(a),Math.abs(b));
+ const dir=u.map((x,i)=>x*Math.cos(angle)+v[i]*Math.sin(angle));
+ let boundary=Infinity;
+ for(let i=0;i<12;i++){
+  if(i===c.d-1)continue;
+  const m=DODECA_NORMALS_R988[i],den=dotR988(m,dir);
+  if(den>1e-12)boundary=Math.min(boundary,(1-dotR988(m,n))/den);
+ }
+ const xyz=Object.freeze(n.map((x,i)=>x+rho*boundary*dir[i]));
+ dodecaFaceSamplesR989[key]=xyz;
+ return xyz;
+}
+export function dodecaShellPointR988(rowId){
+ const c=coordinatesR881(rowId),base=faceSampleR989(c),scale=dodecaShellScaleR988(c.p);
+ return Object.freeze({...c,x:base[0]*scale,y:base[1]*scale,z:base[2]*scale});
+}
+// Each wire edge is taken from the same vertex/face topology as OBJ.
+export function dodecaShellEdgesR989(){
+ const {vertices,edges}=DODECA_TOPOLOGY_R988,out=[];
+ for(let shell=1;shell<=12;shell++){
+  const scale=dodecaShellScaleR988(shell);
+  const positions=vertices.map(v=>Object.freeze({x:v[0]*scale,y:v[1]*scale,z:v[2]*scale}));
+  for(let edge=0;edge<edges.length;edge++){
+   const [a,b]=edges[edge];
+   out.push(Object.freeze({shell,edge,vertexA:a,vertexB:b,from:positions[a],to:positions[b]}));
+  }
+ }
+ return Object.freeze(out);
+}
+export function dodecaSampleCacheCountR989(){return dodecaFaceSamplesR989.filter(Boolean).length}
+
+export function dodecaShellObjR988(){
+ const {vertices,faces}=DODECA_TOPOLOGY_R988,lines=['# OMEGA R988 regular dodecahedron shells; formal geometry only'];
+ for(let p=1;p<=12;p++){
+  lines.push('o shell_'+p);
+  const scale=dodecaShellScaleR988(p),offset=(p-1)*20+1;
+  for(const v of vertices)lines.push('v '+v.map(x=>x*scale).join(' '));
+  for(const face of faces)lines.push('f '+face.map(i=>i+offset).join(' '));
+ }
+ return lines.join('\n')+'\n';
+}

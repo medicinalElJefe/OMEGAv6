@@ -44,7 +44,14 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
  const [previousSoftwareQuery,setPreviousSoftwareQuery]=useState('');
  const [previousSoftwareResults,setPreviousSoftwareResults]=useState<readonly R512RecoveredSystemResolution[]>([]);
  const [commandPreviousSoftware,setCommandPreviousSoftware]=useState<readonly R512RecoveredSystemResolution[]>([]);
- const [activeRecovered,setActiveRecovered]=useState<RecoveredExecutionCapsuleR512|null>(()=>{try{const raw=sessionStorage.getItem('omega.r512.executionCapsule');return raw?JSON.parse(raw):null}catch{return null}});
+ const [activeRecovered,setActiveRecovered]=useState<RecoveredExecutionCapsuleR512|null>(null);
+ const recoveredFocusEpoch=useRef(0);
+ const clearRecoveredExecution=()=>{
+  recoveredFocusEpoch.current++;
+  setActiveRecovered(null);
+  try{sessionStorage.removeItem('omega.r512.executionCapsule')}catch{}
+ };
+ useEffect(()=>{let live=true;const epoch=recoveredFocusEpoch.current;try{const raw=sessionStorage.getItem('omega.r512.executionCapsule');if(raw)void import('./recoveredSystemSearchR512').then(m=>{if(!live||epoch!==recoveredFocusEpoch.current)return;const focus=m.restoreRecoveredFocusR969(JSON.parse(raw));setActiveRecovered(focus);if(!focus)sessionStorage.removeItem('omega.r512.executionCapsule')}).catch(()=>{if(live&&epoch===recoveredFocusEpoch.current)clearRecoveredExecution()});}catch{}return()=>{live=false;recoveredFocusEpoch.current++}},[]);
  const domainCaps=useMemo(()=>state.domain==='HOME'?OMEGA7_CAPABILITIES:omega7CapabilitiesForDomain(state.domain),[state.domain]);
  const results=useMemo(()=>state.query?searchOmega7Capabilities(state.query):domainCaps,[state.query,domainCaps]);
  const healthRows=Object.entries(state.health);
@@ -79,7 +86,8 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
  // R779: keep the visible instrument and browser URL in lockstep. History holds
  // only a public registered route name; Canon addresses/private source state stay local.
  useEffect(()=>{
-  const restore=()=>{
+  const restore=(event?:PopStateEvent)=>{
+   if(event)clearRecoveredExecution();
    const selection=nativeHistorySelectionR779(window.location.search,OMEGA7_NATIVE_ROUTES);
    if(!selection.managed)return;
    const requested=readNativeWorkspaceRouteR778(window.location.search,OMEGA7_NATIVE_ROUTES);
@@ -95,6 +103,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
  },[dispatch]);
 
  const switchDomain=(domain:Omega7Domain)=>{
+  clearRecoveredExecution();
   returnDomainRef.current=null;
   const href=nativeHistoryHrefR779(null,OMEGA7_NATIVE_ROUTES);
   if(new URLSearchParams(window.location.search).has('omega7route'))window.history.pushState({omega7Route:null},'',href);
@@ -102,6 +111,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
   dispatch({type:'SELECT_ROUTE',route:null});
  };
  const backToDomain=()=>{
+  clearRecoveredExecution();
   const destination=returnDomainRef.current||state.domain;
   returnDomainRef.current=null;
   const href=nativeHistoryHrefR779(null,OMEGA7_NATIVE_ROUTES);
@@ -109,9 +119,10 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
   dispatch({type:'DOMAIN',domain:destination});
   dispatch({type:'SELECT_ROUTE',route:null});
  };
- const open=(route:string)=>{
+ const open=(route:string,preserveRecoveredFocus=false)=>{
   const cap=OMEGA7_CAPABILITIES.find(x=>x.legacyRoute===route);
   if(!cap)return;
+  if(!preserveRecoveredFocus)clearRecoveredExecution();
   if(!state.selectedRoute&&returnDomainRef.current===null)returnDomainRef.current=state.domain;
   setLibraryOpen(false);
   if(isOmega7NativeRoute(cap.legacyRoute)){
@@ -127,16 +138,20 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
  };
 
  const launchCapsule=(capsule:RecoveredExecutionCapsuleR512)=>{
+  recoveredFocusEpoch.current++;
   setActiveRecovered(capsule);
   try{sessionStorage.setItem('omega.r512.executionCapsule',JSON.stringify(capsule))}catch{}
   window.dispatchEvent(new CustomEvent('omega-r512-execute-capability',{detail:capsule}));
-  open(capsule.route);
+  open(capsule.route,true);
  };
  const launchRecovered=(entry:(typeof R486_VISIBLE_CAPABILITIES)[number])=>launchCapsule(recoveredExecutionCapsuleR512(entry));
- const launchRecoveredSystem=(entry:R512RecoveredSystemResolution)=>void import('./recoveredSystemSearchR512').then(m=>launchCapsule(m.recoveredSystemExecutionCapsuleR512(entry)));
- const clearRecoveredExecution=()=>{
-  setActiveRecovered(null);
-  try{sessionStorage.removeItem('omega.r512.executionCapsule')}catch{}
+ const launchRecoveredSystem=(entry:R512RecoveredSystemResolution)=>{
+  clearRecoveredExecution();
+  const requestedEpoch=recoveredFocusEpoch.current;
+  void import('./recoveredSystemSearchR512').then(m=>{
+   if(requestedEpoch!==recoveredFocusEpoch.current)return;
+   launchCapsule(m.recoveredSystemExecutionCapsuleR512(entry));
+  }).catch(()=>{if(requestedEpoch===recoveredFocusEpoch.current)clearRecoveredExecution()});
  };
 
  return <div className='o7-app' data-omega7='true' data-depth={state.depth.toLowerCase()}>
@@ -172,7 +187,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
       <dl><div><dt>Executor</dt><dd>{activeRecovered.capabilityId}</dd></div><div><dt>Domain</dt><dd>{activeRecovered.executionDomain}</dd></div><div><dt>State</dt><dd>{activeRecovered.state.replaceAll('_',' ')}</dd></div><div><dt>Action</dt><dd>{(activeRecovered.launchKind||'EXECUTE').replaceAll('_',' ')}</dd></div><div><dt>Source</dt><dd>{(activeRecovered.sourceKind||'CAPABILITY_LINEAGE').replaceAll('_',' ')}</dd></div><div><dt>Proof</dt><dd>{activeRecovered.receiptAuthority} / {activeRecovered.admissionAuthority}</dd></div></dl>
       <button onClick={clearRecoveredExecution}>Clear focus</button>
      </aside>}
-     <Omega7NativeSurface route={state.selectedRoute} onNavigate={open} depth={state.depth} softwareLaunch={activeRecovered}/>
+     <Omega7NativeSurface route={state.selectedRoute} onNavigate={open} onLaunchRecoveredSystem={launchRecoveredSystem} depth={state.depth} softwareLaunch={activeRecovered}/>
     </section>:
     <>
      {state.domain!=='HOME'&&<section className='o7-intro o7-intro-r512 o7-intro-r519'>

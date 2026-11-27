@@ -8,6 +8,7 @@
       "workspace": "src7/workspaces/CommandWorkspaceR439.tsx",
       "dependencySpecifiers": [
         "../../src/OmegaCommandDeck",
+        "../../src/OmegaIntentWorkbenchR85",
         "../../src/OmegaRichText",
         "../../src/corpusRuntime",
         "../../src/fullOverallModeOrchestratorR79",
@@ -115,7 +116,8 @@
     {
       "workspace": "src7/workspaces/DevelopmentComputeWorkspaceR444.tsx",
       "dependencySpecifiers": [
-        "../../src/HybridMissionControlR8",
+        "../../src/HybridLinkR32",
+        "../../src/HybridRuntimeSnapshotR238",
         "../../src/IntelligenceFabricPanel",
         "../../src/OmegaIntentWorkbenchR85",
         "../../src/SAISovereignControl",
@@ -145,10 +147,13 @@
         "../../src/UniversalQualityControl",
         "../../src/corpusRuntime",
         "../../src/platformAdapter",
+        "../../src/recoveredSoftwareExecutionR512",
         "../../src/sourceBackedModeRuntimeR21",
+        "../OmegaOneSystemLedgerR926",
         "../capabilityRegistry",
         "./CanonicalSessionReplayPanelR679",
         "./NativeDecisionTruthPanelR681",
+        "./OmegaLocalHubPanelR884",
         "./OperationalModesPanelR671",
         "./OperatorGraphPanelR676"
       ],
