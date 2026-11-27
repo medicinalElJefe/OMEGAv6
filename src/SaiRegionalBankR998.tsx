@@ -2,13 +2,15 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {corpusState} from './corpusRuntime';
 import {inspectionSHA} from './execution/saiHostInspectionR209.js';
-import {projectedRegionR998,trainProjectedRegionR998,summarizeBankR998,predictRegionalR998,verifyRegionalModelR998,R998_BANK,R998_FEATURES} from './saiRelationalLearningR992.mjs';
+import {projectedRegionR998,trainProjectedRegionR998,summarizeBankR998,predictRegionalR998,verifyRegionalModelR998,R998_BANK,R998_FEATURES,correlateFieldR999} from './saiRelationalLearningR992.mjs';
 type Model=ReturnType<typeof trainProjectedRegionR998>;
 type Row={region:number;weights:readonly number[];bestEpoch:number;partitions:Model['partitions'];sourceSha256:string};
 const KEY='omega.sai.r998.regional-bank',LIMIT=2097152;
 const compact=(model:Model,sourceSha256:string):Row=>({region:model.region,weights:model.weights,bestEpoch:model.bestEpoch,partitions:model.partitions,sourceSha256});
 export default function SaiRegionalBankR998({address}:{address:number}){
  const [models,setModels]=useState<Row[]>([]),[authorized,setAuthorized]=useState(false),[busy,setBusy]=useState(false),[training,setTraining]=useState(false),[message,setMessage]=useState(''),[prediction,setPrediction]=useState<ReturnType<typeof predictRegionalR998>|null>(null);
+ const [correlation,setCorrelation]=useState<ReturnType<typeof correlateFieldR999>|null>(null);
+ useEffect(()=>setCorrelation(null),[models]);
  const lock=useRef(false),alive=useRef(true),pause=useRef(false);
  useEffect(()=>{alive.current=true;return()=>{alive.current=false;pause.current=true}},[]);
  useEffect(()=>setPrediction(null),[address,models]);
@@ -44,11 +46,26 @@ export default function SaiRegionalBankR998({address}:{address:number}){
   if(!alive.current)return;setModels(next.sort((a,b)=>a.region-b.region));setAuthorized(false);setMessage('Source digests and optimizer replay verified; bank restored.');
  };
  const infer=()=>void work(async()=>{const model=models.find(x=>x.region===Math.floor(address/144));if(!model)throw Error('Selected region has not been trained');const dataset=projectedRegionR998(corpusState,model.region);if(await inspectionSHA(dataset)!==model.sourceSha256)throw Error('Projected source changed');setPrediction(predictRegionalR998(dataset,model,address));setMessage('Selected address evaluated by its source-bound regional model.')});
+ const correlate=()=>void work(async()=>{
+  if(!summary.complete)throw Error('Complete model bank required');
+  const values:number[]=[];
+  for(const model of models.slice().sort((a,b)=>a.region-b.region)){
+   await new Promise<void>(resolve=>window.setTimeout(resolve,0));if(!alive.current)return;
+   const dataset=projectedRegionR998(corpusState,model.region);
+   if(await inspectionSHA(dataset)!==model.sourceSha256)throw Error('Projected source changed');
+   for(const row of dataset.rows)values.push(predictRegionalR998(dataset,model,row.address).prediction);
+  }
+  if(!alive.current)return;
+  setCorrelation(correlateFieldR999(values,{steps:4}));setMessage('Four-axis prediction exchange completed; CanonState unchanged.');
+ });
  const exportBank=()=>void work(async()=>{const text=await pack(),url=URL.createObjectURL(new Blob([text],{type:'application/json'}));try{const a=document.createElement('a');a.href=url;a.download='omega-sai-r998-regional-bank.json';a.click()}finally{window.setTimeout(()=>URL.revokeObjectURL(url),1000)}});
  return <section data-r998-regional-bank='LOCAL_PROJECTED_CORPUS_TRAINING' aria-label='Full projected atlas model bank' style={{border:'1px solid #60758c',borderRadius:10,padding:12,marginBottom:12,maxWidth:'100%',minWidth:0,overflowWrap:'anywhere'}}>
  <h3>SAI · Whole projected atlas learning</h3><p>Train 144 regional regressors on the embedded 20,736-address projected corpus. Each model learns the projected scar channel from eight projected features, with separate training, validation and held-out addresses. These are not raw donor data, empirical observations, or foundation-model weights.</p>
  <label style={{display:'flex',alignItems:'center',gap:8}}><input type='checkbox' checked={authorized} disabled={busy} onChange={e=>setAuthorized(e.target.checked)}/>Authorize local projected-source training</label>
  <div style={{display:'flex',gap:8,flexWrap:'wrap'}}><button disabled={busy||!authorized||summary.complete} onClick={train}>{models.length?'Resume whole-field training':'Train all 144 regions'}</button><button disabled={!training} onClick={()=>{pause.current=true}}>Pause at region boundary</button><button disabled={busy||!models.length} onClick={()=>void work(async()=>{localStorage.setItem(KEY,await pack());setMessage('Saved local bank with regional source digests.')})}>Save model bank</button><button disabled={busy} onClick={()=>void work(async()=>restore(localStorage.getItem(KEY)||''))}>Restore and replay bank</button><button disabled={busy||!models.length} onClick={exportBank}>Export model bank</button><button disabled={busy||!models.some(x=>x.region===Math.floor(address/144))} onClick={infer}>Infer selected address</button><button disabled={busy} onClick={()=>{setModels([]);setAuthorized(false);setMessage('Active model bank cleared; saved bank remains.')}}>Clear active bank</button></div>
+ <button disabled={busy||!summary.complete} onClick={correlate}>Correlate all 20,736 predictions</button>
+ <p>R999 · Four simultaneous periodic lattice exchanges of model predictions only; not learned communication or empirical evidence.</p>
+ {correlation&&<output>Selected address correlated prediction {correlation.values[address]?.toFixed(6)} · conservation residual {correlation.residual.toExponential(3)} · {correlation.edges.toLocaleString()} undirected edges</output>}
  <label>Import model bank <input type='file' accept='.json,application/json' disabled={busy} onChange={e=>{const file=e.target.files?.[0];e.target.value='';if(file)void work(async()=>{if(file.size>LIMIT)throw Error('Bank too large');await restore(await file.text())})}}/></label>
  <progress value={summary.regions} max={144}/><p>{summary.regions} / 144 models · {summary.addresses.toLocaleString()} addresses · {summary.parameterCount.toLocaleString()} trainable parameters across trained regions</p>
  {Object.entries(summary.partitions).map(([kind,row])=><p key={kind}>{kind}: {row.count} addresses · MSE {row.initialMse===null?'—':row.initialMse.toPrecision(5)} → {row.mse===null?'—':row.mse.toPrecision(5)}</p>)}

@@ -333,3 +333,30 @@ export function verifyRegionalModelR998(dataset,model){
  if(orderedCheckpointJSONR997(compact(expected))!==orderedCheckpointJSONR997(compact(model)))throw Error('Regional model replay mismatch');
  return expected;
 }
+
+ // R999: periodic four-axis address graph; simultaneous conservative exchange
+ // over model predictions, never over CanonState or training labels.
+export function correlateFieldR999(values,{weight=.125,steps=1}={}){
+ if(!Array.isArray(values)||values.length!==20736||!values.every(Number.isFinite)||!Number.isFinite(weight)||weight<0||weight>.125||!Number.isSafeInteger(steps)||steps<1||steps>32)throw Error('Invalid correlation field or budget');
+ let state=Float64Array.from(values);
+ const initial=state.reduce((a,b)=>a+b,0),scale=state.reduce((a,b)=>a+Math.abs(b),0);
+ if(!Number.isFinite(initial)||!Number.isFinite(scale))throw Error('Nonfinite field aggregate');
+ const strides=[1,12,144,1728];
+ for(let step=0;step<steps;step++){
+  const next=new Float64Array(state.length);
+  for(let i=0;i<state.length;i++){
+   let delta=0;
+   for(const stride of strides){
+    const digit=Math.floor(i/stride)%12;
+    const plus=i+(digit===11?-11:1)*stride,minus=i+(digit===0?11:-1)*stride;
+    delta+=(state[plus]-state[i])+(state[minus]-state[i]);
+   }
+   next[i]=state[i]+weight*delta;
+   if(!Number.isFinite(next[i]))throw Error('Nonfinite correlated state');
+  }
+  state=next;
+ }
+ const total=state.reduce((a,b)=>a+b,0),residual=total-initial;
+ if(!Number.isFinite(residual)||Math.abs(residual)>1e-10*Math.max(1,scale))throw Error('Correlation conservation failed');
+ return {schema:'OMEGA_SAI_PERIODIC_FIELD_R999',values:Array.from(state),steps,weight,initial,total,residual,edges:82944,canonicalMutation:false,empirical:false};
+}
