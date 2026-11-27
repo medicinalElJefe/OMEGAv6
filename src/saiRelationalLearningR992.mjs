@@ -360,3 +360,18 @@ export function correlateFieldR999(values,{weight=.125,steps=1}={}){
  if(!Number.isFinite(residual)||Math.abs(residual)>1e-10*Math.max(1,scale))throw Error('Correlation conservation failed');
  return {schema:'OMEGA_SAI_PERIODIC_FIELD_R999',values:Array.from(state),steps,weight,initial,total,residual,edges:82944,canonicalMutation:false,empirical:false};
 }
+
+ // R1000: replayable, source/model-bound field receipts. Digests bind identity,
+ // not authenticated origin; verification requires the current source and bank.
+export function fieldReceiptR1000(values,bindings,options={}){
+ if(!Array.isArray(values)||values.length!==20736||!Array.from(values).every(Number.isFinite))throw Error('Invalid dense input field');
+ if(!Array.isArray(bindings)||bindings.length!==144||!Array.from(bindings).every((b,i)=>b&&b.region===i&&typeof b.sourceSha256==='string'&&/^[a-f0-9]{64}$/.test(b.sourceSha256)&&typeof b.modelSha256==='string'&&/^[a-f0-9]{64}$/.test(b.modelSha256)))throw Error('Invalid regional source/model bindings');
+ const result=correlateFieldR999(values,options);
+ return {schema:'OMEGA_SAI_FIELD_RECEIPT_R1000',bindings:bindings.map(b=>({region:b.region,sourceSha256:b.sourceSha256,modelSha256:b.modelSha256})),input:Array.from(values,x=>x===0?0:x),result,canonicalMutation:false,empirical:false};
+}
+export function verifyFieldReceiptR1000(packet,values,bindings){
+ if(!packet||packet.schema!=='OMEGA_SAI_FIELD_RECEIPT_R1000'||!packet.result)throw Error('Invalid field receipt');
+ const expected=fieldReceiptR1000(values,bindings,{weight:packet.result.weight,steps:packet.result.steps});
+ if(orderedCheckpointJSONR997(expected)!==orderedCheckpointJSONR997(packet))throw Error('Field receipt replay mismatch');
+ return expected;
+}

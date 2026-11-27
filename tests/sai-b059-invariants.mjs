@@ -158,3 +158,16 @@ assert.throws(()=>correlateFieldR999(field999,{weight:.126}),/Invalid/);
 assert.throws(()=>correlateFieldR999(field999,{steps:33}),/Invalid/);
 assert.throws(()=>correlateFieldR999([NaN]),/Invalid/);
 console.log('R999 PASS: periodic four-axis conservative prediction exchange and deterministic replay.');
+
+const {fieldReceiptR1000,verifyFieldReceiptR1000}=await import('../src/saiRelationalLearningR992.mjs');
+const binds1000=Array.from({length:144},(_,region)=>({region,sourceSha256:'a'.repeat(64),modelSha256:region.toString(16).padStart(64,'0')}));
+const receipt1000=fieldReceiptR1000(field999,binds1000,{steps:4});
+assert.deepEqual(receipt1000.result,result999);
+assert.deepEqual(verifyFieldReceiptR1000(JSON.parse(JSON.stringify(receipt1000)),field999,binds1000),receipt1000);
+const tamper1000=JSON.parse(JSON.stringify(receipt1000));tamper1000.result.values[0]+=.01;
+assert.throws(()=>verifyFieldReceiptR1000(tamper1000,field999,binds1000),/replay mismatch/);
+const changed1000=binds1000.map((b,i)=>i===0?{...b,modelSha256:'f'.repeat(64)}:b);
+assert.throws(()=>verifyFieldReceiptR1000(receipt1000,field999,changed1000),/replay mismatch/);
+assert.throws(()=>fieldReceiptR1000(field999,binds1000.slice(1)),/bindings/);
+assert.throws(()=>fieldReceiptR1000(Array(20736),binds1000),/dense/);
+console.log('R1000 PASS: full field receipt roundtrip, source/model binding and tamper rejection.');

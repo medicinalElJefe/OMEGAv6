@@ -2,7 +2,7 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {corpusState} from './corpusRuntime';
 import {inspectionSHA} from './execution/saiHostInspectionR209.js';
-import {projectedRegionR998,trainProjectedRegionR998,summarizeBankR998,predictRegionalR998,verifyRegionalModelR998,R998_BANK,R998_FEATURES,correlateFieldR999} from './saiRelationalLearningR992.mjs';
+import {projectedRegionR998,trainProjectedRegionR998,summarizeBankR998,predictRegionalR998,verifyRegionalModelR998,R998_BANK,R998_FEATURES,correlateFieldR999,fieldReceiptR1000,verifyFieldReceiptR1000} from './saiRelationalLearningR992.mjs';
 type Model=ReturnType<typeof trainProjectedRegionR998>;
 type Row={region:number;weights:readonly number[];bestEpoch:number;partitions:Model['partitions'];sourceSha256:string};
 const KEY='omega.sai.r998.regional-bank',LIMIT=2097152;
@@ -11,6 +11,8 @@ export default function SaiRegionalBankR998({address}:{address:number}){
  const [models,setModels]=useState<Row[]>([]),[authorized,setAuthorized]=useState(false),[busy,setBusy]=useState(false),[training,setTraining]=useState(false),[message,setMessage]=useState(''),[prediction,setPrediction]=useState<ReturnType<typeof predictRegionalR998>|null>(null);
  const [correlation,setCorrelation]=useState<ReturnType<typeof correlateFieldR999>|null>(null);
  useEffect(()=>setCorrelation(null),[models]);
+ const [receipt,setReceipt]=useState<ReturnType<typeof fieldReceiptR1000>|null>(null);
+ useEffect(()=>setReceipt(null),[models]);
  const lock=useRef(false),alive=useRef(true),pause=useRef(false);
  useEffect(()=>{alive.current=true;return()=>{alive.current=false;pause.current=true}},[]);
  useEffect(()=>setPrediction(null),[address,models]);
@@ -46,17 +48,33 @@ export default function SaiRegionalBankR998({address}:{address:number}){
   if(!alive.current)return;setModels(next.sort((a,b)=>a.region-b.region));setAuthorized(false);setMessage('Source digests and optimizer replay verified; bank restored.');
  };
  const infer=()=>void work(async()=>{const model=models.find(x=>x.region===Math.floor(address/144));if(!model)throw Error('Selected region has not been trained');const dataset=projectedRegionR998(corpusState,model.region);if(await inspectionSHA(dataset)!==model.sourceSha256)throw Error('Projected source changed');setPrediction(predictRegionalR998(dataset,model,address));setMessage('Selected address evaluated by its source-bound regional model.')});
- const correlate=()=>void work(async()=>{
+ const fieldInputs=async()=>{
   if(!summary.complete)throw Error('Complete model bank required');
-  const values:number[]=[];
+  const values:number[]=[],bindings:{region:number;sourceSha256:string;modelSha256:string}[]=[];
   for(const model of models.slice().sort((a,b)=>a.region-b.region)){
-   await new Promise<void>(resolve=>window.setTimeout(resolve,0));if(!alive.current)return;
+   await new Promise<void>(resolve=>window.setTimeout(resolve,0));if(!alive.current)return null;
    const dataset=projectedRegionR998(corpusState,model.region);
    if(await inspectionSHA(dataset)!==model.sourceSha256)throw Error('Projected source changed');
+   bindings.push({region:model.region,sourceSha256:model.sourceSha256,modelSha256:await inspectionSHA(model)});
    for(const row of dataset.rows)values.push(predictRegionalR998(dataset,model,row.address).prediction);
   }
-  if(!alive.current)return;
-  setCorrelation(correlateFieldR999(values,{steps:4}));setMessage('Four-axis prediction exchange completed; CanonState unchanged.');
+  return alive.current?{values,bindings}:null;
+ };
+ const correlate=()=>void work(async()=>{
+  const inputs=await fieldInputs();if(!inputs)return;
+  const next=fieldReceiptR1000(inputs.values,inputs.bindings,{steps:4});
+  setReceipt(next);setCorrelation(next.result);setMessage('Source/model-bound prediction exchange completed; CanonState unchanged.');
+ });
+ const exportField=()=>void work(async()=>{
+  if(!receipt)throw Error('No field receipt');
+  const text=JSON.stringify(receipt);if(new TextEncoder().encode(text).length>LIMIT)throw Error('Field receipt exceeds byte budget');
+  const url=URL.createObjectURL(new Blob([text],{type:'application/json'}));try{const a=document.createElement('a');a.href=url;a.download='omega-sai-r1000-field.json';a.click()}finally{window.setTimeout(()=>URL.revokeObjectURL(url),1000)}
+ });
+ const importField=(file:File)=>void work(async()=>{
+  if(file.size>LIMIT)throw Error('Field receipt exceeds byte budget');
+  const packet=JSON.parse(await file.text()),inputs=await fieldInputs();if(!inputs)return;
+  const next=verifyFieldReceiptR1000(packet,inputs.values,inputs.bindings);
+  setReceipt(next);setCorrelation(next.result);setMessage('Field receipt replay verified against active source and model bank.');
  });
  const exportBank=()=>void work(async()=>{const text=await pack(),url=URL.createObjectURL(new Blob([text],{type:'application/json'}));try{const a=document.createElement('a');a.href=url;a.download='omega-sai-r998-regional-bank.json';a.click()}finally{window.setTimeout(()=>URL.revokeObjectURL(url),1000)}});
  return <section data-r998-regional-bank='LOCAL_PROJECTED_CORPUS_TRAINING' aria-label='Full projected atlas model bank' style={{border:'1px solid #60758c',borderRadius:10,padding:12,marginBottom:12,maxWidth:'100%',minWidth:0,overflowWrap:'anywhere'}}>
@@ -66,6 +84,8 @@ export default function SaiRegionalBankR998({address}:{address:number}){
  <button disabled={busy||!summary.complete} onClick={correlate}>Correlate all 20,736 predictions</button>
  <p>R999 · Four simultaneous periodic lattice exchanges of model predictions only; not learned communication or empirical evidence.</p>
  {correlation&&<output>Selected address correlated prediction {correlation.values[address]?.toFixed(6)} · conservation residual {correlation.residual.toExponential(3)} · {correlation.edges.toLocaleString()} undirected edges</output>}
+ <button disabled={busy||!receipt} onClick={exportField}>Export replayable field receipt</button>
+ <label>Verify field receipt <input type='file' accept='.json,application/json' disabled={busy||!summary.complete} onChange={e=>{const file=e.target.files?.[0];e.target.value='';if(file)importField(file)}}/></label>
  <label>Import model bank <input type='file' accept='.json,application/json' disabled={busy} onChange={e=>{const file=e.target.files?.[0];e.target.value='';if(file)void work(async()=>{if(file.size>LIMIT)throw Error('Bank too large');await restore(await file.text())})}}/></label>
  <progress value={summary.regions} max={144}/><p>{summary.regions} / 144 models · {summary.addresses.toLocaleString()} addresses · {summary.parameterCount.toLocaleString()} trainable parameters across trained regions</p>
  {Object.entries(summary.partitions).map(([kind,row])=><p key={kind}>{kind}: {row.count} addresses · MSE {row.initialMse===null?'—':row.initialMse.toPrecision(5)} → {row.mse===null?'—':row.mse.toPrecision(5)}</p>)}
