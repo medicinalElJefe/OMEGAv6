@@ -183,3 +183,46 @@ const identity1001=auditCorrelationR1001(fieldReceiptR1000(field999,binds1000,{w
 assert.deepEqual(identity1001.full.before,identity1001.full.after);
 assert.throws(()=>auditCorrelationR1001(tamper1000,read998),/replay mismatch/);
 console.log('R1001 PASS: full and partitioned correlation evaluation, identity and tamper refusal.');
+
+const {selectCorrelationR1002,verifySelectionR1002}=await import('../src/saiRelationalLearningR992.mjs');
+const selected1002=selectCorrelationR1002(field999,binds1000,read998);
+assert.equal(selected1002.candidates.length,13);
+assert.equal(selected1002.selectionCount,4032);
+assert.equal(selected1002.selected.mse,Math.min(...selected1002.candidates.map(c=>c.mse)));
+assert.ok(selected1002.selected.mse<=selected1002.candidates[0].mse);
+assert.equal(selected1002.audit.partitions.test.before.count,4320);
+assert.ok(Math.abs(selected1002.selected.mse-selected1002.audit.partitions.validation.after.mse)<1e-12);
+const testAddresses1002=new Set(Array.from({length:144},(_,r)=>splitDatasetR995(projectedRegionR998(read998,r),37).test.map(x=>x.address)).flat());
+const alteredRead1002=a=>{const row=read998(a);return testAddresses1002.has(a)?{...row,metrics:{...row.metrics,scar:1-row.metrics.scar}}:row};
+const altered1002=selectCorrelationR1002(field999,binds1000,alteredRead1002);
+assert.deepEqual(altered1002.selected,selected1002.selected);
+assert.deepEqual(altered1002.candidates,selected1002.candidates);
+assert.deepEqual(verifySelectionR1002(JSON.parse(JSON.stringify(selected1002)),field999,binds1000,read998),selected1002);
+const forged1002=JSON.parse(JSON.stringify(selected1002));forged1002.selected.mse+=1;
+assert.throws(()=>verifySelectionR1002(forged1002,field999,binds1000,read998),/replay mismatch/);
+console.log('R1002 PASS: validation-only bounded selection, held-out isolation and replay.');
+
+const {verifySaiSphereR1003,saiSpherePixelR1003}=await import('../src/saiSphereBridgeR1003.mjs');
+const digest1003=async value=>{const {createHash}=await import('node:crypto');return createHash('sha256').update(JSON.stringify(value)).digest('hex')};
+const rows1003=[],bindings1003=[];
+for(const model of models998){
+ const sourceSha256=await digest1003(projectedRegionR998(read998,model.region));
+ const compact={region:model.region,weights:model.weights,bestEpoch:model.bestEpoch,partitions:model.partitions,sourceSha256};
+ rows1003.push(compact);bindings1003.push({region:model.region,sourceSha256,modelSha256:await digest1003(compact)});
+}
+const transfer1003={schema:'OMEGA_SAI_SPHERE_READONLY_R1003',models:rows1003,field:fieldReceiptR1000(field999,bindings1003,{steps:4}),canonicalMutation:false};
+assert.deepEqual(await verifySaiSphereR1003(JSON.parse(JSON.stringify(transfer1003)),read998,{digest:digest1003}),transfer1003.field);
+assert.equal(saiSpherePixelR1003(transfer1003.field,20735).value,transfer1003.field.result.values[20735]);
+assert.throws(()=>saiSpherePixelR1003(transfer1003.field,20736),/address/);
+await assert.rejects(()=>verifySaiSphereR1003({...transfer1003,canonicalMutation:true},read998,{digest:digest1003}),/read-only/);
+await assert.rejects(()=>verifySaiSphereR1003({...transfer1003,models:rows1003.map((m,i)=>i===0?{...m,sourceSha256:'f'.repeat(64)}:m)},read998,{digest:digest1003}),/digest mismatch/);
+console.log('R1003 PASS: independently replayed SAI to SPHERE read-only field projection.');
+
+const {packSaiSphereR1004,unpackSaiSphereR1004,replayPortableSaiSphereR1004}=await import('../src/saiSphereBridgeR1003.mjs');
+const portable1004=await packSaiSphereR1004(transfer1003,digest1003);
+assert.deepEqual(await unpackSaiSphereR1004(portable1004,{digest:digest1003}),transfer1003);
+assert.deepEqual(await replayPortableSaiSphereR1004(portable1004,read998,{digest:digest1003}),transfer1003.field);
+const altered1004=JSON.parse(portable1004);altered1004.body.field.result.values[0]+=.1;
+await assert.rejects(()=>unpackSaiSphereR1004(JSON.stringify(altered1004),{digest:digest1003}),/digest mismatch/);
+await assert.rejects(()=>unpackSaiSphereR1004('x'.repeat(2097153),{digest:digest1003}),/size/);
+console.log('R1004 PASS: bounded portable SAI–SPHERE transfer, digest refusal and independent replay.');

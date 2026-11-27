@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R1001 evaluates R1000 source/model-bound field exchange against disjoint projected-source partitions; R1000 and R999 each 11/11 exact-head CI passed. R1001 candidate CI pending.",
+  "latestGovernedWork": "R1004 portable bounded SAI–SPHERE envelope and independent receiving replay; failed imports preserve previous verified projection. R1002/R1003 workflow records unavailable at observation; candidate CI pending.",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -627,7 +627,22 @@
     },
     {
       "revision": "R1001",
-      "conservation": "Full-field and partitioned before/after projected-source residual evaluation; no claim of improvement, empirical validity, or Canon mutation.",
+      "conservation": "Full-field and partitioned before/after projected-source residual evaluation; no claim of improvement, empirical validity, or Canon mutation. Exact head b531cb63aa5e26e493a5ad020252dba43cc2bba9: 11/11 workflows passed.",
+      "accepted": "EXACT_HEAD_CI_ONLY"
+    },
+    {
+      "revision": "R1002",
+      "conservation": "13 deterministic exchange candidates including identity; 4032 validation addresses select parameters, 4320 held-out addresses evaluated only after selection. Existing SAI field receipt and UI extended with portable replay and held-out label isolation tests.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R1003",
+      "conservation": "Existing SAI field transfers to existing SPHERE outer raster. Receiver rechecks 144 source digests and optimizer checkpoints, reconstructs 20736 predictions and replays exchange. No state mutation or authority promotion.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R1004",
+      "conservation": "Portable SAI/SPHERE transfer export/import, pre-replay byte and SHA checks, full optimizer and field replay, serialized receiver lock and non-destructive rejected imports. No Canon or SPHERE state mutation.",
       "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
     }
   ],

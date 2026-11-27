@@ -395,3 +395,34 @@ export function auditCorrelationR1001(receipt,read){
  const finish=s=>({before:auditFinishR994(s.before),after:auditFinishR994(s.after)});
  return {schema:'OMEGA_SAI_CORRELATION_AUDIT_R1001',full:finish(full),partitions:Object.fromEntries(Object.entries(parts).map(([k,s])=>[k,finish(s)])),regions,canonicalMutation:false,empirical:false};
 }
+
+ // R1002: deterministic validation-only selection, with an identity baseline.
+ // Held-out labels enter the final audit only after parameters are selected.
+export function selectCorrelationR1002(values,bindings,read){
+ if(typeof read!=='function')throw Error('Projected source reader required');
+ const baseline=fieldReceiptR1000(values,bindings,{weight:0,steps:1});
+ const validation=[];
+ for(let region=0;region<144;region++){
+  const data=projectedRegionR998(read,region);
+  validation.push(...splitDatasetR995(data,37).validation);
+ }
+ if(validation.length!==4032)throw Error('Validation coverage mismatch');
+ const candidates=[{weight:0,steps:1}];
+ for(const steps of [1,2,4,8])for(const weight of [.03125,.0625,.125])candidates.push({weight,steps});
+ const scores=[];let selected=candidates[0],best=Infinity;
+ for(const candidate of candidates){
+  const state=candidate.weight===0?baseline.result.values:correlateFieldR999(baseline.input,candidate).values;
+  const mse=validation.reduce((s,row)=>s+(state[row.address]-row.target)**2,0)/validation.length;
+  if(!Number.isFinite(mse))throw Error('Nonfinite validation score');
+  scores.push({...candidate,mse});
+  if(mse<best){best=mse;selected=candidate;}
+ }
+ const field=fieldReceiptR1000(baseline.input,baseline.bindings,selected);
+ return {schema:'OMEGA_SAI_VALIDATION_SELECTION_R1002',selectionPartition:'validation',selectionCount:validation.length,candidates:scores,selected:{...selected,mse:best},field,audit:auditCorrelationR1001(field,read),canonicalMutation:false,empirical:false};
+}
+export function verifySelectionR1002(packet,values,bindings,read){
+ if(!packet||packet.schema!=='OMEGA_SAI_VALIDATION_SELECTION_R1002')throw Error('Invalid selection receipt');
+ const expected=selectCorrelationR1002(values,bindings,read);
+ if(orderedCheckpointJSONR997(expected)!==orderedCheckpointJSONR997(packet))throw Error('Selection replay mismatch');
+ return expected;
+}
