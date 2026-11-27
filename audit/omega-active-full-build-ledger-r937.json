@@ -289,11 +289,6 @@
       "id": "LIVE_POST_DEPLOY_ROLLBACK",
       "state": "HELD",
       "proof": null
-    },
-    {
-      "revision": "R1006",
-      "conservation": "Accepted R121 missions bind client-replayed SAI context to visible CSV and existing durable mission journal with fail-closed validation. No additional cloud dispatch, independent server verification or Canon mutation.",
-      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
     }
   ],
   "completionRule": "EACH_GATE_REQUIRES_INDEPENDENT_EXACT_SOURCE_PROOF; EACH_RESOLVED_BLOCKER_RETAINS_ITS_ID_AND_IMMUTABLE_RECEIPT; WORKSTREAM_COMPLETION_CANNOT_EXCEED_EVIDENCE; RELEASE_CLEAN_REQUIRES_ZERO_OPEN_BLOCKERS_ALL_WORKSTREAMS_PROVEN_AND_POST_DEPLOY_PROOFS",
