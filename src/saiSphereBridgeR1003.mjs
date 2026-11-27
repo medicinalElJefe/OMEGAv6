@@ -24,3 +24,22 @@ export function saiSpherePixelR1003(field,address){
  if(!Number.isFinite(value))throw Error('Invalid SAI projection value');
  return {address,value,hue:Math.max(0,Math.min(1,value)),canonicalMutation:false};
 }
+
+ // R1004 portable transport: byte bounds and envelope integrity precede replay.
+ // A digest detects corruption, not origin authentication.
+export async function packSaiSphereR1004(packet,digest=inspectionSHA){
+ if(!packet||packet.schema!=='OMEGA_SAI_SPHERE_READONLY_R1003'||packet.canonicalMutation!==false||!summarizeBankR998(packet.models).complete||!packet.field)throw Error('Invalid portable SAI transfer');
+ const text=JSON.stringify({schema:'OMEGA_SAI_SPHERE_PORTABLE_R1004',body:packet,sha256:await digest(packet)});
+ if(new TextEncoder().encode(text).length>SAI_SPHERE_LIMIT_R1003)throw Error('Portable SAI transfer exceeds byte budget');
+ return text;
+}
+export async function unpackSaiSphereR1004(text,{digest=inspectionSHA}={}){
+ if(typeof text!=='string'||!text||new TextEncoder().encode(text).length>SAI_SPHERE_LIMIT_R1003)throw Error('Invalid portable SAI transfer size');
+ const envelope=JSON.parse(text);
+ if(envelope?.schema!=='OMEGA_SAI_SPHERE_PORTABLE_R1004'||typeof envelope.sha256!=='string'||!/^[a-f0-9]{64}$/.test(envelope.sha256)||!envelope.body||await digest(envelope.body)!==envelope.sha256)throw Error('Portable SAI transfer digest mismatch');
+ return envelope.body;
+}
+export async function replayPortableSaiSphereR1004(text,read,options={}){
+ const packet=await unpackSaiSphereR1004(text,options);
+ return verifySaiSphereR1003(packet,read,options);
+}

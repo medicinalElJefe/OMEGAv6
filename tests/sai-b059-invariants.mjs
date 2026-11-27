@@ -217,3 +217,12 @@ assert.throws(()=>saiSpherePixelR1003(transfer1003.field,20736),/address/);
 await assert.rejects(()=>verifySaiSphereR1003({...transfer1003,canonicalMutation:true},read998,{digest:digest1003}),/read-only/);
 await assert.rejects(()=>verifySaiSphereR1003({...transfer1003,models:rows1003.map((m,i)=>i===0?{...m,sourceSha256:'f'.repeat(64)}:m)},read998,{digest:digest1003}),/digest mismatch/);
 console.log('R1003 PASS: independently replayed SAI to SPHERE read-only field projection.');
+
+const {packSaiSphereR1004,unpackSaiSphereR1004,replayPortableSaiSphereR1004}=await import('../src/saiSphereBridgeR1003.mjs');
+const portable1004=await packSaiSphereR1004(transfer1003,digest1003);
+assert.deepEqual(await unpackSaiSphereR1004(portable1004,{digest:digest1003}),transfer1003);
+assert.deepEqual(await replayPortableSaiSphereR1004(portable1004,read998,{digest:digest1003}),transfer1003.field);
+const altered1004=JSON.parse(portable1004);altered1004.body.field.result.values[0]+=.1;
+await assert.rejects(()=>unpackSaiSphereR1004(JSON.stringify(altered1004),{digest:digest1003}),/digest mismatch/);
+await assert.rejects(()=>unpackSaiSphereR1004('x'.repeat(2097153),{digest:digest1003}),/size/);
+console.log('R1004 PASS: bounded portable SAI–SPHERE transfer, digest refusal and independent replay.');
