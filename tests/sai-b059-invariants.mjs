@@ -171,3 +171,15 @@ assert.throws(()=>verifyFieldReceiptR1000(receipt1000,field999,changed1000),/rep
 assert.throws(()=>fieldReceiptR1000(field999,binds1000.slice(1)),/bindings/);
 assert.throws(()=>fieldReceiptR1000(Array(20736),binds1000),/dense/);
 console.log('R1000 PASS: full field receipt roundtrip, source/model binding and tamper rejection.');
+
+const {auditCorrelationR1001}=await import('../src/saiRelationalLearningR992.mjs');
+const audit1001=auditCorrelationR1001(receipt1000,read998);
+assert.equal(audit1001.full.before.count,20736);
+assert.deepEqual(Object.values(audit1001.partitions).map(p=>p.before.count),[12384,4032,4320]);
+assert.equal(audit1001.regions.length,144);
+assert.ok(audit1001.regions.every(r=>r.before.count===144&&r.after.count===144));
+for(const kind of ['train','validation','test'])assert.ok(Math.abs(audit1001.partitions[kind].before.mse-summary998.partitions[kind].mse)<1e-12);
+const identity1001=auditCorrelationR1001(fieldReceiptR1000(field999,binds1000,{weight:0}),read998);
+assert.deepEqual(identity1001.full.before,identity1001.full.after);
+assert.throws(()=>auditCorrelationR1001(tamper1000,read998),/replay mismatch/);
+console.log('R1001 PASS: full and partitioned correlation evaluation, identity and tamper refusal.');

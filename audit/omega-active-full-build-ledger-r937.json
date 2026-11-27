@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R998 whole local projected atlas regional training bank, using R995 optimizer with 144 regional models, 20736 address coverage, projected source digests, replayable bank, bounded pause/resume, offline inference; R997 10 workflows passed 1 pending when inspected",
+  "latestGovernedWork": "R1001 evaluates R1000 source/model-bound field exchange against disjoint projected-source partitions; R1000 and R999 each 11/11 exact-head CI passed. R1001 candidate CI pending.",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -613,6 +613,21 @@
     {
       "revision": "R998",
       "conservation": "One existing SAI learning architecture extended to 144 local regional specialists over embedded source-derived corpus, 24 epochs per region, 121 parameters per model, 86/28/30 train/validation/test partitions, explicit authorization, region boundary pause/resume, source-bound SHA checkpoint, full optimizer replay on restore and selected-address inference. Direct complete 144-region synthetic fixture trained and all 20736 predictions compared against evaluation, 17424 parameters, final regional replay. Real browser corpus path and exact CI pending; no empirical or independent foundation agent claim.",
+      "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
+    },
+    {
+      "revision": "R999",
+      "conservation": "Four-axis periodic prediction exchange, 82944 undirected edges, conservative bounded execution, existing SAI UI. Exact head d5ef628d883206d09e0b5e8b97d7f22ecedab4ed: 11/11 workflows passed.",
+      "accepted": "EXACT_HEAD_CI_ONLY"
+    },
+    {
+      "revision": "R1000",
+      "conservation": "Portable source/model-bound field receipt, replay and tamper refusal. Exact head e8d4b4bf1ce70429dbf1c421a83641ddfe0367ff: 11/11 workflows passed.",
+      "accepted": "EXACT_HEAD_CI_ONLY"
+    },
+    {
+      "revision": "R1001",
+      "conservation": "Full-field and partitioned before/after projected-source residual evaluation; no claim of improvement, empirical validity, or Canon mutation.",
       "accepted": "CANDIDATE_SOURCE_ONLY_CI_PENDING"
     }
   ],

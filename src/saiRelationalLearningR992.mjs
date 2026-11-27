@@ -375,3 +375,23 @@ export function verifyFieldReceiptR1000(packet,values,bindings){
  if(orderedCheckpointJSONR997(expected)!==orderedCheckpointJSONR997(packet))throw Error('Field receipt replay mismatch');
  return expected;
 }
+
+ // R1001: evaluate exchange against the same source targets and disjoint
+ // regional split membership. No fitting or selection on held-out results.
+export function auditCorrelationR1001(receipt,read){
+ if(!receipt||typeof read!=='function')throw Error('Field and source reader required');
+ const verified=verifyFieldReceiptR1000(receipt,receipt.input,receipt.bindings);
+ const stats=()=>({before:auditAccumulatorR994(),after:auditAccumulatorR994()});
+ const full=stats(),parts=Object.fromEntries(['train','validation','test'].map(k=>[k,stats()]));
+ const regions=[];
+ for(let region=0;region<144;region++){
+  const dataset=projectedRegionR998(read,region),split=splitDatasetR995(dataset,37),local=stats();
+  for(const kind of ['train','validation','test'])for(const row of split[kind]){
+   const a=row.address,before=verified.input[a]-row.target,after=verified.result.values[a]-row.target;
+   for(const group of [full,parts[kind],local]){auditAddR994(group.before,a,before);auditAddR994(group.after,a,after);}
+  }
+  regions.push({region,before:auditFinishR994(local.before),after:auditFinishR994(local.after)});
+ }
+ const finish=s=>({before:auditFinishR994(s.before),after:auditFinishR994(s.after)});
+ return {schema:'OMEGA_SAI_CORRELATION_AUDIT_R1001',full:finish(full),partitions:Object.fromEntries(Object.entries(parts).map(([k,s])=>[k,finish(s)])),regions,canonicalMutation:false,empirical:false};
+}
