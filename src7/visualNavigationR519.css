@@ -151,3 +151,31 @@
  .o7-app[data-r1019-shell] .o7-r519-nav-foot strong{color:#c7d1db}
 }
 @media(max-width:760px){.o7-app[data-r1019-shell] .o7-nav-r519{background:#15181e;border-color:#2b3039}.o7-app[data-r1019-shell] .o7-nav-r519 button.active{border-color:transparent;background:#252e35;box-shadow:none}.o7-app[data-r1019-shell] .o7-nav-r519 button.active .o7-r519-nav-icon{color:#91e0cf}}
+
+/* R1020: flatter domain navigation and source inventory, preserving the interactive visual field. */
+.o7-app[data-r1019-shell] .o7-intro-r519>h1{font:600 clamp(25px,3vw,38px)/1.15 system-ui,sans-serif;letter-spacing:-.045em;color:#f0f2f4}
+.o7-app[data-r1019-shell] .o7-intro-r519>p{font:500 10px/1.4 system-ui,sans-serif;color:#a3afbc}
+.o7-app[data-r1019-shell] .o7-r519-portal{border-radius:8px;box-shadow:none;border-color:#303944;background:#14191f}
+.o7-app[data-r1019-shell] .o7-r519-portal::before{display:none}
+.o7-app[data-r1019-shell] .o7-r519-heading h2,.o7-app[data-r1019-shell] .o7-r519-inspector h3{font:600 clamp(20px,2.4vw,30px)/1.2 system-ui,sans-serif;color:#e6ebf0}
+.o7-app[data-r1019-shell] .o7-r519-inspector{background:#191f26;border-radius:7px;box-shadow:none;border-color:#303944}
+.o7-app[data-r1019-shell] .o7-r519-launch{background:#91e0cf;color:#112522;border-radius:6px}
+.o7-app[data-r1019-shell] .o7-quick-menu{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid #303944;margin-top:8px}
+.o7-app[data-r1019-shell] .o7-quick-menu button{flex:1 1 145px;min-height:50px;padding:8px;border:0;border-right:1px solid #303944;border-radius:0;box-shadow:none;background:none}
+.o7-app[data-r1019-shell] .o7-quick-menu button:hover{background:#222a33;box-shadow:inset 0 -2px #91e0cf}
+.o7-app[data-r1019-shell] .o7-quick-menu button b{font:600 12px/1.3 system-ui,sans-serif;color:#e2e7ee}
+.o7-app[data-r1019-shell] .o7-capability-grid-r512{display:block}
+.o7-app[data-r1019-shell] .o7-capability-group-title{margin:15px 0 0;padding:8px 0;border-bottom:1px solid #3a424c;font:600 12px/1.3 system-ui,sans-serif;color:#b9c5d0}
+.o7-app[data-r1019-shell] .o7-capability-grid-r512>article{display:grid;grid-template-columns:minmax(0,1fr) minmax(170px,auto);gap:8px;padding:12px 5px;border:0;border-bottom:1px solid #303944;border-radius:0;background:none;box-shadow:none}
+.o7-app[data-r1019-shell] .o7-capability-grid-r512>article::before{display:none}
+.o7-app[data-r1019-shell] .o7-capability-grid-r512>article:hover{background:#1b222a}
+.o7-app[data-r1019-shell] .o7-capability-grid-r512>article b{font:600 14px/1.3 system-ui,sans-serif;color:#e6ebf0;letter-spacing:0}
+.o7-app[data-r1019-shell] .o7-capability-grid-r512>article p{font-size:11px;margin-top:4px}
+.o7-app[data-r1019-shell] .o7-capability-grid-r512>article footer{align-items:center}
+.o7-app[data-r1019-shell] .o7-capability-grid-r512>article footer button{min-height:40px;border:1px solid #414c57;border-radius:6px;background:#202831;color:#dce5eb;font:500 11px/1.3 system-ui,sans-serif}
+.o7-app[data-r1019-shell] .o7-capability-grid-r512>article details{grid-column:1/-1}
+.o7-app[data-r1019-shell] .o7-domain-recovered{border:0;border-top:1px solid #303944;border-radius:0;padding:14px 0;background:none}
+.o7-app[data-r1019-shell] .o7-domain-recovered>div{grid-template-columns:1fr;gap:0}
+.o7-app[data-r1019-shell] .o7-domain-recovered>div>button{min-height:44px;border:0;border-bottom:1px solid #303944;border-radius:0;background:none}
+.o7-app[data-r1019-shell] .o7-domain-recovered>div>button:hover{background:#222a33}
+@media(max-width:760px){.o7-app[data-r1019-shell] .o7-capability-grid-r512>article{grid-template-columns:1fr}.o7-app[data-r1019-shell] .o7-capability-grid-r512>article footer button{min-height:44px}.o7-app[data-r1019-shell] .o7-quick-menu button{flex-basis:46%}}

@@ -1,4 +1,7 @@
 import {chromium} from 'playwright';
+import {readFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {planMissionR121} from '../src/swarm/swarmCoreR121.js';
 const base=(process.env.OMEGA_E2E_URL||process.env.OMEGA_PUBLIC_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 const expectedSha=String(process.env.OMEGA_EXPECTED_SHA||'').trim();
 const useFixtures=process.env.OMEGA_R520_USE_FIXTURES==='1';
@@ -41,6 +44,10 @@ async function check(browser,label,viewport){
   const trigger=page.locator('button[data-r520-full-library="open"]');
   await trigger.waitFor({state:'visible',timeout:20000});
   await assertHeaderHitboxes(page,label+' initial');
+  const contextBar=page.locator('[data-r1020-workbench="UNIFIED_CONTEXT"]');
+  if(await contextBar.locator('[data-r538-workflow]').count()!==1||await contextBar.locator('[data-r536-journey]').count()!==1)throw new Error(label+': workspace continuity controls not conserved');
+  const contextStyle=await contextBar.locator('[data-r538-workflow]').evaluate(el=>getComputedStyle(el).borderRadius);
+  if(contextStyle!=='0px')throw new Error(label+': context controls regressed into cards');
   if(label==='mobile'){
    await page.setViewportSize({width:320,height:700});
    await assertHeaderHitboxes(page,label+' narrow 320px');
@@ -120,6 +127,76 @@ async function check(browser,label,viewport){
   console.log('R520 '+label+' COMPLETE FUNCTION LIBRARY PASS · 44 routes · 72 lineages · 100 historical records · source filters · archived donor disclosure · remembered-name search · real Atlas launch');
  }finally{await context.close()}
 }
+
+// R1021: exact deployed browser -> real zero-provider deterministic cell -> archive.
+// A single durable mission per promotion, then GET-only mobile recovery.
+async function liveSwarmR1021(browser){
+ if(!expectedSha||useFixtures)return;
+ let intent='',expectedCell;
+ for(let n=0;n<64;n++){
+  const candidate='R1021 release acceptance '+expectedSha+' '+n;
+  const cell=planMissionR121({intent:candidate,mode:'SOLO',requestedCells:1,providerBudget:0}).selected[0];
+  if(cell.profile.domainRole==='MATHEMATICS'||cell.profile.domainRole==='DATA'){intent=candidate;expectedCell=cell;break}
+ }
+ if(!expectedCell)throw Error('R1021 no deterministic acceptance cell selected');
+ let missionId='';
+ async function openConsole(context){
+  const page=await context.newPage();
+  await page.goto(base+'/?omega7=1&omega7route='+encodeURIComponent('SAI Lab')+'&r1021='+Date.now(),{waitUntil:'domcontentloaded',timeout:45000});
+  await page.locator('[data-r1017-cloud-swarm]').waitFor({state:'visible',timeout:35000});
+  await page.getByRole('button',{name:'Open cloud swarm console',exact:true}).click();
+  const consoleRoot=page.locator('.r121-swarm');
+  await consoleRoot.waitFor({state:'visible',timeout:25000});
+  return {page,consoleRoot};
+ }
+ const desktop=await browser.newContext({viewport:{width:1440,height:960},acceptDownloads:true});
+ try{
+  const {page,consoleRoot}=await openConsole(desktop);
+  const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+  await consoleRoot.getByLabel('Mission intent').fill(intent);
+  await consoleRoot.getByLabel('Execution mode').selectOption('SOLO');
+  const budget=consoleRoot.getByLabel('Maximum provider calls');
+  if(await budget.inputValue()!=='0')throw Error('R1021 provider opt-in default regressed');
+  const acceptedPromise=page.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname==='/api/swarm/missions',{timeout:30000});
+  await consoleRoot.getByRole('button',{name:'LAUNCH SWARM',exact:true}).click();
+  const acceptedResponse=await acceptedPromise;
+  if(!acceptedResponse.ok())throw Error('R1021 live mission admission HTTP '+acceptedResponse.status());
+  const accepted=await acceptedResponse.json();missionId=accepted?.mission?.id;
+  if(typeof missionId!=='string'||accepted.mission.total!==1||accepted.mission.providerBudget!==0||accepted.plan?.sampleCells?.[0]?.id!==expectedCell.id)throw Error('R1021 actual accepted mission diverges from deterministic plan');
+  await consoleRoot.locator('[data-r1021-mission-status="COMPLETE"]').waitFor({state:'visible',timeout:90000});
+  const status=await page.request.get(base+'/api/swarm/missions/'+encodeURIComponent(missionId));
+  const receipt=(await status.json()).mission;
+  if(!status.ok()||receipt?.id!==missionId||receipt.completed!==1||receipt.failed!==0||receipt.providerAttempts!==0||receipt.canonicalMutation!==false)throw Error('R1021 actual execution receipt invalid');
+  const history=consoleRoot.locator('[data-r1014-result-history]');
+  await history.getByRole('button',{name:'LOAD RESULT HISTORY',exact:true}).click();
+  const row=history.locator('.r121-recent button[data-ok="true"]');
+  await row.waitFor({state:'visible',timeout:20000});await row.click();
+  const inspector=consoleRoot.locator('[data-r1013-mission-cell]');
+  await inspector.locator('pre').waitFor({state:'visible',timeout:10000});
+  await inspector.getByRole('button',{name:'VERIFY PAYLOAD SHA-256',exact:true}).click();
+  await inspector.locator('[data-r1021-digest-feedback]').filter({hasText:'Payload bytes match reported SHA-256'}).waitFor({state:'visible',timeout:15000});
+  const downloadPromise=page.waitForEvent('download',{timeout:25000});
+  await history.getByRole('button',{name:'DOWNLOAD FULL ARCHIVE',exact:true}).click();
+  const download=await downloadPromise;
+  const file=await download.path();if(!file)throw Error('R1021 archive download missing');
+  const archive=JSON.parse(await readFile(file,'utf8'));
+  const result=archive.rows?.[0];
+  if(archive.missionId!==missionId||archive.snapshot?.completeArchiveOfAccountedReturns!==true||archive.rows?.length!==1||result?.cellId!==expectedCell.id||result.executor!=='DETERMINISTIC'||result.ok!==true||typeof result.resultJson!=='string'||createHash('sha256').update(result.resultJson).digest('hex')!==result.receiptSha)throw Error('R1021 downloaded real result failed identity/digest validation');
+  if(errors.length)throw Error('R1021 desktop browser errors '+errors.join(' | ').slice(0,1000));
+  console.log('R1021 LIVE DETERMINISTIC SAI PASS · '+expectedSha+' · '+missionId+' · '+result.cellId+' · '+result.receiptSha+' · actual archive bytes · provider calls 0 · no Canon admission');
+ }finally{await desktop.close()}
+ const mobile=await browser.newContext({viewport:{width:390,height:844}});
+ try{
+  const {page,consoleRoot}=await openConsole(mobile);
+  let writes=0;page.on('request',r=>{if(r.method()!=='GET'&&new URL(r.url()).pathname.startsWith('/api/swarm/missions'))writes++});
+  await consoleRoot.getByLabel('Existing mission ID').fill(missionId);
+  await consoleRoot.getByRole('button',{name:'RECOVER BY ID',exact:true}).click();
+  await consoleRoot.locator('[data-r1021-mission-status="COMPLETE"]').waitFor({state:'visible',timeout:25000});
+  const selected=await consoleRoot.locator('[data-r1021-mission-status]').getAttribute('data-r1021-mission-id');
+  if(selected!==missionId||writes!==0)throw Error('R1021 mobile recovery identity or no-redispatch proof failed');
+  console.log('R1021 MOBILE GET-ONLY RECOVERY PASS · '+expectedSha+' · '+missionId);
+ }finally{await mobile.close()}
+}
 if(expectedSha){
  if(!/^[0-9a-f]{40}$/i.test(expectedSha))throw new Error('R520 expected SHA must be full hexadecimal commit');
  const response=await fetch(base+'/omega-build-receipt.json?r520='+Date.now(),{headers:{'cache-control':'no-cache'}});
@@ -131,5 +208,6 @@ const browser=await chromium.launch({headless:true});
 try{
  await check(browser,'desktop',{width:1440,height:960});
  await check(browser,'mobile',{width:390,height:844});
+ await liveSwarmR1021(browser);
  console.log('R520 ALL FUNCTIONS BROWSER PASS · source inventories are not claims that all historical software executes');
 }finally{await browser.close()}

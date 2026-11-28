@@ -191,3 +191,8 @@ assert.match(sai1017,/lazy\(\(\)=>import\('\.\.\/\.\.\/src\/OmegaSwarmR121'\)\)/
 assert.match(sai1017,/swarmOpen&&<Suspense/);
 assert.match(sai1017,/<OmegaSwarmR121 record=\{record\} state=\{status\} address=\{address\} onAddress=\{commit\} onNavigate=\{onNavigate\}/);
 console.log('R1017 PASS: Home entry and existing native SAI route mount the actual R121 console on demand without automatic dispatch.');
+
+assert.match(directUi1013,/\[providerBudget,setProviderBudget\]=useState\(0\)/);
+assert.match(directUi1013,/data-r1021-digest-feedback/);
+assert.match(directUi1013,/data-r1021-mission-status/);
+console.log('R1021 PASS: explicit zero-provider default and in-context result verification controls.');

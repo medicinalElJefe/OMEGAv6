@@ -177,11 +177,10 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
   </aside>
 
   <main className='o7-main' data-native-route={state.selectedRoute&&isOmega7NativeRoute(state.selectedRoute)?state.selectedRoute:''}>
-   <WorkflowSurfaceR538 onNavigate={open}/>
-   <OmegaUserJourneyR536 route={state.selectedRoute} onOpen={open}/>
+   <div className='o7-r1020-context' data-r1020-workbench='UNIFIED_CONTEXT' aria-label='Workspace controls'><WorkflowSurfaceR538 onNavigate={open}/><OmegaUserJourneyR536 route={state.selectedRoute} onOpen={open}/></div>
    {state.selectedRoute&&isOmega7NativeRoute(state.selectedRoute)?
     <section className='o7-native-host' data-native-host-route={state.selectedRoute}>
-     <div className='o7-native-toolbar'><button onClick={backToDomain}>← Back to {DOMAIN_LABEL[state.domain]}</button><span>OMEGA7 native · OMEGAv6 engine preserved</span><a data-r778-native-link href={nativeWorkspaceHrefR778(state.selectedRoute,OMEGA7_NATIVE_ROUTES)} aria-label={'Direct link to '+state.selectedRoute+' workspace'} title='Bookmark or copy this link to reopen this exact instrument'>Direct instrument link</a></div>
+     <div className='o7-native-toolbar'><button onClick={backToDomain}>← {DOMAIN_LABEL[state.domain]}</button><span>{OMEGA7_CAPABILITIES.find(cap=>cap.legacyRoute===state.selectedRoute)?.label||state.selectedRoute}</span><a data-r778-native-link href={nativeWorkspaceHrefR778(state.selectedRoute,OMEGA7_NATIVE_ROUTES)} aria-label={'Direct link to '+state.selectedRoute+' workspace'} title='Bookmark or copy this link to reopen this exact instrument'>Direct instrument link</a></div>
      {activeRecovered&&activeRecovered.route===state.selectedRoute&&<aside className='o7-executor-capsule' data-r512-executor={activeRecovered.recoveredId} data-state={activeRecovered.state.toLowerCase()}>
       <div><span>Resolved historical software</span><b>{activeRecovered.recoveredName}</b><small>{activeRecovered.operation} → {activeRecovered.route}</small></div>
       <dl><div><dt>Executor</dt><dd>{activeRecovered.capabilityId}</dd></div><div><dt>Domain</dt><dd>{activeRecovered.executionDomain}</dd></div><div><dt>State</dt><dd>{activeRecovered.state.replaceAll('_',' ')}</dd></div><div><dt>Action</dt><dd>{(activeRecovered.launchKind||'EXECUTE').replaceAll('_',' ')}</dd></div><div><dt>Source</dt><dd>{(activeRecovered.sourceKind||'CAPABILITY_LINEAGE').replaceAll('_',' ')}</dd></div><div><dt>Proof</dt><dd>{activeRecovered.receiptAuthority} / {activeRecovered.admissionAuthority}</dd></div></dl>
@@ -214,7 +213,8 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
      </section>}
      {state.domain==='HOME'&&<R519VisualNavigation domain='HOME' onNavigate={open}/>}
 
-     {state.domain==='HOME'&&<Suspense fallback={<p role='status'>Loading live operational evidence…</p>}><OperationalTruthR495 depth={state.depth} onNavigate={open}/></Suspense>}\n     {state.domain==='HOME'&&<section className='o7-recovered' data-r486-visible-convergence='true'>
+     {state.domain==='HOME'&&<Suspense fallback={<p role='status'>Loading live operational evidence…</p>}><OperationalTruthR495 depth={state.depth} onNavigate={open}/></Suspense>}
+     {state.domain==='HOME'&&<section className='o7-recovered' data-r486-visible-convergence='true'>
       <header><div><span>Recovered capability fabric</span><h2>Your recovered work is connected to the product</h2><p>{R486_VISIBLE_SUMMARY.total} recovered capability lineages now resolve through their current OMEGA executors. Open the function you need; lineage, gate and authority stay attached underneath.</p></div><button onClick={()=>setRecoveredOpen(x=>!x)}>{recoveredOpen?'Hide recovered capabilities':'Browse recovered capabilities'}</button></header>
       <div className='o7-recovered-summary'><article><b>{R486_VISIBLE_SUMMARY.executesNow}</b><span>execute now</span></article><article><b>{R486_VISIBLE_SUMMARY.adapters}</b><span>active adapters</span></article><article><b>{R486_VISIBLE_SUMMARY.truthGated}</b><span>truth/device gated</span></article><article><b>{R486_VISIBLE_SUMMARY.routable}/{R486_VISIBLE_SUMMARY.total}</b><span>bound to current routes</span></article></div>
       {recoveredOpen&&<>

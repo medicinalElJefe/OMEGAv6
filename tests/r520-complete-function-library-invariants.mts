@@ -79,3 +79,8 @@ assert.ok(root.includes("data-r1019-shell='WORKSTATION'"));
 assert.ok(css.includes('grid-template-columns:218px minmax(0,1fr)'));
 assert.ok(browser.includes('flat native menu layout regressed'));
 console.log('R1019 PASS: flat workstation command surface, compact navigation and unchanged source inventories.');
+
+assert.ok(root.includes("data-r1020-workbench='UNIFIED_CONTEXT'"));
+assert.ok(root.includes('<WorkflowSurfaceR538 onNavigate={open}/><OmegaUserJourneyR536 route={state.selectedRoute} onOpen={open}/>'));
+assert.ok(shellCss.includes('.o7-r1020-context'));
+console.log('R1020 PASS: unified workspace context retains existing state/history controls and routes.');

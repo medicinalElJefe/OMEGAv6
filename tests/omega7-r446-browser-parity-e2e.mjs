@@ -21,12 +21,15 @@ async function mockBoundedApis(page){
 }
 
 async function openRoute(page,route,label){
- await page.locator('.o7-search-trigger').click();
- const input=page.locator('.o7-command input');
- await input.fill(route);
- const result=page.locator(`[data-command-route="${route}"]`);
+ // R1021: actuate the actual complete-function menu, not a parallel search result.
+ await page.locator('[data-r520-full-library="open"]').click();
+ const library=page.locator('.o7-r520-library');
+ await library.waitFor({state:'visible',timeout:15000});
+ await library.getByRole('textbox',{name:'Search all functions'}).fill(route);
+ const result=library.locator(`[data-r520-route="${route}"] button`);
  await result.waitFor({state:'visible',timeout:10000});
  await result.click();
+ await library.waitFor({state:'detached',timeout:10000});
  await page.waitForFunction(r=>document.querySelector('.o7-main')?.getAttribute('data-native-route')===r,route,{timeout:15000});
  await page.locator('.o7-native-host').waitFor({state:'visible',timeout:15000});
  await page.waitForFunction(()=>{
@@ -61,7 +64,7 @@ async function proveViewport(browser,label,viewport){
  await page.locator('.o7-status').waitFor({state:'visible'});
  await page.locator('.o7-status header button').click();
 
- for(const route of routes)await openRoute(page,route,label);
+ for(const route of routes){await openRoute(page,route,label);console.log('R1021 MENU DESTINATION PASS · '+label+' · '+route+' · fixture-backed navigation/render only')}
 
  const overflow=await page.evaluate(()=>Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-window.innerWidth);
  if(overflow>8)throw new Error(`${label}: horizontal overflow ${overflow}px`);
