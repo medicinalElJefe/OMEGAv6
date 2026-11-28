@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R1023: safe direct-mission admission schedules before publication, preserves earlier alarm, reports all active indexed missions; recovery validates before replacing selection, fences stale reads and cancels pending exports on unmount. Candidate only.",
+  "latestGovernedWork": "R1024: serialize shared cell executions, cap queued work, reject unknown executors and classify unavailable/failed specialist results as failures rather than completed receipts. Candidate only.",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -703,6 +703,11 @@
     {
       "revision": "R1023",
       "conservation": "Mission admission and recovery failure containment",
+      "accepted": "CANDIDATE_SOURCE_ONLY"
+    },
+    {
+      "revision": "R1024",
+      "conservation": "Shared R121 cell execution and failure accounting",
       "accepted": "CANDIDATE_SOURCE_ONLY"
     }
   ],
