@@ -49,3 +49,31 @@ budget1011.dispatch=async(m,cell)=>{const executor=budget1011.executor(cell,m);i
 const budgetResult1011=await budget1011.process(mission1011.id);
 assert.equal(modelCalls1011,1);assert.equal(synthesis1011,0);assert.equal(budgetResult1011.providerAttempts,1);
 console.log('R1011 PASS: active mission index conservation, bounded concurrent admission, terminal record retention and durable provider budget.');
+
+const {resultDigestR1012,verifyDeterministicReturnR1012}=await import('../src/sphereResultBytesR1012.mjs');
+const {OmegaSwarmCell}=await import('../src/swarm/swarmCellR121.js');
+const cellStore1012=storage1010();
+const cellRuntime1012=new OmegaSwarmCell({storage:cellStore1012},{});
+let corrupt1012=false;
+const runtime1012=new OmegaSwarmCoordinator({storage:storage1010()},{OMEGA_SWARM_CELL:{idFromName:id=>id,get:()=>({async fetch(req){
+ const original=await cellRuntime1012.fetch(req);
+ if(!corrupt1012)return original;
+ const data=await original.json();data.result.summary='altered after receipt';return new Response(JSON.stringify(data),{status:200});
+}})}});
+const mission1012=initial1010('real-deterministic');
+mission1012.pending=mission1012.pending.filter(cell=>!(cell.profile.domainRole==='PHYSICS'&&cell.profile.phaseRole==='EXECUTE')&&!(cell.profile.domainRole==='ORCHESTRATION'&&cell.profile.phaseRole==='FRAME')).slice(0,1);
+assert.equal(mission1012.pending.length,1);mission1012.total=1;
+await runtime1012.save(mission1012);
+const real1012=await runtime1012.process(mission1012.id);
+assert.equal(real1012.completed,1);
+assert.ok(real1012.recent[0].resultJson);
+assert.equal(await verifyDeterministicReturnR1012(real1012.recent[0]),true);
+assert.equal(await resultDigestR1012(real1012.recent[0].resultJson),real1012.recent[0].receiptSha);
+corrupt1012=true;
+const corruptMission1012={...mission1012,id:'altered-payload'};
+await runtime1012.save(corruptMission1012);
+const rejected1012=await runtime1012.process(corruptMission1012.id);
+assert.equal(rejected1012.completed,0);assert.equal(rejected1012.failed,1);
+assert.match(rejected1012.recent[0].summary,/DIGEST_MISMATCH/);
+assert.equal(rejected1012.recent[0].resultJson,undefined);
+console.log('R1012 PASS: actual cell executor receipt round trip, bounded deterministic payload and digest mismatch rejection.');

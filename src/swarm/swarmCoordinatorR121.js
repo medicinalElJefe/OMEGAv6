@@ -1,4 +1,5 @@
 import {SWARM_CELL_COUNT,SWARM_LANE_COUNT,compactPlanR121,planMissionR121} from './swarmCoreR121.js';
+import {resultDigestR1012,MAX_RESULT_JSON_R1012} from '../sphereResultBytesR1012.mjs';
 import {SWARM_MODEL_R121} from './swarmCellR121.js';
 
 const ACTIVE_R1011=new Set(['QUEUED','RUNNING']);
@@ -34,7 +35,15 @@ export class OmegaSwarmCoordinator{
   return run;
  }
  executor(cell,mission){if(cell.profile.domainRole==='PHYSICS'&&cell.profile.phaseRole==='EXECUTE')return'OPTICAL_CHAIN';if(cell.profile.domainRole==='ORCHESTRATION'&&cell.profile.phaseRole==='FRAME')return'GENESIS';if(cell.providerEligible&&mission.providerBudget>0&&(!Array.isArray(mission.providerReservedCells)||mission.providerReservedCells.includes(cell.id)))return'WORKERS_AI';return'DETERMINISTIC'}
- async dispatch(mission,cell){const id=this.env.OMEGA_SWARM_CELL.idFromName(cell.id),stub=this.env.OMEGA_SWARM_CELL.get(id),executor=this.executor(cell,mission),task={schema:'OMEGA_SWARM_TASK_R121',missionId:mission.id,taskId:`${mission.id}:${cell.order}`,cellId:cell.id,index:cell.index,lane:cell.lane,intent:mission.intent,mode:mission.mode,executor,lineage:[`omega-v6:swarm:${mission.id}`,`organ:${cell.profile.domainRole}`,`branch:${cell.profile.phaseRole}`,`cell:${cell.id}`]};const r=await stub.fetch(new Request('https://swarm-cell.internal/task',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(task)}));return{cell,executor,ok:r.ok,status:r.status,data:await r.json().catch(()=>null)}}
+ async dispatch(mission,cell){const id=this.env.OMEGA_SWARM_CELL.idFromName(cell.id),stub=this.env.OMEGA_SWARM_CELL.get(id),executor=this.executor(cell,mission),task={schema:'OMEGA_SWARM_TASK_R121',missionId:mission.id,taskId:`${mission.id}:${cell.order}`,cellId:cell.id,index:cell.index,lane:cell.lane,intent:mission.intent,mode:mission.mode,executor,lineage:[`omega-v6:swarm:${mission.id}`,`organ:${cell.profile.domainRole}`,`branch:${cell.profile.phaseRole}`,`cell:${cell.id}`]};const r=await stub.fetch(new Request('https://swarm-cell.internal/task',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(task)}));const data=await r.json().catch(()=>null);
+ if(!r.ok)return{cell,executor,ok:false,status:r.status,data};
+ const reject=(error,status=502)=>({cell,executor,ok:false,status,data:{error}});
+ const receipt=data?.receipt,result=data?.result;
+ if(data?.ok!==true||!receipt||receipt.schema!=='OMEGA_SWARM_CELL_RECEIPT_R121'||receipt.taskId!==task.taskId||receipt.missionId!==mission.id||receipt.cellId!==cell.id||receipt.index!==cell.index||receipt.lane!==cell.lane||receipt.executor!==executor||receipt.canonicalMutation!==false||!result||typeof result.kind!=='string'||typeof receipt.resultSha256!=='string'||!/^[a-f0-9]{64}$/.test(receipt.resultSha256))return reject('R1012_CELL_RECEIPT_IDENTITY_INVALID');
+ const bytes=JSON.stringify(result);
+ if(await resultDigestR1012(bytes)!==receipt.resultSha256)return reject('R1012_CELL_RESULT_DIGEST_MISMATCH');
+ if(['PROVIDER_GATED','SERVICE_GATED','OPTICAL_CHAIN_FAILED'].includes(result.kind)||result.ok===false)return reject('R1012_EXECUTOR_UNAVAILABLE_OR_FAILED: '+clip(result.summary||result.kind,900),424);
+ return{cell,executor,ok:true,status:r.status,data,...(mission.total<=12&&executor==='DETERMINISTIC'&&result.kind==='DETERMINISTIC_CELL_ANALYSIS'&&bytes.length<=MAX_RESULT_JSON_R1012?{resultJson:bytes}:{})}}
  // R1010: persist a batch before any external execution. An interrupted batch
  // is recorded as uncertain, never automatically repeated (provider side effects).
  async process(id){
@@ -47,7 +56,7 @@ export class OmegaSwarmCoordinator{
   m.completed+=x.ok?1:0;m.failed+=x.ok?0:1;
   m.organProcessed[x.cell.address.domain]=(m.organProcessed[x.cell.address.domain]||0)+1;
   const result=x.data?.result,summary=clip(result?.summary||result?.truthBoundary||x.data?.error||x.data?.code,1200);
-  m.recent.unshift({cellId:x.cell.id,index:x.cell.index,organ:x.cell.profile.domainRole,phase:x.cell.profile.phaseRole,executor:x.executor,ok:x.ok,status:x.status,summary,receiptSha:x.data?.receipt?.resultSha256||null});
+  m.recent.unshift({cellId:x.cell.id,index:x.cell.index,organ:x.cell.profile.domainRole,phase:x.cell.profile.phaseRole,executor:x.executor,ok:x.ok,status:x.status,summary,receiptSha:x.data?.receipt?.resultSha256||null,...(typeof x.resultJson==='string'?{resultJson:x.resultJson}:{})});
   m.recent=m.recent.slice(0,36);
   if(x.executor==='WORKERS_AI'&&x.ok&&summary)m.providerOutputs.push({cellId:x.cell.id,role:x.cell.profile.domainRole,summary});
   m.providerOutputs=m.providerOutputs.slice(0,12);

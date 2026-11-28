@@ -20,7 +20,7 @@ assert.equal(shouldWatchMissionR894(result.single),true);
 assert.equal(shouldWatchMissionR894(result.collective),true);
 for(const s of ['COMPLETE','FAILED','CANCELLED','TIMED_OUT','PAUSED'])assert.equal(shouldWatchMissionR894({...result.single,status:s}),false);
 assert.throws(()=>restoreMissionJournalR894('not-json'),/Malformed/);
-assert.throws(()=>restoreMissionJournalR894('x'.repeat(131073)),/oversized/);
+assert.throws(()=>restoreMissionJournalR894('x'.repeat(262145)),/oversized/);
 assert.throws(()=>serializeMissionJournalR894({...single,originAgent:-1},null),/Untrusted/);
 assert.throws(()=>serializeMissionJournalR894({...single,originOuter:18},null),/Untrusted/);
 assert.throws(()=>serializeMissionJournalR894({...single,missionId:'../bad'},null),/Untrusted/);
@@ -144,3 +144,15 @@ console.log('R1009 PASS: accepted coordinator plan identities, lanes, restored c
 
 // R1010 must run in the active convergence suite, not only the historical R121 suite.
 await import('./r1010-swarm-durable-recovery-invariants.mjs');
+
+const {resultDigestR1012,verifyDeterministicReturnR1012}=await import('../src/sphereResultBytesR1012.mjs');
+const payload1012=JSON.stringify({kind:'DETERMINISTIC_CELL_ANALYSIS',summary:'actual bounded result',metrics:{wordCount:4}});
+const row1012={...row1008(17),resultJson:payload1012,receiptSha:await resultDigestR1012(payload1012)};
+const status1012=validateSwarmStatusR889(response1008(boundSingle1006,[row1012],1),boundSingle1006);
+const restored1012=restoreMissionJournalR894(serializeMissionJournalR894(status1012,null)).single;
+assert.equal(await verifyDeterministicReturnR1012(restored1012.cellReturns.rows[0]),true);
+assert.equal(await verifyDeterministicReturnR1012({...row1012,receiptSha:'b'.repeat(64)}),false);
+assert.equal(JSON.parse(exportMissionReturnR1007(restored1012)).receipt.cellReturns.rows[0].resultJson,payload1012);
+assert.throws(()=>validateSwarmStatusR889(response1008(boundSingle1006,[{...row1012,resultJson:'invalid'}],1),boundSingle1006),/Untrusted/);
+assert.match(ui,/Verify returned payload SHA-256/);
+console.log('R1012 browser contract PASS: payload survives journal and export; byte consistency is explicitly checkable.');

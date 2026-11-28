@@ -1,5 +1,6 @@
 // R1008: retain R121 coordinator-reported cell receipts, NOT SPHERE agent outputs.
 import {parseCellId,capabilityProfile} from './swarm/swarmCoreR121.js';
+import {validateDeterministicPayloadR1012} from './sphereResultBytesR1012.mjs';
 const AUTHORITY='COORDINATOR_REPORTED_CELL_PREVIEW_NOT_INDEPENDENTLY_VERIFIED';
 const SHA=/^[a-f0-9]{64}$/;
 const EXECUTORS=new Set(['DETERMINISTIC','WORKERS_AI','GENESIS','OPTICAL_CHAIN','UNKNOWN']);
@@ -12,7 +13,12 @@ export function validateCellReturnsR1008(envelope,missionId,maxCells){
   const p=capabilityProfile(address);
   if(row.organ!==p.domainRole||row.phase!==p.phaseRole)throw Error('Untrusted cell return address roles');
   seen.add(row.cellId);
-  return Object.freeze({cellId:row.cellId,index:row.index,organ:row.organ,phase:row.phase,executor:row.executor,ok:row.ok,status:row.status,summary:row.summary,receiptSha:row.receiptSha});
+  const extra={};
+  if(row.resultJson!==undefined){
+   if(row.executor!=='DETERMINISTIC'||!row.ok||row.receiptSha===null)throw Error('Untrusted result payload authority');
+   extra.resultJson=validateDeterministicPayloadR1012(row.resultJson);
+  }
+  return Object.freeze({cellId:row.cellId,index:row.index,organ:row.organ,phase:row.phase,executor:row.executor,ok:row.ok,status:row.status,summary:row.summary,receiptSha:row.receiptSha,...extra});
  });
  return Object.freeze({schema:'OMEGA_R121_CELL_RETURNS_R1008',missionId,authority:AUTHORITY,canonicalMutation:false,rows:Object.freeze(rows)});
 }

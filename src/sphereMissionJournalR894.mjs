@@ -6,7 +6,7 @@ import {R890_SCHEMA} from './sphereCollectiveR890.mjs';
 import {validatePlannedReturnsR1009} from './sphereCellReturnsR1008.mjs';
 export const R894_SCHEMA='OMEGA_SPHERE_MISSION_JOURNAL_R894';
 export const R894_STORAGE_KEY='omega.r894.sphere.missions.v1';
-const MAX_JOURNAL=131072,ID=/^[A-Za-z0-9_.:-]{1,128}$/;
+const MAX_JOURNAL=262144,ID=/^[A-Za-z0-9_.:-]{1,128}$/;
 const STATUS=new Set(['RECEIVED','QUEUED','RUNNING','COMPLETE','PAUSED','CANCELLED','FAILED','TIMED_OUT','NOT_REPORTED']);
 function statusOf(x){if(typeof x!=='string'||!STATUS.has(x))throw new Error('Untrusted cloud mission status');return x}
 const index=(x,max)=>Number.isSafeInteger(x)&&x>=0&&x<max;
