@@ -172,3 +172,31 @@ assert.equal((await submit1023()).status,202);assert.equal(admissionStore1023.al
 const allStatus1023=await (await queue1011.fetch(new Request('https://root.internal/status'))).json();
 assert.equal(allStatus1023.active,48);assert.equal(allStatus1023.missions.length,12);
 console.log('R1023 PASS: no durable orphan on scheduler refusal, earlier wakeup retained, full active count beyond recent preview.');
+
+const serialStore1024=storage1010();
+let entered1024=0,release1024;
+const hold1024=new Promise(resolve=>{release1024=resolve});
+const serialCell1024=new OmegaSwarmCell({storage:serialStore1024},{AI:{async run(){entered1024++;if(entered1024===1)await hold1024;return {response:'bounded model output'}}}});
+const cellTask1024=(id,executor='WORKERS_AI')=>new Request('https://cell.internal/task',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({taskId:id,missionId:'serial-test',cellId:'omega-cell-07-07-01',index:936,lane:11232,intent:'test serialized task',executor})});
+const first1024=serialCell1024.fetch(cellTask1024('first'));
+const second1024=serialCell1024.fetch(cellTask1024('second'));
+for(let spin=0;entered1024===0&&spin<100;spin++)await new Promise(resolve=>setTimeout(resolve,1));
+assert.equal(entered1024,1);
+assert.equal((await (await serialCell1024.fetch(new Request('https://cell.internal/state'))).json()).cell.status,'WORKING');
+release1024();
+const both1024=await Promise.all([first1024,second1024]);
+assert.ok(both1024.every(r=>r.ok));assert.equal(entered1024,2);
+assert.equal((await serialStore1024.get('cell')).completedTasks,2);
+const gatedStore1024=storage1010(),gatedCell1024=new OmegaSwarmCell({storage:gatedStore1024},{});
+for(const executor of ['WORKERS_AI','GENESIS','OPTICAL_CHAIN']){
+ const response=await gatedCell1024.fetch(cellTask1024('missing-'+executor,executor));assert.equal(response.status,424);
+ const body=await response.json();assert.equal(body.ok,false);assert.equal(body.receipt,undefined);
+}
+const gatedState1024=await gatedStore1024.get('cell');
+assert.equal(gatedState1024.completedTasks,0);assert.equal(gatedState1024.failedTasks,3);
+assert.ok(gatedState1024.scar>0);
+assert.equal((await gatedCell1024.fetch(cellTask1024('bad','TYPO'))).status,400);
+assert.equal((await gatedCell1024.fetch(cellTask1024('valid','DETERMINISTIC'))).status,200);
+assert.equal((await gatedStore1024.get('cell')).completedTasks,1);
+assert.equal((await gatedStore1024.get('cell')).failedTasks,3);
+console.log('R1024 PASS: shared cell serialization, live working-state reads, conserved concurrent counters, specialist refusal and subsequent deterministic recovery.');

@@ -342,3 +342,35 @@ export function dodecaShellObjR988(){
  }
  return lines.join('\n')+'\n';
 }
+
+// R1025: discover existing local project keys without reading or rewriting scene bytes.
+// The actual project remains subject to R977 validation when opened.
+export const STUDIO_PROJECT_PREFIX_R1025='omega.r881.project.';
+export function listStudioProjectsR1025(storage){
+ const names=new Set();
+ for(let i=0;i<storage.length;i++){
+  const key=storage.key(i);
+  if(typeof key!=='string'||!key.startsWith(STUDIO_PROJECT_PREFIX_R1025))continue;
+  const name=key.slice(STUDIO_PROJECT_PREFIX_R1025.length);
+  if(name.trim()&&name.length<=256)names.add(name);
+ }
+ return [...names].sort((a,b)=>a.localeCompare(b));
+}
+export const STUDIO_ASSET_MAX_BYTES_R1025=64*1024*1024;
+export async function readStudioAssetsR1025(files,currentCount){
+ if(!Number.isSafeInteger(currentCount)||currentCount<0||!Array.isArray(files)||currentCount+files.length>1024)throw Error('Project asset inventory limit: 1,024 references');
+ let total=0;
+ for(const f of files){
+  if(!f||typeof f.name!=='string'||f.name.length>1024||!Number.isSafeInteger(f.size)||f.size<0||typeof f.arrayBuffer!=='function')throw Error('Invalid local asset');
+  total+=f.size;
+  if(total>STUDIO_ASSET_MAX_BYTES_R1025)throw Error('Asset selection exceeds 64 MiB; attach smaller batches');
+ }
+ const rows=[];
+ for(const f of files){
+  const bytes=new Uint8Array(await f.arrayBuffer());
+  if(bytes.byteLength!==f.size)throw Error('Asset byte length changed during read');
+  const receipt=await byteReceiptR881(bytes,{source:'USER_SELECTED_FILE',proofTier:'OBS'});
+  rows.push({name:f.name,sha256:receipt.sha256,byteSize:receipt.byteSize,proofTier:'OBS',source:'USER_SELECTED_FILE'});
+ }
+ return rows;
+}

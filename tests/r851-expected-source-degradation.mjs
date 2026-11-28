@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {classifyR313RateLimitR851} from '../src/system/r313ExpectedSourceDegradationR851.js';
+import {classifyR313RateLimitR851,matchOptionalConsoleFailureR1030} from '../src/system/r313ExpectedSourceDegradationR851.js';
 const origin='http://127.0.0.1:4173';
 const classify=(url,resourceType='image',method='GET',status=429)=>classifyR313RateLimitR851({url,resourceType,method,status},origin);
 test('only enumerated rate-limited Earth observation resources can degrade R313',()=>{
@@ -39,4 +39,19 @@ test('first-party failures, mutation requests, untrusted external hosts and othe
  assert.equal(classify(origin+'/api/earth/noaa/image?coverage=G19-FD','image','POST'),'BLOCKING');
  assert.equal(classify(origin+'/api/earth/noaa/image?coverage=G19-FD','image','GET',500),'BLOCKING');
  assert.equal(classify('https://tile.openstreetmap.org/6/10/20.png','image','GET',404),'BLOCKING');
+});
+
+test('R1030 exact external 503 degrades optional observations, not first-party services',()=>{
+ assert.equal(classify(gridUrl,'fetch','GET',503),'OPEN_METEO_GLOBAL_GRID_DEGRADED');
+ assert.equal(classify('https://tile.openstreetmap.org/6/10/20.png','image','GET',503),'OSM_BASEMAP_TILE_DEGRADED');
+ assert.equal(classify('https://api.rainviewer.com/public/weather-maps.json','fetch','GET',503),'RAINVIEWER_CATALOG_DEGRADED');
+ for(const url of [origin+'/api/status',origin+'/api/earth/noaa/image?coverage=G19-FD',origin+'/assets/main.js','https://example.com/image.png',gridUrl+'&extra=1'])assert.equal(classify(url,url===gridUrl+'&extra=1'?'fetch':'image','GET',503),'BLOCKING',url);
+ const response={status:503,url:new URL(gridUrl).href,method:'GET',resourceType:'fetch'};
+ const rows=[response];
+ const msg={text:'Failed to load resource: the server responded with a status of 503 (Service Unavailable)',url:response.url};
+ assert.equal(matchOptionalConsoleFailureR1030({...msg,url:''},rows,origin),false);
+ assert.equal(matchOptionalConsoleFailureR1030({...msg,url:origin+'/api/status'},rows,origin),false);
+ assert.equal(matchOptionalConsoleFailureR1030({...msg,text:msg.text.replace('503','429')},rows,origin),false);
+ assert.equal(matchOptionalConsoleFailureR1030(msg,rows,origin),true);
+ assert.equal(matchOptionalConsoleFailureR1030(msg,rows,origin),false);
 });

@@ -3,9 +3,12 @@
  * and other resource failures remain blocking. Never fabricates success.
  */
 export function classifyR313RateLimitR851({status,url,method,resourceType},previewOrigin){
- if(status!==429||method!=='GET')return 'BLOCKING';
+ if(![429,503].includes(status)||method!=='GET')return 'BLOCKING';
  let target,preview;
  try{target=new URL(url);preview=new URL(previewOrigin)}catch{return 'BLOCKING'}
+ // R1030: HTTP 503 is admissible only for the exact third-party optional sources.
+ // Never downgrade first-party service unavailability to a successful interaction.
+ if(status===503&&target.origin===preview.origin)return 'BLOCKING';
  if(target.origin===preview.origin&&resourceType==='image'&&target.pathname==='/api/earth/noaa/image'&&target.searchParams.has('coverage')&&target.searchParams.get('coverage')!==''&&[...target.searchParams.keys()].every(k=>k==='coverage'))return 'NOAA_SOURCE_IMAGE_DEGRADED';
  if(target.protocol==='https:'&&target.origin==='https://tile.openstreetmap.org'&&resourceType==='image'&&!target.search&&/^\/\d+\/\d+\/\d+\.png$/.test(target.pathname))return 'OSM_BASEMAP_TILE_DEGRADED';
  if(target.protocol==='https:'&&!target.port&&!target.username&&!target.password&&(target.hostname==='rainviewer.com'||target.hostname.endsWith('.rainviewer.com'))&&resourceType==='image'&&!target.search&&/^\/v2\/radar\/\d+\/256\/\d+\/\d+\/\d+\/2\/1_1\.png$/.test(target.pathname))return 'RAINVIEWER_RADAR_TILE_DEGRADED';
@@ -26,4 +29,16 @@ export function classifyR313RateLimitR851({status,url,method,resourceType},previ
  }
  if(target.origin==='https://api.rainviewer.com'&&resourceType==='fetch'&&target.pathname==='/public/weather-maps.json'&&!target.search)return 'RAINVIEWER_CATALOG_DEGRADED';
  return 'BLOCKING';
+}
+
+// Match a console failure to a particular observed HTTP response. An unknown
+// URL, wrong status, or unrelated first-party outage cannot borrow a receipt.
+export function matchOptionalConsoleFailureR1030(entry,responses,previewOrigin){
+ const match=String(entry?.text||'').match(/^Failed to load resource: the server responded with a status of (429|503)\s*(?:\([^)]*\))?$/i);
+ if(!match||!entry.url)return false;
+ const status=Number(match[1]);
+ let target;try{target=new URL(entry.url).href}catch{return false}
+ const index=responses.findIndex(r=>!r.matched&&r.status===status&&r.url===target&&classifyR313RateLimitR851(r,previewOrigin)!=='BLOCKING');
+ if(index<0)return false;
+ responses[index].matched=true;return true;
 }
