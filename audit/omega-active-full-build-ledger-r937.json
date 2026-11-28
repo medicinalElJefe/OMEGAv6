@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R1020: unify existing workspace state/history controls in compact toolbar, remove sticky toolbar overlap and flatten domain tool menus while preserving R71 visual workbench and all navigation bindings; candidate only.",
+  "latestGovernedWork": "R1021: route parity actuates actual full function menu for all 44 destinations; exact promoted-SHA R520 production test adds actual zero-provider deterministic SAI execution, archive download verification and mobile read-only recovery. Default provider budget zero; result verification displayed at inspection point. Candidate only.",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -688,6 +688,11 @@
     {
       "revision": "R1020",
       "conservation": "Compact shared workspace chrome and flat domain instrument inventory",
+      "accepted": "CANDIDATE_SOURCE_ONLY"
+    },
+    {
+      "revision": "R1021",
+      "conservation": "Actual menu destination coverage and deployed SAI input/output browser acceptance",
       "accepted": "CANDIDATE_SOURCE_ONLY"
     }
   ],
