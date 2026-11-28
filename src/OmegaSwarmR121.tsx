@@ -16,11 +16,11 @@ const cid=(i:number)=>{const d=Math.floor(i/144),rem=i%144,p=Math.floor(rem/12),
 export default function OmegaSwarmR121({record,address,onAddress,onNavigate}:Props){
  const[manifest,setManifest]=useState<any>(null),[status,setStatus]=useState<any>(null),[mission,setMission]=useState<any>(null),[plan,setPlan]=useState<any>(null),[mode,setMode]=useState<SwarmMode>('TREE'),[cells,setCells]=useState(144),[providerBudget,setProviderBudget]=useState(0),[intent,setIntent]=useState('Partition the current OMEGA goal across the sovereign swarm, preserve continuity and scar carry, then return a proof-bounded synthesis without inventing external evidence.'),[busy,setBusy]=useState(false),[message,setMessage]=useState(''),[selectedCell,setSelectedCell]=useState<any>(null),[showAll,setShowAll]=useState(true);
  const [recoverId,setRecoverId]=useState(()=>{try{return window.localStorage.getItem(R1013_MISSION_KEY)||''}catch{return ''}}),[historicalCell,setHistoricalCell]=useState<any>(null),[digestFeedback,setDigestFeedback]=useState<{row:any;message:string}|null>(null);
- const selectedMission=useRef(''),generation=useRef(0),pendingLoad=useRef(false),archiveRequest=useRef(0),exportRequest=useRef(0);
+ const selectedMission=useRef(''),generation=useRef(0),pendingLoad=useRef(false),archiveRequest=useRef(0),exportRequest=useRef(0),recoveryRequest=useRef(0);
  const [resultPage,setResultPage]=useState<any>(null),[archiveBusy,setArchiveBusy]=useState(false),[exportBusy,setExportBusy]=useState(false),[exportProgress,setExportProgress]=useState('');
  const active=mission&&['QUEUED','RUNNING'].includes(mission.status);
  const selectMission=(id:string)=>{
-  selectedMission.current=missionIdR1013(id);generation.current++;
+  selectedMission.current=missionIdR1013(id);generation.current++;recoveryRequest.current++;
   setRecoverId(id);setHistoricalCell(null);setPlan(null);setMission(null);archiveRequest.current++;setResultPage(null);setArchiveBusy(false);exportRequest.current++;setExportBusy(false);setExportProgress('');
   try{window.localStorage.setItem(R1013_MISSION_KEY,id)}catch{setMessage('Browser persistence unavailable; save the mission ID manually.')}
   return generation.current;
@@ -31,8 +31,17 @@ export default function OmegaSwarmR121({record,address,onAddress,onNavigate}:Pro
   if(token===generation.current&&selectedMission.current===id)setMission((current:any)=>reconcileMissionR1013(current,next));
  };
  const recover=async(id:string)=>{
-  try{const token=selectMission(id.trim());await fetchMission(id.trim(),token)}
-  catch(e:any){setMessage('Mission recovery refused: '+(e?.message||String(e)))}
+  const seq=++recoveryRequest.current,token=generation.current;
+  const isCurrent=()=>seq===recoveryRequest.current&&token===generation.current;
+  try{
+   const candidate=missionIdR1013(id.trim());
+   const response=await api.get<any>(missionPathR1013(candidate));
+   const verified=validateMissionR1013(response.data?.mission,candidate);
+   if(!isCurrent())return;
+   if(selectedMission.current===candidate){setMission((current:any)=>reconcileMissionR1013(current,verified));setRecoverId(candidate)}
+   else{selectMission(candidate);setMission(verified)}
+   setMessage('Recovered mission '+candidate+' without repeating execution.');
+  }catch(e:any){if(isCurrent())setMessage('Mission recovery refused; previous selection retained: '+(e?.message||String(e)))}
  };
  const load=async()=>{
   if(pendingLoad.current)return;
@@ -42,11 +51,11 @@ export default function OmegaSwarmR121({record,address,onAddress,onNavigate}:Pro
   catch(e:any){if(token===generation.current)setMessage(e?.message||String(e))}
   finally{pendingLoad.current=false}
  };
- useEffect(()=>{if(recoverId)void recover(recoverId);void load()},[]);
+ useEffect(()=>{if(recoverId)void recover(recoverId);void load();return()=>{generation.current++;recoveryRequest.current++;archiveRequest.current++;exportRequest.current++}},[]);
  // Poll only active work. Terminal synthesis may remain unconfirmed; refresh manually.
  useEffect(()=>{if(!active)return;const id=window.setInterval(()=>void load(),1800);return()=>window.clearInterval(id)},[active,mission?.id]);
  useEffect(()=>{setCells(DEFAULT_COUNTS[mode])},[mode]);
- const launch=async()=>{if(!intent.trim()||busy)return;setBusy(true);setMessage('');const before=generation.current;try{const r=await api.post<any>('/api/swarm/missions',{intent,mode,requestedCells:mode==='FULL'?1728:cells,providerBudget});const accepted=validateMissionR1013(r.data?.mission,r.data?.mission?.id);if(before!==generation.current){setMessage('New mission accepted: '+accepted.id+'; current selection preserved.');return}selectMission(accepted.id);setMission(accepted);setPlan(r.data?.plan||null);setMessage('Mission '+accepted.id+' entered the execution fabric. CanonState remains unchanged.')}catch(e:any){setMessage(e?.message||String(e))}finally{setBusy(false)}};
+ const launch=async()=>{if(!intent.trim()||busy)return;setBusy(true);setMessage('');const before=generation.current;recoveryRequest.current++;try{const r=await api.post<any>('/api/swarm/missions',{intent,mode,requestedCells:mode==='FULL'?1728:cells,providerBudget});const accepted=validateMissionR1013(r.data?.mission,r.data?.mission?.id);if(before!==generation.current){setMessage('New mission accepted: '+accepted.id+'; current selection preserved.');return}selectMission(accepted.id);setMission(accepted);setPlan(r.data?.plan||null);setMessage('Mission '+accepted.id+' entered the execution fabric. CanonState remains unchanged.')}catch(e:any){setMessage(e?.message||String(e))}finally{setBusy(false)}};
  const tick=async()=>{if(!mission?.id||busy)return;const id=mission.id,token=generation.current;setBusy(true);try{const r=await api.post<any>(missionPathR1013(id)+'/tick',{});const next=validateMissionR1013(r.data?.mission,id);if(token===generation.current&&selectedMission.current===id)setMission((current:any)=>reconcileMissionR1013(current,next))}catch(e:any){setMessage(e?.message||String(e))}finally{setBusy(false)}};
  const downloadMission=()=>{try{const url=URL.createObjectURL(new Blob([exportMissionR1013(mission)],{type:'application/json'}));try{const a=document.createElement('a');a.href=url;a.download='omega-r121-'+mission.id+'.json';a.click()}finally{setTimeout(()=>URL.revokeObjectURL(url),1000)}}catch(e:any){setMessage(e?.message||String(e))}};
  const loadResultPage=async(offset?:number)=>{
