@@ -175,3 +175,6 @@ assert.match(directUi1013,/generation.current/);
 assert.match(directUi1013,/DOWNLOAD MISSION JSON/);
 assert.ok(!directUi1013.slice(directUi1013.indexOf(' const recover=async'),directUi1013.indexOf(' const launch=async')).includes('api.post'));
 console.log('R1013 PASS: direct mission identity, monotonic recovery, historical cell inspection and GET-only restore contract.');
+
+assert.match(directUi1013,/data-r1014-result-history='PAGINATED_GET_ONLY'/);
+assert.match(directUi1013,/DOWNLOAD RESULT PAGE/);

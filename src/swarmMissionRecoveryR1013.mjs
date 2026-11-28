@@ -20,3 +20,12 @@ export function exportMissionR1013(m){
  validateMissionR1013(m,m?.id);
  return JSON.stringify({schema:'OMEGA_DIRECT_MISSION_RETURN_R1013',authority:'COORDINATOR_REPORTED_NOT_INDEPENDENTLY_VERIFIED',canonicalMutation:false,mission:m},null,2);
 }
+
+export function resultPagePathR1014(id,offset){
+ if(offset!==undefined&&(!Number.isSafeInteger(offset)||offset<0||offset>1728))throw Error('Invalid result offset');
+ return missionPathR1013(id)+'/results?limit=24'+(offset===undefined?'':'&offset='+offset);
+}
+export function validateResultPageR1014(p,id){
+ if(!p||p.ok!==true||p.schema!=='OMEGA_R121_RESULT_PAGE_R1014'||p.missionId!==missionIdR1013(id)||p.canonicalMutation!==false||p.authority!=='COORDINATOR_REPORTED_NOT_INDEPENDENTLY_VERIFIED'||![p.archiveStart,p.archivedCount,p.accounted,p.planned,p.offset].every(Number.isSafeInteger)||p.archiveStart<0||p.archivedCount<0||p.archiveStart+p.archivedCount!==p.accounted||p.accounted>p.planned||p.planned>1728||p.offset<p.archiveStart||p.offset>p.accounted||!Array.isArray(p.rows)||p.rows.length>24||p.offset+p.rows.length>p.accounted||p.rows.some((row,i)=>!row||row.ordinal!==p.offset+i||typeof row.cellId!=='string')||p.nextOffset!==(p.offset+p.rows.length<p.accounted?p.offset+p.rows.length:null)||(p.rows.length===0&&p.nextOffset!==null))throw Error('Untrusted result history page');
+ return p;
+}
