@@ -141,3 +141,6 @@ assert.throws(()=>serializeMissionJournalR894(null,{...result1009,completed:0}),
 assert.throws(()=>captureAcceptedPlanR1009({mission:m1009,plan:{...p1009,sampleCells:[...p1009.sampleCells.slice(1),{...p1009.sampleCells[0],lane:-1}]}},3),/Untrusted planned/);
 assert.match(ui,/data-r1009-accepted-plan/);
 console.log('R1009 PASS: accepted coordinator plan identities, lanes, restored counts and returned membership enforced.');
+
+// R1010 must run in the active convergence suite, not only the historical R121 suite.
+await import('./r1010-swarm-durable-recovery-invariants.mjs');
