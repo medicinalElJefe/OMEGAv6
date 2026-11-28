@@ -100,3 +100,26 @@ const legacyPage1014=await (await archive1014.fetch(new Request('https://root.in
 assert.equal(legacyPage1014.archiveStart,1);assert.equal(legacyPage1014.archivedCount,2);
 assert.equal(legacyPage1014.rows[0].ordinal,1);
 console.log('R1014 PASS: atomic durable cell history beyond 36 previews, exact paging, legacy gap disclosure and read-only retrieval.');
+
+const {collectMissionArchiveR1015}=await import('../src/swarmMissionRecoveryR1013.mjs');
+const full1015=JSON.parse(await collectMissionArchiveR1015(finished1014,offset=>readPage1014(offset??0)));
+assert.equal(full1015.rows.length,60);
+assert.equal(full1015.snapshot.completeArchiveOfAccountedReturns,true);
+assert.equal(full1015.snapshot.fullMissionAccounted,true);
+await assert.rejects(()=>collectMissionArchiveR1015(finished1014,async offset=>{const p=await readPage1014(offset??0);return {...p,rows:p.rows.map((row,i)=>i===0?{...row,cellId:'invalid'}:row)}}),/identity/);
+await assert.rejects(()=>collectMissionArchiveR1015(finished1014,offset=>readPage1014(offset??0),{isCurrent:()=>false}),/cancelled/);
+const legacyFull1015=JSON.parse(await collectMissionArchiveR1015(await archive1014.get('legacy-archive'),async offset=>(await (await archive1014.fetch(new Request('https://root.internal/missions/legacy-archive/results'+(offset===undefined?'':'?offset='+offset)))).json())));
+assert.equal(legacyFull1015.snapshot.missingEarlierReturns,1);
+assert.equal(legacyFull1015.snapshot.completeArchiveOfAccountedReturns,false);
+corrupt1012=false;
+const larger1015=planMissionR121({intent:'real deterministic archival payload test',mode:'FLOCK',requestedCells:24,providerBudget:0});
+const actual1015={...initial1010('large-payload-archive'),pending:larger1015.selected.filter(cell=>!(cell.profile.domainRole==='PHYSICS'&&cell.profile.phaseRole==='EXECUTE')&&!(cell.profile.domainRole==='ORCHESTRATION'&&cell.profile.phaseRole==='FRAME')).slice(0,13),archiveStart:0,archivedCount:0};
+assert.equal(actual1015.pending.length,13);actual1015.total=13;
+await runtime1012.save(actual1015);
+const returned1015=await runtime1012.process(actual1015.id);
+assert.equal(returned1015.completed,13);
+assert.ok(returned1015.recent.every(row=>row.resultJson===undefined));
+const archive1015=JSON.parse(await collectMissionArchiveR1015(returned1015,async offset=>(await (await runtime1012.fetch(new Request('https://root.internal/missions/large-payload-archive/results'+(offset===undefined?'':'?offset='+offset)))).json())));
+assert.equal(archive1015.rows.length,13);
+assert.ok(archive1015.rows.every(row=>typeof row.resultJson==='string'));
+console.log('R1015 PASS: large deterministic payload archive, bounded snapshot export, identity/count validation, legacy disclosure and cancellation.');

@@ -51,7 +51,7 @@ export class OmegaSwarmCoordinator{
  const bytes=JSON.stringify(result);
  if(await resultDigestR1012(bytes)!==receipt.resultSha256)return reject('R1012_CELL_RESULT_DIGEST_MISMATCH');
  if(['PROVIDER_GATED','SERVICE_GATED','OPTICAL_CHAIN_FAILED'].includes(result.kind)||result.ok===false)return reject('R1012_EXECUTOR_UNAVAILABLE_OR_FAILED: '+clip(result.summary||result.kind,900),424);
- return{cell,executor,ok:true,status:r.status,data,...(mission.total<=12&&executor==='DETERMINISTIC'&&result.kind==='DETERMINISTIC_CELL_ANALYSIS'&&bytes.length<=MAX_RESULT_JSON_R1012?{resultJson:bytes}:{})}}
+ return{cell,executor,ok:true,status:r.status,data,...(executor==='DETERMINISTIC'&&result.kind==='DETERMINISTIC_CELL_ANALYSIS'&&bytes.length<=MAX_RESULT_JSON_R1012?{resultJson:bytes}:{})}}
  // R1010: persist a batch before any external execution. An interrupted batch
  // is recorded as uncertain, never automatically repeated (provider side effects).
  async process(id){
@@ -64,12 +64,13 @@ export class OmegaSwarmCoordinator{
   m.completed+=x.ok?1:0;m.failed+=x.ok?0:1;
   m.organProcessed[x.cell.address.domain]=(m.organProcessed[x.cell.address.domain]||0)+1;
   const result=x.data?.result,summary=clip(result?.summary||result?.truthBoundary||x.data?.error||x.data?.code,1200);
-  const row={cellId:x.cell.id,index:x.cell.index,organ:x.cell.profile.domainRole,phase:x.cell.profile.phaseRole,executor:x.executor,ok:x.ok,status:x.status,summary,receiptSha:x.data?.receipt?.resultSha256||null,...(typeof x.resultJson==='string'?{resultJson:x.resultJson}:{})};
-  m.recent.unshift(row);
+  const row={cellId:x.cell.id,index:x.cell.index,organ:x.cell.profile.domainRole,phase:x.cell.profile.phaseRole,executor:x.executor,ok:x.ok,status:x.status,summary,receiptSha:x.data?.receipt?.resultSha256||null,};
+  const payload=typeof x.resultJson==='string'?{resultJson:x.resultJson}:{};
+  m.recent.unshift(m.total<=12?{...row,...payload}:row);
   m.recent=m.recent.slice(0,36);
   if(x.executor==='WORKERS_AI'&&x.ok&&summary)m.providerOutputs.push({cellId:x.cell.id,role:x.cell.profile.domainRole,summary});
   m.providerOutputs=m.providerOutputs.slice(0,12);
-  return {...row,ordinal:m.completed+m.failed-1};
+  return {...row,...payload,ordinal:m.completed+m.failed-1};
  }
  // R1014: archive each accounted return with the same atomic storage write
  // as its mission counters. Legacy gaps are disclosed, never reconstructed.
