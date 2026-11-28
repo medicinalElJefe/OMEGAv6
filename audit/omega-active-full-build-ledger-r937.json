@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R1014: atomic paginated R121 mission result history, legacy gap disclosure and direct console page inspection/export. Candidate source; fresh CI and deployment pending.",
+  "latestGovernedWork": "R1015: retained bounded deterministic payloads beyond twelve-cell missions, validated fixed-prefix whole-archive export, explicit legacy gaps and cancellation. Candidate implementation only; live acceptance pending.",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -658,6 +658,11 @@
     {
       "revision": "R1014",
       "conservation": "Durable mission result history beyond recent preview window",
+      "accepted": "CANDIDATE_SOURCE_ONLY"
+    },
+    {
+      "revision": "R1015",
+      "conservation": "Large mission payload retention and bounded complete archive export",
       "accepted": "CANDIDATE_SOURCE_ONLY"
     }
   ],

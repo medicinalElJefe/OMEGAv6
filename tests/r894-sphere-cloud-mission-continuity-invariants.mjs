@@ -178,3 +178,6 @@ console.log('R1013 PASS: direct mission identity, monotonic recovery, historical
 
 assert.match(directUi1013,/data-r1014-result-history='PAGINATED_GET_ONLY'/);
 assert.match(directUi1013,/DOWNLOAD RESULT PAGE/);
+
+assert.match(directUi1013,/DOWNLOAD FULL ARCHIVE/);
+assert.match(directUi1013,/CANCEL EXPORT/);
