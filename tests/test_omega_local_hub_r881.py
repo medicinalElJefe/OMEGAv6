@@ -977,6 +977,23 @@ class LocalHubTests(unittest.TestCase):
         self.assertIn("R924_BIN_AUTHORITY_OR_SHA_HELD",rejected["error"])
 
 
+    def test_r1028_nested_original_bin_integrity(self):
+        import io
+        import zipfile
+        import hashlib
+        inner=io.BytesIO()
+        with zipfile.ZipFile(inner,"w") as z:z.writestr("source/model.py",b"source")
+        raw=inner.getvalue()
+        outer=io.BytesIO()
+        with zipfile.ZipFile(outer,"w") as z:z.writestr("OMEGA_SETUP/P06.bin",raw)
+        record={"name":"P06.bin","sha256":hashlib.sha256(raw).hexdigest(),"archive_bytes":len(raw),"member_count":1,"uncompressed_bytes":6}
+        with zipfile.ZipFile(outer) as z:
+            good=hubmod.verify_original_bin_r1028(z,"OMEGA_SETUP/P06.bin",record)
+            self.assertEqual(good["crc"],"PASS")
+            self.assertEqual(good["members"],1)
+            for bad,error in [({**record,"sha256":"0"*64},"SHA256"),({**record,"member_count":2},"MEMBER_COUNT"),({**record,"archive_bytes":len(raw)+1},"SIZE")]:
+                with self.assertRaisesRegex(ValueError,error):hubmod.verify_original_bin_r1028(z,"OMEGA_SETUP/P06.bin",bad)
+
     def test_r925_exact_correlated_donor_field_and_duplex_receipts(self):
         import json
         import hashlib

@@ -16,6 +16,7 @@ from contextlib import contextmanager
 import uuid
 import zipfile
 import stat
+import tempfile
 import unicodedata
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlsplit
@@ -392,6 +393,42 @@ def execute_b010_r922(root:Path,args:dict):
 
 R924_LAWS=("OBJECTIVE","INFORMATION","IDENTITY","BOUNDARY","RELATIONSHIP","TRANSFORMATION",
            "RESOURCE","CONTINUITY","EVIDENCE","EVALUATION","EXPRESSION","RECURSION")
+# Original V61.3 manifest independently recovered and hash-pinned in R1028.
+R1028_V613_MANIFEST_SHA256="5f9da813496084468f743d36b02d784d32a99aa3b6e1bc0b5385cfe711e3e7ca"
+def verify_original_bin_r1028(wrapper, member, record):
+    """Stream a source-pinned BIN to a temporary file; verify inner ZIP CRCs.
+    Never extract members to a project directory and never run donor code.
+    """
+    size=record.get("archive_bytes")
+    count=record.get("member_count")
+    expanded=record.get("uncompressed_bytes")
+    if (type(size) is not int or not 22<=size<=768*1024*1024 or
+        type(count) is not int or not 1<=count<=5000 or
+        type(expanded) is not int or not 0<=expanded<=768*1024*1024):
+        raise ValueError("R1028_BIN_MANIFEST_BOUNDS_HELD")
+    info=wrapper.getinfo(member)
+    if info.file_size!=size or info.flag_bits&1: raise ValueError("R1028_BIN_SIZE_OR_ENCRYPTION_HELD")
+    h=hashlib.sha256();total=0
+    with tempfile.TemporaryFile() as stage:
+        with wrapper.open(info) as stream:
+            for chunk in iter(lambda:stream.read(1048576),b""):
+                total+=len(chunk)
+                if total>size: raise ValueError("R1028_BIN_SIZE_HELD")
+                h.update(chunk);stage.write(chunk)
+        if total!=size or h.hexdigest()!=record["sha256"]:raise ValueError("R1028_BIN_SHA256_HELD")
+        stage.seek(0)
+        with zipfile.ZipFile(stage) as inner:
+            entries=inner.infolist()
+            if len(entries)!=count or sum(x.file_size for x in entries)!=expanded:raise ValueError("R1028_BIN_MEMBER_COUNT_OR_BYTES_HELD")
+            names=set()
+            for entry in entries:
+                name=entry.filename;key=unicodedata.normalize("NFC",name.rstrip("/")).casefold()
+                parts=PurePosixPath(name).parts
+                if not key or key in names or name.startswith("/") or chr(92) in name or ":" in name or ".." in parts or entry.flag_bits&1 or stat.S_ISLNK(entry.external_attr>>16):
+                    raise ValueError("R1028_UNSAFE_INNER_MEMBER_HELD")
+                names.add(key)
+            if inner.testzip() is not None:raise ValueError("R1028_BIN_CRC_HELD")
+    return {"name":record["name"],"sha256":h.hexdigest(),"archiveBytes":total,"members":count,"uncompressedBytes":expanded,"crc":"PASS"}
 def correlate_duplex24_r924(root:Path,args:dict):
     """Reconcile all 24 historical BIN authorities and the complete ZIP distribution.
 
@@ -408,7 +445,9 @@ def correlate_duplex24_r924(root:Path,args:dict):
     if manifest_path.stat().st_size>2*1024*1024:
         raise ValueError("R924_MANIFEST_TOO_LARGE_HELD")
     try:
-        manifest=json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest_bytes=manifest_path.read_bytes()
+        if len(manifest_bytes)>2*1024*1024:raise ValueError("R924_MANIFEST_TOO_LARGE_HELD")
+        manifest=json.loads(manifest_bytes.decode("utf-8"))
     except (UnicodeError,ValueError) as exc:
         raise ValueError("R924_MANIFEST_JSON_HELD") from exc
     if not isinstance(manifest,dict):
@@ -419,6 +458,8 @@ def correlate_duplex24_r924(root:Path,args:dict):
         raise ValueError("R924_EXACT_20_PART_24_BIN_SCHEMA_HELD")
     def valid_sha(value):
         return isinstance(value,str) and len(value)==64 and all(x in "0123456789abcdef" for x in value)
+    manifest_sha=hashlib.sha256(manifest_bytes).hexdigest()
+    original_manifest=manifest_sha==R1028_V613_MANIFEST_SHA256
     observed_payload={}
     payload_index={}
     for item in payloads:
@@ -452,6 +493,7 @@ def correlate_duplex24_r924(root:Path,args:dict):
     verified=0
     present=0
     all_identified_payloads=set()
+    duplicate_payloads=set()
     for name in sorted(expected_parts):
         source=safe_under(root,(folder.rstrip("/")+"/" if folder!="." else "")+name,False)
         record=expected_parts[name]
@@ -474,10 +516,28 @@ def correlate_duplex24_r924(root:Path,args:dict):
                 if len(entries)!=record.get("entries"):
                     results.append({"file":name,"state":"ZIP_ENTRY_COUNT_HELD","expectedEntries":record.get("entries"),"observedEntries":len(entries)})
                     continue
+                if len(set(entries))!=len(entries):
+                    results.append({"file":name,"state":"DUPLICATE_WRAPPER_MEMBER_HELD"})
+                    continue
+                found=[]
                 for filename in entries:
                     if filename.startswith("OMEGA_SETUP/") and filename.endswith(".bin"):
-                        all_identified_payloads.add(filename.rsplit("/",1)[-1])
-        except (zipfile.BadZipFile,OSError):
+                        bin_name=filename.rsplit("/",1)[-1]
+                        if bin_name in all_identified_payloads or bin_name in found:duplicate_payloads.add(bin_name)
+                        found.append(bin_name)
+                if original_manifest:
+                    if z.testzip() is not None:raise ValueError("R1028_WRAPPER_CRC_HELD")
+                    local=[]
+                    for bin_name in found:
+                        record=next((p for p in payload_index.values() if p["name"]==bin_name),None)
+                        if record is None:raise ValueError("R1028_UNKNOWN_BIN_HELD")
+                        local.append(verify_original_bin_r1028(z,"OMEGA_SETUP/"+bin_name,record))
+                    for witness in local:observed_payload[witness["name"]]={**witness,"wrapper":name}
+                all_identified_payloads.update(found)
+        except (zipfile.BadZipFile,OSError,ValueError,RuntimeError) as exc:
+            if original_manifest:
+                results.append({"file":name,"state":"ORIGINAL_PAYLOAD_VERIFICATION_HELD","reason":str(exc)[:240]})
+                continue
             results.append({"file":name,"state":"ZIP_STRUCTURE_HELD"})
             continue
         verified+=1
@@ -492,15 +552,20 @@ def correlate_duplex24_r924(root:Path,args:dict):
                       "inverseArchiveMemberLocated":inverse["name"] in all_identified_payloads,
                       "outverseArchiveMemberLocated":outverse["name"] in all_identified_payloads,
                       "authority":"HISTORICAL_MANIFEST_ONLY"})
-    complete=verified==20 and len(all_identified_payloads)==24
+    complete=verified==20 and len(all_identified_payloads)==24 and not duplicate_payloads
+    all_payloads=original_manifest and complete and len(observed_payload)==24
+    for pair in pairs:
+        pair["inverseBytesVerified"]=pair["inverse"] in observed_payload and pair["inverse"] not in duplicate_payloads
+        pair["outverseBytesVerified"]=pair["outverse"] in observed_payload and pair["outverse"] not in duplicate_payloads
     return {"schema":"OMEGA_HISTORICAL_DUPLEX24_CORRELATION_R924",
-            "state":"COMPLETE_OUTER_DISTRIBUTION_HASHES_SOURCE_ONLY" if complete else "INCOMPLETE_ARCHIVE_SET_HELD",
-            "manifestSha256":sha_file(manifest_path),"manifest":rel,
+            "state":"COMPLETE_ORIGINAL_OUTER_AND_INNER_BYTES_SOURCE_ONLY" if all_payloads else "COMPLETE_OUTER_DISTRIBUTION_HASHES_SOURCE_ONLY" if complete else "INCOMPLETE_ARCHIVE_SET_HELD",
+            "manifestSha256":manifest_sha,"manifest":rel,"originalManifestPinned":original_manifest,
             "expectedParts":20,"locatedParts":present,"verifiedOuterParts":verified,
             "missingParts":[x["file"] for x in results if x["state"]=="MISSING"],
             "partResults":results,"duplexPairs":pairs,
             "payloadsLocatedByName":len(all_identified_payloads),
-            "payloadBytesAllIndependentlyVerified":False,
+            "verifiedInnerPayloads":len(set(observed_payload)-duplicate_payloads),"innerPayloadReceipts":[observed_payload[k] for k in sorted(observed_payload) if k not in duplicate_payloads],"duplicatePayloads":sorted(duplicate_payloads),
+            "payloadBytesAllIndependentlyVerified":all_payloads,
             "historicExecutableFunctionalityProven":False,"canonicalWrites":0,
             "productionReady":False,"gpuComputeProven":False,
             "basis":"HISTORICAL_SOURCE_AND_LOCAL_FILE_HASHES_NOT_RUNTIME_PARITY"}

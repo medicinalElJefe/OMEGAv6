@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R1027: restore actual R123 organism and R125 autonomic consoles in native SAI Lab, validated GET-only mission recovery and explicit zero provider budget, production browser proof for access and live route preview. Candidate only.",
+  "latestGovernedWork": "R1028: recovered 19/20 actual V61.3 wrappers and 19/24 original nested BINs (357 CRC members), V61.14 22 manifest-file SHA checks; pinned nested archive audit in existing local Hub; original P15 Duplex24 numerical translation in Control Matrix with two original-source fixture oracles. Candidate only, original Part 01 still missing.",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -724,6 +724,11 @@
       "revision": "R1027",
       "conservation": "Native hierarchical and autonomic execution surface restoration",
       "accepted": "CANDIDATE_SOURCE_ONLY"
+    },
+    {
+      "revision": "R1028",
+      "conservation": "Original V61.3 archive byte recovery and recovered 24-BIN model integration",
+      "accepted": "LOCAL_SOURCE_BYTES_VERIFIED_BROWSER_TRANSLATION_CANDIDATE_ONLY"
     }
   ],
   "independentArchiveUnverifiedOtherListedParts": 77,

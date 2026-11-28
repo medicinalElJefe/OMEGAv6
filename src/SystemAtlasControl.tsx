@@ -9,6 +9,7 @@ import ExtremeRestorationR46 from './ExtremeRestorationR46';
 import OmegaSystemInventoryR83 from './OmegaSystemInventoryR83';
 import {MASTER_SYSTEMS_R83} from './softwareMasterLedgerR83';
 import FullSystemConvergencePanelR95 from './FullSystemConvergencePanelR95';
+import HistoricalDuplexPanelR1028 from './HistoricalDuplexPanelR1028';
 import SystemFoundryLiveR270 from './SystemFoundryLiveR270';
 import './systemAtlas.css';
 import './systemCapabilityR13.css';
@@ -33,6 +34,7 @@ export default function SystemAtlasControl({record,onNavigate,control=false}:Pro
  return <section className='special-app system-atlas-r1 system-atlas-r13 system-atlas-r38' data-current-reality='R168' data-successor-debt={R48_COMPLETION_SUMMARY.restorationDebt} data-foundry-live-truth='R270_SHARED_R238_R239'>
   <header className='special-head'><div><span>R168 CURRENT SUCCESSOR REALITY · R268/R269 SYSTEM FOUNDRY · R270 SHARED LIVE TRUTH · ONE CAPABILITY AUTHORITY</span><h2>{control?'System Control Matrix':'System Atlas'}</h2></div><div className='atlas-r1-status'><b>{R48_COMPLETION_FAMILIES.length} FAMILIES · {audit.total} ROUTED APPLICATION SURFACES · {EXPRESSION_PLANES.length} EXPRESSION PLANES</b><small>{SYSTEM_ATLAS_ID} · STATE {record.stateId} · {record.metrics.decision} · current reality ≠ historical registration</small></div></header>
   <div className='atlas-r1-invariant'><ShieldCheck/><b>{SYSTEM_INVARIANT}</b><span>R168 uses the R48/R155 successor ledger for current family execution and the unified capabilityReality authority for routes. V24 donor/debt labels remain visible only as predecessor evidence; R270 lets Foundry consume the same workstation-scoped R238/R239 truth membrane as Hybrid without creating a parallel runtime or polling owner.</span></div>
+  {control&&<HistoricalDuplexPanelR1028 record={record}/>}
   <FullSystemConvergencePanelR95 onNavigate={onNavigate}/>
   <SystemFoundryLiveR270/>
   <section className='atlas-r38-stage' aria-label='Active packet and System Atlas truth context'>

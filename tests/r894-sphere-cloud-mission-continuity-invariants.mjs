@@ -207,3 +207,21 @@ assert.match(sai1017,/data-r1027-orchestration='R123_R125'/);
 assert.match(sai1017,/<OmegaOrganismR123\/>/);assert.match(sai1017,/<OmegaAutonomicR125\/>/);
 for(const kind of ['OrganismR123','AutonomicR125']){const surface=readFileSync('src/Omega'+kind+'.tsx','utf8');assert.match(surface,/\[providerBudget,setProviderBudget\]=useState\(0\)/);assert.match(surface,/previous mission retained/);assert.match(surface,/data-r1027-recovery/);assert.ok(!surface.slice(surface.indexOf(' const recover=async'),surface.indexOf(' const active=mission')).includes('api.post'))}
 console.log('R1027 SOURCE PASS: original R123 and R125 execution consoles restored inside native SAI Lab, zero provider default and GET-only recovery.');
+
+const {compileDuplexR1028,propagationMatrixR1028}=await import('../src/duplexModelR1028.mjs');
+const m1028=propagationMatrixR1028();assert.equal(m1028.length,24);assert.ok(m1028.every(r=>r.length===24));assert.equal(m1028[0][12],Math.fround(.72));assert.equal(m1028[12][0],Math.fround(.18));
+const scene1028={scale_index:1,domain_index:1,lens_index:1,phase_index:1,calculus_mode_index:1,view_mode:'FIELD',quality:'BALANCED'};
+const profile1028={proof_score:.55,continuity:.72,contradiction:.22,burden:.35,plasticity:.65,symmetry:.73,asymmetry:.27,compression_ratio:1};
+const a1028=compileDuplexR1028(scene1028,profile1028);
+const close1028=(a,b)=>assert.ok(Math.abs(a-b)<1e-8,'Original donor numerical fixture mismatch '+a+' / '+b);
+assert.deepEqual(a1028.plan.gates,{STAY:5,TURN:5,ESCALATE:2});assert.equal(a1028.plan.method,'LOCAL_SIMULATION');
+assert.deepEqual(a1028.plan.active,["I01","I02","I03","I04","I05","I06","I07","I08","I09","I10","I12","O01","O02","O03","O04","O06","O07","O08","O09","O10","O12"]);
+assert.deepEqual(a1028.plan.disturbed,["I01","I02","I03","I04","I05","I06","I07","I08","I09","I10","I12","O02","O03","O07","O08","O09","O12"]);
+close1028(a1028.presence[0].projected_outverse,.6924564475520556);close1028(a1028.presence[0].validity,.7200918936550357);
+close1028(a1028.inverse[11].value,.786282260974345);close1028(a1028.outverse[11].value,.3783462253997509);close1028(a1028.plan.predicted_cost,.7545442858736711);
+const b1028=compileDuplexR1028({...scene1028,scale_index:12,domain_index:7,lens_index:4,phase_index:11,calculus_mode_index:8,view_mode:'TRAVERSAL',quality:'MASTER'},{proof_score:.8,continuity:.2,contradiction:.7,burden:.8,plasticity:.3,symmetry:.37,asymmetry:.63,compression_ratio:3});
+assert.deepEqual(b1028.plan.gates,{STAY:0,TURN:0,ESCALATE:12});assert.equal(b1028.plan.method,'GRAPH_TRAVERSAL');assert.deepEqual(b1028.plan.disturbed,['I05','I06','I10']);close1028(b1028.plan.expected_accuracy,.6697280178368256);
+assert.throws(()=>compileDuplexR1028({...scene1028,scale_index:0},profile1028));assert.throws(()=>compileDuplexR1028(scene1028,{...profile1028,proof_score:NaN}));
+assert.equal(a1028.canonicalMutation,false);assert.equal(a1028.originalStateHash,null);
+assert.match(readFileSync('src/SystemAtlasControl.tsx','utf8'),/control&&<HistoricalDuplexPanelR1028 record=\{record\}/);
+console.log('R1028 PASS: recovered V61.3 P15 numerical fixture comparison, 24 bins / 12 presence channels, propagation, explicit input refusal, native Control Matrix mount.');
