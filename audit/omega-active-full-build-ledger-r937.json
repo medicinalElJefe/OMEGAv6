@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R1025: existing Creation Studio project directory, bounded atomic asset checksum attachment, explicit export failure recovery and non-overlapping operation controls, border-free scene hit geometry; candidate only.",
+  "latestGovernedWork": "R1026: restore repeatable real R29 SVG/PNG/packet export, bounded and serialized queue, checked receipt retention before download and explicit recoverable errors. Candidate only; provider generation remains separate.",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -713,6 +713,11 @@
     {
       "revision": "R1025",
       "conservation": "Discoverable local creation projects and recoverable real artifact operations",
+      "accepted": "CANDIDATE_SOURCE_ONLY"
+    },
+    {
+      "revision": "R1026",
+      "conservation": "Recoverable existing render queue artifact execution",
       "accepted": "CANDIDATE_SOURCE_ONLY"
     }
   ],

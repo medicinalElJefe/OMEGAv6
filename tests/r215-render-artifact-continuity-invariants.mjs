@@ -41,3 +41,7 @@ must(r214.includes('future executed artifact/frame receipt must return to R214/R
 must(r214.includes("canonicalAdmission:'R125'"),'R125 must remain sole Canon admission authority');
 
 console.log('R215 REPRESENTATIONAL ARTIFACT CONTINUITY PASS · exact exported SVG/PNG/packet bytes are SHA-256 hashed before download · receipt binds to matching R214/R213/R211/R208 continuity when available · R86/R87/R97 carry preserved · computed-photoreal/solver/native/federation/Canon claims remain false');
+
+for(const marker of ["data-r1026-render-feedback","Regenerate & export","job remains retryable","Unable to retain artifact receipt; download not started","if(lock.current)return;lock.current=true","finally{URL.revokeObjectURL(url)}"])must(source.includes(marker),'R1026 render recovery missing '+marker);
+must(!source.includes("disabled={j.status==='EXPORTED_LOCAL'}"),'previously exported job must remain recoverable');
+console.log('R1026 SOURCE CONTRACT PASS: bounded render queue, serialized execution, checked receipt persistence, repeat export and recoverable failure feedback.');
