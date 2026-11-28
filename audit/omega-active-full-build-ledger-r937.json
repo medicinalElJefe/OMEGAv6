@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R1021: route parity actuates actual full function menu for all 44 destinations; exact promoted-SHA R520 production test adds actual zero-provider deterministic SAI execution, archive download verification and mobile read-only recovery. Default provider budget zero; result verification displayed at inspection point. Candidate only.",
+  "latestGovernedWork": "R1022: correct canvas drawable hit rectangle; verify actual delivered pointer coordinate and intended reachable pixel; expose Atlas/Relativity instrument index in standard view with direct open and focus. Candidate only.",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -693,6 +693,11 @@
     {
       "revision": "R1021",
       "conservation": "Actual menu destination coverage and deployed SAI input/output browser acceptance",
+      "accepted": "CANDIDATE_SOURCE_ONLY"
+    },
+    {
+      "revision": "R1022",
+      "conservation": "Exact responsive SPHERE hit geometry and direct science instrument discovery",
       "accepted": "CANDIDATE_SOURCE_ONLY"
     }
   ],

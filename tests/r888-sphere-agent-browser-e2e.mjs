@@ -114,25 +114,34 @@ async function prove(browser,label,viewport){
   const raster=lab.locator('canvas[data-r892-projection]');
   const projection=lab.getByLabel('20,736 pixel address projection');
   assert.equal(await raster.getAttribute('data-r892-projection'),'INNER_20736');
-  await raster.evaluate(el=>el.scrollIntoView({block:'center',inline:'center'}));
-  const size=await raster.evaluate(el=>({width:el.getBoundingClientRect().width,height:el.getBoundingClientRect().height}));
-  const mobile=label==='mobile';
-  const targetInner=mobile?10465:20736;
-  await raster.click({position:{x:size.width*((mobile?96.5:191.5)/192),y:size.height*((mobile?54.5:107.5)/108)}});
-  assert.match(await lab.locator('[data-r892-selected-address]').innerText(),new RegExp('Selected inner state: '+targetInner+' of 20736'));
-  await lab.getByLabel('Exact inner state address').fill('20736');
-  assert.match(await lab.locator('[data-r892-selected-address]').innerText(),/Selected inner state: 20736 of 20736/);
-  await projection.selectOption('OUTER_20736');
-  assert.equal(await raster.getAttribute('data-r892-projection'),'OUTER_20736');
-  const targetOuter=mobile?10465:19;
-  await raster.evaluate(el=>el.scrollIntoView({block:'center',inline:'center'}));
-  await raster.click({position:{x:size.width*((mobile?96.5:18.5)/192),y:size.height*((mobile?54.5:.5)/108)}});
-  assert.equal(await lab.getByRole('spinbutton',{name:'Outer address'}).inputValue(),String(targetOuter),label+' exact outer address');
-  await projection.selectOption('INNER_20736');
-  await raster.evaluate(el=>el.scrollIntoView({block:'center',inline:'center'}));
-  await raster.click({position:{x:size.width*((mobile?96.5:.5)/192),y:size.height*((mobile?54.5:.5)/108)}});
-  assert.match(await lab.locator('[data-r892-selected-address]').innerText(),new RegExp('Selected inner state: '+(mobile?10465:1)+' of 20736'));
-  await lab.getByLabel('Exact inner state address').fill('1');
+  // Independently measure the actual delivered browser pointer, not a fractional requested offset.
+   const mobile=label==='mobile';
+   async function clickPixel(x,y,mode){
+    await raster.evaluate(el=>el.scrollIntoView({block:'center',inline:'center',behavior:'instant'}));
+    const geometry=await raster.evaluate(el=>{
+     const r=el.getBoundingClientRect(),style=getComputedStyle(el);
+     if(parseFloat(style.borderLeftWidth)||parseFloat(style.borderTopWidth)||parseFloat(style.paddingLeft)||parseFloat(style.paddingTop))throw Error('R1022 drawable canvas geometry contains insets');
+     el.removeAttribute('data-r1022-pointer');
+     el.addEventListener('click',e=>{const b=el.getBoundingClientRect();el.dataset.r1022Pointer=JSON.stringify({x:e.clientX,y:e.clientY,left:b.left,top:b.top,width:b.width,height:b.height})},{once:true,capture:true});
+     return {left:r.left,top:r.top,width:r.width,height:r.height};
+    });
+    const point=(origin,length,index,count)=>{const low=origin+index*length/count,high=origin+(index+1)*length/count,nearest=Math.ceil(low+1e-7);return nearest<high?nearest:(low+high)/2};
+    await page.mouse.click(point(geometry.left,geometry.width,x,192),point(geometry.top,geometry.height,y,108));
+    const raw=await raster.getAttribute('data-r1022-pointer');assert.ok(raw,label+' real canvas click received');
+    const p=JSON.parse(raw),col=Math.max(0,Math.min(191,Math.floor((p.x-p.left)*192/p.width))),row=Math.max(0,Math.min(107,Math.floor((p.y-p.top)*108/p.height))),expected=row*192+col+1;
+    if(mode==='INNER_20736')assert.match(await lab.locator('[data-r892-selected-address]').innerText(),new RegExp('Selected inner state: '+expected+' of 20736'));
+    else assert.equal(await lab.getByRole('spinbutton',{name:'Outer address'}).inputValue(),String(expected),label+' delivered exact outer address');
+    if(p.width>=192&&p.height>=108)assert.equal(expected,y*192+x+1,label+' intended pixel address');
+   }
+   await clickPixel(mobile?96:191,mobile?54:107,'INNER_20736');
+   await lab.getByLabel('Exact inner state address').fill('20736');
+   assert.match(await lab.locator('[data-r892-selected-address]').innerText(),/Selected inner state: 20736 of 20736/);
+   await projection.selectOption('OUTER_20736');
+   assert.equal(await raster.getAttribute('data-r892-projection'),'OUTER_20736');
+   await clickPixel(mobile?96:18,mobile?54:0,'OUTER_20736');
+   await projection.selectOption('INNER_20736');
+   await clickPixel(mobile?96:0,mobile?54:0,'INNER_20736');
+   await lab.getByLabel('Exact inner state address').fill('1');
   assert.match(await lab.locator('[data-r892-selected-address]').innerText(),/Selected inner state: 1 of 20736/);
   console.log('R892 BROWSER '+label.toUpperCase()+' PASS: exact last/first inner address, unique outer agent address and projection switching.');
   // R893: verify real autonomous scheduling sweeps distinct nested inner coordinates.

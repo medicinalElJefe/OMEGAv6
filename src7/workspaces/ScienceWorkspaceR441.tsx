@@ -1,4 +1,4 @@
-import {useEffect,useMemo,useState} from 'react';
+import {useEffect,useMemo,useState,useRef} from 'react';
 import RelativityLab from '../../src/RelativityLab';
 import DeweyTemporalWorkbenchV9 from '../../src/DeweyTemporalWorkbenchV9';
 import PellResearchWorkbenchR755 from '../../src/PellResearchWorkbenchR755';
@@ -35,7 +35,10 @@ const fromCoords=(c:{d:number;p:number;r:number;l:number})=>clamp(1728*c.d+144*c
 
 export default function ScienceWorkspaceR441({route,onNavigate,depth}:Props){
  const[ready,setReady]=useState(false),[error,setError]=useState(''),[address,setAddress]=useState(readAddress),[instrumentOpen,setInstrumentOpen]=useState(depth!=='STANDARD');
- useEffect(()=>{setInstrumentOpen(depth!=='STANDARD')},[depth,route]);
+ const requestedInstrument=useRef<string|null>(null);
+ const focusInstrument=(id:string)=>{const target=document.getElementById('o7-'+id);if(!target)return false;target.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'});target.focus({preventScroll:true});return true};
+ useEffect(()=>{requestedInstrument.current=null;setInstrumentOpen(depth!=='STANDARD')},[depth,route]);
+ useEffect(()=>{if(instrumentOpen&&requestedInstrument.current&&focusInstrument(requestedInstrument.current))requestedInstrument.current=null},[instrumentOpen]);
  useEffect(()=>{let live=true;initCorpusPack().then(()=>{if(live){setReady(true);setError('')}}).catch(e=>{if(live)setError(e instanceof Error?e.message:String(e))});return()=>{live=false}},[]);
  useEffect(()=>{
   // R784: event-first synchronization; legacy writers that only update storage
@@ -97,8 +100,8 @@ export default function ScienceWorkspaceR441({route,onNavigate,depth}:Props){
    <button className='o7-open-instrument' onClick={()=>setInstrumentOpen(true)}>Open full {route} instrument</button>
   </section>}
 
-  {instrumentOpen&&SCIENCE_INSTRUMENTS[route]&&<nav className='o7-science-instrument-index' aria-label={route+' instrument navigation'} data-r777-instrument-index>
-   {SCIENCE_INSTRUMENTS[route]!.map(item=><a key={item.id} href={'#o7-'+item.id} onClick={e=>{const target=document.getElementById('o7-'+item.id);if(!target)return;e.preventDefault();target.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'});target.focus({preventScroll:true});}}>{item.label}</a>)}
+  {SCIENCE_INSTRUMENTS[route]&&<nav className='o7-science-instrument-index' aria-label={route+' instrument navigation'} data-r777-instrument-index>
+   {SCIENCE_INSTRUMENTS[route]!.map(item=><a key={item.id} href={'#o7-'+item.id} onClick={e=>{e.preventDefault();if(!focusInstrument(item.id)){requestedInstrument.current=item.id;setInstrumentOpen(true)}}}>{item.label}</a>)}
   </nav>}
   {instrumentOpen&&<div className='o7-native-surface'>
    {route==='Relativity'?<><section id='o7-relativity-lab' tabIndex={-1}><RelativityLab record={record} state={state} onNavigate={onNavigate}/></section><section id='o7-temporal-workbench' tabIndex={-1}><DeweyTemporalWorkbenchV9/></section><section id='o7-pell-research' tabIndex={-1}><PellResearchWorkbenchR755/></section><section id='o7-typed-provenance' tabIndex={-1}><TypedProvenanceWorkbenchR757 address={address} onAddress={commit}/></section><section id='o7-canon-topology' tabIndex={-1}><CanonTopologyWorkbenchR763 onAddress={commit}/></section></>:

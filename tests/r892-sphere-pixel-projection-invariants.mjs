@@ -24,8 +24,11 @@ for(const coords of [[-1,0],[192,0],[0,108],[0,-1],[.1,2]])assert.throws(()=>ras
 assert.throws(()=>rasterCoordinateR892(0,'BAD_MODE'));
 assert.throws(()=>pointerAddressR892(0,0,0,0,0,108));
 const canvasStyle=readFileSync('src/sphereAgentInstrumentR887.css','utf8');
-assert.match(canvasStyle,/cursor:crosshair;touch-action:manipulation;border:1px solid #4b7381;border-radius:0;/,'corner addresses must remain clickable and visible; no clipped rounded raster corners');
+assert.match(canvasStyle,/cursor:crosshair;touch-action:manipulation;border:0;outline:1px solid #4b7381;border-radius:0;/,'corner addresses must remain clickable and visible; no clipped rounded raster corners');
 const ui=readFileSync('src/SphereAgentInstrumentR887.tsx','utf8');
 for(const token of ['rasterAddressR892(x,y,pixelProjection)','pointerAddressR892(e.clientX','20,736 inner states · selected agent','20,736 outer agents · selected shell','data-r892-selected-address','setActiveInner(pixel.address)','setOuter(pixel.address)','data-r892-projection={pixelProjection}','Exact inner state address'])assert.ok(ui.includes(token),'Missing exact R892 UI mapping: '+token);
 assert.ok(!ui.includes('inner=(innerPage*144+(x+y*WIDTH)%144)%SIZE'),'Old 144-repeated pixel sampling must be removed');
 console.log('R892 PASS: 41,472 bijective address roundtrips across two projection modes; pixel boundaries; exact UI selection; no 144-state tiling.');
+
+for(const mode of ['INNER_20736','OUTER_20736'])for(const [w,h] of [[247.3,139.10625],[480.5,270.28125],[192,108]])for(const [x,y] of [[0,0],[96,54],[191,107]])assert.equal(pointerAddressR892(17.25+(x+.5)*w/192,142.375+(y+.5)*h/108,17.25,142.375,w,h,mode).address,y*192+x);
+console.log('R1022 PIXEL GEOMETRY PASS: border-free drawable rectangle and fractional responsive layout.');
