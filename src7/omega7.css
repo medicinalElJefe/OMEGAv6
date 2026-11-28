@@ -229,13 +229,17 @@
 .o7-native-toolbar [data-r778-native-link]:hover,.o7-native-toolbar [data-r778-native-link]:focus-visible{outline:2px solid #d4b07d;outline-offset:2px;background:rgba(211,177,128,.15)}
 @media(max-width:760px){.o7-native-toolbar [data-r778-native-link]{min-height:44px;font-size:10px;padding:7px 9px;white-space:normal;text-align:center}.o7-native-toolbar{gap:8px}}
 
-/* R1018: launch shelf stays visible before the lazy complete function library opens. */
-.o7-r1018-launch-panel{border:1px solid #8b755644;background:linear-gradient(120deg,#23333d,#101b26 70%,#30271e);padding:clamp(14px,2vw,25px)}
-.o7-r1018-launch-panel>header b{font:600 clamp(19px,2.1vw,26px)/1.15 system-ui,sans-serif;color:#f0e7d7}
-.o7-r1018-launch-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:15px}
-.o7-r1018-launch-actions button{text-align:left;display:grid;align-content:center;gap:5px;min-height:78px;padding:12px;border:1px solid #8fabb644;border-radius:10px;background:linear-gradient(140deg,#2a3c49,#14212c);color:#e9e9de;cursor:pointer}
-.o7-r1018-launch-actions button:first-child{border-color:#caa57288;background:linear-gradient(140deg,#514432,#1c2932)}
-.o7-r1018-launch-actions button:hover,.o7-r1018-launch-actions button:focus-visible{border-color:#e0ba7e;outline-offset:2px}
-.o7-r1018-launch-actions button b{font:600 13px/1.3 system-ui,sans-serif}
-.o7-r1018-launch-actions button small{font-size:11px;line-height:1.4;color:#a9c1cc}
-@media(max-width:980px){.o7-r1018-launch-actions{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* R1019 — slim workstation chrome and actual launch bar. */
+.o7-app[data-r1019-shell]{--o7-accent:#91e0cf;--o7-bg:#101318;--o7-surface:#1b2027;--o7-line:#282d35;background:#101318}
+.o7-app[data-r1019-shell] .o7-topbar{background:#15181e;backdrop-filter:none;border-color:#2b3039}
+.o7-app[data-r1019-shell] .o7-brand b{font-weight:650;letter-spacing:-.04em}
+.o7-app[data-r1019-shell] .o7-r520-toggle{background:#222a31!important;color:#e6eeef!important;border-color:#424d57!important}
+.o7-app[data-r1019-shell] .o7-search-trigger{background:#11151b;border-color:#313844;border-radius:7px;color:#b2bdc8}
+.o7-r1019-launch-strip{display:flex;gap:0;align-items:stretch;overflow-x:auto;margin:0 0 18px;border-bottom:1px solid #343b45;scrollbar-width:thin}
+.o7-r1019-launch-strip button{display:flex;gap:7px;align-items:center;flex:0 0 auto;min-height:44px;padding:0 13px;border:0;border-radius:0;border-bottom:2px solid transparent;background:none;color:#c9d1db;cursor:pointer}
+.o7-r1019-launch-strip button:first-child{color:#9ee4d4;border-bottom-color:#91e0cf}
+.o7-r1019-launch-strip button:hover,.o7-r1019-launch-strip button:focus-visible{background:#232a33;border-bottom-color:#91e0cf;outline-offset:-2px}
+.o7-r1019-launch-strip b{font:550 12px/1.3 system-ui,sans-serif;white-space:nowrap}
+.o7-r1019-launch-strip span{font:500 10px/1.3 system-ui,sans-serif;color:#a0acb9;white-space:nowrap}
+@media(max-width:760px){.o7-r1019-launch-strip{margin-bottom:12px}.o7-r1019-launch-strip button{padding:0 10px}.o7-r1019-launch-strip span{display:none}}

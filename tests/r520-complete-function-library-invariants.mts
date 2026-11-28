@@ -73,3 +73,9 @@ assert.ok(root.includes('o7-r1018-launch-actions'));
 assert.equal(new Set(MASTER_MENU_OPTIONS_R83.map(x=>x.topMenu)).size,12,'historical twelve master menu groups conserved');
 assert.ok(browser.includes('all current tools must be immediately visible'));
 console.log('R1018 PASS: compact complete route atlas, detail switch, group controls and twelve historical master menus conserved.');
+
+assert.ok(library.includes("data-r1019-design='DESKTOP_COMMAND_SURFACE'"));
+assert.ok(root.includes("data-r1019-shell='WORKSTATION'"));
+assert.ok(css.includes('grid-template-columns:218px minmax(0,1fr)'));
+assert.ok(browser.includes('flat native menu layout regressed'));
+console.log('R1019 PASS: flat workstation command surface, compact navigation and unchanged source inventories.');

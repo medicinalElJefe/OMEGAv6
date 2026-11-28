@@ -50,6 +50,9 @@ async function check(browser,label,viewport){
   await trigger.click();
   const pane=page.locator('.o7-r520-library[aria-label="OMEGA complete function library"]');
   await pane.waitFor({state:'visible',timeout:15000});
+  if(await pane.getAttribute('data-r1019-design')!=='DESKTOP_COMMAND_SURFACE')throw new Error(label+': workstation menu design missing');
+  const layout=await pane.evaluate(el=>{const row=el.querySelector('[data-r520-route]'),rail=el.querySelector('.o7-r520-matrix');return {flat:row?getComputedStyle(row).borderRadius==='0px':false,rail:rail?getComputedStyle(rail).flexDirection:null}});
+  if(!layout.flat||layout.rail!==(label==='mobile'?'row':'column'))throw new Error(label+': flat native menu layout regressed: '+JSON.stringify(layout));
   // A responsive tab may put its number and label on separate lines; verify the actual
   // visible tab and its exact count instead of relying on an incidental whitespace layout.
   for(const [id,count,name] of [['ROUTES','44','Current tools'],['RECOVERED','72','Recovered lineages'],['HISTORY','100','Historical systems'],['OPTIONS','36','Menu definitions'],['CONTRACTS','18','Capability contracts']]){

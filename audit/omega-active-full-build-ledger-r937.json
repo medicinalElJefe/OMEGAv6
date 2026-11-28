@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R1018: native command atlas redesign, all 44 current route cards expanded by default, compact/detail modes, group controls and direct Home launch shelf; historical source inventories and proof boundaries conserved. Candidate only.",
+  "latestGovernedWork": "R1019: replace card-based menu with flat desktop-style command launcher, slim navigation rail, responsive list, compact Home launch strip. Existing route/lineage bindings and source proofs preserved. Candidate only.",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -678,6 +678,11 @@
     {
       "revision": "R1018",
       "conservation": "Complete native function menu with source-grounded launch controls and responsive compact/detail presentation",
+      "accepted": "CANDIDATE_SOURCE_ONLY"
+    },
+    {
+      "revision": "R1019",
+      "conservation": "Native workstation design with flat source-bound menus and existing launch controls",
       "accepted": "CANDIDATE_SOURCE_ONLY"
     }
   ],
