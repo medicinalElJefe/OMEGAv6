@@ -228,3 +228,18 @@
 .o7-native-toolbar [data-r778-native-link]{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:0;padding:7px 12px;border:1px solid rgba(211,177,128,.44);border-radius:9px;color:#e7cba1;text-decoration:none;font:600 11px/1.35 system-ui,sans-serif;white-space:nowrap;background:rgba(211,177,128,.07)}
 .o7-native-toolbar [data-r778-native-link]:hover,.o7-native-toolbar [data-r778-native-link]:focus-visible{outline:2px solid #d4b07d;outline-offset:2px;background:rgba(211,177,128,.15)}
 @media(max-width:760px){.o7-native-toolbar [data-r778-native-link]{min-height:44px;font-size:10px;padding:7px 9px;white-space:normal;text-align:center}.o7-native-toolbar{gap:8px}}
+
+
+/* R1019 — slim workstation chrome and actual launch bar. */
+.o7-app[data-r1019-shell]{--o7-accent:#91e0cf;--o7-bg:#101318;--o7-surface:#1b2027;--o7-line:#282d35;background:#101318}
+.o7-app[data-r1019-shell] .o7-topbar{background:#15181e;backdrop-filter:none;border-color:#2b3039}
+.o7-app[data-r1019-shell] .o7-brand b{font-weight:650;letter-spacing:-.04em}
+.o7-app[data-r1019-shell] .o7-r520-toggle{background:#222a31!important;color:#e6eeef!important;border-color:#424d57!important}
+.o7-app[data-r1019-shell] .o7-search-trigger{background:#11151b;border-color:#313844;border-radius:7px;color:#b2bdc8}
+.o7-r1019-launch-strip{display:flex;gap:0;align-items:stretch;overflow-x:auto;margin:0 0 18px;border-bottom:1px solid #343b45;scrollbar-width:thin}
+.o7-r1019-launch-strip button{display:flex;gap:7px;align-items:center;flex:0 0 auto;min-height:44px;padding:0 13px;border:0;border-radius:0;border-bottom:2px solid transparent;background:none;color:#c9d1db;cursor:pointer}
+.o7-r1019-launch-strip button:first-child{color:#9ee4d4;border-bottom-color:#91e0cf}
+.o7-r1019-launch-strip button:hover,.o7-r1019-launch-strip button:focus-visible{background:#232a33;border-bottom-color:#91e0cf;outline-offset:-2px}
+.o7-r1019-launch-strip b{font:550 12px/1.3 system-ui,sans-serif;white-space:nowrap}
+.o7-r1019-launch-strip span{font:500 10px/1.3 system-ui,sans-serif;color:#a0acb9;white-space:nowrap}
+@media(max-width:760px){.o7-r1019-launch-strip{margin-bottom:12px}.o7-r1019-launch-strip button{padding:0 10px}.o7-r1019-launch-strip span{display:none}}

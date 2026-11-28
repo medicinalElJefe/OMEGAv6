@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R1015: retained bounded deterministic payloads beyond twelve-cell missions, validated fixed-prefix whole-archive export, explicit legacy gaps and cancellation. Candidate implementation only; live acceptance pending.",
+  "latestGovernedWork": "R1019: replace card-based menu with flat desktop-style command launcher, slim navigation rail, responsive list, compact Home launch strip. Existing route/lineage bindings and source proofs preserved. Candidate only.",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -663,6 +663,26 @@
     {
       "revision": "R1015",
       "conservation": "Large mission payload retention and bounded complete archive export",
+      "accepted": "CANDIDATE_SOURCE_ONLY"
+    },
+    {
+      "revision": "R1016",
+      "conservation": "Synthesis completion and uncertain-outcome continuity",
+      "accepted": "CANDIDATE_SOURCE_ONLY"
+    },
+    {
+      "revision": "R1017",
+      "conservation": "Native SAI Lab integration of existing cloud execution, recovery and archive export controls",
+      "accepted": "CANDIDATE_SOURCE_ONLY"
+    },
+    {
+      "revision": "R1018",
+      "conservation": "Complete native function menu with source-grounded launch controls and responsive compact/detail presentation",
+      "accepted": "CANDIDATE_SOURCE_ONLY"
+    },
+    {
+      "revision": "R1019",
+      "conservation": "Native workstation design with flat source-bound menus and existing launch controls",
       "accepted": "CANDIDATE_SOURCE_ONLY"
     }
   ],

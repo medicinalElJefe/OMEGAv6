@@ -154,7 +154,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
   }).catch(()=>{if(requestedEpoch===recoveredFocusEpoch.current)clearRecoveredExecution()});
  };
 
- return <div className='o7-app' data-omega7='true' data-depth={state.depth.toLowerCase()}>
+ return <div className='o7-app' data-omega7='true' data-r1019-shell='WORKSTATION' data-depth={state.depth.toLowerCase()}>
   <header className='o7-topbar'>
    <button className='o7-brand' onClick={()=>switchDomain('HOME')}><b>OMEGA</b><span>7</span></button>
    <button className='o7-search-trigger' onClick={()=>{dispatch({type:'COMMAND',open:true});queueMicrotask(()=>inputRef.current?.focus())}}>Search or ask OMEGA <kbd>Ctrl K</kbd></button>
@@ -201,6 +201,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
       </div>
      </section>}
 
+     {state.domain==='HOME'&&<nav className='o7-r1018-launch-actions o7-r1019-launch-strip' data-r1017-execution-entry='SAI_LAB' aria-label='Quick launch workspace'><button type='button' onClick={()=>setLibraryOpen(true)}><b>All tools</b><span>{OMEGA7_CAPABILITIES.length}</span></button><button type='button' onClick={()=>open('SAI Lab')}><b>Open SAI Lab</b><span>Cloud execution</span></button><button type='button' onClick={()=>open('Atlas')}><b>State Atlas</b><span>Explore</span></button><button type='button' onClick={()=>open('Hybrid Link')}><b>Hybrid Link</b><span>Device</span></button><button type='button' onClick={()=>open('Evidence & Proof')}><b>Evidence</b><span>Proof</span></button></nav>}
      {state.domain==='HOME'&&<section className='o7-home-visual o7-home-established' data-r510-visual-restoration='CURRENT_R71_CANONICAL_HOME'>
       <Suspense fallback={<div className='o7-home-stage-loading'>Materializing current OMEGA visual system…</div>}>
        <OmegaHomeR71
@@ -212,6 +213,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
       </Suspense>
      </section>}
      {state.domain==='HOME'&&<R519VisualNavigation domain='HOME' onNavigate={open}/>}
+
      {state.domain==='HOME'&&<Suspense fallback={<p role='status'>Loading live operational evidence…</p>}><OperationalTruthR495 depth={state.depth} onNavigate={open}/></Suspense>}\n     {state.domain==='HOME'&&<section className='o7-recovered' data-r486-visible-convergence='true'>
       <header><div><span>Recovered capability fabric</span><h2>Your recovered work is connected to the product</h2><p>{R486_VISIBLE_SUMMARY.total} recovered capability lineages now resolve through their current OMEGA executors. Open the function you need; lineage, gate and authority stay attached underneath.</p></div><button onClick={()=>setRecoveredOpen(x=>!x)}>{recoveredOpen?'Hide recovered capabilities':'Browse recovered capabilities'}</button></header>
       <div className='o7-recovered-summary'><article><b>{R486_VISIBLE_SUMMARY.executesNow}</b><span>execute now</span></article><article><b>{R486_VISIBLE_SUMMARY.adapters}</b><span>active adapters</span></article><article><b>{R486_VISIBLE_SUMMARY.truthGated}</b><span>truth/device gated</span></article><article><b>{R486_VISIBLE_SUMMARY.routable}/{R486_VISIBLE_SUMMARY.total}</b><span>bound to current routes</span></article></div>

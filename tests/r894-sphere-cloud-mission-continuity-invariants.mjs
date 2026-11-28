@@ -181,3 +181,13 @@ assert.match(directUi1013,/DOWNLOAD RESULT PAGE/);
 
 assert.match(directUi1013,/DOWNLOAD FULL ARCHIVE/);
 assert.match(directUi1013,/CANCEL EXPORT/);
+
+const home1017=readFileSync('src7/Omega7Root.tsx','utf8');
+const sai1017=readFileSync('src7/workspaces/DevelopmentComputeWorkspaceR444.tsx','utf8');
+assert.match(home1017,/data-r1017-execution-entry='SAI_LAB'/);
+assert.match(home1017,/onClick=\{\(\)=>open\('SAI Lab'\)\}/);
+assert.match(sai1017,/data-r1017-cloud-swarm='EXISTING_R121_EXECUTOR'/);
+assert.match(sai1017,/lazy\(\(\)=>import\('\.\.\/\.\.\/src\/OmegaSwarmR121'\)\)/);
+assert.match(sai1017,/swarmOpen&&<Suspense/);
+assert.match(sai1017,/<OmegaSwarmR121 record=\{record\} state=\{status\} address=\{address\} onAddress=\{commit\} onNavigate=\{onNavigate\}/);
+console.log('R1017 PASS: Home entry and existing native SAI route mount the actual R121 console on demand without automatic dispatch.');

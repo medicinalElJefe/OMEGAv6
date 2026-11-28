@@ -123,3 +123,35 @@ const archive1015=JSON.parse(await collectMissionArchiveR1015(returned1015,async
 assert.equal(archive1015.rows.length,13);
 assert.ok(archive1015.rows.every(row=>typeof row.resultJson==='string'));
 console.log('R1015 PASS: large deterministic payload archive, bounded snapshot export, identity/count validation, legacy disclosure and cancellation.');
+
+let call1016=0;
+const synthesisStore1016=storage1010();
+const synth1016=new OmegaSwarmCoordinator({storage:synthesisStore1016},{OMEGA_SWARM_CELL:{},AI:{async run(){
+ call1016++;const saved=await synth1016.get('synthesis-live');
+ assert.equal(saved.status,'RUNNING');assert.equal(saved.synthesisState,'IN_FLIGHT');
+ assert.equal(saved.providerAttempts,2);assert.equal(saved.completed,1);
+ assert.equal(saved.completedAt,undefined);
+ const publicState=await (await synth1016.fetch(new Request('https://root.internal/missions/synthesis-live'))).json();
+ assert.equal(publicState.mission.status,'RUNNING');
+ return {response:'bounded synthesis result'};
+}}});
+const synthMission1016=initial1010('synthesis-live');
+synthMission1016.pending=synthMission1016.pending.slice(0,1).map(cell=>({...cell,providerEligible:true,profile:{...cell.profile,domainRole:'SOFTWARE'}}));
+synthMission1016.total=1;synthMission1016.providerBudget=2;synthMission1016.providerAttempts=0;
+synth1016.dispatch=async(m,cell)=>({cell,executor:synth1016.executor(cell,m),ok:true,status:200,data:{result:{summary:'bounded contribution'},receipt:{resultSha256:'a'.repeat(64)}}});
+await synth1016.save(synthMission1016);
+const returned1016=await synth1016.process(synthMission1016.id);
+assert.equal(returned1016.status,'COMPLETE');assert.equal(returned1016.synthesisState,'RETURNED');
+assert.equal(returned1016.finalSynthesis.text,'bounded synthesis result');assert.equal(call1016,1);
+const crashed1016={...returned1016,id:'synthesis-interrupted',status:'RUNNING',synthesisState:'IN_FLIGHT',completedAt:undefined};
+await synth1016.save(crashed1016);
+const recovered1016=await new OmegaSwarmCoordinator({storage:synthesisStore1016},{AI:{async run(){throw Error('MUST_NOT_REPLAY')}}}).process(crashed1016.id);
+assert.equal(recovered1016.status,'COMPLETE');assert.equal(recovered1016.synthesisState,'OUTCOME_UNKNOWN');assert.equal(recovered1016.providerAttempts,2);
+assert.match(recovered1016.finalSynthesis.text,/No automatic replay/);
+const empty1016=new OmegaSwarmCoordinator({storage:storage1010()},{OMEGA_SWARM_CELL:{},AI:{async run(){return {response:''}}}});
+empty1016.dispatch=synth1016.dispatch;
+await empty1016.save({...synthMission1016,id:'synthesis-empty'});
+const refused1016=await empty1016.process('synthesis-empty');
+assert.equal(refused1016.synthesisState,'FAILED');assert.equal(refused1016.finalSynthesis.text,'EMPTY_SYNTHESIS_RESULT');
+assert.equal(refused1016.status,'COMPLETE');assert.equal(refused1016.completed,1);
+console.log('R1016 PASS: synthesis remains observable until return, durable reservation, interrupted outcome not replayed, empty provider result refused.');

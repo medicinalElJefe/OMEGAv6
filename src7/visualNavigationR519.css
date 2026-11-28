@@ -129,3 +129,25 @@
  .o7-nav-r519 button .o7-r519-nav-text strong{font-size:9px}
 }
 @media(prefers-reduced-motion:reduce){.o7-r519-geometry{animation:none}.o7-r519-node,.o7-r519-launch,.o7-nav-r519 button{transition:none}}
+
+/* R1019 — compact native application rail; preserve all existing route controls. */
+@media(min-width:761px){
+ .o7-app[data-r1019-shell]{grid-template-columns:194px minmax(0,1fr)}
+ .o7-app[data-r1019-shell] .o7-nav-r519{padding:12px 8px;background:#14171c;gap:3px;border-color:#2b3039}
+ .o7-app[data-r1019-shell] .o7-r519-nav-identity{padding:6px 9px 15px;gap:9px;margin-bottom:8px;border-color:#292e36}
+ .o7-app[data-r1019-shell] .o7-r519-nav-identity>span{width:31px;height:31px;border-radius:8px;background:#222a30;border-color:#39444d;box-shadow:none;color:#91e0cf;font:500 22px/1 system-ui,sans-serif}
+ .o7-app[data-r1019-shell] .o7-r519-nav-identity strong{font-size:9px;letter-spacing:.09em;color:#dce2e7}
+ .o7-app[data-r1019-shell] .o7-r519-nav-identity small{display:none}
+ .o7-app[data-r1019-shell] .o7-nav-r519 button{min-height:44px;padding:8px 9px;border:0;border-radius:6px;gap:9px;background:none;box-shadow:none}
+ .o7-app[data-r1019-shell] .o7-nav-r519 button:hover{transform:none;background:#20262e}
+ .o7-app[data-r1019-shell] .o7-nav-r519 button.active{background:#252e35;box-shadow:inset 2px 0 #91e0cf;color:#eef4f5}
+ .o7-app[data-r1019-shell] .o7-r519-nav-icon{width:25px;height:25px;border:0;border-radius:0;background:none;color:#a5b1bf}
+ .o7-app[data-r1019-shell] .o7-nav-r519 button.active .o7-r519-nav-icon{color:#91e0cf;background:none}
+ .o7-app[data-r1019-shell] .o7-nav-r519 button .o7-r519-nav-text strong{font-size:12px;font-weight:550}
+ .o7-app[data-r1019-shell] .o7-nav-r519 button .o7-r519-nav-text small{display:none}
+ .o7-app[data-r1019-shell] .o7-r519-nav-count{border:0;background:none;color:#a4afbc;min-width:16px}
+ .o7-app[data-r1019-shell] .o7-r519-nav-foot{padding:13px 9px 8px;border-color:#292e36}
+ .o7-app[data-r1019-shell] .o7-r519-nav-foot>span{color:#a5b0bd;letter-spacing:.08em}
+ .o7-app[data-r1019-shell] .o7-r519-nav-foot strong{color:#c7d1db}
+}
+@media(max-width:760px){.o7-app[data-r1019-shell] .o7-nav-r519{background:#15181e;border-color:#2b3039}.o7-app[data-r1019-shell] .o7-nav-r519 button.active{border-color:transparent;background:#252e35;box-shadow:none}.o7-app[data-r1019-shell] .o7-nav-r519 button.active .o7-r519-nav-icon{color:#91e0cf}}

@@ -12,6 +12,7 @@ import {corpusState,decodeAddress,initCorpusPack} from '../../src/corpusRuntime'
 import {sourceBackedModeSummary} from '../../src/sourceBackedModeRuntimeR21';
 import type {Omega7Depth} from '../capabilityRegistry';
 const OmegaLocalHubPanelR884=lazy(()=>import('./OmegaLocalHubPanelR884'));
+const OmegaSwarmR121=lazy(()=>import('../../src/OmegaSwarmR121'));
 
 export type Omega7DevelopmentRoute='Hybrid Link'|'Quality Compiler'|'Build Out'|'Development'|'Kernel Intelligence'|'SAI Lab';
 type Props={route:Omega7DevelopmentRoute;onNavigate:(route:string)=>void;depth:Omega7Depth};
@@ -23,6 +24,7 @@ const writeAddress=(n:number)=>{const next=clamp(n);try{localStorage.setItem('om
 export default function DevelopmentComputeWorkspaceR444({route,onNavigate,depth}:Props){
  const[ready,setReady]=useState(false),[error,setError]=useState(''),[address,setAddress]=useState(readAddress),[instrumentOpen,setInstrumentOpen]=useState(depth!=='STANDARD');
  const[status,setStatus]=useState<any>(null),[restore,setRestore]=useState<any>(null);
+ const[swarmOpen,setSwarmOpen]=useState(false);
  const[selfbuild,setSelfbuild]=useState<any>(null),[selfbuildError,setSelfbuildError]=useState('');
  useEffect(()=>{let live=true;fetch('/omega-r170-selfbuild-state.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('HTTP '+r.status);return r.json()}).then(data=>{if(live)setSelfbuild(data)}).catch(e=>{if(live)setSelfbuildError(String(e))});return()=>{live=false}},[]);
  useEffect(()=>setInstrumentOpen(depth!=='STANDARD'),[depth,route]);
@@ -71,6 +73,11 @@ export default function DevelopmentComputeWorkspaceR444({route,onNavigate,depth}
 
   {(route==='Hybrid Link'||route==='Development'||route==='Build Out')&&<Suspense fallback={<section role='status'>Loading authenticated local execution controls…</section>}><OmegaLocalHubPanelR884 initialOperation={route==='Hybrid Link'?'HASH_TREE':'SPHERE_TENSOR_STEP'}/></Suspense>}
 
+  {route==='SAI Lab'&&<section className='o7-science-intro' data-r1017-cloud-swarm='EXISTING_R121_EXECUTOR' aria-label='Cloud swarm execution'>
+   <span>Cloud execution · R121</span><h2>Mission execution and recovery</h2><p>Open the existing 1,728-cell cloud runtime to run bounded missions, recover previous mission IDs, inspect historical results and download retained archives. Opening the console does not launch a mission.</p>
+   <button type='button' aria-expanded={swarmOpen} onClick={()=>setSwarmOpen(value=>!value)}>{swarmOpen?'Close cloud swarm console':'Open cloud swarm console'}</button>
+   {swarmOpen&&<Suspense fallback={<p role='status'>Loading cloud swarm console…</p>}><OmegaSwarmR121 record={record} state={status} address={address} onAddress={commit} onNavigate={onNavigate}/></Suspense>}
+  </section>}
   {instrumentOpen&&<div className='o7-native-surface'>
    {route==='Hybrid Link'?<HybridRuntimeSnapshotProviderR238><HybridLinkR32 status={status} record={record} showOperationalWorkspace={false}/></HybridRuntimeSnapshotProviderR238>:
     route==='Quality Compiler'?<UniversalQualityControl record={record} status={status} restore={restore} modeCount={modeSummary.appliedCount} catalogCount={modeSummary.catalogCount}/>:
