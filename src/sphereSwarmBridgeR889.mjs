@@ -1,6 +1,7 @@
 // R889 governed SPHERE→R121 cloud swarm adapter.
 // Explicit operator invocation only: returned cloud receipts never mutate SPHERE or CanonState.
 import {agentAddress,agentSnapshot,axes4,SIZE} from './sphereAgentFabricR887.mjs';
+import {captureCellReturnsR1008,captureAcceptedPlanR1009} from './sphereCellReturnsR1008.mjs';
 export const R889_SCHEMA='OMEGA_SPHERE_SWARM_BRIDGE_R889';
 const MAX_OBJECTIVE=1400;
 export function sphereSwarmIntentR889(fabric,agent,inner,objective){
@@ -25,7 +26,7 @@ export function sphereSwarmRequestR889(fabric,agent,inner,objective,providerBudg
 export function validateSwarmReturnR889(data,packet){
  if(!data||typeof data!=='object'||!data.mission||typeof data.mission!=='object'||typeof data.mission.id!=='string'||!/^[A-Za-z0-9_.:-]{1,128}$/.test(data.mission.id))throw new Error('Swarm returned no valid mission receipt');
  const m=data.mission;
- return Object.freeze({schema:R889_SCHEMA,originAgent:packet.agent,originShell:packet.shell,originOuter:packet.outer,originInner:packet.inner,missionId:m.id,status:typeof m.status==='string'?m.status:'NOT_REPORTED',truthClass:'CLOUD_RECEIPT_RETURNED_NOT_CANON_ADMITTED',externalProof:'NOT_ESTABLISHED_BY_MISSION_ACCEPTANCE',localStateMutated:false});
+ return Object.freeze({schema:R889_SCHEMA,originAgent:packet.agent,originShell:packet.shell,originOuter:packet.outer,originInner:packet.inner,missionId:m.id,...captureAcceptedPlanR1009(data,1),status:typeof m.status==='string'?m.status:'NOT_REPORTED',truthClass:'CLOUD_RECEIPT_RETURNED_NOT_CANON_ADMITTED',externalProof:'NOT_ESTABLISHED_BY_MISSION_ACCEPTANCE',localStateMutated:false});
 }
 export function validateSwarmStatusR889(data,original){
  if(!original||original.schema!==R889_SCHEMA)throw new Error('Missing original swarm receipt');
@@ -35,5 +36,5 @@ export function validateSwarmStatusR889(data,original){
  const status=allowed.includes(m.status)?m.status:'NOT_REPORTED';
  const complete=Number.isSafeInteger(m.completed)&&m.completed>=0?m.completed:0;
  const failed=Number.isSafeInteger(m.failed)&&m.failed>=0?m.failed:0;
- return Object.freeze({...original,status,completed:complete,failed,proofState:typeof m.proofState==='string'?m.proofState:'NOT_REPORTED',hasSynthesis:typeof m.finalSynthesis?.text==='string'&&m.finalSynthesis.text.length>0,reportedSynthesis:typeof m.finalSynthesis?.text==='string'?m.finalSynthesis.text.slice(0,1200):'',truthClass:'CLOUD_RECEIPT_RETURNED_NOT_CANON_ADMITTED',externalProof:'MODEL_OUTPUT_NOT_SCIENTIFIC_EVIDENCE',localStateMutated:false});
+ return Object.freeze({...original,...captureCellReturnsR1008(m,original,1),status,completed:complete,failed,proofState:typeof m.proofState==='string'?m.proofState:'NOT_REPORTED',hasSynthesis:typeof m.finalSynthesis?.text==='string'&&m.finalSynthesis.text.length>0,reportedSynthesis:typeof m.finalSynthesis?.text==='string'?m.finalSynthesis.text.slice(0,1200):'',truthClass:'CLOUD_RECEIPT_RETURNED_NOT_CANON_ADMITTED',externalProof:'MODEL_OUTPUT_NOT_SCIENTIFIC_EVIDENCE',localStateMutated:false});
 }

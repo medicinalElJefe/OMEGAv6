@@ -52,3 +52,5 @@ assert.match(ui,/CAPACITY GOVERNOR/);
 assert.match(convergence,/OmegaSwarmR121/);
 assert.match(convergence,/OmegaFieldMotionConvergenceR28/);
 console.log('R121 swarm runtime invariants PASS · R121 provenance preserved · SQLite declarative exports live');
+
+await import('./r1010-swarm-durable-recovery-invariants.mjs');

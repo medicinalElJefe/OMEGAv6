@@ -3,9 +3,10 @@
 import {AGENTS,SIZE} from './sphereAgentFabricR887.mjs';
 import {R889_SCHEMA} from './sphereSwarmBridgeR889.mjs';
 import {R890_SCHEMA} from './sphereCollectiveR890.mjs';
+import {validatePlannedReturnsR1009} from './sphereCellReturnsR1008.mjs';
 export const R894_SCHEMA='OMEGA_SPHERE_MISSION_JOURNAL_R894';
 export const R894_STORAGE_KEY='omega.r894.sphere.missions.v1';
-const MAX_JOURNAL=32768,ID=/^[A-Za-z0-9_.:-]{1,128}$/;
+const MAX_JOURNAL=262144,ID=/^[A-Za-z0-9_.:-]{1,128}$/;
 const STATUS=new Set(['RECEIVED','QUEUED','RUNNING','COMPLETE','PAUSED','CANCELLED','FAILED','TIMED_OUT','NOT_REPORTED']);
 function statusOf(x){if(typeof x!=='string'||!STATUS.has(x))throw new Error('Untrusted cloud mission status');return x}
 const index=(x,max)=>Number.isSafeInteger(x)&&x>=0&&x<max;
@@ -66,16 +67,18 @@ export function exportMissionReturnR1007(receipt){
 function singleReceipt(x){
  if(x===null)return null;
  if(!x||x.schema!==R889_SCHEMA||!ID.test(x.missionId||'')||!index(x.originAgent,AGENTS)||!index(x.originShell,12)||!index(x.originOuter,SIZE)||!index(x.originInner,SIZE)||x.originAgent!==x.originShell*SIZE+x.originOuter||x.localStateMutated!==false||x.truthClass!=='CLOUD_RECEIPT_RETURNED_NOT_CANON_ADMITTED')throw new Error('Untrusted individual mission receipt');
- return{schema:R889_SCHEMA,originAgent:x.originAgent,originShell:x.originShell,originOuter:x.originOuter,originInner:x.originInner,missionId:x.missionId,status:statusOf(x.status),truthClass:'CLOUD_RECEIPT_RETURNED_NOT_CANON_ADMITTED',externalProof:'NOT_ESTABLISHED_BY_JOURNAL',localStateMutated:false,...returnedFieldsR1007(x,false),...(Object.prototype.hasOwnProperty.call(x,'saiContext')?{saiContext:verifySaiMissionBindingR1006(x,x.saiContext)}:{})};
+ return{schema:R889_SCHEMA,originAgent:x.originAgent,originShell:x.originShell,originOuter:x.originOuter,originInner:x.originInner,missionId:x.missionId,status:statusOf(x.status),truthClass:'CLOUD_RECEIPT_RETURNED_NOT_CANON_ADMITTED',externalProof:'NOT_ESTABLISHED_BY_JOURNAL',localStateMutated:false,...returnedFieldsR1007(x,false),...validatePlannedReturnsR1009(x,1),...(Object.prototype.hasOwnProperty.call(x,'saiContext')?{saiContext:verifySaiMissionBindingR1006(x,x.saiContext)}:{})};
 }
 function collectiveReceipt(x){
  if(x===null)return null;
  if(!x||x.schema!==R890_SCHEMA||!ID.test(x.missionId||'')||!index(x.rootAgent,AGENTS)||!index(x.inner,SIZE)||!Array.isArray(x.members)||x.members.length<1||x.members.length>12||x.members[0]!==x.rootAgent||new Set(x.members).size!==x.members.length||!x.members.every(n=>index(n,AGENTS))||x.localMutation!==false||x.authority!=='SWARM_RESULT_NOT_CANON_ADMITTED')throw new Error('Untrusted collective mission receipt');
- return{schema:R890_SCHEMA,rootAgent:x.rootAgent,inner:x.inner,members:[...x.members],missionId:x.missionId,status:statusOf(x.status),authority:'SWARM_RESULT_NOT_CANON_ADMITTED',localMutation:false,returnedProof:'NOT_ESTABLISHED_BY_JOURNAL',...returnedFieldsR1007(x,true),...(Object.prototype.hasOwnProperty.call(x,'saiContext')?{saiContext:verifySaiMissionBindingR1006(x,x.saiContext)}:{})};
+ return{schema:R890_SCHEMA,rootAgent:x.rootAgent,inner:x.inner,members:[...x.members],missionId:x.missionId,status:statusOf(x.status),authority:'SWARM_RESULT_NOT_CANON_ADMITTED',localMutation:false,returnedProof:'NOT_ESTABLISHED_BY_JOURNAL',...returnedFieldsR1007(x,true),...validatePlannedReturnsR1009(x,x.members.length),...(Object.prototype.hasOwnProperty.call(x,'saiContext')?{saiContext:verifySaiMissionBindingR1006(x,x.saiContext)}:{})};
 }
 export function serializeMissionJournalR894(single,collective){
  const journal={schema:R894_SCHEMA,single:singleReceipt(single),collective:collectiveReceipt(collective)};
- return JSON.stringify(journal);
+ const serialized=JSON.stringify(journal);
+ if(serialized.length>MAX_JOURNAL)throw new Error('Invalid or oversized mission journal');
+ return serialized;
 }
 export function restoreMissionJournalR894(serialized){
  if(serialized===null||serialized===undefined)return Object.freeze({single:null,collective:null});

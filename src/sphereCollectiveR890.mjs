@@ -1,6 +1,7 @@
 // R890: bounded selected-agent collective to existing R121 FLOCK scheduler.
 // Address membership is explicit; cloud receipts do not mutate local values or canonical authority.
 import {agentAddress,agentSnapshot,axes4,neighbors,SIZE} from './sphereAgentFabricR887.mjs';
+import {captureCellReturnsR1008,captureAcceptedPlanR1009} from './sphereCellReturnsR1008.mjs';
 export const R890_SCHEMA='OMEGA_SPHERE_COLLECTIVE_R890';
 export const MAX_R890_PEERS=12;
 function validateMember(id){return agentAddress(id),id}
@@ -31,10 +32,10 @@ export function collectiveRequestR890(fabric,agent,inner,objective,count=9,provi
 export function collectiveReceiptR890(data,packet){
  if(!packet||packet.schema!==R890_SCHEMA||!Array.isArray(packet.members)||packet.members.length<1||packet.members.length>12)throw new Error('Invalid collective packet');
  if(!data||typeof data!=='object'||!data.mission||typeof data.mission.id!=='string'||!/^[A-Za-z0-9_.:-]{1,128}$/.test(data.mission.id))throw new Error('Invalid cloud mission receipt');
- return Object.freeze({schema:R890_SCHEMA,rootAgent:packet.rootAgent,inner:packet.inner,members:packet.members.map(m=>m.id),missionId:data.mission.id,status:'RECEIVED',authority:'SWARM_RESULT_NOT_CANON_ADMITTED',localMutation:false,returnedProof:'NOT_ESTABLISHED'});
+ return Object.freeze({schema:R890_SCHEMA,rootAgent:packet.rootAgent,inner:packet.inner,members:packet.members.map(m=>m.id),missionId:data.mission.id,...captureAcceptedPlanR1009(data,packet.members.length),status:'RECEIVED',authority:'SWARM_RESULT_NOT_CANON_ADMITTED',localMutation:false,returnedProof:'NOT_ESTABLISHED'});
 }
 export function collectiveStatusR890(data,receipt){
  if(!receipt||receipt.schema!==R890_SCHEMA||!data||data.mission?.id!==receipt.missionId)throw new Error('Collective mission identity mismatch');
  const mission=data.mission,allowed=new Set(['QUEUED','RUNNING','COMPLETE','PAUSED','CANCELLED','FAILED','TIMED_OUT']);
- return Object.freeze({...receipt,status:allowed.has(mission.status)?mission.status:'NOT_REPORTED',completed:Number.isSafeInteger(mission.completed)&&mission.completed>=0?mission.completed:0,failed:Number.isSafeInteger(mission.failed)&&mission.failed>=0?mission.failed:0,summary:typeof mission.finalSynthesis?.text==='string'?mission.finalSynthesis.text.slice(0,1200):'',authority:'SWARM_RESULT_NOT_CANON_ADMITTED',localMutation:false});
+ return Object.freeze({...receipt,...captureCellReturnsR1008(mission,receipt,receipt.members.length),status:allowed.has(mission.status)?mission.status:'NOT_REPORTED',completed:Number.isSafeInteger(mission.completed)&&mission.completed>=0?mission.completed:0,failed:Number.isSafeInteger(mission.failed)&&mission.failed>=0?mission.failed:0,summary:typeof mission.finalSynthesis?.text==='string'?mission.finalSynthesis.text.slice(0,1200):'',authority:'SWARM_RESULT_NOT_CANON_ADMITTED',localMutation:false});
 }
