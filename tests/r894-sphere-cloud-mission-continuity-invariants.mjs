@@ -156,3 +156,22 @@ assert.equal(JSON.parse(exportMissionReturnR1007(restored1012)).receipt.cellRetu
 assert.throws(()=>validateSwarmStatusR889(response1008(boundSingle1006,[{...row1012,resultJson:'invalid'}],1),boundSingle1006),/Untrusted/);
 assert.match(ui,/Verify returned payload SHA-256/);
 console.log('R1012 browser contract PASS: payload survives journal and export; byte consistency is explicitly checkable.');
+
+const {missionPathR1013,validateMissionR1013,reconcileMissionR1013,exportMissionR1013}=await import('../src/swarmMissionRecoveryR1013.mjs');
+const direct1013={schema:'OMEGA_SWARM_MISSION_R121',id:'swarm_test-1',status:'RUNNING',total:3,completed:1,failed:0,recent:[],canonicalMutation:false};
+assert.equal(missionPathR1013(direct1013.id),'/api/swarm/missions/swarm_test-1');
+assert.throws(()=>missionPathR1013('../other'),/Invalid/);
+assert.throws(()=>validateMissionR1013(direct1013,'different'),/Untrusted/);
+assert.throws(()=>validateMissionR1013({...direct1013,canonicalMutation:true},direct1013.id),/Untrusted/);
+assert.throws(()=>validateMissionR1013({...direct1013,completed:4},direct1013.id),/Untrusted/);
+assert.equal(reconcileMissionR1013(direct1013,{...direct1013,completed:0}),direct1013);
+const terminal1013={...direct1013,status:'COMPLETE',completed:3};
+assert.equal(reconcileMissionR1013(terminal1013,direct1013),terminal1013);
+assert.equal(JSON.parse(exportMissionR1013(terminal1013)).authority,'COORDINATOR_REPORTED_NOT_INDEPENDENTLY_VERIFIED');
+const directUi1013=readFileSync('src/OmegaSwarmR121.tsx','utf8');
+assert.match(directUi1013,/data-r1013-mission-recovery='GET_ONLY'/);
+assert.match(directUi1013,/data-r1013-mission-cell/);
+assert.match(directUi1013,/generation.current/);
+assert.match(directUi1013,/DOWNLOAD MISSION JSON/);
+assert.ok(!directUi1013.slice(directUi1013.indexOf(' const recover=async'),directUi1013.indexOf(' const launch=async')).includes('api.post'));
+console.log('R1013 PASS: direct mission identity, monotonic recovery, historical cell inspection and GET-only restore contract.');
