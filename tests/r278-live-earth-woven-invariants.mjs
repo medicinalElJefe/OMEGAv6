@@ -23,3 +23,7 @@ must(wrangler.includes('"main": "src/workerR116.js"'),'Earth visual successor mu
 for(const forbidden of ['CanonState=','nativeExecutionClaimed=true','OMEGA_RUNTIME.put','R147 dispatch override'])must(!motion.includes(forbidden)&&!earth.includes(forbidden),'Earth visual path may not acquire execution or Canon authority: '+forbidden);
 console.log('R278/R279 EARTH MOTION PASS · returned WGS84 current field retained · canonical R265/R266 calculus retained · visualization moved into Earth Now · no global wire injection · no fabricated satellite pixels · existing worker/execution/Canon authority preserved');
 await import('./r279-earth-truth-navigation-invariants.mjs');
+
+must(motion.includes("typeof v==='number'&&Number.isFinite(v)?v:null"),'R1030 null or missing values must never become measured zero');
+must(motion.includes('raw.length!==GRID.length')&&motion.includes('no complete observation samples'),'R1030 malformed or empty global observations must not be reported returned');
+console.log('R1030 SOURCE PASS: refuse incomplete grids and absent observations; preserve actual numeric zero.');

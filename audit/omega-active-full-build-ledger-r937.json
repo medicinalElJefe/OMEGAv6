@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R1029: integrated real 720p source-state WebM recording, byte-hashed local transactional retention, playback and recovery across Render Queue and Assets; direct entry for both. Candidate only, external provider generation separate.",
+  "latestGovernedWork": "R1030: address R241 R313 mobile HTTP 503 failure class via exact optional third-party source URL/status matching and full HTTP diagnostics; first-party 503 and unmatched failures stay blocking. Reject malformed/empty global observation grids and null-to-zero coercion. Original failing URL was not retained, exact-head rerun required.",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -734,6 +734,11 @@
       "revision": "R1029",
       "conservation": "Actual video artifact generation and retained playback in existing creation workflow",
       "accepted": "CANDIDATE_SOURCE_ONLY"
+    },
+    {
+      "revision": "R1030",
+      "conservation": "R241 interaction outage attribution and Earth observation integrity",
+      "accepted": "CANDIDATE_FIX_NOT_YET_VERIFIED"
     }
   ],
   "independentArchiveUnverifiedOtherListedParts": 77,
