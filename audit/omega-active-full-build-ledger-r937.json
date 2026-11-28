@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R1017: expose the existing direct R121 console in native OMEGA7 SAI Lab, with Home navigation and on-demand mounting. Candidate source; fresh CI, live interaction and release acceptance pending.",
+  "latestGovernedWork": "R1018: native command atlas redesign, all 44 current route cards expanded by default, compact/detail modes, group controls and direct Home launch shelf; historical source inventories and proof boundaries conserved. Candidate only.",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -673,6 +673,11 @@
     {
       "revision": "R1017",
       "conservation": "Native SAI Lab integration of existing cloud execution, recovery and archive export controls",
+      "accepted": "CANDIDATE_SOURCE_ONLY"
+    },
+    {
+      "revision": "R1018",
+      "conservation": "Complete native function menu with source-grounded launch controls and responsive compact/detail presentation",
       "accepted": "CANDIDATE_SOURCE_ONLY"
     }
   ],

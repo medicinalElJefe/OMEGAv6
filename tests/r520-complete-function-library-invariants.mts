@@ -66,3 +66,10 @@ assert.ok(browser.includes("width:320,height:700"),'narrow phone hitbox proof ca
 assert.ok(browser.includes('after lazy function library loaded'),'drawer CSS cannot later reintroduce header overlap');
 assert.ok(browser.includes("await check(browser,'desktop'")&&browser.includes("await check(browser,'mobile'"),'real dual viewport browser proof required');
 console.log('R520 COMPLETE FUNCTION INVENTORY PASS · 44 current routes · 72 recovered lineages · 100 historical records · 6 canonical areas · donor/gate boundaries explicit');
+
+assert.ok(library.includes("data-r1018-density={tab==='ROUTES'?density:'DETAIL'}"));
+assert.ok(library.includes('useState<string[]>([...routeOrder])'));
+assert.ok(root.includes('o7-r1018-launch-actions'));
+assert.equal(new Set(MASTER_MENU_OPTIONS_R83.map(x=>x.topMenu)).size,12,'historical twelve master menu groups conserved');
+assert.ok(browser.includes('all current tools must be immediately visible'));
+console.log('R1018 PASS: compact complete route atlas, detail switch, group controls and twelve historical master menus conserved.');

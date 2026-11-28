@@ -68,6 +68,13 @@ async function check(browser,label,viewport){
     if(await button.getAttribute('aria-expanded')!=='true')await button.click();
    }
   }
+  if(await pane.locator('[data-r520-route]').count()!==44)throw new Error(label+': all current tools must be immediately visible in default menu');
+  await pane.getByRole('button',{name:'Collapse all',exact:true}).click();
+  if(await pane.locator('[data-r520-route]').count()!==0)throw new Error(label+': collapse-all failed');
+  await pane.getByRole('button',{name:'Expand all',exact:true}).click();
+  await pane.getByRole('button',{name:'Detail',exact:true}).click();
+  if(await pane.getAttribute('data-r1018-density')!=='DETAIL')throw new Error(label+': detail layout failed');
+  await pane.getByRole('button',{name:'Compact',exact:true}).click();
   await expandAll();
   const routeIds=await pane.locator('[data-r520-route]').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('data-r520-route')));
   if(routeIds.length!==44||new Set(routeIds).size!==44)throw new Error(label+': route library omission/duplication: '+routeIds.length);
