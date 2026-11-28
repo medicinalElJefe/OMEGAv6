@@ -88,3 +88,14 @@ assert.equal(eq.allEquivalent,true);assert.equal(eq.passCount,3);
 assert.equal(compareFormulasR884([1,2],[1,2.1],{versionLeft:'a',versionRight:'b'}).allEquivalent,false);
 assert.equal(compareFormulasR884([1],[NaN],{versionLeft:'a',versionRight:'b'}).state,'NONFINITE_FORMULA_VALUE');
 console.log('R881 PASS: all 20736 reversible addresses and antipodes, turn composition, clocks, 7 score scopes, R237/R170/Orion/TIT holds, source split refusal, SHA-256 receipts, Worker API');
+
+const {listStudioProjectsR1025,readStudioAssetsR1025,STUDIO_ASSET_MAX_BYTES_R1025}=await import('../src/system/creationCanonR881.mjs');
+const keys1025=['omega.r881.project.Zeta','omega.r881.project.Alpha','unrelated','omega.r881.project.','omega.r881.project.'+'x'.repeat(257)];
+assert.deepEqual(listStudioProjectsR1025({length:keys1025.length,key:i=>keys1025[i]}),['Alpha','Zeta']);
+const file1025={name:'sample.txt',size:5,arrayBuffer:async()=>new TextEncoder().encode('hello').buffer};
+assert.deepEqual(await readStudioAssetsR1025([file1025],0),[{name:'sample.txt',sha256:receipt.sha256,byteSize:5,proofTier:'OBS',source:'USER_SELECTED_FILE'}]);
+await assert.rejects(()=>readStudioAssetsR1025([file1025],1024),/inventory limit/);
+await assert.rejects(()=>readStudioAssetsR1025([{...file1025,size:STUDIO_ASSET_MAX_BYTES_R1025+1,arrayBuffer:async()=>{throw Error('must not read')}}],0),/64 MiB/);
+await assert.rejects(()=>readStudioAssetsR1025([{...file1025,size:6}],0),/length changed/);
+await assert.rejects(()=>readStudioAssetsR1025([file1025,{...file1025,arrayBuffer:async()=>{throw Error('read refused')}}],0),/read refused/);
+console.log('R1025 PASS: existing project directory discovery, bounded atomic asset checksums, oversize and failed-read refusal.');
