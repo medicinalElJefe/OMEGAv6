@@ -202,3 +202,8 @@ assert.match(directUi1013,/if\(!isCurrent\(\)\)return;/);
 assert.match(directUi1013,/previous selection retained/);
 assert.match(directUi1013,/else\{selectMission\(candidate\);setMission\(verified\)\}/);
 console.log('R1023 browser source contract: validated recovery before selection mutation, stale response fence, unmount cancellation.');
+
+assert.match(sai1017,/data-r1027-orchestration='R123_R125'/);
+assert.match(sai1017,/<OmegaOrganismR123\/>/);assert.match(sai1017,/<OmegaAutonomicR125\/>/);
+for(const kind of ['OrganismR123','AutonomicR125']){const surface=readFileSync('src/Omega'+kind+'.tsx','utf8');assert.match(surface,/\[providerBudget,setProviderBudget\]=useState\(0\)/);assert.match(surface,/previous mission retained/);assert.match(surface,/data-r1027-recovery/);assert.ok(!surface.slice(surface.indexOf(' const recover=async'),surface.indexOf(' const active=mission')).includes('api.post'))}
+console.log('R1027 SOURCE PASS: original R123 and R125 execution consoles restored inside native SAI Lab, zero provider default and GET-only recovery.');

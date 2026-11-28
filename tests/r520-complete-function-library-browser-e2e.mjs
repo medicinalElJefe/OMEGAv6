@@ -195,6 +195,19 @@ async function liveSwarmR1021(browser){
   const selected=await consoleRoot.locator('[data-r1021-mission-status]').getAttribute('data-r1021-mission-id');
   if(selected!==missionId||writes!==0)throw Error('R1021 mobile recovery identity or no-redispatch proof failed');
   console.log('R1021 MOBILE GET-ONLY RECOVERY PASS · '+expectedSha+' · '+missionId);
+  await page.getByRole('button',{name:'Open organism console',exact:true}).click();
+  await page.locator('.r123-organism').waitFor({state:'visible',timeout:25000});
+  await page.locator('[data-r1027-recovery="organism"]').waitFor({state:'visible'});
+  await page.getByRole('button',{name:'Close organism console',exact:true}).click();
+  await page.getByRole('button',{name:'Open autonomic console',exact:true}).click();
+  const autonomic=page.locator('.r125-auto');await autonomic.waitFor({state:'visible',timeout:25000});
+  await page.locator('[data-r1027-recovery="autonomic"]').waitFor({state:'visible'});
+  const planned=page.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname==='/api/swarm/autonomic/plan',{timeout:25000});
+  await autonomic.getByRole('button',{name:'PREVIEW ROUTE',exact:true}).click();
+  const returned=await planned;if(!returned.ok())throw Error('R1027 live preview rejected '+returned.status());
+  const payload=await returned.json();if(!payload.plan||payload.plan.budgets?.providerTotal!==0)throw Error('R1027 plan lacks explicit zero budget');
+  await autonomic.locator('.r125-plan').waitFor({state:'visible',timeout:15000});
+  console.log('R1027 LIVE ORGANISM/AUTONOMIC ACCESS PASS · original consoles and zero-provider route preview; no mission launch');
  }finally{await mobile.close()}
 }
 if(expectedSha){

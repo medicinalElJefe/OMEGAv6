@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R1026: restore repeatable real R29 SVG/PNG/packet export, bounded and serialized queue, checked receipt retention before download and explicit recoverable errors. Candidate only; provider generation remains separate.",
+  "latestGovernedWork": "R1027: restore actual R123 organism and R125 autonomic consoles in native SAI Lab, validated GET-only mission recovery and explicit zero provider budget, production browser proof for access and live route preview. Candidate only.",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -718,6 +718,11 @@
     {
       "revision": "R1026",
       "conservation": "Recoverable existing render queue artifact execution",
+      "accepted": "CANDIDATE_SOURCE_ONLY"
+    },
+    {
+      "revision": "R1027",
+      "conservation": "Native hierarchical and autonomic execution surface restoration",
       "accepted": "CANDIDATE_SOURCE_ONLY"
     }
   ],
