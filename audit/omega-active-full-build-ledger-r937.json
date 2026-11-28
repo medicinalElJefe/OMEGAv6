@@ -226,7 +226,7 @@
     "REQUIRE_FRESH_DEVICE_AND_PROVIDER_RECEIPTS",
     "NO_UNVERIFIED_HISTORICAL_COVERAGE_CLAIM"
   ],
-  "latestGovernedWork": "R1019: replace card-based menu with flat desktop-style command launcher, slim navigation rail, responsive list, compact Home launch strip. Existing route/lineage bindings and source proofs preserved. Candidate only.",
+  "latestGovernedWork": "R1020: unify existing workspace state/history controls in compact toolbar, remove sticky toolbar overlap and flatten domain tool menus while preserving R71 visual workbench and all navigation bindings; candidate only.",
   "independentArchiveWitnessLedger": "audit/omega-historical-byte-witnesses-r944.json",
   "independentArchiveByteWitnesses": 79,
   "gateReceipts": [
@@ -683,6 +683,11 @@
     {
       "revision": "R1019",
       "conservation": "Native workstation design with flat source-bound menus and existing launch controls",
+      "accepted": "CANDIDATE_SOURCE_ONLY"
+    },
+    {
+      "revision": "R1020",
+      "conservation": "Compact shared workspace chrome and flat domain instrument inventory",
       "accepted": "CANDIDATE_SOURCE_ONLY"
     }
   ],

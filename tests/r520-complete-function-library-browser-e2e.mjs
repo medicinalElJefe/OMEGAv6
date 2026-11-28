@@ -41,6 +41,10 @@ async function check(browser,label,viewport){
   const trigger=page.locator('button[data-r520-full-library="open"]');
   await trigger.waitFor({state:'visible',timeout:20000});
   await assertHeaderHitboxes(page,label+' initial');
+  const contextBar=page.locator('[data-r1020-workbench="UNIFIED_CONTEXT"]');
+  if(await contextBar.locator('[data-r538-workflow]').count()!==1||await contextBar.locator('[data-r536-journey]').count()!==1)throw new Error(label+': workspace continuity controls not conserved');
+  const contextStyle=await contextBar.locator('[data-r538-workflow]').evaluate(el=>getComputedStyle(el).borderRadius);
+  if(contextStyle!=='0px')throw new Error(label+': context controls regressed into cards');
   if(label==='mobile'){
    await page.setViewportSize({width:320,height:700});
    await assertHeaderHitboxes(page,label+' narrow 320px');
