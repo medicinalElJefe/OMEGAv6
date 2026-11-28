@@ -22,12 +22,12 @@ const readAddress=()=>{try{return clamp(Number(localStorage.getItem('omega.v6.ad
 const writeAddress=(n:number)=>{const next=clamp(n);try{localStorage.setItem('omega.v6.address',String(next));window.dispatchEvent(new CustomEvent('omega7-address-changed',{detail:{address:next}}))}catch{}return next};
 
 export default function WorkCreateWorkspaceR443({route,onNavigate,depth,autoOpen=false}:Props){
- const[ready,setReady]=useState(false),[error,setError]=useState(''),[address,setAddress]=useState(readAddress),[instrumentOpen,setInstrumentOpen]=useState(depth!=='STANDARD'||autoOpen);
+ const[ready,setReady]=useState(false),[error,setError]=useState(''),[address,setAddress]=useState(readAddress),[instrumentOpen,setInstrumentOpen]=useState(depth!=='STANDARD'||autoOpen||route==='Render Queue'||route==='Assets');
  const[status,setStatus]=useState<any>(null),[restore,setRestore]=useState<any>(null),[uiMode,setUiMode]=useState('AUTO');
  const[soundOpen,setSoundOpen]=useState(false);
  const[studioOpen,setStudioOpen]=useState(false);
  useEffect(()=>{if(route!=='Create')setSoundOpen(false)},[route]);
- useEffect(()=>{setInstrumentOpen(depth!=='STANDARD'||autoOpen)},[depth,route,autoOpen]);
+ useEffect(()=>{setInstrumentOpen(depth!=='STANDARD'||autoOpen||route==='Render Queue'||route==='Assets')},[depth,route,autoOpen]);
  useEffect(()=>{let live=true;initCorpusPack().then(()=>{if(live){setReady(true);setError('')}}).catch(e=>{if(live)setError(e instanceof Error?e.message:String(e))});return()=>{live=false}},[]);
  useEffect(()=>{let live=true;Promise.all([api.get<any>('/api/status'),api.get<any>('/api/restoration')]).then(([s,r])=>{if(live){setStatus(s.data);setRestore(r.data)}}).catch(()=>{});return()=>{live=false}},[]);
  useEffect(()=>{const sync=()=>setAddress(current=>{const next=readAddress();return current===next?current:next});const id=window.setInterval(sync,850);window.addEventListener('storage',sync);window.addEventListener('omega7-address-changed',sync as EventListener);return()=>{window.clearInterval(id);window.removeEventListener('storage',sync);window.removeEventListener('omega7-address-changed',sync as EventListener)}},[]);

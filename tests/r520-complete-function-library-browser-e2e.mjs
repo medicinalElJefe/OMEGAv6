@@ -210,6 +210,28 @@ async function liveSwarmR1021(browser){
   console.log('R1027 LIVE ORGANISM/AUTONOMIC ACCESS PASS · original consoles and zero-provider route preview; no mission launch');
  }finally{await mobile.close()}
 }
+async function videoR1029(browser){
+ const context=await browser.newContext({viewport:{width:1440,height:960},acceptDownloads:true});
+ try{
+  const page=await context.newPage();
+  await mockBoundedApis(page);
+  const go=async(route)=>{await page.goto(base+'/?omega7=1&omega7route='+encodeURIComponent(route),{waitUntil:'domcontentloaded',timeout:45000});const panel=page.locator('[data-r1029-video-library]');await panel.waitFor({state:'visible',timeout:35000});return panel};
+  let panel=await go('Render Queue');
+  await panel.getByLabel('Video duration').selectOption('2');
+  await panel.getByRole('button',{name:'Record traversal video',exact:true}).click();
+  const clip=panel.locator('[data-r1029-clip]').first();await clip.waitFor({state:'visible',timeout:25000});
+  const id=await clip.getAttribute('data-r1029-clip');
+  // Reload in another existing route: actual durable video bytes, not a preview-only claim.
+  panel=await go('Assets');
+  const saved=panel.locator('[data-r1029-clip="'+id+'"]');await saved.waitFor({state:'visible',timeout:20000});
+  await saved.getByRole('button',{name:'Play verified video',exact:true}).click();
+  await page.waitForFunction(()=>{const v=document.querySelector('video[aria-label="Verified traversal playback"]');return v&&v.readyState>=1&&v.videoWidth===1280&&v.videoHeight===720},{timeout:15000});
+  const pull=async(name)=>{const pending=page.waitForEvent('download');await saved.getByRole('button',{name,exact:true}).click();const file=await (await pending).path();return readFile(file)};
+  const bytes=await pull('Download WebM'),receipt=JSON.parse((await pull('Download video receipt')).toString('utf8'));
+  if(bytes.length<1000||bytes.subarray(0,4).toString('hex')!=='1a45dfa3'||receipt.sha256!==createHash('sha256').update(bytes).digest('hex')||receipt.bytes!==bytes.length||receipt.sourceAddresses.length!==5||receipt.canonicalMutation!==false)throw Error('R1029 recorded artifact or source receipt mismatch');
+  console.log('R1029 VIDEO PLAYBACK AND BYTE RECOVERY PASS · '+bytes.length+' bytes · '+receipt.sha256+' · browser-local source model');
+ }finally{await context.close()}
+}
 if(expectedSha){
  if(!/^[0-9a-f]{40}$/i.test(expectedSha))throw new Error('R520 expected SHA must be full hexadecimal commit');
  const response=await fetch(base+'/omega-build-receipt.json?r520='+Date.now(),{headers:{'cache-control':'no-cache'}});
@@ -221,6 +243,7 @@ const browser=await chromium.launch({headless:true});
 try{
  await check(browser,'desktop',{width:1440,height:960});
  await check(browser,'mobile',{width:390,height:844});
+ await videoR1029(browser);
  await liveSwarmR1021(browser);
  console.log('R520 ALL FUNCTIONS BROWSER PASS · source inventories are not claims that all historical software executes');
 }finally{await browser.close()}

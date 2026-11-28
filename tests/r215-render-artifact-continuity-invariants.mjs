@@ -45,3 +45,8 @@ console.log('R215 REPRESENTATIONAL ARTIFACT CONTINUITY PASS · exact exported SV
 for(const marker of ["data-r1026-render-feedback","Regenerate & export","job remains retryable","Unable to retain artifact receipt; download not started","if(lock.current)return;lock.current=true","finally{URL.revokeObjectURL(url)}"])must(source.includes(marker),'R1026 render recovery missing '+marker);
 must(!source.includes("disabled={j.status==='EXPORTED_LOCAL'}"),'previously exported job must remain recoverable');
 console.log('R1026 SOURCE CONTRACT PASS: bounded render queue, serialized execution, checked receipt persistence, repeat export and recoverable failure feedback.');
+
+const video=fs.readFileSync('src/TraversalVideoR1029.tsx','utf8');
+for(const marker of ['new MediaRecorder','canvas.captureStream(fps)','row.autoPing.dataNext','store.add(clip)','tx.oncomplete','await digest(await blob.arrayBuffer())','video controls','LOCAL_SOURCE_MODEL_VIDEO_NOT_PROVIDER_OR_NATIVE'])must(video.includes(marker==='video controls'?'controls playsInline':marker),'R1029 missing '+marker);
+must(source.includes('<TraversalVideoR1029 address={record.address}/>')&&source.includes('<TraversalVideoR1029 address={record.address} libraryOnly/>'),'Video creation and recovery must share the same local library');
+console.log('R1029 SOURCE PASS: real browser video encoding, source succession, transactional retention, byte verification and playback.');
