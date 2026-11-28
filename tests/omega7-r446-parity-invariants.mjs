@@ -17,7 +17,8 @@ assert.equal(OMEGA7_INHERITANCE_LEDGER.some(canRetireOmega6Surface),false,'R446 
 
 assert.ok(root.includes('data-capability-route={cap.legacyRoute}'),'capability cards need stable route identity for parity automation');
 assert.ok(root.includes('data-command-route={cap.legacyRoute}'),'command results need stable route identity for parity automation');
-for(const token of ["desktop',{width:1440,height:960}","mobile',{width:390,height:844}","for(const route of routes)await openRoute","horizontal overflow","main is not the page scroll owner","unhandled page errors","o7-native-failure"])assert.ok(browser.includes(token),'R446 browser proof missing '+token);
+for(const token of ["desktop',{width:1440,height:960}","mobile',{width:390,height:844}","for(const route of routes){await openRoute","horizontal overflow","main is not the page scroll owner","unhandled page errors","o7-native-failure"])assert.ok(browser.includes(token),'R446 browser proof missing '+token);
+assert.ok(browser.includes('[data-r520-full-library="open"]')&&browser.includes('[data-r520-route="${route}"] button')&&browser.includes('R1021 MENU DESTINATION PASS'),'Every route must be actuated through the actual complete function menu with per-destination evidence');
 assert.ok(workflow.includes('playwright@1.63.0'),'R446 must pin the accepted browser harness');
 assert.ok(workflow.includes('npm run build')&&workflow.includes('vite preview'),'R446 must test the exact built product, not source-only rendering');
 assert.ok(workflow.includes('omega7-r446-browser-parity-e2e.mjs'),'R446 workflow must execute the parity test');
