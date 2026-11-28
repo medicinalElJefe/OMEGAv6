@@ -196,3 +196,9 @@ assert.match(directUi1013,/\[providerBudget,setProviderBudget\]=useState\(0\)/);
 assert.match(directUi1013,/data-r1021-digest-feedback/);
 assert.match(directUi1013,/data-r1021-mission-status/);
 console.log('R1021 PASS: explicit zero-provider default and in-context result verification controls.');
+
+assert.match(directUi1013,/const verified=validateMissionR1013\(response\.data\?\.mission,candidate\)/);
+assert.match(directUi1013,/if\(!isCurrent\(\)\)return;/);
+assert.match(directUi1013,/previous selection retained/);
+assert.match(directUi1013,/else\{selectMission\(candidate\);setMission\(verified\)\}/);
+console.log('R1023 browser source contract: validated recovery before selection mutation, stale response fence, unmount cancellation.');
